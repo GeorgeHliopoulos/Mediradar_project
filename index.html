@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+
+<html lang="el">
+<head>
+<link rel="manifest" href="manifest.json">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+</script>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>MediRadar App</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap" rel="stylesheet"/>
+<style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #ffffff);
+      color: #333;
+    }
+    header {
+      background: linear-gradient(to right, #00a8e8, #0077b6);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    header p {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+    section {
+      background-color: white;
+      margin-bottom: 30px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    section:hover {
+      transform: scale(1.01);
+    }
+    section h2 {
+      color: #0077b6;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    ul li {
+      margin-bottom: 10px;
+    }
+    .search-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .search-box input {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    .search-box button {
+      padding: 12px;
+      background-color: #00a8e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .search-box button:hover {
+      background-color: #0077b6;
+    }
+    .map-placeholder {
+      width: 100%;
+      height: 300px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Map_icon.svg/1024px-Map_icon.svg.png') center/contain no-repeat;
+      background-color: #d0eaff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0077b6;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #0077b6;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #0077b6;
+      color: white;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.8em;
+      }
+      .search-box input, .search-box button {
+        font-size: 0.9em;
+      }
+    }
+  </style>
+<link href="manifest.json" rel="manifest"/></head>
+<body>
+<header>
+<h1>MediRadar</h1>
+<p>Καινοτομία στην αναζήτηση φαρμάκων</p>
+</header>
+<div class="container">
+<section>
+<h2>🔍 Αναζήτηση Φαρμάκου</h2>
+<div class="search-box">
+<input id="medicineInput" placeholder="Πληκτρολόγησε το όνομα του φαρμάκου..." type="text"/>
+<button onclick="searchMedicine()">Αναζήτηση</button>
+<button onclick="scanBarcode()">📷 Σάρωση Barcode</button>
+<div class="result" id="searchResult"></div>
+</div>
+</section>
+<section>
+<h2>📍 Επιλογή Φαρμακείου</h2>
+<div class="map-placeholder">
+        Google Maps Placeholder<br>
+<select id="citySelect" style="margin-top:10px; padding:10px; border-radius:8px;">
+  <option value="">Επιλέξτε πόλη</option>
+  <option value="Αθήνα">Αθήνα</option>
+  <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
+  <option value="Πάτρα">Πάτρα</option>
+  <option value="Ηράκλειο">Ηράκλειο</option>
+  <option value="Λάρισα">Λάρισα</option>
+  <option value="Βόλος">Βόλος</option>
+  <option value="Ιωάννινα">Ιωάννινα</option>
+  <option value="Χανιά">Χανιά</option>
+  <option value="Καλαμάτα">Καλαμάτα</option>
+  <option value="Ρόδος">Ρόδος</option>
+</select>
+
+      </div>
+<select id="citySelect" style="width:100%; padding:10px; margin-top:10px; border-radius:8px;"><option value="Αθήνα">Αθήνα</option><option value="Θεσσαλονίκη">Θεσσαλονίκη</option><option value="Πάτρα">Πάτρα</option><option value="Ηράκλειο">Ηράκλειο</option><option value="Λάρισα">Λάρισα</option><option value="Βόλος">Βόλος</option><option value="Ιωάννινα">Ιωάννινα</option><option value="Χανιά">Χανιά</option><option value="Καλαμάτα">Καλαμάτα</option><option value="Ξάνθη">Ξάνθη</option><option value="Κομοτηνή">Κομοτηνή</option><option value="Σέρρες">Σέρρες</option><option value="Καβάλα">Καβάλα</option><option value="Ρόδος">Ρόδος</option><option value="Κέρκυρα">Κέρκυρα</option></select></section>
+<section>
+<h2>📦 Αίτημα Διαθεσιμότητας</h2>
+<button onclick="sendRequest()" style="width: 100%; padding: 15px; background-color: #00c896; color: white; border: none; border-radius: 8px; font-size: 1em;">Αποστολή Ερωτήματος</button>
+<div class="result" id="requestStatus"></div>
+</section>
+<section>
+<h2>🔔 Ειδοποιήσεις</h2>
+<ul>
+<li>Push notifications για φαρμακεία</li>
+<li>Άμεση ενημέρωση για απαντήσεις</li>
+</ul>
+<button onclick="simulateNotification()">Προσομοίωση Απάντησης Φαρμακείου</button>
+<div class="result" id="notificationArea"></div>
+</section>
+<section>
+<h2>⏳ Δέσμευση Φαρμάκου</h2>
+<p>Το φάρμακο δεσμεύεται για 60 λεπτά μετά από θετική απάντηση.</p>
+</section>
+<section>
+<h2>📜 Ιστορικό Αιτημάτων</h2>
+<p>Ο χρήστης βλέπει όλα τα προηγούμενα αιτήματα και απαντήσεις.</p>
+</section>
+<section>
+<h2>👥 Ρόλοι Χρηστών</h2>
+<ul>
+<li><strong>Χρήστης/Ασθενής:</strong> Υποβάλλει αιτήματα</li>
+<li><strong>Φαρμακείο:</strong> Απαντά και διαχειρίζεται φάρμακα</li>
+<li><strong>Διαχειριστής:</strong> Παρακολουθεί το σύστημα</li>
+</ul>
+</section>
+<section>
+<h2>🎯 Οφέλη</h2>
+<ul>
+<li>⏱ Εξοικονόμηση χρόνου</li>
+<li>📞 Λιγότερα τηλεφωνήματα</li>
+<li>📊 Αποδοτική διάθεση φαρμάκων</li>
+</ul>
+</section>
+</div>
+<footer>
+    © 2025 MediRadar | Designed for better healthcare
+  </footer>
+<script>
+    function searchMedicine() {
+      const input = document.getElementById("medicineInput").value;
+      const result = document.getElementById("searchResult");
+      if (input.trim() === "") {
+        result.textContent = "⚠️ Παρακαλώ εισάγετε ένα φάρμακο.";
+      } else {
+        result.textContent = `🔎 Αναζητήθηκε: "${input}"`;
+      }
+    }
+
+    function scanBarcode() {
+      const result = document.getElementById("searchResult");
+      result.textContent = "📷 Σάρωση barcode ολοκληρώθηκε (προσομοίωση).";
+    }
+
+    function sendRequest() {
+      const status = document.getElementById("requestStatus");
+      status.textContent = "✅ Το αίτημα στάλθηκε σε κοντινά φαρμακεία.";
+    }
+
+    function simulateNotification() {
+      const area = document.getElementById("notificationArea");
+      area.textContent = "📬 Το φαρμακείο 'Υγεία Plus' απάντησε: Το φάρμακο είναι διαθέσιμο!";
+    }
+  </script>
+<section><h2>📜 Ιστορικό Αιτημάτων (Τοπική Αποθήκευση)</h2><button onclick="showHistory()">Προβολή Ιστορικού</button><div class="result" id="historyArea"></div></section><script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+</script><script>
+function sendRequest() {
+  const status = document.getElementById("requestStatus");
+  const medicine = document.getElementById("medicineInput").value;
+  const city = document.getElementById("citySelect").value;
+  const timestamp = new Date().toLocaleString();
+  const entry = { medicine, city, timestamp };
+  let history = JSON.parse(localStorage.getItem("requestHistory")) || [];
+  history.push(entry);
+  localStorage.setItem("requestHistory", JSON.stringify(history));
+  status.textContent = "✅ Το αίτημα στάλθηκε σε κοντινά φαρμακεία.";
+}
+
+function showHistory() {
+  const history = JSON.parse(localStorage.getItem("requestHistory")) || [];
+  let output = "<ul>";
+  history.forEach(item => {
+    output += `<li>${item.timestamp}: ${item.medicine} (${item.city})</li>`;
+  });
+  output += "</ul>";
+  document.getElementById("historyArea").innerHTML = output;
+}
+</script>
+<!-- Mock Push Notification Setup -->
+<script>
+  function initPushNotifications() {
+    alert("Push notifications initialized (mock setup).");
+  }
+  window.onload = initPushNotifications;
+</script>
+
+</body>
+</html>
