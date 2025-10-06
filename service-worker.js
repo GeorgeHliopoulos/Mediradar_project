@@ -1,18 +1,16 @@
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open('mediradar-cache').then(function(cache) {
-      return cache.addAll([
-        './mediradar_pwa_enhanced.html',
-        './manifest.json'
-      ]);
-    })
-  );
+self.addEventListener('install', event => {
+  console.log('Service Worker installing.');
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', function(event) {
+self.addEventListener('activate', event => {
+  console.log('Service Worker activating.');
+});
+
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(function(response) {
+    caches.match(event.request).then(response => {
       return response || fetch(event.request);
     })
   );
