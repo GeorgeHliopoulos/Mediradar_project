@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediradar</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Mediradar</h1>
+        <div class="login-options">
+            <button onclick="loginWith('Google')">Google</button>
+            <button onclick="loginWith('Apple')">Apple</button>
+            <button onclick="loginWith('Microsoft')">Microsoft</button>
+        </div>
+    </header>
+
+    <main>
+        <form id="medicine-form">
+            <label for="city">Πόλη:</label>
+            <select id="city" name="city">
+                <option value="Αθήνα">Αθήνα</option><option value="Θεσσαλονίκη">Θεσσαλονίκη</option><option value="Πάτρα">Πάτρα</option><option value="Ηράκλειο">Ηράκλειο</option><option value="Λάρισα">Λάρισα</option><option value="Βόλος">Βόλος</option><option value="Ιωάννινα">Ιωάννινα</option><option value="Χανιά">Χανιά</option><option value="Καλαμάτα">Καλαμάτα</option><option value="Καβάλα">Καβάλα</option><option value="Ξάνθη">Ξάνθη</option><option value="Κομοτηνή">Κομοτηνή</option><option value="Σέρρες">Σέρρες</option><option value="Ρόδος">Ρόδος</option><option value="Κέρκυρα">Κέρκυρα</option><option value="Τρίκαλα">Τρίκαλα</option><option value="Λαμία">Λαμία</option><option value="Αλεξανδρούπολη">Αλεξανδρούπολη</option><option value="Αγρίνιο">Αγρίνιο</option><option value="Χαλκίδα">Χαλκίδα</option>
+            </select>
+
+            <label for="medicine-name">Όνομα Φαρμάκου:</label>
+            <input type="text" id="medicine-name" name="medicine-name" required>
+
+            <label for="active-substance">Δραστική Ουσία (προαιρετικά):</label>
+            <select id="active-substance" name="active-substance">
+                <option value="">-- Επιλογή --</option>
+                <option value="Paracetamol">Παρακεταμόλη</option>
+                <option value="Ibuprofen">Ιβουπροφαίνη</option>
+                <option value="Amoxicillin">Αμοξικιλλίνη</option>
+            </select>
+
+            <label for="medicine-type">Τύπος Φαρμάκου:</label>
+            <select id="medicine-type" name="medicine-type">
+                <option value="Σκόνη">Σκόνη</option><option value="Υγρό">Υγρό</option><option value="Χάπι">Χάπι</option><option value="Δερματική Κρέμα">Δερματική Κρέμα</option><option value="Αλοιφή">Αλοιφή</option>
+            </select>
+
+            <label for="quantity">Ποσότητα:</label>
+            <input type="number" id="quantity" name="quantity" min="1" required>
+
+            <label for="generic-option">Να προταθεί γενόσημο αν δεν υπάρχει:</label>
+            <select id="generic-option" name="generic-option">
+                <option value="ΝΑΙ">ΝΑΙ</option>
+                <option value="ΟΧΙ">ΟΧΙ</option>
+            </select>
+
+            <label>
+                <input type="checkbox" id="gdpr-consent" required>
+                Συμφωνώ με τους <a href="#" onclick="showGDPR()">όρους GDPR</a>
+            </label>
+
+            <button type="submit">Υποβολή Αίτησης</button>
+        </form>
+
+        <div id="gdpr-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeGDPR()">&times;</span>
+                <h2>Όροι GDPR</h2>
+                <p>
+Η εφαρμογή Mediradar συλλέγει και επεξεργάζεται τα προσωπικά σας δεδομένα αποκλειστικά για την εξυπηρέτηση του αιτήματος σας σχετικά με τη διαθεσιμότητα φαρμάκων. 
+Τα δεδομένα σας δεν θα κοινοποιηθούν σε τρίτους και θα διατηρηθούν μόνο για όσο διάστημα απαιτείται για την ολοκλήρωση της διαδικασίας. 
+Με την αποδοχή των όρων, συναινείτε στην επεξεργασία των δεδομένων σας σύμφωνα με τον Γενικό Κανονισμό για την Προστασία Δεδομένων (GDPR).
+</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mediradar</p>
+    </footer>
+</body>
+</html>
