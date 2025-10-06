@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mediradar</title>
-  styles.css
+
+  <!-- Link to CSS -->
+  <link rel="stylesheetnifest (optional for PWA) -->
   manifest.json
-  script.js</script>
-  firebase.js</script>
-</head>
-<body>
+
+  <!-- JavaScript files -->
+  <script src="script.js" defersrc="firebase.js" deferody>
   <header>
     <div class="logo">Mediradar</div>
     <div class="profile">
-      https://img.icons8.com/ios-filled/50/user.png
-      <div id="user-menu" class="dropdown">
+      <img src="https://img.icons8.com/ios-filled/50/user.png" alt="User Icon"class="dropdown">
         <button id="google-login">Σύνδεση με Google</button>
         <button id="logout-btn" style="display:none;">Αποσύνδεση</button>
       </div>
@@ -26,12 +26,17 @@
       <h2>Αίτηση Φαρμάκου</h2>
       <form id="medicine-form">
         <div class="form-group">
-          <label for="medicine-name">https://img.icons8.com/ios/24/pill.png Όνομα Φαρμάκου:</label>
+          <label for="medicine-name">
+            <img src="https://img.icons8.com/ios/24/pill.png" alt="P Φαρμάκου:
+          </label>
           <input type="text" id="medicine-name" required />
         </div>
 
         <div class="form-group">
-          <label for="active-substance">https://img.icons8.com/ios/24/test-tube.png Δραστική Ουσία (προαιρετικά):</label>
+          <label for="active-substance">
+            <img src="https://img.icons8.com/ios/24.png
+            Δραστική Ουσία (προαιρετικά):
+          </label>
           <select id="active-substance">
             <option value="">-- Επιλογή --</option>
             <option value="Paracetamol">Παρακεταμόλη</option>
@@ -41,7 +46,9 @@
         </div>
 
         <div class="form-group">
-          <label for="medicine-type"><img src="https://img.icons8.com/ios/24/medicine.png" alt:</label>
+          <label for="medicine-type">
+            <img src="https://img.icons8.com/ios/24/medicine.png" altπος Φαρμάκου:
+          </label>
           <select id="medicine-type" required>
             <option value="">-- Επιλογή --</option>
             <option value="Σκόνη">Σκόνη</option>
@@ -53,18 +60,24 @@
         </div>
 
         <div class="form-group">
-          <label for="quantity">https://img.icons8.com/ios/24/box.png Ποσότητα (τεμάχια ή κουτιά):</label>
+          <label for="quantity">
+            <img src="https://img.icons8.com/ios/24/box.png" alt="Box Icon"άχια ή κουτιά):
+          </label>
           <input type="number" id="quantity" min="1" required />
         </div>
 
         <div class="form-group">
-          <p>https://img.icons8.com/ios/24/approval.png Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;</p>
+          <p>
+            <img src="https://img.icons8.com/ios/24/approval.png" alt="εν υπάρχει το φάρμακο, να προταθεί γενόσημο;
+          </p>
           <label><input type="radio" name="allow-generic" value="ΝΑΙ" required /> ΝΑΙ</label>
           <label><input type="radio" name="allow-generic" value="ΟΧΙ" /> ΟΧΙ</label>
         </div>
 
         <div class="form-group">
-          <label for="city">https://img.icons8.com/ios/24/city.png Πόλη:</label>
+          <label for="city">
+            <img src="https://img.icons8.com/ios/24/city.png" altλη:
+          </label>
           <select id="city" required>
             <option value="">-- Επιλογή --</option>
             <option value="Αθήνα">Αθήνα</option>
@@ -93,7 +106,7 @@
         <div class="form-group">
           <label>
             <input type="checkbox" id="gdpr-checkbox" required />
-            Αποδέχομαι τους #όρους GDPR</a>
+            Αποδέχομαι τους <a hrefGDPR</a>
           </label>
         </div>
 
@@ -110,4 +123,3 @@
     </div>
   </div>
 </body>
-</html>
