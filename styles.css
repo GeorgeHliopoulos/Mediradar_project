@@ -1,4 +1,4 @@
-/* Google Font */
+/* Base */
 body {
   font-family: 'Roboto', sans-serif;
   background-color: #f9f9f9;
@@ -15,6 +15,7 @@ header {
   background-color: #007bff;
   color: white;
   padding: 15px 20px;
+  flex-wrap: wrap;
 }
 
 header .logo {
@@ -42,6 +43,7 @@ header button {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  transition: background 0.3s ease;
 }
 
 header button:hover {
@@ -52,9 +54,11 @@ header button:hover {
 .form-section {
   background: white;
   padding: 20px;
-  margin: 20px;
+  margin: 20px auto;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 .form-section h2 {
@@ -85,11 +89,13 @@ select {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  transition: border-color 0.3s ease;
 }
 
-input[type="radio"],
-input[type="checkbox"] {
-  margin-right: 5px;
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  border-color: #007bff;
 }
 
 .submit-btn {
@@ -100,10 +106,12 @@ input[type="checkbox"] {
   border-radius: 5px;
   cursor: pointer;
   font-size: 1rem;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .submit-btn:hover {
   background-color: #0056b3;
+  transform: scale(1.05);
 }
 
 /* GDPR Modal */
@@ -117,6 +125,7 @@ input[type="checkbox"] {
   background: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
+  animation: fadeIn 0.4s ease;
 }
 
 .modal-content {
@@ -131,4 +140,27 @@ input[type="checkbox"] {
   float: right;
   font-size: 1.5rem;
   cursor: pointer;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .form-section {
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
 }
