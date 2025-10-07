@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MediRadar</title>
 
-  <!-- Fonts: Inter (body) + Manrope (headings) -->
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CDN -->
@@ -27,16 +27,13 @@
     }
   </script>
 
-  <!-- PWA -->
+  <!-- PWA (optional) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#29a3a3" />
   <link rel="icon" href="/icons/icon-192.png" sizes="192x192">
 
   <style>
-    :root{
-      --fadeBg:#f7fbfb;
-      --fadeDark:#0b1515;
-    }
+    :root{ --fadeBg:#f7fbfb; --fadeDark:#0b1515; }
 
     /* Colorful, gradually fading background (LIGHT, πιο έντονο) */
     .app-bg{
@@ -60,8 +57,7 @@
     }
 
     .icon-emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.06)); }
-    /* Μόνο για SVG που δεν θέλουν σκιά (π.χ. γενόσημο) */
-    .no-shadow{ filter:none !important; }
+    .no-shadow{ filter:none !important; } /* για SVG που δεν θέλουν σκιά */
 
     /* Autocomplete dropdown */
     .ac-list{ position:absolute; inset-inline:0; top:100%; z-index:30; }
@@ -73,7 +69,7 @@
       border-radius:16px; box-shadow:0 0 0 100vmax rgba(0,0,0,.25); pointer-events:none;
     }
 
-    /* Toast base animation */
+    /* Toast animation */
     .toast-enter{ opacity:0; transform: translate(-50%,10px); }
     .toast-enter-active{ opacity:1; transform: translate(-50%,0); transition:.18s ease-out; }
     .toast-exit{ opacity:1; }
@@ -85,17 +81,41 @@
   <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-2xl bg-brand-500 text-white grid place-items-center shadow-inner">
-          <svg viewBox="0 0 24 24" class="w-5 h-5"><path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/></svg>
-        </div>
-        <span class="text-xl font-display font-bold tracking-tight">MediRadar</span>
+        <!-- NEW LOGO (inline SVG: symbol + wordmark) -->
+        <svg class="h-8 w-auto" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MediRadar">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#29A3A3"/><stop offset="1" stop-color="#208181"/>
+            </linearGradient>
+          </defs>
+          <!-- symbol -->
+          <g transform="translate(4,4)">
+            <circle cx="20" cy="20" r="18" fill="url(#g)"/>
+            <circle cx="20" cy="20" r="14" fill="white" fill-opacity=".12"/>
+            <path d="M20 7 a13 13 0 0 1 0 26" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".85"/>
+            <path d="M20 12 a8 8 0 0 1 0 16" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".75"/>
+            <path d="M20 15 a5 5 0 0 1 0 10" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".65"/>
+            <circle cx="29.5" cy="23" r="2.6" fill="white"/>
+          </g>
+          <!-- wordmark -->
+          <g transform="translate(60,11)" fill="#0F172A">
+            <path d="M0 23V0h4.8v8.6c1.6-2.4 4.1-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.4 0-5.8-1.3-7.5-3.6V23H0Zm12.2-3.6c3.6 0 6.1-2.6 6.1-6.2s-2.5-6.1-6.1-6.1c-3.7 0-6.2 2.6-6.2 6.2s2.5 6.1 6.2 6.1Z"/>
+            <path d="M29.6 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3H34.4c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
+            <path d="M52.9 23V4.8h4.8v3.7c1.6-2.5 4.2-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.3 0-5.7-1.2-7.4-3.5V32h-4.8V23Zm12.2-3.6c3.7 0 6.2-2.6 6.2-6.2s-2.5-6.1-6.2-6.1c-3.6 0-6.1 2.6-6.1 6.2s2.5 6.1 6.1 6.1Z"/>
+            <path d="M79.9 0h5v4.8h-5V0Zm.1 4.8h4.8V23H80V4.8Z"/>
+            <path d="M89.4 4.8h4.8v3.8c1.1-2.4 3.4-3.9 6.7-3.9 1 0 1.9.1 2.7.4L102 9.9c-.8-.3-1.6-.4-2.6-.4-4 0-5.3 2.5-5.3 6.5V23h-4.8V4.8Z"/>
+            <path d="M104.2 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3H109c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
+            <path d="M127.5 23V4.8h4.8v3.7c1.6-2.5 4.2-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.3 0-5.7-1.2-7.4-3.5V32h-4.8V23Zm12.2-3.6c3.7 0 6.2-2.6 6.2-6.2s-2.5-6.1-6.2-6.1c-3.6 0-6.1 2.6-6.1 6.2s2.5 6.1 6.1 6.1Z"/>
+            <path d="M154.5 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3h-14.5c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
+            <path d="M179.4 4.8h4.8v3.8c1.1-2.4 3.4-3.9 6.7-3.9 1 0 1.9.1 2.7.4l-1.6 4.9c-.8-.3-1.6-.4-2.6-.4-4 0-5.3 2.5-5.3 6.5V23h-4.8V4.8Z"/>
+          </g>
+        </svg>
       </div>
 
       <div class="flex items-center gap-2">
         <!-- Language -->
         <div class="flex items-center rounded-xl overflow-hidden bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-700">
           <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold bg-slate-900/5 dark:bg-white/10 flex items-center gap-1" title="Ελληνικά">
-            <!-- Greek flag (accurate) -->
             <svg width="14" height="10" viewBox="0 0 27 18" class="icon-emoji" aria-hidden="true">
               <rect width="27" height="18" fill="#0D5EAF"/>
               <g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g>
@@ -163,9 +183,7 @@
             <input id="medicine-name" type="text" autocomplete="off"
               class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400 dark:placeholder:text-slate-400/80"
               placeholder="π.χ. Augmentin 875mg" />
-            <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg">
-              <!-- suggestions injected here -->
-            </div>
+            <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
           </div>
           <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Συμβουλή φορμάτ: <em>Εμπορική ονομασία + δοσολογία (π.χ. “500mg”)</em></p>
         </div>
@@ -222,8 +240,7 @@
             <svg class="w-6 h-6 no-shadow" viewBox="0 0 24 24" aria-hidden="true">
               <defs>
                 <linearGradient id="g-ok" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%"  stop-color="#34D399"/>
-                  <stop offset="100%" stop-color="#10B981"/>
+                  <stop offset="0%"  stop-color="#34D399"/><stop offset="100%" stop-color="#10B981"/>
                 </linearGradient>
               </defs>
               <circle cx="12" cy="12" r="10" fill="url(#g-ok)"/>
@@ -317,6 +334,36 @@
     </section>
   </main>
 
+  <!-- RESERVATION FOCUS MODAL (full-screen) -->
+  <div id="reserve-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 p-4 z-50">
+    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 shadow-soft border border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="text-lg font-display font-bold" id="resv-title">Κράτηση 60’</h3>
+        <button id="reserve-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" aria-label="Κλείσιμο">×</button>
+      </div>
+      <div class="px-5 py-4">
+        <div class="flex items-start gap-3">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f48a.png" alt="" class="w-12 h-12" />
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-semibold text-base">Φαρμακείο Ιάκωβος</h4>
+              <span class="text-sm px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Δεσμευμένο: <span id="hold-ttl-big">59:59</span></span>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">2.1km · Έτοιμο σε 20’ · Χάπι · Paracetamol 500mg</p>
+          </div>
+        </div>
+        <div class="mt-4 grid sm:grid-cols-2 gap-3">
+          <a href="#" class="px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 text-center">Οδηγίες / Χάρτης</a>
+          <a href="tel:+302101234567" class="px-4 py-3 rounded-xl bg-slate-800/90 text-white font-semibold hover:bg-slate-800 text-center">Κλήση Φαρμακείου</a>
+        </div>
+        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Κράτησε αυτό το παράθυρο ανοιχτό για να βλέπεις τον χρόνο δέσμευσης.</p>
+      </div>
+      <div class="px-5 pb-5 flex justify-end">
+        <button id="reserve-ok" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold">Εντάξει</button>
+      </div>
+    </div>
+  </div>
+
   <!-- GDPR Modal -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 shadow-soft border border-slate-200 dark:border-slate-800">
@@ -369,12 +416,14 @@
         substance:'Δραστική Ουσία', type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', genericQ:'Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', rx:'Προαιρετικά: Αριθμός Συνταγής', rxHelp:'Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.',
         scan:'Σάρωση barcode', stop:'Τερματισμός', scanHint:'Στόχευσε τον γραμμωτό κώδικα της συνταγής.', gdprShort:'Αποδέχομαι τους',
-        submit:'Υποβολή Αναζήτησης', reserved:'Δεσμευμένο', sent:'✅ Αναζήτηση στάλθηκε', neterr:'⚠️ Σφάλμα δικτύου — δοκίμασε ξανά' },
+        submit:'Υποβολή Αναζήτησης', reserved:'Δεσμευμένο', sent:'✅ Αναζήτηση στάλθηκε', neterr:'⚠️ Σφάλμα δικτύου — δοκίμασε ξανά',
+        resvTitle:'Κράτηση 60’', ok:'Εντάξει' },
       en:{ title:'Medicine Search', subtitle:'Find availability at nearby pharmacies instantly.', medname:'Medicine Name',
         substance:'Active Substance', type:'Medicine Type', qty:'Quantity (units/boxes)', genericQ:'If unavailable, suggest a generic?',
         yes:'YES', no:'NO', city:'City', rx:'Optional: Prescription Number', rxHelp:'Helps the pharmacy locate the correct product/dosage quickly.',
         scan:'Scan barcode', stop:'Stop', scanHint:'Aim the camera at the prescription barcode.', gdprShort:'I accept the',
-        submit:'Submit Search', reserved:'Reserved', sent:'✅ Search sent', neterr:'⚠️ Network error — try again' }
+        submit:'Submit Search', reserved:'Reserved', sent:'✅ Search sent', neterr:'⚠️ Network error — try again',
+        resvTitle:'Reservation 60’', ok:'OK' }
     };
     const langEL = document.getElementById('lang-el');
     const langEN = document.getElementById('lang-en');
@@ -392,10 +441,14 @@
       setText('t-city', t('city')); setText('t-rx', t('rx')); setText('t-rxHelp', t('rxHelp'));
       setText('t-scan', t('scan')); setText('t-stop', t('stop')); setText('t-scanHint', t('scanHint'));
       setText('t-gdprShort', t('gdprShort')); setText('t-submit', t('submit'));
+      document.getElementById('resv-title').textContent = t('resvTitle');
+      document.getElementById('reserve-ok').textContent = t('ok');
+
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Παρακεταμόλη':'e.g. Paracetamol';
       document.getElementById('quantity').placeholder = state.lang==='el'?'π.χ. 1':'e.g. 1';
       document.getElementById('rx-number').placeholder = state.lang==='el'?'π.χ. 0123-456789-00':'e.g. 0123-456789-00';
+
       langEL.classList.toggle('bg-slate-900/5', state.lang==='el');
       langEN.classList.toggle('bg-slate-900/5', state.lang==='en');
       localStorage.setItem('mediradar-lang', state.lang);
@@ -536,10 +589,15 @@
     scanBtn.addEventListener('click', startScan);
     stopBtn.addEventListener('click', stopScan);
 
-    /* ---------- Reserve 60’ + countdown + confetti ---------- */
+    /* ---------- Reserve 60’ + countdown + confetti (1600ms) + FOCUS MODAL ---------- */
     const reserveBtn = document.getElementById('reserve-btn');
     const holdBadge = document.getElementById('hold-badge');
     const holdTTL = document.getElementById('hold-ttl');
+    const holdTTLBig = document.getElementById('hold-ttl-big');
+    const reserveModal = document.getElementById('reserve-modal');
+    const reserveClose = document.getElementById('reserve-close');
+    const reserveOK = document.getElementById('reserve-ok');
+
     let countdownTimer=null, remaining=3600; // seconds
 
     function startCountdown(seconds=3600){
@@ -548,42 +606,61 @@
       updateTTL();
       clearInterval(countdownTimer);
       countdownTimer = setInterval(()=>{
-        remaining--; if(remaining<=0){ clearInterval(countdownTimer); holdBadge.classList.add('hidden'); return; }
+        remaining--; if(remaining<=0){ clearInterval(countdownTimer); holdBadge.classList.add('hidden'); closeReserveModal(); return; }
         updateTTL();
       },1000);
     }
     function updateTTL(){
       const m = Math.floor(remaining/60).toString().padStart(2,'0');
       const s = (remaining%60).toString().padStart(2,'0');
-      holdTTL.textContent = `${m}:${s}`;
+      const txt = `${m}:${s}`;
+      holdTTL.textContent = txt;
+      holdTTLBig.textContent = txt;
     }
+
+    function openReserveModal(){
+      reserveModal.classList.remove('hidden');
+      reserveModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('resv-title').textContent = t('resvTitle');
+    }
+    function closeReserveModal(){
+      reserveModal.classList.add('hidden');
+      reserveModal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+
     reserveBtn?.addEventListener('click', ()=>{
       startCountdown(60*60);
-      fireConfetti(800);
+      fireConfetti(1600); // διπλάσια διάρκεια από 800ms
       showToast(state.lang==='el' ? `${t('reserved')}: 60’` : `Reserved: 60’`);
+      openReserveModal();
     });
+    reserveClose.addEventListener('click', closeReserveModal);
+    reserveOK.addEventListener('click', closeReserveModal);
+    reserveModal.addEventListener('click', (e)=>{ if(e.target===reserveModal) closeReserveModal(); });
 
-    /* ---------- Confetti (tiny, dependency-free) ---------- */
+    /* ---------- Confetti (dependency-free) ---------- */
     const confettiCanvas = document.getElementById('confetti');
     const ctx = confettiCanvas.getContext('2d');
-    function fireConfetti(duration=800){
+    function fireConfetti(duration=1600){
       confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight;
       confettiCanvas.style.display = 'block';
-      const particles = Array.from({length: 120}, ()=> ({
+      const particles = Array.from({length: 180}, ()=> ({ // λίγο περισσότερα για impact
         x: Math.random()*innerWidth,
         y: -20,
-        vx: (Math.random()-.5)*2,
-        vy: Math.random()*3+2,
+        vx: (Math.random()-.5)*3,
+        vy: Math.random()*3+2.5,
         size: Math.random()*6+3,
         color: ['#F78DA7','#84C5F4','#C3A6F4','#FFE08A','#9DE0D6'][Math.floor(Math.random()*5)],
-        rot: Math.random()*360, vr:(Math.random()-.5)*10
+        rot: Math.random()*360, vr:(Math.random()-.5)*12
       }));
       let start = performance.now();
       function tick(ts){
         const elapsed = ts - start;
         ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
         particles.forEach(p=>{
-          p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.rot += p.vr;
+          p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.rot += p.vr;
           ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
           ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
           ctx.restore();
@@ -592,6 +669,17 @@
       }
       requestAnimationFrame(tick);
     }
+
+    /* ---------- GDPR modal ---------- */
+    const gdprModal = document.getElementById('gdpr-modal');
+    const gdprOpen = document.getElementById('gdpr-open');
+    const gdprClose = document.getElementById('gdpr-close');
+    const gdprAccept = document.getElementById('gdpr-accept');
+    gdprOpen.addEventListener('click', ()=>{ gdprModal.classList.remove('hidden'); gdprModal.classList.add('flex'); });
+    function closeGDPR(){ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); }
+    gdprClose.addEventListener('click', closeGDPR);
+    gdprAccept.addEventListener('click', closeGDPR);
+    gdprModal.addEventListener('click', (e)=>{ if(e.target===gdprModal) closeGDPR(); });
   </script>
 </body>
 </html>
