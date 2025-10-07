@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="el" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,22 +12,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
           colors: {
             brand: {
-              // TEAL theme (matches the chosen mockup)
-              50:  '#e6f6f6',
-              100: '#c9eeee',
-              200: '#a3e0df',
-              300: '#79cfcf',
-              400: '#4fbcbc',
-              500: '#29a3a3',   /* main */
-              600: '#208181',
-              700: '#196464',
-              800: '#134b4b',
-              900: '#0e3838'
+              50:'#e6f6f6',100:'#c9eeee',200:'#a3e0df',300:'#79cfcf',
+              400:'#4fbcbc',500:'#29a3a3',600:'#208181',700:'#196464',800:'#134b4b',900:'#0e3838'
             },
             ink: { 900:'#0F172A', 700:'#1F2937', 600:'#334155', 400:'#94A3B8' }
           },
@@ -38,23 +30,31 @@
     }
   </script>
 
-  <!-- PWA Manifest -->
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#29a3a3" />
   <link rel="icon" href="/icons/icon-192.png" sizes="192x192">
 
   <style>
-    /* Soft gradient background like the mockup */
-    body {
-      background: radial-gradient(1000px 600px at 15% -10%, rgba(41,163,163,0.18), transparent 60%),
-                  radial-gradient(800px 500px at 110% 10%, rgba(15,23,42,0.06), transparent 50%),
-                  #f8fafc; /* slate-50 base */
+    :root {
+      --bg1: radial-gradient(1000px 600px at 15% -10%, rgba(41,163,163,0.18), transparent 60%);
+      --bg2: radial-gradient(800px 500px at 110% 10%, rgba(15,23,42,0.06), transparent 50%);
+      --bgBase: #f6fbfb;               /* πιο διακριτικό από λευκό */
+    }
+    .app-bg {
+      background: var(--bg1), var(--bg2), var(--bgBase);
+    }
+    .dark .app-bg {
+      background:
+        radial-gradient(900px 550px at 10% -10%, rgba(41,163,163,0.20), transparent 60%),
+        radial-gradient(800px 480px at 120% 10%, rgba(15,23,42,0.40), transparent 60%),
+        #0b1515; /* σκούρο teal base */
     }
   </style>
 </head>
-<body class="text-ink-900 font-sans selection:bg-brand-200/60">
+<body class="app-bg text-ink-900 dark:text-slate-200 font-sans selection:bg-brand-200/60 min-h-full">
   <!-- Header -->
-  <header class="sticky top-0 z-40 bg-brand-600 text-white">
+  <header class="sticky top-0 z-40 bg-brand-600/95 dark:bg-brand-700/95 text-white backdrop-blur">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-2xl bg-white/15 grid place-items-center shadow-inner">
@@ -64,11 +64,18 @@
         <span class="text-xl font-bold tracking-tight">MediRadar</span>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button id="google-login" class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition">Σύνδεση</button>
-        <button id="logout-btn" class="hidden px-3 py-2 rounded-xl bg-white/10 text-white text-sm font-semibold hover:bg-white/20 transition">Αποσύνδεση</button>
-        <button id="menu-btn" class="ml-1 p-2 rounded-xl hover:bg-white/10">
-          <svg viewBox="0 0 24 24" class="w-6 h-6 text-white"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10Zm0 2c-4.97 0-9 2.686-9 6v2h18v-2c0-3.314-4.03-6-9-6Z"/></svg>
+      <div class="flex items-center gap-1 sm:gap-2">
+        <!-- Language toggle -->
+        <div class="flex items-center bg-white/15 rounded-xl overflow-hidden">
+          <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold bg-white/10">EL</button>
+          <button id="lang-en" class="px-2 py-1.5 text-xs font-semibold opacity-80 hover:opacity-100">EN</button>
+        </div>
+
+        <!-- Dark Mode toggle -->
+        <button id="theme-toggle" class="ml-1 p-2 rounded-xl hover:bg-white/10" aria-label="Dark mode">
+          <!-- sun/moon swap via CSS -->
+          <svg id="icon-sun" viewBox="0 0 24 24" class="w-6 h-6 hidden"><path fill="currentColor" d="M6.76 4.84L5.34 3.42L3.92 4.84L5.34 6.26l1.42-1.42ZM1 13h3v-2H1v2Zm10 10h2v-3h-2v3Zm9.08-18.16l-1.41-1.41l-1.42 1.41l1.42 1.42l1.41-1.42ZM20 13h3v-2h-3v2Zm-8-7a7 7 0 1 0 0 14a7 7 0 0 0 0-14Zm6.24 13.16l1.42 1.42l1.41-1.42l-1.41-1.41l-1.42 1.41ZM3.92 19.16l1.42 1.42l1.42-1.42l-1.42-1.41l-1.42 1.41Z"/></svg>
+          <svg id="icon-moon" viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M12 2a9.99 9.99 0 0 0-8.485 15.071A10 10 0 1 0 12 2Z"/></svg>
         </button>
       </div>
     </div>
@@ -76,63 +83,63 @@
 
   <!-- Main -->
   <main class="mx-auto max-w-4xl px-4 sm:px-6 pt-6 pb-24">
-    <!-- Hero (pill icon + title) -->
+    <!-- Hero (NEW icon: magnifying glass) -->
     <section class="mb-6">
       <div class="rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-soft p-5 sm:p-6">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-white/15 grid place-items-center">
-            <!-- pill icon -->
+            <!-- magnifier icon -->
             <svg viewBox="0 0 24 24" class="w-5 h-5 text-white">
-              <path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0ZM7.05 14.121l4.243-4.243l3.535 3.536l-4.243 4.242z"/>
+              <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5l1.5-1.5l-5-5ZM9.5 14A4.5 4.5 0 1 1 14 9.5A4.505 4.505 0 0 1 9.5 14Z"/>
             </svg>
           </div>
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold">Αναζήτηση Φαρμάκου</h1>
-            <p class="mt-1 text-white/80 text-sm">Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.</p>
+            <h1 id="t-title" class="text-2xl sm:text-3xl font-bold">Αναζήτηση Φαρμάκου</h1>
+            <p id="t-subtitle" class="mt-1 text-white/85 text-sm">Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Card container -->
+    <!-- Form -->
     <section aria-labelledby="form-title">
       <form id="medicine-form" class="grid grid-cols-1 gap-4 sm:gap-5">
-        <!-- Medicine name -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="medicine-name" class="text-sm font-semibold">Όνομα Φαρμάκου</label>
+        <!-- Medicine name (icon: pill) -->
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-medname-label" for="medicine-name" class="text-sm font-semibold">Όνομα Φαρμάκου</label>
           <div class="mt-2 relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0Z"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0ZM7.05 14.121l4.243-4.243l3.535 3.536l-4.243 4.242z"/></svg>
             </span>
             <input id="medicine-name" type="text" required
-              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
+              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400 dark:placeholder:text-slate-400/80"
               placeholder="π.χ. Augmentin 875mg" />
           </div>
         </div>
 
-        <!-- Active substance (text) -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="active-substance" class="text-sm font-semibold flex items-center gap-2">
+        <!-- Active substance (text) (icon: test tube) -->
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-substance-label" for="active-substance" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7v4.586l-3.95 6.582A4 4 0 0 0 6.582 20h10.836a4 4 0 0 0 3.532-4.832L17 8.586V4h-2v4.586l3.657 6.093A2 2 0 0 1 17.418 18H6.582a2 2 0 0 1-1.739-3l3.157-5.26V4H7Z"/></svg>
-            Δραστική Ουσία <span class="text-ink-400 font-normal">(προαιρετικά)</span>
+            Δραστική Ουσία <span class="text-ink-400 dark:text-slate-400 font-normal">(προαιρετικά)</span>
           </label>
           <div class="mt-2 relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7z"/></svg>
             </span>
             <input id="active-substance" type="text"
-              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
+              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400 dark:placeholder:text-slate-400/80"
               placeholder="π.χ. Παρακεταμόλη" />
           </div>
         </div>
 
-        <!-- Type -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="medicine-type" class="text-sm font-semibold flex items-center gap-2">
+        <!-- Type (select) (icon: blister pack) -->
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-type-label" for="medicine-type" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 3H7v4h2V6Zm4 0h-2v4h2V6Zm4 0h-2v4h2V6ZM9 12H7v4h2v-4Zm4 0h-2v4h2v-4Zm4 0h-2v4h2v-4Z"/></svg>
             Τύπος Φαρμάκου
           </label>
-          <select id="medicine-type" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
+          <select id="medicine-type" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
             <option value="">— Επιλογή —</option>
             <option value="Σκόνη">Σκόνη</option>
             <option value="Υγρό">Υγρό</option>
@@ -143,41 +150,41 @@
         </div>
 
         <!-- Quantity -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="quantity" class="text-sm font-semibold flex items-center gap-2">
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-qty-label" for="quantity" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M4 7h16v2H4zM4 11h16v2H4zM4 15h10v2H4z"/></svg>
             Ποσότητα (τεμάχια/κουτιά)
           </label>
           <input id="quantity" type="number" min="1" required
-                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500"
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500"
                  placeholder="π.χ. 1" />
         </div>
 
         <!-- Allow generic -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <p class="text-sm font-semibold flex items-center gap-2">
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <p id="t-generic-q" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="m9 16.17l-3.59-3.58L4 14l5 5l11-11l-1.41-1.41z"/></svg>
             Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;
           </p>
           <div class="mt-3 flex gap-4">
             <label class="inline-flex items-center gap-2">
               <input type="radio" name="allow-generic" value="ΝΑΙ" required class="size-4 accent-brand-600">
-              <span>ΝΑΙ</span>
+              <span id="t-yes">ΝΑΙ</span>
             </label>
             <label class="inline-flex items-center gap-2">
               <input type="radio" name="allow-generic" value="ΟΧΙ" class="size-4 accent-brand-600">
-              <span>ΟΧΙ</span>
+              <span id="t-no">ΟΧΙ</span>
             </label>
           </div>
         </div>
 
         <!-- City -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="city" class="text-sm font-semibold flex items-center gap-2">
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-city-label" for="city" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
             Πόλη
           </label>
-          <select id="city" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
+          <select id="city" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
             <option value="">— Επιλογή —</option>
             <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option>
             <option>Ηράκλειο</option><option>Λάρισα</option><option>Βόλος</option>
@@ -190,42 +197,45 @@
         </div>
 
         <!-- Prescription number + barcode scan -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
-          <label for="rx-number" class="text-sm font-semibold flex items-center gap-2">
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
+          <label id="t-rx-label" for="rx-number" class="text-sm font-semibold flex items-center gap-2">
             <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h2v16H3V4Zm4 0h1v16H7V4Zm3 0h3v16h-3V4Zm5 0h1v16h-1V4Zm3 0h2v16h-2V4Z"/></svg>
             Προαιρετικά: Αριθμός Συνταγής
           </label>
-          <p class="mt-1 text-xs text-ink-400">Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.</p>
+          <p id="t-rx-help" class="mt-1 text-xs text-ink-400 dark:text-slate-400">Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.</p>
           <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
             <input id="rx-number" type="text"
-              class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
+              class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400 dark:placeholder:text-slate-400/80"
               placeholder="π.χ. 0123-456789-00" inputmode="numeric" />
             <button type="button" id="scan-barcode" class="px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
-              Σάρωση barcode
+              <span id="t-scan">Σάρωση barcode</span>
             </button>
           </div>
           <div id="scan-area" class="mt-3 hidden">
-            <video id="preview" playsinline class="w-full rounded-xl border border-slate-200"></video>
-            <p class="text-xs text-ink-400 mt-1">Στόχευσε τον γραμμωτό κώδικα της συνταγής.</p>
+            <video id="preview" playsinline class="w-full rounded-xl border border-slate-200 dark:border-slate-700"></video>
+            <p id="t-scan-hint" class="text-xs text-ink-400 dark:text-slate-400 mt-1">Στόχευσε τον γραμμωτό κώδικα της συνταγής.</p>
             <div class="mt-2">
-              <button type="button" id="stop-scan" class="px-3 py-2 rounded-xl bg-slate-200 text-slate-800 text-sm font-semibold hover:bg-slate-300">Τερματισμός</button>
+              <button type="button" id="stop-scan" class="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-semibold hover:bg-slate-300 dark:hover:bg-slate-600">
+                <span id="t-stop">Τερματισμός</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- GDPR -->
-        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white/90 dark:bg-slate-900/50 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-700 p-4">
           <label class="inline-flex items-start gap-3">
             <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
             <span class="text-sm leading-6">
-              Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand-700 hover:text-brand-900">Όρους Αναζήτησης & GDPR</button>.
+              <span id="t-gdpr-text">Αποδέχομαι τους</span>
+              <button type="button" id="gdpr-open" class="underline text-brand-700 dark:text-brand-400 hover:text-brand-900 dark:hover:text-brand-200">Όρους Αναζήτησης & GDPR</button>.
             </span>
           </label>
         </div>
 
         <!-- Submit -->
         <div class="flex justify-end">
-          <button type="submit" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-300">
+          <button id="t-submit" type="submit" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-300">
             Υποβολή Αναζήτησης
           </button>
         </div>
@@ -235,28 +245,20 @@
 
   <!-- GDPR Modal -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-3xl rounded-2xl bg-white shadow-soft">
-      <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-bold">Όροι Αναζήτησης & Ενημέρωση GDPR</h3>
-        <button id="gdpr-close" class="p-2 hover:bg-slate-100 rounded-xl" aria-label="Κλείσιμο">×</button>
+    <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 shadow-soft border border-slate-200 dark:border-slate-700">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 id="t-gdpr-title" class="text-lg font-bold">Όροι Αναζήτησης & Ενημέρωση GDPR</h3>
+        <button id="gdpr-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" aria-label="Κλείσιμο">×</button>
       </div>
       <div class="p-5 max-h-[60vh] overflow-auto">
-        <div id="gdpr-text" class="prose prose-sm max-w-none">
-          <p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (<em>συμπλήρωσε επωνυμία/στοιχεία</em>).</p>
-          <p><strong>Σκοπός:</strong> Διαβίβαση αιτήματος αναζήτησης φαρμάκου σε φαρμακεία για ενημέρωση διαθεσιμότητας/τιμής/χρόνου παραλαβής.</p>
-          <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία (αριθμός συνταγής/σάρωση).</p>
-          <p><strong>Ελαχιστοποίηση δεδομένων:</strong> Όνομα φαρμάκου, (προαιρετικά) δραστική ουσία, τύπος, ποσότητα, προτίμηση γενόσημου, πόλη, (προαιρετικά) αριθμός συνταγής/barcode.</p>
-          <p><strong>Διαβίβαση:</strong> Σε επιλεγμένα φαρμακεία μόνο για τον παραπάνω σκοπό. Οι φαρμακοποιοί είναι ανεξάρτητοι υπεύθυνοι για τις δικές τους καταγραφές.</p>
-          <p><strong>Τήρηση:</strong> Διατήρηση αιτημάτων έως 30 ημέρες για υποστήριξη και έπειτα ανωνυμοποίηση/διαγραφή, εκτός νόμιμης υποχρέωσης.</p>
-          <p><strong>Δικαιώματα:</strong> Πρόσβαση, διόρθωση, διαγραφή, περιορισμός, φορητότητα, εναντίωση· επικοινώνησε στο <em>email</em>. Αρμόδια αρχή: ΑΠΔΠΧ.</p>
-          <p><strong>Συγκατάθεση/Ανάκληση:</strong> Μπορείς να την ανακαλέσεις ανά πάσα στιγμή για τα προαιρετικά στοιχεία.</p>
-          <p><strong>Ασφάλεια:</strong> HTTPS, ελεγχόμενα δικαιώματα πρόσβασης, καταγραφή συμβάντων.</p>
-          <p><strong>Εκτελούντες:</strong> Πάροχοι φιλοξενίας/μηνυμάτων με συμβάσεις άρθρου 28.</p>
-          <p><strong>Cookies:</strong> Μόνο τεχνικά. Γεωτοποθεσία δεν απαιτείται.</p>
+        <div id="gdpr-text" class="prose prose-sm dark:prose-invert max-w-none">
+          <!-- Το περιεχόμενο γεμίζει από i18n παρακάτω -->
         </div>
       </div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-accept" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Κατάλαβα</button>
+        <button id="gdpr-accept" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
+          ΟΚ
+        </button>
       </div>
     </div>
   </div>
@@ -266,13 +268,131 @@
 
   <!-- App JS -->
   <script>
-    // GDPR modal
+    // ---------- Theme (Dark/Light) ----------
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+
+    function setTheme(mode) {
+      if (mode === 'dark') { html.classList.add('dark'); iconSun.classList.remove('hidden'); iconMoon.classList.add('hidden'); }
+      else { html.classList.remove('dark'); iconSun.classList.add('hidden'); iconMoon.classList.remove('hidden'); }
+      localStorage.setItem('mediradar-theme', mode);
+    }
+    setTheme(localStorage.getItem('mediradar-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    themeBtn.addEventListener('click', () => setTheme(html.classList.contains('dark') ? 'light' : 'dark'));
+
+    // ---------- Language (EL/EN) ----------
+    const langEL = document.getElementById('lang-el');
+    const langEN = document.getElementById('lang-en');
+    const t = (k)=>strings[state.lang][k];
+
+    const strings = {
+      el: {
+        title: 'Αναζήτηση Φαρμάκου',
+        subtitle: 'Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.',
+        medname: 'Όνομα Φαρμάκου',
+        substance: 'Δραστική Ουσία',
+        type: 'Τύπος Φαρμάκου',
+        qty: 'Ποσότητα (τεμάχια/κουτιά)',
+        genericQ: 'Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;',
+        yes: 'ΝΑΙ', no: 'ΟΧΙ',
+        city: 'Πόλη',
+        rx: 'Προαιρετικά: Αριθμός Συνταγής',
+        rxHelp: 'Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.',
+        scan: 'Σάρωση barcode', stop: 'Τερματισμός', scanHint:'Στόχευσε τον γραμμωτό κώδικα της συνταγής.',
+        gdprShort: 'Αποδέχομαι τους',
+        submit: 'Υποβολή Αναζήτησης',
+        gdprTitle: 'Όροι Αναζήτησης & Ενημέρωση GDPR',
+        gdprHTML: `
+<p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (<em>συμπλήρωσε επωνυμία/στοιχεία</em>).</p>
+<p><strong>Σκοπός:</strong> Διαβίβαση αιτήματος αναζήτησης φαρμάκου σε φαρμακεία για ενημέρωση διαθεσιμότητας/τιμής/χρόνου παραλαβής.</p>
+<p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία (αριθμός συνταγής/σάρωση).</p>
+<p><strong>Ελαχιστοποίηση δεδομένων:</strong> Όνομα φαρμάκου, (προαιρετικά) δραστική ουσία, τύπος, ποσότητα, προτίμηση γενόσημου, πόλη, (προαιρετικά) αριθμός συνταγής/barcode.</p>
+<p><strong>Διαβίβαση:</strong> Σε επιλεγμένα φαρμακεία μόνο για τον παραπάνω σκοπό. Οι φαρμακοποιοί είναι ανεξάρτητοι υπεύθυνοι.</p>
+<p><strong>Τήρηση:</strong> Έως 30 ημέρες και μετά ανωνυμοποίηση/διαγραφή, εκτός νόμιμης υποχρέωσης.</p>
+<p><strong>Δικαιώματα:</strong> Πρόσβαση, διόρθωση, διαγραφή, περιορισμός, φορητότητα, εναντίωση (επικοινώνησε στο email υποστήριξης). Αρμόδια αρχή: ΑΠΔΠΧ.</p>
+<p><strong>Συγκατάθεση:</strong> Ανάκληση ανά πάσα στιγμή για τα προαιρετικά στοιχεία.</p>
+<p><strong>Ασφάλεια:</strong> HTTPS, ελεγχόμενη πρόσβαση, καταγραφή συμβάντων. Εκτελούντες κατά άρθρο 28 GDPR.</p>`
+      },
+      en: {
+        title: 'Medicine Search',
+        subtitle: 'Find availability at nearby pharmacies instantly.',
+        medname: 'Medicine Name',
+        substance: 'Active Substance',
+        type: 'Medicine Type',
+        qty: 'Quantity (units/boxes)',
+        genericQ: 'If unavailable, suggest a generic?',
+        yes: 'YES', no: 'NO',
+        city: 'City',
+        rx: 'Optional: Prescription Number',
+        rxHelp: 'Helps the pharmacy locate the correct product/dosage quickly.',
+        scan: 'Scan barcode', stop: 'Stop', scanHint:'Aim the camera at the prescription barcode.',
+        gdprShort: 'I accept the',
+        submit: 'Submit Search',
+        gdprTitle: 'Search Terms & GDPR Notice',
+        gdprHTML: `
+<p><strong>Controller:</strong> MediRadar (<em>add legal entity/contact</em>).</p>
+<p><strong>Purpose:</strong> Forward your medicine search request to selected pharmacies to inform you about availability/price/pickup time.</p>
+<p><strong>Legal basis:</strong> GDPR 6(1)(b) and 6(1)(a) for optional data (prescription number/scan).</p>
+<p><strong>Data minimisation:</strong> Medicine name, (optional) active substance, type, quantity, generic preference, city, (optional) prescription number/barcode.</p>
+<p><strong>Disclosures:</strong> To selected pharmacies solely for the above purpose. Pharmacists are separate controllers for their records.</p>
+<p><strong>Retention:</strong> Up to 30 days for support/evidence, then anonymised or deleted unless required by law.</p>
+<p><strong>Your rights:</strong> Access, rectification, erasure, restriction, portability, objection (contact support email). Supervisory authority: Hellenic DPA.</p>
+<p><strong>Consent:</strong> You can withdraw at any time for optional items.</p>
+<p><strong>Security:</strong> HTTPS, access controls, audit logs. Processors under Art. 28 GDPR.</p>`
+      }
+    };
+
+    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
+
+    function applyLang() {
+      document.documentElement.lang = state.lang === 'el' ? 'el' : 'en';
+      // labels
+      document.getElementById('t-title').textContent = t('title');
+      document.getElementById('t-subtitle').textContent = t('subtitle');
+      document.getElementById('t-medname-label').textContent = t('medname');
+      document.getElementById('t-substance-label').childNodes[1].nodeValue = ' ' + t('substance') + ' ';
+      document.getElementById('t-type-label').childNodes[1].nodeValue = ' ' + t('type') + ' ';
+      document.getElementById('t-qty-label').childNodes[1].nodeValue = ' ' + t('qty') + ' ';
+      document.getElementById('t-generic-q').childNodes[1].nodeValue = ' ' + t('genericQ') + ' ';
+      document.getElementById('t-yes').textContent = t('yes');
+      document.getElementById('t-no').textContent = t('no');
+      document.getElementById('t-city-label').childNodes[1].nodeValue = ' ' + t('city') + ' ';
+      document.getElementById('t-rx-label').childNodes[1].nodeValue = ' ' + t('rx') + ' ';
+      document.getElementById('t-rx-help').textContent = t('rxHelp');
+      document.getElementById('t-scan').textContent = t('scan');
+      document.getElementById('t-stop').textContent = t('stop');
+      document.getElementById('t-scan-hint').textContent = t('scanHint');
+      document.getElementById('t-gdpr-title').textContent = t('gdprTitle');
+      document.getElementById('t-gdpr-text').firstChild.textContent = t('gdprShort') + ' ';
+      document.getElementById('t-submit').textContent = t('submit');
+      // placeholders
+      document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
+      document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Παρακεταμόλη':'e.g. Paracetamol';
+      document.getElementById('quantity').placeholder = state.lang==='el'?'π.χ. 1':'e.g. 1';
+      document.getElementById('rx-number').placeholder = state.lang==='el'?'π.χ. 0123-456789-00':'e.g. 0123-456789-00';
+      // GDPR body
+      document.getElementById('gdpr-text').innerHTML = t('gdprHTML');
+      // toggle styling buttons
+      if (state.lang === 'el') { langEL.classList.add('bg-white/10'); langEN.classList.remove('bg-white/10'); }
+      else { langEN.classList.add('bg-white/10'); langEL.classList.remove('bg-white/10'); }
+      localStorage.setItem('mediradar-lang', state.lang);
+    }
+
+    langEL.addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
+    langEN.addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
+    // init language
+    document.getElementById('t-gdpr-text').innerHTML = strings[state.lang].gdprShort + ' ';
+    applyLang();
+
+    // ---------- GDPR modal ----------
     const modal = document.getElementById('gdpr-modal');
     document.getElementById('gdpr-open').addEventListener('click', () => modal.classList.remove('hidden'));
     document.getElementById('gdpr-close').addEventListener('click', () => modal.classList.add('hidden'));
     document.getElementById('gdpr-accept').addEventListener('click', () => modal.classList.add('hidden'));
 
-    // Submit (stub)
+    // ---------- Submit (stub) ----------
     document.getElementById('medicine-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
@@ -284,13 +404,14 @@
         generic: fd.get('allow-generic'),
         city: document.getElementById('city').value,
         rx: document.getElementById('rx-number').value.trim(),
-        gdpr: document.getElementById('gdpr-checkbox').checked
+        gdpr: document.getElementById('gdpr-checkbox').checked,
+        lang: state.lang
       };
-      alert('🔎 Αναζήτηση στάλθηκε!\n' + JSON.stringify(data, null, 2));
+      alert((state.lang==='el'?'🔎 Αναζήτηση στάλθηκε!':'🔎 Search submitted!') + '\n' + JSON.stringify(data, null, 2));
       e.target.reset();
     });
 
-    // Barcode scan (mobile-friendly)
+    // ---------- Barcode Scan (mobile-friendly) ----------
     const scanBtn = document.getElementById('scan-barcode');
     const stopBtn = document.getElementById('stop-scan');
     const scanArea = document.getElementById('scan-area');
@@ -328,7 +449,7 @@
         }
       } catch (err) {
         console.error(err);
-        alert('Δεν ήταν δυνατή η πρόσβαση στην κάμερα. Έλεγξε τα δικαιώματα.');
+        alert(state.lang==='el'?'Δεν ήταν δυνατή η πρόσβαση στην κάμερα. Έλεγξε τα δικαιώματα.':'Camera access failed. Please check permissions.');
         stopScan();
       }
     }
@@ -344,8 +465,8 @@
       const src = document.getElementById('zxing-lib').getAttribute('data-src');
       await new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.body.appendChild(s); });
     }
-    document.getElementById('scan-barcode').addEventListener('click', startScan);
-    document.getElementById('stop-scan').addEventListener('click', stopScan);
+    scanBtn.addEventListener('click', startScan);
+    stopBtn.addEventListener('click', stopScan);
 
     // Service worker (optional)
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(console.error); }
