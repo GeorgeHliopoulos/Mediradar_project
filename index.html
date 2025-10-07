@@ -16,11 +16,23 @@
         extend: {
           fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
           colors: {
-            brand: { DEFAULT: '#29A3A3', dark: '#1E7F7F', light: '#E6F6F6' },
-            ink: { 900: '#0F172A', 700:'#1F2937', 600: '#334155', 400: '#94A3B8' }
+            brand: {
+              // TEAL theme (matches the chosen mockup)
+              50:  '#e6f6f6',
+              100: '#c9eeee',
+              200: '#a3e0df',
+              300: '#79cfcf',
+              400: '#4fbcbc',
+              500: '#29a3a3',   /* main */
+              600: '#208181',
+              700: '#196464',
+              800: '#134b4b',
+              900: '#0e3838'
+            },
+            ink: { 900:'#0F172A', 700:'#1F2937', 600:'#334155', 400:'#94A3B8' }
           },
-          boxShadow: { soft: '0 8px 24px rgba(15,23,42,.08)' },
-          borderRadius: { xl2: '1rem' }
+          boxShadow: { soft: '0 12px 28px rgba(15,23,42,.10)' },
+          borderRadius: { xl2: '1.25rem' }
         }
       }
     }
@@ -28,26 +40,35 @@
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#29A3A3" />
+  <meta name="theme-color" content="#29a3a3" />
   <link rel="icon" href="/icons/icon-192.png" sizes="192x192">
+
+  <style>
+    /* Soft gradient background like the mockup */
+    body {
+      background: radial-gradient(1000px 600px at 15% -10%, rgba(41,163,163,0.18), transparent 60%),
+                  radial-gradient(800px 500px at 110% 10%, rgba(15,23,42,0.06), transparent 50%),
+                  #f8fafc; /* slate-50 base */
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-ink-900 font-sans selection:bg-brand/20">
+<body class="text-ink-900 font-sans selection:bg-brand-200/60">
   <!-- Header -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+  <header class="sticky top-0 z-40 bg-brand-600 text-white">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-2xl bg-brand/10 grid place-items-center">
+        <div class="w-9 h-9 rounded-2xl bg-white/15 grid place-items-center shadow-inner">
           <!-- target logo -->
-          <svg viewBox="0 0 24 24" class="w-5 h-5 text-brand"><path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/></svg>
+          <svg viewBox="0 0 24 24" class="w-5 h-5 text-white"><path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/></svg>
         </div>
         <span class="text-xl font-bold tracking-tight">MediRadar</span>
       </div>
 
       <div class="flex items-center gap-2">
-        <button id="google-login" class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition">Σύνδεση</button>
-        <button id="logout-btn" class="hidden px-3 py-2 rounded-xl bg-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-300 transition">Αποσύνδεση</button>
-        <button id="menu-btn" class="ml-1 p-2 rounded-xl hover:bg-slate-100">
-          <svg viewBox="0 0 24 24" class="w-6 h-6 text-ink-600"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10Zm0 2c-4.97 0-9 2.686-9 6v2h18v-2c0-3.314-4.03-6-9-6Z"/></svg>
+        <button id="google-login" class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25 transition">Σύνδεση</button>
+        <button id="logout-btn" class="hidden px-3 py-2 rounded-xl bg-white/10 text-white text-sm font-semibold hover:bg-white/20 transition">Αποσύνδεση</button>
+        <button id="menu-btn" class="ml-1 p-2 rounded-xl hover:bg-white/10">
+          <svg viewBox="0 0 24 24" class="w-6 h-6 text-white"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10Zm0 2c-4.97 0-9 2.686-9 6v2h18v-2c0-3.314-4.03-6-9-6Z"/></svg>
         </button>
       </div>
     </div>
@@ -55,65 +76,63 @@
 
   <!-- Main -->
   <main class="mx-auto max-w-4xl px-4 sm:px-6 pt-6 pb-24">
-    <!-- Hero -->
+    <!-- Hero (pill icon + title) -->
     <section class="mb-6">
-      <div class="rounded-2xl bg-gradient-to-br from-white to-brand.light shadow-soft p-5 sm:p-6 border border-slate-200">
+      <div class="rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-soft p-5 sm:p-6">
         <div class="flex items-center gap-3">
-          <!-- pill icon -->
-          <div class="w-9 h-9 rounded-2xl bg-white border border-brand/30 grid place-items-center">
-            <svg viewBox="0 0 24 24" class="w-5 h-5 text-brand">
+          <div class="w-10 h-10 rounded-2xl bg-white/15 grid place-items-center">
+            <!-- pill icon -->
+            <svg viewBox="0 0 24 24" class="w-5 h-5 text-white">
               <path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0ZM7.05 14.121l4.243-4.243l3.535 3.536l-4.243 4.242z"/>
             </svg>
           </div>
           <div>
             <h1 class="text-2xl sm:text-3xl font-bold">Αναζήτηση Φαρμάκου</h1>
-            <p class="mt-1 text-ink-400 text-sm">Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.</p>
+            <p class="mt-1 text-white/80 text-sm">Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Form -->
+    <!-- Card container -->
     <section aria-labelledby="form-title">
       <form id="medicine-form" class="grid grid-cols-1 gap-4 sm:gap-5">
         <!-- Medicine name -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="medicine-name" class="text-sm font-semibold">Όνομα Φαρμάκου</label>
           <div class="mt-2 relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0Z"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M19.778 4.222a6 6 0 0 1 0 8.485l-7.07 7.07a6 6 0 1 1-8.486-8.485l7.071-7.07a6 6 0 0 1 8.485 0Z"/></svg>
             </span>
             <input id="medicine-name" type="text" required
-              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand placeholder:text-slate-400"
+              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
               placeholder="π.χ. Augmentin 875mg" />
           </div>
         </div>
 
-        <!-- Active substance (text, no dropdown) -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <!-- Active substance (text) -->
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="active-substance" class="text-sm font-semibold flex items-center gap-2">
-            <!-- beaker icon -->
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7v4.586l-3.95 6.582A4 4 0 0 0 6.582 20h10.836a4 4 0 0 0 3.532-4.832L17 8.586V4h-2v4.586l3.657 6.093A2 2 0 0 1 17.418 18H6.582a2 2 0 0 1-1.739-3l3.157-5.26V4H7Z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7v4.586l-3.95 6.582A4 4 0 0 0 6.582 20h10.836a4 4 0 0 0 3.532-4.832L17 8.586V4h-2v4.586l3.657 6.093A2 2 0 0 1 17.418 18H6.582a2 2 0 0 1-1.739-3l3.157-5.26V4H7Z"/></svg>
             Δραστική Ουσία <span class="text-ink-400 font-normal">(προαιρετικά)</span>
           </label>
           <div class="mt-2 relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7z"/></svg>
+              <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10v2H7z"/></svg>
             </span>
             <input id="active-substance" type="text"
-              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand placeholder:text-slate-400"
+              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
               placeholder="π.χ. Παρακεταμόλη" />
           </div>
         </div>
 
-        <!-- Type (keep select, change icon) -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <!-- Type -->
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="medicine-type" class="text-sm font-semibold flex items-center gap-2">
-            <!-- blister pack icon -->
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 3H7v4h2V6Zm4 0h-2v4h2V6Zm4 0h-2v4h2V6ZM9 12H7v4h2v-4Zm4 0h-2v4h2v-4Zm4 0h-2v4h2v-4Z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 3H7v4h2V6Zm4 0h-2v4h2V6Zm4 0h-2v4h2V6ZM9 12H7v4h2v-4Zm4 0h-2v4h2v-4Zm4 0h-2v4h2v-4Z"/></svg>
             Τύπος Φαρμάκου
           </label>
-          <select id="medicine-type" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand">
+          <select id="medicine-type" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
             <option value="">— Επιλογή —</option>
             <option value="Σκόνη">Σκόνη</option>
             <option value="Υγρό">Υγρό</option>
@@ -124,41 +143,41 @@
         </div>
 
         <!-- Quantity -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="quantity" class="text-sm font-semibold flex items-center gap-2">
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M4 7h16v2H4zM4 11h16v2H4zM4 15h10v2H4z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M4 7h16v2H4zM4 11h16v2H4zM4 15h10v2H4z"/></svg>
             Ποσότητα (τεμάχια/κουτιά)
           </label>
           <input id="quantity" type="number" min="1" required
-                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand"
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500"
                  placeholder="π.χ. 1" />
         </div>
 
         <!-- Allow generic -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <p class="text-sm font-semibold flex items-center gap-2">
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="m9 16.17l-3.59-3.58L4 14l5 5l11-11l-1.41-1.41z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="m9 16.17l-3.59-3.58L4 14l5 5l11-11l-1.41-1.41z"/></svg>
             Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;
           </p>
           <div class="mt-3 flex gap-4">
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="allow-generic" value="ΝΑΙ" required class="size-4 accent-brand">
+              <input type="radio" name="allow-generic" value="ΝΑΙ" required class="size-4 accent-brand-600">
               <span>ΝΑΙ</span>
             </label>
             <label class="inline-flex items-center gap-2">
-              <input type="radio" name="allow-generic" value="ΟΧΙ" class="size-4 accent-brand">
+              <input type="radio" name="allow-generic" value="ΟΧΙ" class="size-4 accent-brand-600">
               <span>ΟΧΙ</span>
             </label>
           </div>
         </div>
 
         <!-- City -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="city" class="text-sm font-semibold flex items-center gap-2">
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
             Πόλη
           </label>
-          <select id="city" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand">
+          <select id="city" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
             <option value="">— Επιλογή —</option>
             <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option>
             <option>Ηράκλειο</option><option>Λάρισα</option><option>Βόλος</option>
@@ -171,43 +190,42 @@
         </div>
 
         <!-- Prescription number + barcode scan -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label for="rx-number" class="text-sm font-semibold flex items-center gap-2">
-            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h2v16H3V4Zm4 0h1v16H7V4Zm3 0h3v16h-3V4Zm5 0h1v16h-1V4Zm3 0h2v16h-2V4Z"/></svg>
+            <svg class="w-5 h-5 text-brand-600" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h2v16H3V4Zm4 0h1v16H7V4Zm3 0h3v16h-3V4Zm5 0h1v16h-1V4Zm3 0h2v16h-2V4Z"/></svg>
             Προαιρετικά: Αριθμός Συνταγής
           </label>
-          <p class="mt-1 text-xs text-ink-400">Βοηθά το φαρμακείο να εντοπίσει γρήγορα το σωστό σκεύασμα/δοσολογία.</p>
+          <p class="mt-1 text-xs text-ink-400">Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.</p>
           <div class="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
             <input id="rx-number" type="text"
-              class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand placeholder:text-slate-400"
+              class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400"
               placeholder="π.χ. 0123-456789-00" inputmode="numeric" />
-            <button type="button" id="scan-barcode" class="px-4 py-3 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-700">
+            <button type="button" id="scan-barcode" class="px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">
               Σάρωση barcode
             </button>
           </div>
-          <!-- Live camera preview (shown only during scan) -->
           <div id="scan-area" class="mt-3 hidden">
             <video id="preview" playsinline class="w-full rounded-xl border border-slate-200"></video>
             <p class="text-xs text-ink-400 mt-1">Στόχευσε τον γραμμωτό κώδικα της συνταγής.</p>
-            <div class="mt-2 flex gap-2">
+            <div class="mt-2">
               <button type="button" id="stop-scan" class="px-3 py-2 rounded-xl bg-slate-200 text-slate-800 text-sm font-semibold hover:bg-slate-300">Τερματισμός</button>
             </div>
           </div>
         </div>
 
         <!-- GDPR -->
-        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+        <div class="rounded-xl bg-white shadow-soft border border-slate-200 p-4">
           <label class="inline-flex items-start gap-3">
-            <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand">
+            <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
             <span class="text-sm leading-6">
-              Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand hover:text-brand-dark">Όρους Αναζήτησης & GDPR</button>.
+              Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand-700 hover:text-brand-900">Όρους Αναζήτησης & GDPR</button>.
             </span>
           </label>
         </div>
 
         <!-- Submit -->
         <div class="flex justify-end">
-          <button type="submit" class="px-5 py-3 rounded-2xl bg-brand text-white font-semibold shadow-soft hover:bg-brand-dark focus:outline-none focus:ring-4 focus:ring-brand/30">
+          <button type="submit" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-300">
             Υποβολή Αναζήτησης
           </button>
         </div>
@@ -224,52 +242,37 @@
       </div>
       <div class="p-5 max-h-[60vh] overflow-auto">
         <div id="gdpr-text" class="prose prose-sm max-w-none">
-          <p><strong>Υπεύθυνος Επεξεργασίας:</strong> Η πλατφόρμα MediRadar (<em>συμπλήρωσε επωνυμία/στοιχεία επικοινωνίας</em>).</p>
-          <p><strong>Σκοπός:</strong> Διαβίβαση αιτήματος/αναζήτησης φαρμάκου σε φαρμακεία που υποδεικνύεις, ώστε να ενημερωθείς για διαθεσιμότητα, τιμή και χρόνο παραλαβής.</p>
-          <p><strong>Νομική βάση:</strong> άρθρο 6(1)(b) GDPR (εκτέλεση αιτήματος/σύμβασης υπηρεσίας) και άρθρο 6(1)(a) GDPR (συγκατάθεση για προαιρετικά στοιχεία όπως αριθμός συνταγής ή σάρωση barcode).</p>
-          <p><strong>Ελαχιστοποίηση δεδομένων:</strong> Συλλέγουμε μόνο τα απαραίτητα στοιχεία: όνομα φαρμάκου, (προαιρετικά) δραστική ουσία, τύπος, ποσότητα, προτίμηση γενόσημου, πόλη, (προαιρετικά) αριθμός συνταγής/γραμμωτός κώδικας. Δεν συλλέγουμε ιατρική διάγνωση.</p>
-          <p><strong>Διαβίβαση:</strong> Τα στοιχεία αποστέλλονται σε επιλεγμένα φαρμακεία αποκλειστικά για τον σκοπό της αναζήτησης. Οι φαρμακοποιοί ενεργούν ως ανεξάρτητοι υπεύθυνοι επεξεργασίας για τις δικές τους καταγραφές.</p>
-          <p><strong>Τήρηση:</strong> Κρατάμε τα αιτήματα για έως 30 ημέρες για σκοπούς απόδειξης/υποστήριξης και στη συνέχεια ανωνυμοποιούνται ή διαγράφονται, εκτός αν υπάρχει νομική υποχρέωση διατήρησης.</p>
-          <p><strong>Δικαιώματα:</strong> Πρόσβαση, διόρθωση, διαγραφή, περιορισμός, φορητότητα, εναντίωση. Μπορείς να τα ασκήσεις στο <em>email υποστήριξης</em>. Έχεις δικαίωμα καταγγελίας στην ΑΠΔΠΧ.</p>
-          <p><strong>Συγκατάθεση & Ανάκληση:</strong> Μπορείς ανά πάσα στιγμή να ανακαλέσεις τη συγκατάθεσή σου για τα προαιρετικά στοιχεία χωρίς να θίγεται η νομιμότητα που προηγήθηκε.</p>
-          <p><strong>Ασφάλεια:</strong> Κρυπτογράφηση εν κινήσει (HTTPS), ελεγχόμενη πρόσβαση, καταγραφή ενεργειών.</p>
-          <p><strong>Εκτελούντες:</strong> Χρησιμοποιούμε παρόχους φιλοξενίας/μηνυμάτων ως εκτελούντες επεξεργασίας με συμβάσεις άρθρου 28 GDPR.</p>
-          <p><strong>Cookies/Τοποθεσία:</strong> Δεν προβάλουμε διαφήμιση. Χρησιμοποιούνται τεχνικά cookies. Η πόλη επιλέγεται από εσένα· η ακριβής γεωτοποθεσία δεν απαιτείται.</p>
+          <p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (<em>συμπλήρωσε επωνυμία/στοιχεία</em>).</p>
+          <p><strong>Σκοπός:</strong> Διαβίβαση αιτήματος αναζήτησης φαρμάκου σε φαρμακεία για ενημέρωση διαθεσιμότητας/τιμής/χρόνου παραλαβής.</p>
+          <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία (αριθμός συνταγής/σάρωση).</p>
+          <p><strong>Ελαχιστοποίηση δεδομένων:</strong> Όνομα φαρμάκου, (προαιρετικά) δραστική ουσία, τύπος, ποσότητα, προτίμηση γενόσημου, πόλη, (προαιρετικά) αριθμός συνταγής/barcode.</p>
+          <p><strong>Διαβίβαση:</strong> Σε επιλεγμένα φαρμακεία μόνο για τον παραπάνω σκοπό. Οι φαρμακοποιοί είναι ανεξάρτητοι υπεύθυνοι για τις δικές τους καταγραφές.</p>
+          <p><strong>Τήρηση:</strong> Διατήρηση αιτημάτων έως 30 ημέρες για υποστήριξη και έπειτα ανωνυμοποίηση/διαγραφή, εκτός νόμιμης υποχρέωσης.</p>
+          <p><strong>Δικαιώματα:</strong> Πρόσβαση, διόρθωση, διαγραφή, περιορισμός, φορητότητα, εναντίωση· επικοινώνησε στο <em>email</em>. Αρμόδια αρχή: ΑΠΔΠΧ.</p>
+          <p><strong>Συγκατάθεση/Ανάκληση:</strong> Μπορείς να την ανακαλέσεις ανά πάσα στιγμή για τα προαιρετικά στοιχεία.</p>
+          <p><strong>Ασφάλεια:</strong> HTTPS, ελεγχόμενα δικαιώματα πρόσβασης, καταγραφή συμβάντων.</p>
+          <p><strong>Εκτελούντες:</strong> Πάροχοι φιλοξενίας/μηνυμάτων με συμβάσεις άρθρου 28.</p>
+          <p><strong>Cookies:</strong> Μόνο τεχνικά. Γεωτοποθεσία δεν απαιτείται.</p>
         </div>
       </div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-accept" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold hover:bg-brand-dark">Κατάλαβα</button>
+        <button id="gdpr-accept" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Κατάλαβα</button>
       </div>
     </div>
   </div>
 
-  <!-- ZXing (loaded only if χρειαστεί) -->
+  <!-- ZXing (lazy) -->
   <script id="zxing-lib" type="text/plain" data-src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
 
   <!-- App JS -->
   <script>
-    // --- Firebase placeholders ---
-    // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    // import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    // const app = initializeApp({ /* your config */ });
-    // const auth = getAuth(app);
-    // const provider = new GoogleAuthProvider();
-
-    const loginBtn = document.getElementById('google-login');
-    const logoutBtn = document.getElementById('logout-btn');
-
-    // onAuthStateChanged(auth, (user) => {
-    //   loginBtn.classList.toggle('hidden', !!user);
-    //   logoutBtn.classList.toggle('hidden', !user);
-    // });
-
     // GDPR modal
     const modal = document.getElementById('gdpr-modal');
     document.getElementById('gdpr-open').addEventListener('click', () => modal.classList.remove('hidden'));
     document.getElementById('gdpr-close').addEventListener('click', () => modal.classList.add('hidden'));
     document.getElementById('gdpr-accept').addEventListener('click', () => modal.classList.add('hidden'));
 
-    // Form handler (stub)
+    // Submit (stub)
     document.getElementById('medicine-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
@@ -283,63 +286,43 @@
         rx: document.getElementById('rx-number').value.trim(),
         gdpr: document.getElementById('gdpr-checkbox').checked
       };
-      // TODO: send to Firestore / Cloud Function
       alert('🔎 Αναζήτηση στάλθηκε!\n' + JSON.stringify(data, null, 2));
       e.target.reset();
     });
 
-    // ---------- Barcode Scan (mobile-friendly) ----------
+    // Barcode scan (mobile-friendly)
     const scanBtn = document.getElementById('scan-barcode');
     const stopBtn = document.getElementById('stop-scan');
     const scanArea = document.getElementById('scan-area');
     const videoEl = document.getElementById('preview');
     const rxInput = document.getElementById('rx-number');
-    let mediaStream = null;
-    let scanning = false;
-    let zxingReader = null;
-    let zxingInterval = null;
+    let mediaStream = null, scanning = false, zxingReader = null, zxingInterval = null;
 
     async function startScan() {
       scanArea.classList.remove('hidden');
       try {
-        // Prefer environment (rear) camera
         mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        videoEl.srcObject = mediaStream;
-        await videoEl.play();
-        scanning = true;
+        videoEl.srcObject = mediaStream; await videoEl.play(); scanning = true;
 
         if ('BarcodeDetector' in window) {
-          const formats = ['code_128','code_39','ean_13','ean_8','itf','qr_code','upc_a','upc_e','codabar','data_matrix','pdf417','aztec'];
-          const detector = new window.BarcodeDetector({ formats });
+          const detector = new window.BarcodeDetector({ formats: ['code_128','ean_13','qr_code','upc_a','upc_e','code_39','itf','codabar','data_matrix','pdf417','aztec'] });
           const loop = async () => {
             if (!scanning) return;
             try {
-              const barcodes = await detector.detect(videoEl);
-              if (barcodes && barcodes.length) {
-                rxInput.value = barcodes[0].rawValue || '';
-                stopScan();
-                return;
-              }
+              const res = await detector.detect(videoEl);
+              if (res && res.length) { rxInput.value = res[0].rawValue || ''; stopScan(); return; }
             } catch {}
             requestAnimationFrame(loop);
-          };
-          loop();
+          }; loop();
         } else {
-          // Fallback: load ZXing dynamically
           await loadZXing();
           const { BrowserMultiFormatReader } = window.ZXing;
           zxingReader = new BrowserMultiFormatReader();
-          const track = mediaStream.getVideoTracks()[0];
-          const settings = track.getSettings();
-          // Polling decode via canvas
           zxingInterval = setInterval(async () => {
             if (!scanning) return;
             try {
               const result = await zxingReader.decodeOnceFromVideoDevice(undefined, videoEl);
-              if (result && result.text) {
-                rxInput.value = result.text;
-                stopScan();
-              }
+              if (result && result.text) { rxInput.value = result.text; stopScan(); }
             } catch {}
           }, 800);
         }
@@ -349,40 +332,23 @@
         stopScan();
       }
     }
-
     function stopScan() {
       scanning = false;
       if (zxingInterval) { clearInterval(zxingInterval); zxingInterval = null; }
       if (zxingReader) { try { zxingReader.reset(); } catch {} zxingReader = null; }
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(t => t.stop());
-        mediaStream = null;
-      }
-      videoEl.pause();
-      videoEl.srcObject = null;
-      scanArea.classList.add('hidden');
+      if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+      videoEl.pause(); videoEl.srcObject = null; scanArea.classList.add('hidden');
     }
-
     async function loadZXing() {
       if (window.ZXing) return;
-      const tag = document.getElementById('zxing-lib');
-      const src = tag.getAttribute('data-src');
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = reject;
-        document.body.appendChild(s);
-      });
+      const src = document.getElementById('zxing-lib').getAttribute('data-src');
+      await new Promise((resolve, reject) => { const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.body.appendChild(s); });
     }
-
-    scanBtn.addEventListener('click', startScan);
-    stopBtn.addEventListener('click', stopScan);
+    document.getElementById('scan-barcode').addEventListener('click', startScan);
+    document.getElementById('stop-scan').addEventListener('click', stopScan);
 
     // Service worker (optional)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(console.error);
-    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(console.error); }
   </script>
 </body>
 </html>
