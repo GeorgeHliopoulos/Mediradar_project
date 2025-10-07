@@ -6,7 +6,7 @@
   <title>MediRadar</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -58,6 +58,7 @@
 
     .icon-emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.06)); }
     .no-shadow{ filter:none !important; } /* για SVG που δεν θέλουν σκιά */
+    .logo-svg { display:block; shape-rendering:geometricPrecision; text-rendering:optimizeLegibility; }
 
     /* Autocomplete dropdown */
     .ac-list{ position:absolute; inset-inline:0; top:100%; z-index:30; }
@@ -80,37 +81,32 @@
   <!-- Header -->
   <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <!-- NEW LOGO (inline SVG: symbol + wordmark) -->
-        <svg class="h-8 w-auto" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MediRadar">
+      <!-- NEW LOGO -->
+      <a href="/" class="flex items-center gap-3" aria-label="MediRadar">
+        <svg class="logo-svg h-8 w-auto sm:h-9" viewBox="0 0 340 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
           <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <linearGradient id="mdr-g" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#29A3A3"/><stop offset="1" stop-color="#208181"/>
             </linearGradient>
           </defs>
-          <!-- symbol -->
+          <!-- Symbol -->
           <g transform="translate(4,4)">
-            <circle cx="20" cy="20" r="18" fill="url(#g)"/>
+            <circle cx="20" cy="20" r="18" fill="url(#mdr-g)"/>
             <circle cx="20" cy="20" r="14" fill="white" fill-opacity=".12"/>
-            <path d="M20 7 a13 13 0 0 1 0 26" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".85"/>
-            <path d="M20 12 a8 8 0 0 1 0 16" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".75"/>
-            <path d="M20 15 a5 5 0 0 1 0 10" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".65"/>
+            <path d="M20 7a13 13 0 0 1 0 26" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".85"/>
+            <path d="M20 12a8 8 0 0 1 0 16" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".74"/>
+            <path d="M20 15a5 5 0 0 1 0 10" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".64"/>
             <circle cx="29.5" cy="23" r="2.6" fill="white"/>
           </g>
-          <!-- wordmark -->
-          <g transform="translate(60,11)" fill="#0F172A">
-            <path d="M0 23V0h4.8v8.6c1.6-2.4 4.1-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.4 0-5.8-1.3-7.5-3.6V23H0Zm12.2-3.6c3.6 0 6.1-2.6 6.1-6.2s-2.5-6.1-6.1-6.1c-3.7 0-6.2 2.6-6.2 6.2s2.5 6.1 6.2 6.1Z"/>
-            <path d="M29.6 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3H34.4c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
-            <path d="M52.9 23V4.8h4.8v3.7c1.6-2.5 4.2-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.3 0-5.7-1.2-7.4-3.5V32h-4.8V23Zm12.2-3.6c3.7 0 6.2-2.6 6.2-6.2s-2.5-6.1-6.2-6.1c-3.6 0-6.1 2.6-6.1 6.2s2.5 6.1 6.1 6.1Z"/>
-            <path d="M79.9 0h5v4.8h-5V0Zm.1 4.8h4.8V23H80V4.8Z"/>
-            <path d="M89.4 4.8h4.8v3.8c1.1-2.4 3.4-3.9 6.7-3.9 1 0 1.9.1 2.7.4L102 9.9c-.8-.3-1.6-.4-2.6-.4-4 0-5.3 2.5-5.3 6.5V23h-4.8V4.8Z"/>
-            <path d="M104.2 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3H109c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
-            <path d="M127.5 23V4.8h4.8v3.7c1.6-2.5 4.2-3.9 7.6-3.9 5.9 0 10.3 4.5 10.3 10.9 0 6.6-4.4 11.2-10.4 11.2-3.3 0-5.7-1.2-7.4-3.5V32h-4.8V23Zm12.2-3.6c3.7 0 6.2-2.6 6.2-6.2s-2.5-6.1-6.2-6.1c-3.6 0-6.1 2.6-6.1 6.2s2.5 6.1 6.1 6.1Z"/>
-            <path d="M154.5 13.1c.3-4.8 4.1-8.6 9.6-8.6 5.7 0 9.6 4 9.6 9.7v1.3h-14.5c.5 2.7 2.8 4.3 5.9 4.3 2.3 0 4.2-.7 5.8-2l2.2 3.1c-2.1 1.9-5.1 3-8.5 3-6.6 0-10.4-4.2-10.4-10.8Zm17.7-2.3c-.4-2.7-2.5-4.4-5.5-4.4-2.9 0-5.1 1.7-5.6 4.4h11.1Z"/>
-            <path d="M179.4 4.8h4.8v3.8c1.1-2.4 3.4-3.9 6.7-3.9 1 0 1.9.1 2.7.4l-1.6 4.9c-.8-.3-1.6-.4-2.6-.4-4 0-5.3 2.5-5.3 6.5V23h-4.8V4.8Z"/>
-          </g>
+          <!-- Wordmark as TEXT (crisp) -->
+          <text x="64" y="31"
+                font-family="Manrope, Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
+                font-weight="800"
+                font-size="26"
+                letter-spacing="-0.5"
+                fill="currentColor">mediradar</text>
         </svg>
-      </div>
+      </a>
 
       <div class="flex items-center gap-2">
         <!-- Language -->
@@ -398,288 +394,4 @@
     /* ---------- Theme ---------- */
     const html = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle');
-    const iconSun = document.getElementById('icon-sun');
-    const iconMoon = document.getElementById('icon-moon');
-    function setTheme(mode){
-      const dark = mode==='dark';
-      html.classList.toggle('dark', dark);
-      iconSun.classList.toggle('hidden', !dark);
-      iconMoon.classList.toggle('hidden', dark);
-      localStorage.setItem('mediradar-theme', dark?'dark':'light');
-    }
-    setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
-
-    /* ---------- i18n (EL/EN minimal) ---------- */
-    const strings = {
-      el:{ title:'Αναζήτηση Φαρμάκου', subtitle:'Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.', medname:'Όνομα Φαρμάκου',
-        substance:'Δραστική Ουσία', type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', genericQ:'Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;',
-        yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', rx:'Προαιρετικά: Αριθμός Συνταγής', rxHelp:'Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.',
-        scan:'Σάρωση barcode', stop:'Τερματισμός', scanHint:'Στόχευσε τον γραμμωτό κώδικα της συνταγής.', gdprShort:'Αποδέχομαι τους',
-        submit:'Υποβολή Αναζήτησης', reserved:'Δεσμευμένο', sent:'✅ Αναζήτηση στάλθηκε', neterr:'⚠️ Σφάλμα δικτύου — δοκίμασε ξανά',
-        resvTitle:'Κράτηση 60’', ok:'Εντάξει' },
-      en:{ title:'Medicine Search', subtitle:'Find availability at nearby pharmacies instantly.', medname:'Medicine Name',
-        substance:'Active Substance', type:'Medicine Type', qty:'Quantity (units/boxes)', genericQ:'If unavailable, suggest a generic?',
-        yes:'YES', no:'NO', city:'City', rx:'Optional: Prescription Number', rxHelp:'Helps the pharmacy locate the correct product/dosage quickly.',
-        scan:'Scan barcode', stop:'Stop', scanHint:'Aim the camera at the prescription barcode.', gdprShort:'I accept the',
-        submit:'Submit Search', reserved:'Reserved', sent:'✅ Search sent', neterr:'⚠️ Network error — try again',
-        resvTitle:'Reservation 60’', ok:'OK' }
-    };
-    const langEL = document.getElementById('lang-el');
-    const langEN = document.getElementById('lang-en');
-    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
-
-    function t(k){ return strings[state.lang][k]; }
-    function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
-
-    function applyLang(){
-      document.documentElement.lang = state.lang;
-      setText('t-title', t('title')); setText('t-subtitle', t('subtitle'));
-      setText('t-medname', t('medname')); setText('t-substance', t('substance'));
-      setText('t-type', t('type')); setText('t-qty', t('qty'));
-      setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
-      setText('t-city', t('city')); setText('t-rx', t('rx')); setText('t-rxHelp', t('rxHelp'));
-      setText('t-scan', t('scan')); setText('t-stop', t('stop')); setText('t-scanHint', t('scanHint'));
-      setText('t-gdprShort', t('gdprShort')); setText('t-submit', t('submit'));
-      document.getElementById('resv-title').textContent = t('resvTitle');
-      document.getElementById('reserve-ok').textContent = t('ok');
-
-      document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
-      document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Παρακεταμόλη':'e.g. Paracetamol';
-      document.getElementById('quantity').placeholder = state.lang==='el'?'π.χ. 1':'e.g. 1';
-      document.getElementById('rx-number').placeholder = state.lang==='el'?'π.χ. 0123-456789-00':'e.g. 0123-456789-00';
-
-      langEL.classList.toggle('bg-slate-900/5', state.lang==='el');
-      langEN.classList.toggle('bg-slate-900/5', state.lang==='en');
-      localStorage.setItem('mediradar-lang', state.lang);
-    }
-    langEL.addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
-    langEN.addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
-    applyLang();
-
-    /* ---------- Toasts ---------- */
-    const toast = document.getElementById('toast');
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.remove('hidden'); toast.classList.add('toast-enter');
-      requestAnimationFrame(()=> toast.classList.add('toast-enter-active'));
-      setTimeout(()=>{
-        toast.classList.remove('toast-enter','toast-enter-active'); toast.classList.add('toast-exit');
-        requestAnimationFrame(()=> toast.classList.add('toast-exit-active'));
-        setTimeout(()=>{ toast.classList.add('hidden'); toast.classList.remove('toast-exit','toast-exit-active'); }, 260);
-      }, 2200);
-    }
-
-    /* ---------- Form submit (mock) ---------- */
-    const form = document.getElementById('medicine-form');
-    const resultsSection = document.getElementById('results');
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      showToast(t('sent'));
-      resultsSection.classList.remove('hidden');
-      resultsSection.scrollIntoView({ behavior:'smooth', block:'start' });
-    });
-
-    /* ---------- Autocomplete (local demo) ---------- */
-    const AC_MEDICINES = [
-      'Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg'
-    ];
-    const AC_SUBSTANCES = [
-      'Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg','Aspirin 100mg'
-    ];
-    function attachAutocomplete(inputId, listId, data){
-      const input = document.getElementById(inputId);
-      const list = document.getElementById(listId);
-      let idx = -1;
-      function render(items){
-        list.innerHTML = items.map((x,i)=>`
-          <div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">${x}</div>
-        `).join('');
-        list.classList.toggle('hidden', items.length===0);
-      }
-      function filter(q){
-        if(!q) { render([]); return; }
-        const res = data.filter(s => s.toLowerCase().includes(q.toLowerCase())).slice(0,5);
-        render(res);
-      }
-      input.addEventListener('input', ()=>{ idx=-1; filter(input.value.trim()); });
-      input.addEventListener('keydown', (e)=>{
-        const items = [...list.querySelectorAll('.ac-item')];
-        if(!items.length) return;
-        if(e.key==='ArrowDown'){ idx = (idx+1)%items.length; render(items.map(x=>x.dataset.val)); e.preventDefault(); }
-        else if(e.key==='ArrowUp'){ idx = (idx-1+items.length)%items.length; render(items.map(x=>x.dataset.val)); e.preventDefault(); }
-        else if(e.key==='Enter'){ if(idx>=0){ input.value = items[idx].dataset.val; render([]); } }
-        else if(e.key==='Escape'){ render([]); }
-      });
-      list.addEventListener('click', (e)=>{
-        const item = e.target.closest('.ac-item'); if(!item) return;
-        input.value = item.dataset.val; list.classList.add('hidden');
-      });
-      document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
-    }
-    attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
-    attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
-
-    /* ---------- Scanner with overlay + torch ---------- */
-    const scanBtn = document.getElementById('scan-barcode');
-    const stopBtn = document.getElementById('stop-scan');
-    const scanArea = document.getElementById('scan-area');
-    const videoEl = document.getElementById('preview');
-    const rxInput = document.getElementById('rx-number');
-    const torchBtn = document.getElementById('toggle-torch');
-    let mediaStream=null, scanning=false, zxingReader=null, zxingInterval=null, videoTrack=null;
-
-    async function startScan(){
-      scanArea.classList.remove('hidden');
-      try{
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:'environment' }, audio:false });
-        videoEl.srcObject = mediaStream; await videoEl.play(); scanning=true;
-        videoTrack = mediaStream.getVideoTracks()[0];
-        const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-        if(capabilities.torch){ torchBtn.classList.remove('hidden'); } else { torchBtn.classList.add('hidden'); }
-
-        if('BarcodeDetector' in window){
-          const detector = new BarcodeDetector({ formats:['code_128','ean_13','qr_code','upc_a','upc_e','code_39','itf','codabar','data_matrix','pdf417','aztec'] });
-          const loop = async ()=>{
-            if(!scanning) return;
-            try{
-              const res = await detector.detect(videoEl);
-              if(res && res.length){ rxInput.value = res[0].rawValue || ''; stopScan(); return; }
-            }catch{}
-            requestAnimationFrame(loop);
-          }; loop();
-        }else{
-          await loadZXing();
-          const { BrowserMultiFormatReader } = window.ZXing;
-          zxingReader = new BrowserMultiFormatReader();
-          zxingInterval = setInterval(async ()=>{
-            if(!scanning) return;
-            try{
-              const r = await zxingReader.decodeOnceFromVideoDevice(undefined, videoEl);
-              if(r && r.text){ rxInput.value = r.text; stopScan(); }
-            }catch{}
-          }, 800);
-        }
-      }catch(e){
-        console.error(e); showToast('⚠️ ' + (state.lang==='el'?'Δεν ήταν δυνατή η πρόσβαση στην κάμερα.':'Camera access failed.'));
-        stopScan();
-      }
-    }
-    function stopScan(){
-      scanning=false;
-      if(zxingInterval){ clearInterval(zxingInterval); zxingInterval=null; }
-      if(zxingReader){ try{zxingReader.reset();}catch{} zxingReader=null; }
-      if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; }
-      videoEl.pause(); videoEl.srcObject=null; scanArea.classList.add('hidden');
-      torchBtn.classList.add('hidden');
-    }
-    async function loadZXing(){ if(window.ZXing) return;
-      const src=document.getElementById('zxing-lib').getAttribute('data-src');
-      await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.body.appendChild(s); });
-    }
-    let torchOn=false;
-    torchBtn.addEventListener('click', async ()=>{
-      if(!videoTrack || !videoTrack.applyConstraints) return;
-      try{
-        torchOn = !torchOn;
-        await videoTrack.applyConstraints({ advanced:[{ torch: torchOn }] });
-        torchBtn.textContent = torchOn ? '🔦 On' : '🔦';
-      }catch(e){ console.warn('Torch not supported:', e); }
-    });
-    scanBtn.addEventListener('click', startScan);
-    stopBtn.addEventListener('click', stopScan);
-
-    /* ---------- Reserve 60’ + countdown + confetti (1600ms) + FOCUS MODAL ---------- */
-    const reserveBtn = document.getElementById('reserve-btn');
-    const holdBadge = document.getElementById('hold-badge');
-    const holdTTL = document.getElementById('hold-ttl');
-    const holdTTLBig = document.getElementById('hold-ttl-big');
-    const reserveModal = document.getElementById('reserve-modal');
-    const reserveClose = document.getElementById('reserve-close');
-    const reserveOK = document.getElementById('reserve-ok');
-
-    let countdownTimer=null, remaining=3600; // seconds
-
-    function startCountdown(seconds=3600){
-      remaining = seconds;
-      holdBadge.classList.remove('hidden');
-      updateTTL();
-      clearInterval(countdownTimer);
-      countdownTimer = setInterval(()=>{
-        remaining--; if(remaining<=0){ clearInterval(countdownTimer); holdBadge.classList.add('hidden'); closeReserveModal(); return; }
-        updateTTL();
-      },1000);
-    }
-    function updateTTL(){
-      const m = Math.floor(remaining/60).toString().padStart(2,'0');
-      const s = (remaining%60).toString().padStart(2,'0');
-      const txt = `${m}:${s}`;
-      holdTTL.textContent = txt;
-      holdTTLBig.textContent = txt;
-    }
-
-    function openReserveModal(){
-      reserveModal.classList.remove('hidden');
-      reserveModal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-      document.getElementById('resv-title').textContent = t('resvTitle');
-    }
-    function closeReserveModal(){
-      reserveModal.classList.add('hidden');
-      reserveModal.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-
-    reserveBtn?.addEventListener('click', ()=>{
-      startCountdown(60*60);
-      fireConfetti(1600); // διπλάσια διάρκεια από 800ms
-      showToast(state.lang==='el' ? `${t('reserved')}: 60’` : `Reserved: 60’`);
-      openReserveModal();
-    });
-    reserveClose.addEventListener('click', closeReserveModal);
-    reserveOK.addEventListener('click', closeReserveModal);
-    reserveModal.addEventListener('click', (e)=>{ if(e.target===reserveModal) closeReserveModal(); });
-
-    /* ---------- Confetti (dependency-free) ---------- */
-    const confettiCanvas = document.getElementById('confetti');
-    const ctx = confettiCanvas.getContext('2d');
-    function fireConfetti(duration=1600){
-      confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight;
-      confettiCanvas.style.display = 'block';
-      const particles = Array.from({length: 180}, ()=> ({ // λίγο περισσότερα για impact
-        x: Math.random()*innerWidth,
-        y: -20,
-        vx: (Math.random()-.5)*3,
-        vy: Math.random()*3+2.5,
-        size: Math.random()*6+3,
-        color: ['#F78DA7','#84C5F4','#C3A6F4','#FFE08A','#9DE0D6'][Math.floor(Math.random()*5)],
-        rot: Math.random()*360, vr:(Math.random()-.5)*12
-      }));
-      let start = performance.now();
-      function tick(ts){
-        const elapsed = ts - start;
-        ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
-        particles.forEach(p=>{
-          p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.rot += p.vr;
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-          ctx.restore();
-        });
-        if(elapsed < duration){ requestAnimationFrame(tick); } else { confettiCanvas.style.display='none'; }
-      }
-      requestAnimationFrame(tick);
-    }
-
-    /* ---------- GDPR modal ---------- */
-    const gdprModal = document.getElementById('gdpr-modal');
-    const gdprOpen = document.getElementById('gdpr-open');
-    const gdprClose = document.getElementById('gdpr-close');
-    const gdprAccept = document.getElementById('gdpr-accept');
-    gdprOpen.addEventListener('click', ()=>{ gdprModal.classList.remove('hidden'); gdprModal.classList.add('flex'); });
-    function closeGDPR(){ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); }
-    gdprClose.addEventListener('click', closeGDPR);
-    gdprAccept.addEventListener('click', closeGDPR);
-    gdprModal.addEventListener('click', (e)=>{ if(e.target===gdprModal) closeGDPR(); });
-  </script>
-</body>
-</html>
+    const iconSun = document.getElementById('icon
