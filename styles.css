@@ -1,166 +1,180 @@
-/* Base */
-body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-  margin: 0;
-  padding: 0;
+/* ============ Base / Theme ============ */
+:root{
+  --brand-500:#29a3a3;
+  --brand-600:#208181;
+  --ink:#333;
+  --bg-fade-1:#e8fbff;
+  --bg-fade-2:#f5fafc;
+  --bg-fade-3:#f7fafc;
 }
 
-/* Header */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #007bff;
-  color: white;
-  padding: 15px 20px;
-  flex-wrap: wrap;
+/* Χρωματιστό background που ξεθωριάζει σταδιακά (light) */
+body{
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  margin:0; padding:0;
+  min-height:100%;
+  background-attachment: fixed;
+  background-image:
+    radial-gradient(900px 520px at 50% -10%, rgba(132,197,244,.45), transparent 60%),
+    radial-gradient(800px 480px at 10% 10%,  rgba(199,166,244,.35), transparent 55%),
+    radial-gradient(900px 520px at 90% 20%,  rgba(247,141,167,.30), transparent 60%),
+    radial-gradient(800px 460px at 20% 120%, rgba(157,224,214,.30), transparent 60%),
+    linear-gradient(180deg, var(--bg-fade-1) 0%, var(--bg-fade-2) 40%, var(--bg-fade-3) 100%);
+  background-color:#eaf7fa;
 }
 
-header .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+/* Optional: Dark mode αν βάζεις class="dark" στο <html> ή στο <body> */
+.dark body,
+@media (prefers-color-scheme: dark){
+  body{
+    background-image:
+      radial-gradient(900px 520px at 50% -10%, rgba(132,197,244,.35), transparent 60%),
+      radial-gradient(800px 480px at 10% 10%,  rgba(199,166,244,.28), transparent 55%),
+      radial-gradient(900px 520px at 90% 20%,  rgba(247,141,167,.24), transparent 60%),
+      radial-gradient(800px 460px at 20% 120%, rgba(157,224,214,.22), transparent 60%),
+      linear-gradient(180deg, #071014 0%, #0b1515 45%, #0b1515 100%);
+    background-color:#0b1515;
+    color:#e7eef5;
+  }
 }
 
-header .profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* Τυπογραφία τίτλων */
+h1,h2,h3{
+  font-family: 'Manrope','Inter',system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+  line-height: 1.25; /* “ανάσα” στους τίτλους */
 }
 
-header .profile img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+/* ============ Header ============ */
+header{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;
+  background: rgba(255,255,255,.75);
+  backdrop-filter: blur(10px);
+  color:#0b2530;
+  padding: 12px 20px;
+  border-bottom:1px solid rgba(15,23,42,.08);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+.dark header{ background: rgba(2,6,23,.65); color:#e7eef5; border-color: rgba(148,163,184,.18); }
+
+header .logo{ font-size:1.5rem; font-weight:700; }
+
+header .profile{ display:flex; align-items:center; gap:10px; }
+header .profile img{ width:40px; height:40px; border-radius:50%; }
+
+header button{
+  background:#fff; color:var(--brand-600);
+  border:1px solid rgba(2,6,23,.08);
+  padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+header button:hover{ background:#f3f7f7; box-shadow:0 6px 14px rgba(15,23,42,.10); transform:translateY(-1px); }
+.dark header button{ background:#0f172a; color:#cfe9e9; border-color:#1f2a44; }
+.dark header button:hover{ background:#0b1225; }
+
+/* ============ Form Card ============ */
+.form-section{
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(8px);
+  padding: 20px; margin: 20px auto;
+  border-radius: 14px;
+  border:1px solid rgba(15,23,42,.08);
+  box-shadow: 0 12px 28px rgba(15,23,42,.10);
+  max-width: 760px;
+  animation: fadeIn .6s ease-in-out;
+}
+.dark .form-section{
+  background: rgba(2,6,23,.55);
+  border-color: rgba(148,163,184,.15);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
 }
 
-header button {
-  background-color: white;
-  color: #007bff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s ease;
-}
+.form-section h2{ margin-bottom: 16px; color: var(--brand-600); }
 
-header button:hover {
-  background-color: #e6e6e6;
-}
-
-/* Form Section */
-.form-section {
-  background: white;
-  padding: 20px;
-  margin: 20px auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  animation: fadeIn 0.6s ease-in-out;
-}
-
-.form-section h2 {
-  margin-bottom: 15px;
-  color: #007bff;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
+/* Ενιαία κλίμακα spacing σε ομάδες */
+.form-group{ margin-bottom: 16px; }
 
 .form-group label,
-.form-group p {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
+.form-group p{
+  display:block; margin-bottom:8px; font-weight:600;
 }
 
-.form-group img {
-  vertical-align: middle;
-  margin-right: 5px;
+/* Inputs */
+input[type="text"], input[type="number"], select{
+  width:100%; padding:12px 14px;
+  border:1px solid #cdd5df; border-radius:12px;
+  background:#fff; color:#0f172a;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+input[type="text"]::placeholder,
+input[type="number"]::placeholder{ color:#98a2b3; }
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus{
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 4px rgba(41,163,163,.18);
 }
 
-input[type="text"],
-input[type="number"],
-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  transition: border-color 0.3s ease;
+.dark input[type="text"], .dark input[type="number"], .dark select{
+  background:#0b1220; color:#e7eef5; border-color:#243046;
+}
+.dark input[type="text"]::placeholder, .dark input[type="number"]::placeholder{ color:#a0aec0; }
+.dark input[type="text"]:focus, .dark input[type="number"]:focus, .dark select:focus{
+  border-color:#3fb9b9; box-shadow:0 0 0 4px rgba(63,185,185,.25);
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-select:focus {
-  border-color: #007bff;
+/* Submit */
+.submit-btn{
+  background: linear-gradient(90deg, var(--brand-500), var(--brand-600));
+  color:#fff; border:none; padding:12px 20px; border-radius:12px;
+  cursor:pointer; font-size:1rem; font-weight:700;
+  transition: transform .12s ease, filter .2s ease, box-shadow .2s ease;
+  box-shadow: 0 10px 20px rgba(41,163,163,.22);
 }
+.submit-btn:hover{ transform: translateY(-1px); filter: brightness(1.02); box-shadow: 0 12px 22px rgba(41,163,163,.28); }
+.submit-btn:active{ transform: translateY(0); }
 
-.submit-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
+.dark .submit-btn{ box-shadow: 0 10px 22px rgba(41,163,163,.30); }
 
-.submit-btn:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
+/* ============ GDPR Modal ============ */
+.modal{
+  display:none; position:fixed; inset:0;
+  background: rgba(0,0,0,.45);
+  justify-content:center; align-items:center; animation: fadeIn .4s ease;
 }
+.modal-content{
+  background:#fff; color:#0f172a; padding:20px; border-radius:14px; width: 92%; max-width: 560px;
+  border:1px solid rgba(15,23,42,.08); box-shadow: 0 20px 40px rgba(15,23,42,.18);
+}
+.dark .modal-content{ background:#0b1220; color:#e7eef5; border-color:#1f2a44; }
+.close{ float:right; font-size:1.5rem; cursor:pointer; }
 
-/* GDPR Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.4s ease;
+/* ============ Toasts ============ */
+#toast{
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+  display:none; padding: 10px 14px;
+  background:#0f172a; color:#fff; border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(15,23,42,.25); z-index: 1000;
+  font-size: .95rem;
 }
+.toast-enter{ opacity:0; transform: translate(-50%,10px); }
+.toast-enter-active{ opacity:1; transform: translate(-50%,0); transition:.18s ease-out; }
+.toast-exit{ opacity:1; }
+.toast-exit-active{ opacity:0; transition:.25s ease-in; }
 
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 500px;
-}
-
-.close {
-  float: right;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
+/* ============ Helpers ============ */
+/* αφαίρεση σκιάς από συγκεκριμένα SVG (π.χ. το εικονίδιο “γενόσημο”) */
+.no-shadow{ filter:none !important; }
 
 /* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeIn{
+  from{ opacity:0; transform: translateY(10px);}
+  to{   opacity:1; transform: translateY(0);}
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .form-section {
-    margin: 10px;
-    padding: 15px;
-  }
-
-  .submit-btn {
-    width: 100%;
-  }
+@media (max-width: 768px){
+  header{ flex-direction: column; text-align: center; }
+  .form-section{ margin: 12px; padding: 16px; }
+  .submit-btn{ width:100%; }
 }
