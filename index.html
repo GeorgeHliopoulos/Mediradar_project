@@ -37,32 +37,42 @@
       --fadeBg:#f7fbfb;
       --fadeDark:#0b1515;
     }
-    /* Colorful, gradually fading background (light) */
+
+    /* Colorful, gradually fading background (LIGHT, πιο έντονο) */
     .app-bg{
-      background:
-        radial-gradient(900px 500px at 10% -10%, rgba(132,197,244,.25), transparent 60%),
-        radial-gradient(700px 420px at 110% 0%, rgba(199,166,244,.22), transparent 55%),
-        radial-gradient(900px 520px at 30% 120%, rgba(247,141,167,.16), transparent 60%),
-        radial-gradient(700px 420px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
-        linear-gradient(180deg, var(--fadeBg), #f7fafc 40%, #f7fafc);
+      background-attachment: fixed;
+      background-image:
+        radial-gradient(900px 520px at 50% -10%, rgba(132,197,244,.45), transparent 60%),
+        radial-gradient(800px 480px at 10% 10%,  rgba(199,166,244,.35), transparent 55%),
+        radial-gradient(900px 520px at 90% 20%,  rgba(247,141,167,.30), transparent 60%),
+        radial-gradient(800px 460px at 20% 120%, rgba(157,224,214,.30), transparent 60%),
+        linear-gradient(180deg, var(--fadeBg), #f5fafc 40%, #f7fafc);
     }
-    /* Dark variant */
+    /* Dark variant (πιο έντονο) */
     .dark .app-bg{
-      background:
-        radial-gradient(900px 500px at 10% -10%, rgba(132,197,244,.18), transparent 60%),
-        radial-gradient(700px 420px at 110% 0%, rgba(199,166,244,.16), transparent 55%),
-        radial-gradient(900px 520px at 30% 120%, rgba(247,141,167,.14), transparent 60%),
-        radial-gradient(700px 420px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
+      background-attachment: fixed;
+      background-image:
+        radial-gradient(900px 520px at 50% -10%, rgba(132,197,244,.35), transparent 60%),
+        radial-gradient(800px 480px at 10% 10%,  rgba(199,166,244,.28), transparent 55%),
+        radial-gradient(900px 520px at 90% 20%,  rgba(247,141,167,.24), transparent 60%),
+        radial-gradient(800px 460px at 20% 120%, rgba(157,224,214,.22), transparent 60%),
         linear-gradient(180deg, var(--fadeDark), #091010 45%, #091010);
     }
+
     .icon-emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.06)); }
+    /* Μόνο για SVG που δεν θέλουν σκιά (π.χ. γενόσημο) */
+    .no-shadow{ filter:none !important; }
+
     /* Autocomplete dropdown */
     .ac-list{ position:absolute; inset-inline:0; top:100%; z-index:30; }
     .ac-item{ cursor:pointer; }
+
     /* Scanner overlay frame */
     .scan-frame::after{
-      content:''; position:absolute; inset:8%; border:3px solid rgba(255,255,255,.85); border-radius:16px; box-shadow:0 0 0 100vmax rgba(0,0,0,.25); pointer-events:none;
+      content:''; position:absolute; inset:8%; border:3px solid rgba(255,255,255,.85);
+      border-radius:16px; box-shadow:0 0 0 100vmax rgba(0,0,0,.25); pointer-events:none;
     }
+
     /* Toast base animation */
     .toast-enter{ opacity:0; transform: translate(-50%,10px); }
     .toast-enter-active{ opacity:1; transform: translate(-50%,0); transition:.18s ease-out; }
@@ -206,10 +216,19 @@
                  placeholder="π.χ. 1" />
         </div>
 
-        <!-- Generic -->
+        <!-- Generic (SVG χωρίς σκιά) -->
         <div class="rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-800 p-4">
           <p class="text-sm font-semibold flex items-center gap-2">
-            <svg class="w-6 h-6 icon-emoji" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#A5D6A7"/><path d="M7.5 12.5l3 3l6-7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="w-6 h-6 no-shadow" viewBox="0 0 24 24" aria-hidden="true">
+              <defs>
+                <linearGradient id="g-ok" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%"  stop-color="#34D399"/>
+                  <stop offset="100%" stop-color="#10B981"/>
+                </linearGradient>
+              </defs>
+              <circle cx="12" cy="12" r="10" fill="url(#g-ok)"/>
+              <path d="M7.5 12.5l3 3l6-6.5" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <span id="t-genericQ">Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;</span>
           </p>
           <div class="mt-3 flex gap-4">
@@ -403,10 +422,8 @@
     const resultsSection = document.getElementById('results');
     form.addEventListener('submit', (e)=>{
       e.preventDefault();
-      // Simulate success
       showToast(t('sent'));
       resultsSection.classList.remove('hidden');
-      // Scroll to results
       resultsSection.scrollIntoView({ behavior:'smooth', block:'start' });
     });
 
@@ -466,7 +483,6 @@
         videoEl.srcObject = mediaStream; await videoEl.play(); scanning=true;
         videoTrack = mediaStream.getVideoTracks()[0];
         const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-        // Torch support
         if(capabilities.torch){ torchBtn.classList.remove('hidden'); } else { torchBtn.classList.add('hidden'); }
 
         if('BarcodeDetector' in window){
@@ -542,7 +558,6 @@
       holdTTL.textContent = `${m}:${s}`;
     }
     reserveBtn?.addEventListener('click', ()=>{
-      // simulate reservation success
       startCountdown(60*60);
       fireConfetti(800);
       showToast(state.lang==='el' ? `${t('reserved')}: 60’` : `Reserved: 60’`);
@@ -577,7 +592,6 @@
       }
       requestAnimationFrame(tick);
     }
-
   </script>
 </body>
 </html>
