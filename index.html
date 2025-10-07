@@ -2,62 +2,116 @@
 <html lang="el">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mediradar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MediRadar</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto0;700&display=swap
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- CSS -->
-  styles.css
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            brand: { DEFAULT: '#29A3A3', dark: '#1E7F7F', light: '#E6F6F6' },
+            ink: { 900: '#0F172A', 600: '#334155', 400: '#94A3B8' }
+          },
+          boxShadow: {
+            soft: '0 8px 24px rgba(15, 23, 42, 0.08)'
+          },
+          borderRadius: { xl2: '1rem' }
+        }
+      }
+    }
+  </script>
 
-  <!-- Manifest -->
-  <link rel="manifest" href="manifestpt.js</script>
-  firebase.js</script>
+  <!-- PWA Manifest (fix your path/file name as needed) -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#29A3A3" />
+  <link rel="icon" href="/icons/icon-192.png" sizes="192x192">
 </head>
-<body>
-  <header>
-    <div class="logo">Mediradar</div>
-    <div class="profile">
-      <img src="https://img.icons8.com//50/user.png
-      <-menu" class="dropdown">
-        <button id="google-login">Σύνδεση με Google</button>
-        <button id="logout-btn" style="display:none;">Αποσύνδεση</button>
+<body class="bg-slate-50 text-ink-900 font-sans selection:bg-brand/20">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-brand/10 grid place-items-center">
+          <!-- target/crosshair logo -->
+          <svg viewBox="0 0 24 24" class="w-5 h-5 text-brand"><path fill="currentColor" d="M11 2h2v3.06A7.002 7.002 0 0 1 18.94 11H22v2h-3.06A7.002 7.002 0 0 1 13 18.94V22h-2v-3.06A7.002 7.002 0 0 1 5.06 13H2v-2h3.06A7.002 7.002 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6a3 3 0 0 1 0-6Z"/></svg>
+        </div>
+        <span class="text-xl font-bold tracking-tight">MediRadar</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="google-login" class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition">Σύνδεση</button>
+        <button id="logout-btn" class="hidden px-3 py-2 rounded-xl bg-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-300 transition">Αποσύνδεση</button>
+
+        <!-- Profile / menu -->
+        <button id="menu-btn" class="ml-1 p-2 rounded-xl hover:bg-slate-100">
+          <svg viewBox="0 0 24 24" class="w-6 h-6 text-ink-600"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10Zm0 2c-4.97 0-9 2.686-9 6v2h18v-2c0-3.314-4.03-6-9-6Z"/></svg>
+        </button>
       </div>
     </div>
   </header>
 
-  <main>
-    <section class="form-section">
-      <h2>Αίτηση Φαρμάκου</h2>
-      <form id="medicine-form">
-        <div class="form-group">
-          <label for="medicine-name">
-            <img srcimg.icons8.com/ios/24/pill.png
-            Όνομα Φαρμάκου:
-          </label>
-          <input type="text" id="medicine-name" required />
+  <!-- Main -->
+  <main class="mx-auto max-w-4xl px-4 sm:px-6 pt-6 pb-24">
+    <!-- Hero card -->
+    <section class="mb-6">
+      <div class="rounded-2xl bg-gradient-to-br from-white to-brand.light shadow-soft p-5 sm:p-6 border border-slate-200">
+        <div class="flex items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold">Αίτηση Φαρμάκου</h1>
+            <p class="mt-1 text-ink-400 text-sm">Στείλε αίτημα διαθεσιμότητας σε φαρμακεία κοντά σου.</p>
+          </div>
+          <div class="hidden sm:block">
+            <div class="px-3 py-1.5 rounded-full bg-white border border-brand/30 text-brand text-xs font-semibold">PWA έτοιμο</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form -->
+    <section aria-labelledby="form-title">
+      <form id="medicine-form" class="grid grid-cols-1 gap-4 sm:gap-5">
+        <!-- Medicine name -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label for="medicine-name" class="text-sm font-semibold">Όνομα Φαρμάκου</label>
+          <div class="mt-2 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M17.657 6.343a8 8 0 1 0 0 11.314a8 8 0 0 0 0-11.314ZM11 5h2v6h-2V5Zm0 8h2v2h-2v-2Z"/></svg>
+            </span>
+            <input id="medicine-name" type="text" required
+              class="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand placeholder:text-slate-400"
+              placeholder="π.χ. Augmentin 875mg" />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="active-substance">
-            <img src="https://img.icons8.com/ios/24/test-tube.png" alt="Test Tube Icon"αιρετικά):
+        <!-- Active substance (optional) -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label for="active-substance" class="text-sm font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h4v2h-2v12a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V6H3V4h4V2Zm0 6h10v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8Z"/></svg>
+            Δραστική Ουσία <span class="text-ink-400 font-normal">(προαιρετικά)</span>
           </label>
-          <select id="active-substance">
-            <option value="">-- Επιλογή --</option>
+          <select id="active-substance" class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand">
+            <option value="">— Επιλογή —</option>
             <option value="Paracetamol">Παρακεταμόλη</option>
             <option value="Ibuprofen">Ιβουπροφαίνη</option>
             <option value="Amoxicillin">Αμοξικιλλίνη</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="medicine-type">
-            https://img.icons8.com/ios/24/medicine.png
-            Τύπος Φαρμάκου:
+        <!-- Type -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label for="medicine-type" class="text-sm font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v4H5V5a2 2 0 0 1 2-2Zm-2 8h14v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6Z"/></svg>
+            Τύπος Φαρμάκου
           </label>
-          <select id="medicine-type" required>
-            <option value="">-- Επιλογή --</option>
+          <select id="medicine-type" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand">
+            <option value="">— Επιλογή —</option>
             <option value="Σκόνη">Σκόνη</option>
             <option value="Υγρό">Υγρό</option>
             <option value="Χάπι">Χάπι</option>
@@ -66,71 +120,140 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="quantity">
-            https://img.icons8.com/ios/24/box.png
-            Ποσότητα (τεμάχια ή κουτιά):
+        <!-- Quantity -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label for="quantity" class="text-sm font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7a2 2 0 0 1 2-2h3v2H5v3H3V7Zm13-2h3a2 2 0 0 1 2 2v3h-2V7h-3V5ZM5 17v-3H3v3a2 2 0 0 0 2 2h3v-2H5Zm14 0h-3v2h3a2 2 0 0 0 2-2v-3h-2v3Z"/></svg>
+            Ποσότητα (τεμάχια/κουτιά)
           </label>
-          <input type="number" id="quantity" min="1" required />
+          <input id="quantity" type="number" min="1" required
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand"
+                 placeholder="π.χ. 1" />
         </div>
 
-        <div class="form-group">
-          <p>
-            https://img.icons8.com/ios/24/approval.png
+        <!-- Allow generic -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <p class="text-sm font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="m9 16.17l-3.59-3.58L4 14l5 5l11-11l-1.41-1.41z"/></svg>
             Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;
           </p>
-          <label><input type="radio" name="allow-generic" value="ΝΑΙ" required /> ΝΑΙ</label>
-          <label><input type="radio" name="allow-generic" value="ΟΧΙ" /> ΟΧΙ</label>
+          <div class="mt-3 flex gap-4">
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="allow-generic" value="ΝΑΙ" required class="size-4 accent-brand">
+              <span>ΝΑΙ</span>
+            </label>
+            <label class="inline-flex items-center gap-2">
+              <input type="radio" name="allow-generic" value="ΟΧΙ" class="size-4 accent-brand">
+              <span>ΟΧΙ</span>
+            </label>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="city">
-            https://img.icons8.com/ios/24/city.png
-            Πόλη:
+        <!-- City -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label for="city" class="text-sm font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-ink-400" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
+            Πόλη
           </label>
-          <select id="city" required>
-            <option value="">-- Επιλογή --</option>
-            <option value="Αθήνα">Αθήνα</option>
-            <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
-            <option value="Πάτρα">Πάτρα</option>
-            <option value="Ηράκλειο">Ηράκλειο</option>
-            <option value="Λάρισα">Λάρισα</option>
-            <option value="Βόλος">Βόλος</option>
-            <option value="Ιωάννινα">Ιωάννινα</option>
-            <option value="Χανιά">Χανιά</option>
-            <option value="Καλαμάτα">Καλαμάτα</option>
-            <option value="Καβάλα">Καβάλα</option>
-            <option value="Ξάνθη">Ξάνθη</option>
-            <option value="Κομοτηνή">Κομοτηνή</option>
-            <option value="Σέρρες">Σέρρες</option>
-            <option value="Ρόδος">Ρόδος</option>
-            <option value="Κέρκυρα">Κέρκυρα</option>
-            <option value="Τρίκαλα">Τρίκαλα</option>
-            <option value="Λαμία">Λαμία</option>
-            <option value="Αλεξανδρούπολη">Αλεξανδρούπολη</option>
-            <option value="Αγρίνιο">Αγρίνιο</option>
-            <option value="Χαλκίδα">Χαλκίδα</option>
+          <select id="city" required class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand/30 focus:border-brand">
+            <option value="">— Επιλογή —</option>
+            <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option>
+            <option>Ηράκλειο</option><option>Λάρισα</option><option>Βόλος</option>
+            <option>Ιωάννινα</option><option>Χανιά</option><option>Καλαμάτα</option>
+            <option>Καβάλα</option><option>Ξάνθη</option><option>Κομοτηνή</option>
+            <option>Σέρρες</option><option>Ρόδος</option><option>Κέρκυρα</option>
+            <option>Τρίκαλα</option><option>Λαμία</option><option>Αλεξανδρούπολη</option>
+            <option>Αγρίνιο</option><option>Χαλκίδα</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="gdpr-checkbox" required />
-            Αποδέχομαι τους #όρους GDPR</a>
+        <!-- GDPR -->
+        <div class="rounded-2xl bg-white shadow-soft border border-slate-200 p-4">
+          <label class="inline-flex items-start gap-3">
+            <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand">
+            <span class="text-sm leading-6">
+              Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand hover:text-brand-dark">όρους GDPR</button>.
+            </span>
           </label>
         </div>
 
-        <button type="submit" class="submit-btn">Υποβολή Αίτησης</button>
+        <!-- Submit -->
+        <div class="flex justify-end">
+          <button type="submit" class="px-5 py-3 rounded-2xl bg-brand text-white font-semibold shadow-soft hover:bg-brand-dark focus:outline-none focus:ring-4 focus:ring-brand/30">
+            Υποβολή Αίτησης
+          </button>
+        </div>
       </form>
     </section>
   </main>
 
-  <div id="gdpr-modal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="hideGdpr()">&times;</span>
-      <h3>Όροι GDPR</h3>
-      <pre id="gdpr-text"></pre>
+  <!-- GDPR Modal -->
+  <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b">
+        <h3 class="text-lg font-bold">Όροι GDPR</h3>
+        <button id="gdpr-close" class="p-2 hover:bg-slate-100 rounded-xl" aria-label="Κλείσιμο">×</button>
+      </div>
+      <div class="p-5 max-h-[60vh] overflow-auto">
+        <pre id="gdpr-text" class="whitespace-pre-wrap text-sm text-ink-600">
+Εδώ βάζεις τους όρους επεξεργασίας δεδομένων (υπεύθυνος επεξεργασίας, σκοπός, χρόνος τήρησης, δικαιώματα κ.λπ.).
+        </pre>
+      </div>
+      <div class="px-5 pb-5 flex justify-end">
+        <button id="gdpr-accept" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold hover:bg-brand-dark">Κατάλαβα</button>
+      </div>
     </div>
   </div>
+
+  <!-- App JS -->
+  <script>
+    // --- Firebase placeholders (uncomment & fill with your config) ---
+    // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    // import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    // const app = initializeApp({ /* your config */ });
+    // const auth = getAuth(app);
+    // const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById('google-login');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // Example auth wiring:
+    // loginBtn.addEventListener('click', async () => { await signInWithPopup(auth, provider); });
+    // logoutBtn.addEventListener('click', async () => { await signOut(auth); });
+    // onAuthStateChanged(auth, (user) => {
+    //   loginBtn.classList.toggle('hidden', !!user);
+    //   logoutBtn.classList.toggle('hidden', !user);
+    // });
+
+    // GDPR modal
+    const modal = document.getElementById('gdpr-modal');
+    document.getElementById('gdpr-open').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('gdpr-close').addEventListener('click', () => modal.classList.add('hidden'));
+    document.getElementById('gdpr-accept').addEventListener('click', () => modal.classList.add('hidden'));
+
+    // Simple form handler (replace with your actual submit logic)
+    document.getElementById('medicine-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('medicine-name').value.trim(),
+        substance: document.getElementById('active-substance').value,
+        type: document.getElementById('medicine-type').value,
+        qty: Number(document.getElementById('quantity').value),
+        generic: (new FormData(e.target)).get('allow-generic'),
+        city: document.getElementById('city').value,
+        gdpr: document.getElementById('gdpr-checkbox').checked
+      };
+      // TODO: send to Firestore / Cloud Function
+      alert('✅ Η αίτηση στάλθηκε!\n' + JSON.stringify(data, null, 2));
+      e.target.reset();
+    });
+  </script>
+
+  <!-- (Optional) register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
+  </script>
 </body>
 </html>
