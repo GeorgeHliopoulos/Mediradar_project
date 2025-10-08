@@ -103,7 +103,7 @@
   <!-- Header -->
   <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
-      <!-- Simple wordmark (προσωρινά μέχρι να κλειδώσουμε νέο logo) -->
+      <!-- Wordmark προσωρινό -->
       <a href="#" class="flex items-center gap-3" aria-label="MediRadar" onclick="goTo('screen-search')">
         <svg class="logo-svg h-8 w-auto sm:h-9" viewBox="0 0 220 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
           <text x="2" y="28"
@@ -128,7 +128,7 @@
           <svg id="icon-moon" viewBox="0 0 24 24" class="w-5 h-5 icon-emoji" aria-hidden="true"><path d="M12 2a9.5 9.5 0 1 0 8 15.5A8 8 0 0 1 12 2Z" fill="#C9D6FF"/></svg>
           <span class="sr-only">Theme</span>
         </button>
-        <!-- (Προαιρετικό) προφίλ/χρήστης -->
+        <!-- (Προαιρετικό) προφίλ -->
         <button class="px-2 py-1.5 rounded-xl hover:bg-slate-900/5 dark:hover:bg-white/10" title="Λογαριασμός">
           <svg viewBox="0 0 24 24" class="w-5 h-5"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20a8 8 0 0 1 16 0" fill="currentColor"/></svg>
         </button>
@@ -139,12 +139,12 @@
   <!-- SCREENS -->
   <main class="mx-auto max-w-4xl px-4 sm:px-6 pt-6 pb-24">
 
-    <!-- Screen 1: Splash -->
+    <!-- Screen 1: Splash (ΝΕΟ) -->
     <section id="screen-splash" class="screen active">
-      <div class="min-h-[60vh] grid place-items-center">
+      <div class="min-h-[70vh] grid place-items-center">
         <div class="text-center">
           <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-soft animate-[pulse_1.6s_ease-in-out_infinite] mx-auto">
-            <svg viewBox="0 0 48 48" class="w-14 h-14">
+            <svg viewBox="0 0 48 48" class="w-14 h-14" aria-hidden="true">
               <circle cx="24" cy="24" r="17" fill="white" fill-opacity=".12"/>
               <path d="M24 8a16 16 0 0 1 0 32" stroke="#fff" stroke-width="2.8" stroke-linecap="round" fill="none" opacity=".9"/>
               <path d="M24 13a11 11 0 0 1 0 22" stroke="#fff" stroke-width="2.8" stroke-linecap="round" fill="none" opacity=".78"/>
@@ -152,8 +152,21 @@
               <circle cx="34" cy="27" r="3.2" fill="#fff"/>
             </svg>
           </div>
+
           <h1 class="font-display text-2xl mt-4">MediRadar</h1>
-          <p class="text-slate-600 dark:text-slate-400 mt-1">Φόρτωση…</p>
+          <p id="splash-sub" class="text-slate-600 dark:text-slate-400 mt-1">Φόρτωση…</p>
+
+          <div class="mt-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+            <span class="inline-block w-2 h-2 rounded-full bg-current animate-bounce [animation-delay:-0.2s]"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-current animate-bounce [animation-delay:-0.1s]"></span>
+            <span class="inline-block w-2 h-2 rounded-full bg-current animate-bounce"></span>
+          </div>
+
+          <button id="splash-next"
+            class="mt-6 px-4 py-2 rounded-xl bg-slate-900/80 dark:bg-white/10 text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled>
+            Συνέχεια
+          </button>
         </div>
       </div>
     </section>
@@ -407,10 +420,6 @@
       document.getElementById(id).classList.add('active');
       window.scrollTo({top:0, behavior:'smooth'});
     }
-    // Splash → Search
-    window.addEventListener('load', ()=>{
-      setTimeout(()=> goTo('screen-search'), 900);
-    });
 
     /* ---------- Theme ---------- */
     const html = document.documentElement;
@@ -427,20 +436,20 @@
     setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
 
-    /* ---------- i18n minimal ---------- */
+    /* ---------- i18n minimal (ΠΡΟΣΘΗΚΕΣ: continue/loading) ---------- */
     const strings = {
       el:{ title:'Αναζήτηση Φαρμάκου', subtitle:'Βρες άμεσα διαθεσιμότητα σε κοντινά φαρμακεία.', medname:'Όνομα Φαρμάκου',
         substance:'Δραστική Ουσία', type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', genericQ:'Αν δεν υπάρχει το φάρμακο, να προταθεί γενόσημο;',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', rx:'Προαιρετικά: Αριθμός Συνταγής', rxHelp:'Βοηθά το φαρμακείο να εντοπίσει γρήγορα σωστό σκεύασμα/δοσολογία.',
         scan:'Σάρωση barcode', stop:'Τερματισμός', scanHint:'Στόχευσε τον γραμμωτό κώδικα της συνταγής.', gdprShort:'Αποδέχομαι τους',
         submit:'Υποβολή Αναζήτησης', reserved:'Δεσμευμένο', sent:'✅ Αναζήτηση στάλθηκε', neterr:'⚠️ Σφάλμα δικτύου — δοκίμασε ξανά',
-        resvTitle:'Κράτηση 60’', ok:'Εντάξει' },
+        resvTitle:'Κράτηση 60’', ok:'Εντάξει', continue:'Συνέχεια', loading:'Φόρτωση…' },
       en:{ title:'Medicine Search', subtitle:'Find availability at nearby pharmacies instantly.', medname:'Medicine Name',
         substance:'Active Substance', type:'Medicine Type', qty:'Quantity (units/boxes)', genericQ:'If unavailable, suggest a generic?',
         yes:'YES', no:'NO', city:'City', rx:'Optional: Prescription Number', rxHelp:'Helps the pharmacy locate the correct product/dosage quickly.',
         scan:'Scan barcode', stop:'Stop', scanHint:'Aim the camera at the prescription barcode.', gdprShort:'I accept the',
         submit:'Submit Search', reserved:'Reserved', sent:'✅ Search sent', neterr:'⚠️ Network error — try again',
-        resvTitle:'Reservation 60’', ok:'OK' }
+        resvTitle:'Reservation 60’', ok:'OK', continue:'Continue', loading:'Loading…' }
     };
     const langEL = document.getElementById('lang-el');
     const langEN = document.getElementById('lang-en');
@@ -459,6 +468,7 @@
       setText('t-gdprShort', t('gdprShort')); setText('t-submit', t('submit'));
       document.getElementById('resv-title').textContent = t('resvTitle');
       document.getElementById('reserve-ok').textContent = t('ok');
+      setText('splash-next', t('continue')); setText('splash-sub', t('loading'));
 
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Παρακεταμόλη':'e.g. Paracetamol';
@@ -485,14 +495,6 @@
         setTimeout(()=>{ toast.classList.add('hidden'); toast.classList.remove('toast-exit','toast-exit-active'); }, 260);
       }, 2200);
     }
-
-    /* ---------- Form submit (mock) ---------- */
-    const form = document.getElementById('medicine-form');
-    form.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      showToast(t('sent'));
-      goTo('screen-results');
-    });
 
     /* ---------- Helpers ---------- */
     const debounce = (fn,ms)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
@@ -557,7 +559,6 @@
       });
       document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
     }
-
     attachRemoteAutocomplete('medicine-name','ac-medicine');
 
     /* ---------- Substance (small local AC) ---------- */
@@ -583,6 +584,46 @@
       document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
     }
     attachLocalAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
+
+    /* ---------- Splash με ελάχιστη διάρκεια & «Συνέχεια» (περιμένει και τη φόρτωση meds) ---------- */
+    (function initSplash(){
+      const MIN = 1600, MAX = 3200;
+      const t0 = performance.now();
+      const btn = document.getElementById('splash-next');
+      const splash = document.getElementById('screen-splash');
+
+      const ready = Promise.all([
+        new Promise(res => window.addEventListener('load', res, { once:true })),
+        (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve(),
+        loadMeds().catch(()=>{}) // φορτώνουμε λίστα πριν δώσουμε Συνέχεια
+      ]);
+
+      function enableButton(){ btn.disabled = false; }
+      function fadeAndGo(){
+        splash.style.opacity = '0';
+        splash.style.transition = 'opacity .28s ease-out';
+        setTimeout(()=> goTo('screen-search'), 280);
+      }
+
+      ready.then(()=>{
+        const elapsed = performance.now() - t0;
+        const waitMore = Math.max(MIN - elapsed, 0);
+        setTimeout(enableButton, waitMore);
+      });
+
+      // Safety: αν αργήσει υπερβολικά, προχωρά μόνο του
+      setTimeout(fadeAndGo, MAX + 400);
+
+      btn.addEventListener('click', fadeAndGo);
+    })();
+
+    /* ---------- Form submit (mock) ---------- */
+    const form = document.getElementById('medicine-form');
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      showToast(t('sent'));
+      goTo('screen-results');
+    });
 
     /* ---------- Scanner with overlay + torch ---------- */
     const scanBtn = document.getElementById('scan-barcode');
