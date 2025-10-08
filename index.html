@@ -17,8 +17,7 @@
         extend: {
           fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'], display:['Manrope','Inter','ui-sans-serif'] },
           colors: {
-            brand: { 50:'#e6f6f6',200:'#a3e0df',300:'#79cfcf',400:'#4fbcbc',500:'#29a3a3',600:'#208181',700:'#196464',800:'#134b4b' },
-            accent: { pink:'#F78DA7', blue:'#84C5F4', purple:'#C3A6F4', yellow:'#FFE08A', mint:'#9DE0D6' }
+            brand: { 50:'#e6f6f6',200:'#a3e0df',300:'#79cfcf',400:'#4fbcbc',500:'#29a3a3',600:'#208181',700:'#196464',800:'#134b4b' }
           },
           boxShadow: { soft:'0 12px 28px rgba(15,23,42,.10)'},
         }
@@ -71,6 +70,12 @@
     .toast-enter-active{ opacity:1; transform: translate(-50%,0); transition:.18s ease-out; }
     .toast-exit{ opacity:1; }
     .toast-exit-active{ opacity:0; transition:.25s ease-in; }
+
+    /* Pending (orange) */
+    .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+    .hourglass { animation: hg 1.2s linear infinite; transform-origin:center; }
+    @keyframes hg { 0%{ transform: rotate(0deg);} 50%{ transform: rotate(180deg);} 100%{ transform: rotate(360deg);} }
   </style>
 </head>
 <body class="app-bg text-slate-900 dark:text-slate-200 font-sans min-h-full">
@@ -79,7 +84,6 @@
   <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <a href="#" class="flex items-center gap-3" aria-label="MediRadar" onclick="goTo('screen-splash')">
-        <!-- Wordmark fallback -->
         <svg class="h-8 w-auto sm:h-9" viewBox="0 0 220 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <text x="2" y="28" font-family="Manrope, Inter, ui-sans-serif, system-ui" font-weight="800" font-size="24" letter-spacing="-0.4" fill="currentColor">MediRadar</text>
         </svg>
@@ -100,14 +104,12 @@
 
   <main class="mx-auto max-w-4xl px-4 sm:px-6 pt-6 pb-24">
 
-    <!-- Screen 1: Splash (με 3 κουμπιά) -->
+    <!-- Screen 1: Splash με 3 κουμπιά -->
     <section id="screen-splash" class="screen active">
       <div class="min-h-[70vh] grid place-items-center">
         <div class="text-center max-w-md mx-auto">
-          <!-- Μεγάλο λογότυπο -->
           <div class="mx-auto rounded-[28px] w-40 h-40 sm:w-48 sm:h-48 bg-gradient-to-br from-brand-500 to-brand-600 shadow-soft grid place-items-center">
             <img src="/assets/logo/mediradar-symbol.svg" alt="" class="w-24 h-24 sm:w-28 sm:h-28" onerror="this.style.display='none'">
-            <!-- fallback wordmark αν δεν υπάρχει svg -->
             <div class="text-white font-display text-3xl sm:text-4xl font-extrabold select-none">M</div>
           </div>
 
@@ -136,7 +138,6 @@
 
     <!-- Screen 2: Αναζήτηση -->
     <section id="screen-search" class="screen">
-      <!-- Hero -->
       <div class="rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-soft p-5 sm:p-6 mb-6">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-white/15 grid place-items-center">
@@ -149,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Form -->
       <form id="medicine-form" class="grid grid-cols-1 gap-4 sm:gap-5">
         <!-- Medicine name + AC -->
         <div class="rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur shadow-soft border border-slate-200/70 dark:border-slate-800 p-4">
@@ -265,7 +265,35 @@
       </form>
     </section>
 
-    <!-- Screen 3: Αποτελέσματα -->
+    <!-- Screen 2.5: Pending (αναμονή απάντησης φαρμακείων) -->
+    <section id="screen-pending" class="screen">
+      <div class="rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-6 shadow-soft">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white grid place-items-center pulse-dot">
+            <!-- SVG hourglass -->
+            <svg viewBox="0 0 24 24" class="w-7 h-7 hourglass" aria-hidden="true">
+              <path d="M7 2h10a2 2 0 0 1 2 2v2a5 5 0 0 1-1.46 3.54L15 12l2.54 2.46A5 5 0 0 1 19 18v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a5 5 0 0 1 1.46-3.54L9 12 6.46 9.54A5 5 0 0 1 5 6V4a2 2 0 0 1 2-2Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-display text-xl">Αναμονή απάντησης από φαρμακείο…</h3>
+            <p class="mt-1 text-slate-700 dark:text-slate-300">Η αίτησή σου στάλθηκε. Σύντομα θα εμφανιστούν φαρμακεία με <strong>διαθεσιμότητα</strong>.</p>
+            <p id="pending-hint" class="mt-1 text-xs text-slate-500">Μπορείς να παραμείνεις σε αυτή την οθόνη — θα ενημερωθεί αυτόματα.</p>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-3">
+          <button class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-100" onclick="goTo('screen-search')">← Αλλαγή στοιχείων</button>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <h4 class="text-sm font-semibold text-slate-600 dark:text-slate-300">Κατάσταση:</h4>
+        <div id="pending-status" class="mt-2 text-sm text-orange-700 dark:text-orange-300">Pending…</div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Αποτελέσματα (χωρίς τιμές) -->
     <section id="screen-results" class="screen">
       <div class="mb-4 flex items-center justify-between">
         <h2 class="font-display text-xl leading-[1.25]">Αποτελέσματα</h2>
@@ -316,7 +344,7 @@
       </div>
       <div class="p-5 max-h-[60vh] overflow-auto"><div class="prose prose-sm dark:prose-invert max-w-none">
         <p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (συμπλήρωσε στοιχεία).</p>
-        <p><strong>Σκοπός:</strong> Διαβίβαση αναζήτησης σε φαρμακεία για ενημέρωση διαθεσιμότητας/τιμής/χρόνου παραλαβής.</p>
+        <p><strong>Σκοπός:</strong> Διαβίβαση αναζήτησης σε φαρμακεία για ενημέρωση διαθεσιμότητας/χρόνου παραλαβής.</p>
         <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία (αριθμός συνταγής/σάρωση).</p>
         <p><strong>Δεδομένα:</strong> Όνομα φαρμάκου, δραστική, τύπος, ποσότητα, γενόσημο, πόλη, (προαιρετικά) αριθμός συνταγής/ barcode.</p>
         <p><strong>Διατήρηση:</strong> Έως 30 ημέρες, έπειτα ανωνυμοποίηση/διαγραφή εκτός νόμιμης υποχρέωσης.</p>
@@ -336,10 +364,9 @@
       </div>
       <div class="p-5 space-y-3 text-sm text-slate-700 dark:text-slate-300">
         <p>1) Πληκτρολογείς το φάρμακο & προαιρετικά τη δραστική/συνταγή.</p>
-        <p>2) Στέλνουμε αναζήτηση στα κοντινά φαρμακεία.</p>
-        <p>3) Βλέπεις αποτελέσματα (διαθεσιμότητα/χρόνος/τιμή) και κάνεις <strong>κράτηση 60’</strong>.</p>
-        <p>4) Παίρνεις οδηγίες (Google Maps) ή καλείς απευθείας το φαρμακείο.</p>
-        <p class="text-xs opacity-80">Με σύνδεση δημιουργείται ιστορικό αναζητήσεων & ειδοποιήσεις.</p>
+        <p>2) Στέλνουμε αίτημα στα κοντινά φαρμακεία.</p>
+        <p>3) Περιμένεις <strong>λίγο</strong> (pending) για απάντηση διαθεσιμότητας.</p>
+        <p>4) Βλέπεις ποια φαρμακεία έχουν διαθέσιμο & κάνεις <strong>κράτηση 60’</strong> ή παίρνεις οδηγίες/κλήση.</p>
       </div>
       <div class="px-5 pb-5 flex justify-end">
         <button class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700" onclick="closeHow()">Συνέχεια</button>
@@ -357,7 +384,7 @@
       <div class="p-5 grid gap-3">
         <button class="px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">🔵 Συνέχεια με Google</button>
         <button class="px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">⚪ Συνέχεια με Apple</button>
-        <p class="text-xs text-slate-500">* Demo placeholder – συνδέεται εύκολα με Firebase Auth.</p>
+        <p class="text-xs text-slate-500">* Demo placeholder – προτείνω Firebase Auth (καθώς το Netlify Identity σταματά).</p>
       </div>
     </div>
   </div>
@@ -386,7 +413,7 @@
     document.getElementById('lang-el').onclick=()=>{ document.documentElement.lang='el'; localStorage.setItem('mediradar-lang','el'); };
     document.getElementById('lang-en').onclick=()=>{ document.documentElement.lang='en'; localStorage.setItem('mediradar-lang','en'); };
 
-    /* Modals: How + Auth */
+    /* Modals */
     const how = document.getElementById('how-modal'), auth = document.getElementById('auth-modal');
     function openHow(){ how.classList.remove('hidden'); how.classList.add('flex'); }
     function closeHow(){ how.classList.add('hidden'); how.classList.remove('flex'); }
@@ -401,8 +428,17 @@
     const toast = document.getElementById('toast');
     function showToast(msg){ toast.textContent = msg; toast.classList.remove('hidden'); toast.classList.add('toast-enter'); requestAnimationFrame(()=> toast.classList.add('toast-enter-active')); setTimeout(()=>{ toast.classList.remove('toast-enter','toast-enter-active'); toast.classList.add('toast-exit'); requestAnimationFrame(()=> toast.classList.add('toast-exit-active')); setTimeout(()=>{ toast.classList.add('hidden'); toast.classList.remove('toast-exit','toast-exit-active'); }, 260); }, 2200); }
 
-    /* Cities (enriched) */
-    const CITIES_GR = ["Αθήνα","Πειραιάς","Θεσσαλονίκη","Πάτρα","Ηράκλειο","Λάρισα","Βόλος","Ιωάννινα","Χανιά","Ρέθυμνο","Άγιος Νικόλαος","Κέρκυρα","Ζάκυνθος","Αργοστόλι","Λευκάδα","Ρόδος","Κως","Μυτιλήνη","Χίος","Σάμος","Σύρος","Νάξος","Πάρος","Τήνος","Άνδρος","Μήλος","Σαντορίνη","Καβάλα","Ξάνθη","Κομοτηνή","Αλεξανδρούπολη","Σέρρες","Δράμα","Κατερίνη","Βέροια","Κοζάνη","Φλώρινα","Καστοριά","Γρεβενά","Τρίκαλα","Καρδίτσα","Λαμία","Χαλκίδα","Θήβα","Λιβαδειά","Ιστιαία","Καρπενήσι","Πρέβεζα","Άρτα","Ηγουμενίτσα","Αγρίνιο","Μεσολόγγι","Πύργος","Καλαμάτα","Σπάρτη","Τρίπολη","Ναύπλιο","Κόρινθος","Λουτράκι","Ορεστιάδα","Νάουσα","Έδεσσα","Καλαμαριά","Πυλαία","Εύοσμος","Σταυρούπολη","Νεάπολη","Ωραιόκαστρο","Θέρμη","Ζωγράφου","Γλυφάδα","Μαρούσι","Χαλάνδρι","Καλλιθέα","Νέα Σμύρνη","Παλαιό Φάληρο","Νίκαια","Κερατσίνι","Περιστέρι","Αιγάλεω","Ίλιον","Πετρούπολη","Γαλάτσι","Νέα Ιωνία","Χολαργός","Ραφήνα","Παλλήνη","Σπάτα","Μαρκόπουλο"];
+    /* Cities (alphabetical, locale el) */
+    const CITIES_GR = [
+      "Αγρίνιο","Άγιος Νικόλαος","Αθήνα","Αίγιο","Αλεξανδρούπολη","Αλόννησος","Αμαλιάδα","Αμφιλοχία","Άμφισσα","Άνδρος","Αργοστόλι",
+      "Άρτα","Βέροια","Βόλος","Γαλάτσι","Γλυφάδα","Γρεβενά","Δράμα","Έδεσσα","Ελευσίνα","Ζάκυνθος","Ηγουμενίτσα","Ηράκλειο",
+      "Θήβα","Θεσσαλονίκη","Ιεράπετρα","Ιστιαία","Ιωάννινα","Καβάλα","Καλαμάτα","Καλαμαριά","Καλαμπάκα","Καρδίτσα","Καρπενήσι",
+      "Καστοριά","Κατερίνη","Κερατσίνι","Κέρκυρα","Κιλκίς","Κοζάνη","Κομοτηνή","Κόρινθος","Κως","Κύμη","Λαμία","Λάρισα","Λευκάδα",
+      "Λιβαδειά","Λουτράκι","Μαρούσι","Μάρκοπουλο","Μεσολόγγι","Μήλος","Μυτιλήνη","Νάξος","Ναύπλιο","Νέα Ιωνία","Νέα Σμύρνη",
+      "Νεάπολη","Νίκαια","Ξάνθη","Ορεστιάδα","Πάρος","Παλλήνη","Πάτρα","Περιστέρι","Πολύγυρος","Πρέβεζα","Πύργος","Ραφήνα","Ρέθυμνο",
+      "Ρόδος","Σαντορίνη","Σέρρες","Σητεία","Σίφνος","Σκάλα","Σκιάθος","Σκόπελος","Σπάτα","Σπάρτη","Σύμη","Σύρος (Ερμούπολη)","Τήνος",
+      "Τρίκαλα","Τρίπολη","Φλώρινα","Χαλάνδρι","Χαλκίδα","Χανιά","Χίος","Ωραιόκαστρο"
+    ].sort((a,b)=>a.localeCompare(b,'el'));
     (function fillCities(){ const sel=document.getElementById('city'); CITIES_GR.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); }); })();
 
     /* Autocomplete (remote meds.txt + local substances) */
@@ -435,38 +471,81 @@
     }
     attachLocalAutocomplete('active-substance','ac-substance',['Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Aspirin 100mg']);
 
-    /* Form submit → Results */
+    /* Submit → Pending → (poll) → Results */
     const form = document.getElementById('medicine-form');
     const resultsList = document.getElementById('results-list');
+    const pendingStatus = document.getElementById('pending-status');
 
-    form.addEventListener('submit',(e)=>{
+    form.addEventListener('submit', async (e)=>{
       e.preventDefault();
       showToast('✅ Αναζήτηση στάλθηκε');
-      // Demo αποτελέσματα
-      const med = document.getElementById('medicine-name').value || 'Paracetamol 500mg';
-      const items = [
-        {name:'Φαρμακείο Ιάκωβος', dist:'2.1km', eta:'Έτοιμο σε 20’', price:'€3.20', phone:'+302103001234', addr:'Αθήνα', q: med},
-        {name:'Φαρμακείο Ελένη',   dist:'1.3km', eta:'Παραλαβή σε 35’', price:'€3.10', phone:'+302103009876', addr:'Αθήνα', q: med},
-        {name:'Φαρμακείο Λήμνου',  dist:'3.2km', eta:'Σήμερα έως 20:00', price:'€3.50', phone:'+302103004321', addr:'Αθήνα', q: med}
-      ];
-      resultsList.innerHTML = items.map((p,i)=>`
+      // Δημιούργησε requestId (client-side demo)
+      const requestId = 'req_'+Date.now();
+      // Εδώ κανονικά θα καλούσες function π.χ. /.netlify/functions/send-request με τα στοιχεία.
+      startPending(requestId);
+    });
+
+    let pollTimer=null, demoTimer=null;
+    function startPending(requestId){
+      goTo('screen-pending');
+      pendingStatus.textContent = 'Pending…';
+      clearInterval(pollTimer); clearTimeout(demoTimer);
+
+      // --- Πραγματικό polling προς backend (όταν είναι έτοιμος) ---
+      async function poll(){
+        try{
+          const r = await fetch(`/.netlify/functions/request-status?id=${encodeURIComponent(requestId)}`, { cache:'no-store' });
+          if(!r.ok) throw 0;
+          const data = await r.json(); // {status:'pending'|'ready', items:[...] }
+          if(data.status === 'ready' && Array.isArray(data.items)){
+            onPharmacyReply(data.items);
+            return;
+          }
+          pendingStatus.textContent = 'Pending… (καμία απάντηση ακόμη)';
+        }catch{
+          pendingStatus.textContent = 'Pending…';
+        }
+      }
+      pollTimer = setInterval(poll, 5000);
+
+      // --- Demo fallback (χωρίς backend) μετά από 8s ---
+      demoTimer = setTimeout(()=>{
+        const med = (document.getElementById('medicine-name').value || 'Paracetamol 500mg');
+        const demoItems = [
+          {name:'Φαρμακείο Ιάκωβος', dist:'2.1km', eta:'Έτοιμο σε 20’', phone:'+302103001234', addr:'Αθήνα', avail:true, q:med, lat:37.98, lng:23.73},
+          {name:'Φαρμακείο Ελένη',   dist:'1.3km', eta:'Παραλαβή σε 35’', phone:'+302103009876', addr:'Αθήνα', avail:true, q:med, lat:37.98, lng:23.75}
+        ];
+        onPharmacyReply(demoItems);
+      }, 8000);
+    }
+
+    function onPharmacyReply(items){
+      clearInterval(pollTimer); clearTimeout(demoTimer);
+      // Φτιάξε λίστα αποτελεσμάτων (χωρίς τιμές)
+      resultsList.innerHTML = (items||[]).map((p,i)=>`
         <article class="rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200/70 dark:border-slate-800 p-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f48a.png" class="w-10 h-10" alt="">
             <div>
               <div class="font-semibold">${p.name}</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">${p.dist} · ${p.eta} · ${p.q}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">${p.dist || ''} · ${p.eta || 'Διαθέσιμο'} · ${p.q || ''}</div>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-sm px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">${p.price}</span>
+            <span class="text-xs px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">${p.avail ? 'Διαθέσιμο' : 'Μη διαθέσιμο'}</span>
             <button class="reserve px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700" data-idx="${i}">Κράτηση 60’</button>
           </div>
         </article>`).join('');
       goTo('screen-results');
-      // attach handlers
-      resultsList.querySelectorAll('.reserve').forEach(btn=> btn.addEventListener('click', ()=> openHold(items[btn.dataset.idx])));
-    });
+      // Attach reserve handlers
+      resultsList.querySelectorAll('.reserve').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const p = items[btn.dataset.idx];
+          openHold(p);
+        });
+      });
+      showToast('Ήρθαν απαντήσεις φαρμακείων');
+    }
 
     /* Hold screen + countdown + actions */
     let countdownTimer=null, remaining=0;
@@ -479,18 +558,18 @@
     function updateTTL(){ const m=String(Math.floor(remaining/60)).padStart(2,'0'); const s=String(remaining%60).padStart(2,'0'); holdTTL.textContent=`${m}:${s}`; }
 
     function openHold(p){
-      // set UI
       document.getElementById('hold-name').textContent = p.name;
-      document.getElementById('hold-meta').textContent = `${p.addr} · ${p.q}`;
-      document.getElementById('hold-call').href = `tel:${p.phone}`;
-      document.getElementById('hold-directions').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name+' '+p.addr)}`;
+      document.getElementById('hold-meta').textContent = `${p.addr || ''} · ${p.q || ''}`;
+      document.getElementById('hold-call').href = p.phone ? `tel:${p.phone}` : '#';
+      const q = encodeURIComponent((p.name||'')+' '+(p.addr||''));
+      const maps = (p.lat && p.lng) ? `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}` : `https://www.google.com/maps/search/?api=1&query=${q}`;
+      document.getElementById('hold-directions').href = maps;
+
       goTo('screen-hold');
-      // effects
       startCountdown(60*60);
       fireConfetti(1600);
       showToast('Δεσμεύτηκε για 60’');
     }
-
     document.getElementById('hold-done').addEventListener('click', ()=>{ showToast('Καλή συνέχεια!'); goTo('screen-results'); });
 
     /* Scanner */
