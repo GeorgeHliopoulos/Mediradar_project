@@ -520,6 +520,2314 @@ Warfarin 5mg
 Warfarin 5mg tablet
 Xarelto 20mg
 Zantac 150mg
+Advantan
+Advantan 100mg
+Advantan 120mg
+Advantan 150mg
+Advantan 160mg tablet
+Advantan 16mg tablet
+Advantan 1g tablet
+Advantan 200mg
+Advantan 250mg
+Advantan 300mg
+Advantan 300mg tablet
+Advantan 325mg
+Advantan 60mg
+Advantan 60mg tablet
+Advantan 75mg
+Advantan 81mg
+Advantan capsule
+Advantan effervescent
+Advantan tablet
+Aerius
+Aerius 100mg
+Aerius 120mg
+Aerius 150mg
+Aerius 160mg tablet
+Aerius 16mg tablet
+Aerius 1g tablet
+Aerius 200mg
+Aerius 250mg
+Aerius 300mg
+Aerius 300mg tablet
+Aerius 325mg
+Aerius 60mg
+Aerius 60mg tablet
+Aerius 75mg
+Aerius 81mg
+Aerius capsule
+Aerius effervescent
+Aerius tablet
+Aknicare
+Aknicare 100mg
+Aknicare 120mg
+Aknicare 150mg
+Aknicare 160mg tablet
+Aknicare 16mg tablet
+Aknicare 1g tablet
+Aknicare 200mg
+Aknicare 250mg
+Aknicare 300mg
+Aknicare 300mg tablet
+Aknicare 325mg
+Aknicare 60mg
+Aknicare 60mg tablet
+Aknicare 75mg
+Aknicare 81mg
+Aknicare capsule
+Aknicare effervescent
+Aknicare tablet
+Algofren
+Algofren 100mg
+Algofren 120mg
+Algofren 150mg
+Algofren 160mg tablet
+Algofren 16mg tablet
+Algofren 1g tablet
+Algofren 200mg
+Algofren 250mg
+Algofren 300mg
+Algofren 300mg tablet
+Algofren 325mg
+Algofren 400mg tablet
+Algofren 60mg
+Algofren 60mg tablet
+Algofren 75mg
+Algofren 81mg
+Algofren capsule
+Algofren effervescent
+Algofren tablet
+Amoxil
+Amoxil 100mg
+Amoxil 120mg
+Amoxil 150mg
+Amoxil 160mg tablet
+Amoxil 16mg tablet
+Amoxil 1g tablet
+Amoxil 200mg
+Amoxil 250mg
+Amoxil 300mg
+Amoxil 300mg tablet
+Amoxil 325mg
+Amoxil 500mg capsule
+Amoxil 60mg
+Amoxil 60mg tablet
+Amoxil 75mg
+Amoxil 81mg
+Amoxil capsule
+Amoxil effervescent
+Amoxil tablet
+Apotel
+Apotel 100mg
+Apotel 120mg
+Apotel 150mg
+Apotel 160mg tablet
+Apotel 16mg tablet
+Apotel 1g tablet
+Apotel 200mg
+Apotel 250mg
+Apotel 300mg
+Apotel 300mg tablet
+Apotel 325mg
+Apotel 500mg tablet
+Apotel 60mg
+Apotel 60mg tablet
+Apotel 75mg
+Apotel 81mg
+Apotel capsule
+Apotel effervescent
+Apotel tablet
+Aspirin
+Aspirin 100mg
+Aspirin 120mg
+Aspirin 150mg
+Aspirin 160mg tablet
+Aspirin 16mg tablet
+Aspirin 1g tablet
+Aspirin 200mg
+Aspirin 250mg
+Aspirin 300mg
+Aspirin 300mg tablet
+Aspirin 325mg
+Aspirin 60mg
+Aspirin 60mg tablet
+Aspirin 75mg
+Aspirin 81mg
+Aspirin capsule
+Aspirin effervescent
+Aspirin tablet
+Augmentin
+Augmentin 100mg
+Augmentin 120mg
+Augmentin 150mg
+Augmentin 160mg tablet
+Augmentin 16mg tablet
+Augmentin 1g tablet
+Augmentin 200mg
+Augmentin 250mg
+Augmentin 300mg
+Augmentin 300mg tablet
+Augmentin 325mg
+Augmentin 60mg
+Augmentin 60mg tablet
+Augmentin 75mg
+Augmentin 81mg
+Augmentin 875mg/125mg tablet
+Augmentin capsule
+Augmentin effervescent
+Augmentin tablet
+Avamys
+Avamys 100mg
+Avamys 120mg
+Avamys 150mg
+Avamys 160mg inhaler
+Avamys 16mg inhaler
+Avamys 1g inhaler
+Avamys 200mg
+Avamys 250mg
+Avamys 300mg
+Avamys 300mg inhaler
+Avamys 325mg
+Avamys 60mg
+Avamys 60mg inhaler
+Avamys 75mg
+Avamys 81mg
+Avamys inhaler
+Avamys spray
+Bactrim
+Bactrim 100mg
+Bactrim 120mg
+Bactrim 150mg
+Bactrim 160mg tablet
+Bactrim 16mg tablet
+Bactrim 1g tablet
+Bactrim 200mg
+Bactrim 250mg
+Bactrim 300mg
+Bactrim 300mg tablet
+Bactrim 325mg
+Bactrim 60mg
+Bactrim 60mg tablet
+Bactrim 75mg
+Bactrim 800mg/160mg tablet
+Bactrim 81mg
+Bactrim capsule
+Bactrim effervescent
+Bactrim tablet
+Benylin
+Benylin 100mg
+Benylin 120mg
+Benylin 150mg
+Benylin 160mg syrup
+Benylin 16mg syrup
+Benylin 1g syrup
+Benylin 200mg
+Benylin 250mg
+Benylin 300mg
+Benylin 300mg syrup
+Benylin 325mg
+Benylin 60mg
+Benylin 60mg syrup
+Benylin 75mg
+Benylin 81mg
+Benylin lozenges
+Benylin spray
+Benylin syrup
+Bepanthene
+Bepanthene 100mg
+Bepanthene 120mg
+Bepanthene 150mg
+Bepanthene 160mg cream 1%
+Bepanthene 16mg cream 1%
+Bepanthene 1g cream 1%
+Bepanthene 200mg
+Bepanthene 250mg
+Bepanthene 300mg
+Bepanthene 300mg cream 1%
+Bepanthene 325mg
+Bepanthene 5% cream
+Bepanthene 60mg
+Bepanthene 60mg cream 1%
+Bepanthene 75mg
+Bepanthene 81mg
+Bepanthene cream 1%
+Bepanthene cream 2%
+Bepanthene gel 1%
+Bepanthene ointment
+Betadine
+Betadine 100mg
+Betadine 120mg
+Betadine 150mg
+Betadine 160mg cream 1%
+Betadine 16mg cream 1%
+Betadine 1g cream 1%
+Betadine 200mg
+Betadine 250mg
+Betadine 300mg
+Betadine 300mg cream 1%
+Betadine 325mg
+Betadine 60mg
+Betadine 60mg cream 1%
+Betadine 75mg
+Betadine 81mg
+Betadine cream 1%
+Betadine cream 2%
+Betadine gel 1%
+Betadine ointment
+Betadine solution 10%
+Brilinta
+Brilinta 100mg
+Brilinta 120mg
+Brilinta 150mg
+Brilinta 160mg tablet
+Brilinta 16mg tablet
+Brilinta 1g tablet
+Brilinta 200mg
+Brilinta 250mg
+Brilinta 300mg
+Brilinta 300mg tablet
+Brilinta 325mg
+Brilinta 60mg
+Brilinta 60mg tablet
+Brilinta 75mg
+Brilinta 81mg
+Brilinta 90mg tablet
+Brilinta capsule
+Brilinta effervescent
+Brilinta tablet
+Bronchostop
+Bronchostop 100mg
+Bronchostop 120mg
+Bronchostop 150mg
+Bronchostop 160mg syrup
+Bronchostop 16mg syrup
+Bronchostop 1g syrup
+Bronchostop 200mg
+Bronchostop 250mg
+Bronchostop 300mg
+Bronchostop 300mg syrup
+Bronchostop 325mg
+Bronchostop 60mg
+Bronchostop 60mg syrup
+Bronchostop 75mg
+Bronchostop 81mg
+Bronchostop lozenges
+Bronchostop spray
+Bronchostop syrup
+Calcium D3
+Calcium D3 100mg
+Calcium D3 120mg
+Calcium D3 150mg
+Calcium D3 160mg tablet
+Calcium D3 16mg tablet
+Calcium D3 1g tablet
+Calcium D3 200mg
+Calcium D3 250mg
+Calcium D3 300mg
+Calcium D3 300mg tablet
+Calcium D3 325mg
+Calcium D3 60mg
+Calcium D3 60mg tablet
+Calcium D3 75mg
+Calcium D3 81mg
+Calcium D3 capsule
+Calcium D3 effervescent
+Calcium D3 tablet
+Canesten
+Canesten 1% cream
+Canesten 100mg
+Canesten 120mg
+Canesten 150mg
+Canesten 160mg cream 1%
+Canesten 16mg cream 1%
+Canesten 1g cream 1%
+Canesten 200mg
+Canesten 250mg
+Canesten 300mg
+Canesten 300mg cream 1%
+Canesten 325mg
+Canesten 60mg
+Canesten 60mg cream 1%
+Canesten 75mg
+Canesten 81mg
+Canesten cream 1%
+Canesten cream 2%
+Canesten gel 1%
+Canesten ointment
+Centrum
+Centrum 100mg
+Centrum 120mg
+Centrum 150mg
+Centrum 160mg tablet
+Centrum 16mg tablet
+Centrum 1g tablet
+Centrum 200mg
+Centrum 250mg
+Centrum 300mg
+Centrum 300mg tablet
+Centrum 325mg
+Centrum 60mg
+Centrum 60mg tablet
+Centrum 75mg
+Centrum 81mg
+Centrum capsule
+Centrum effervescent
+Centrum tablet
+Cetirizine Generics
+Cetirizine Generics 100mg
+Cetirizine Generics 120mg
+Cetirizine Generics 150mg
+Cetirizine Generics 160mg tablet
+Cetirizine Generics 16mg tablet
+Cetirizine Generics 1g tablet
+Cetirizine Generics 200mg
+Cetirizine Generics 250mg
+Cetirizine Generics 300mg
+Cetirizine Generics 300mg tablet
+Cetirizine Generics 325mg
+Cetirizine Generics 60mg
+Cetirizine Generics 60mg tablet
+Cetirizine Generics 75mg
+Cetirizine Generics 81mg
+Cetirizine Generics capsule
+Cetirizine Generics effervescent
+Cetirizine Generics tablet
+Ciproxin
+Ciproxin 100mg
+Ciproxin 120mg
+Ciproxin 150mg
+Ciproxin 160mg tablet
+Ciproxin 16mg tablet
+Ciproxin 1g tablet
+Ciproxin 200mg
+Ciproxin 250mg
+Ciproxin 300mg
+Ciproxin 300mg tablet
+Ciproxin 325mg
+Ciproxin 500mg tablet
+Ciproxin 60mg
+Ciproxin 60mg tablet
+Ciproxin 75mg
+Ciproxin 81mg
+Ciproxin capsule
+Ciproxin effervescent
+Ciproxin tablet
+Claritin
+Claritin 100mg
+Claritin 120mg
+Claritin 150mg
+Claritin 160mg tablet
+Claritin 16mg tablet
+Claritin 1g tablet
+Claritin 200mg
+Claritin 250mg
+Claritin 300mg
+Claritin 300mg tablet
+Claritin 325mg
+Claritin 60mg
+Claritin 60mg tablet
+Claritin 75mg
+Claritin 81mg
+Claritin capsule
+Claritin effervescent
+Claritin tablet
+CoAprovel
+CoAprovel 100mg
+CoAprovel 120mg
+CoAprovel 150mg
+CoAprovel 160mg tablet
+CoAprovel 16mg tablet
+CoAprovel 1g tablet
+CoAprovel 200mg
+CoAprovel 250mg
+CoAprovel 300mg
+CoAprovel 300mg tablet
+CoAprovel 325mg
+CoAprovel 60mg
+CoAprovel 60mg tablet
+CoAprovel 75mg
+CoAprovel 81mg
+CoAprovel capsule
+CoAprovel effervescent
+CoAprovel tablet
+Concor
+Concor 100mg
+Concor 120mg
+Concor 150mg
+Concor 160mg tablet
+Concor 16mg tablet
+Concor 1g tablet
+Concor 200mg
+Concor 250mg
+Concor 300mg
+Concor 300mg tablet
+Concor 325mg
+Concor 60mg
+Concor 60mg tablet
+Concor 75mg
+Concor 81mg
+Concor capsule
+Concor effervescent
+Concor tablet
+Controloc
+Controloc 100mg
+Controloc 120mg
+Controloc 150mg
+Controloc 160mg tablet
+Controloc 16mg tablet
+Controloc 1g tablet
+Controloc 200mg
+Controloc 250mg
+Controloc 300mg
+Controloc 300mg tablet
+Controloc 325mg
+Controloc 40mg tablet
+Controloc 60mg
+Controloc 60mg tablet
+Controloc 75mg
+Controloc 81mg
+Controloc capsule
+Controloc effervescent
+Controloc tablet
+Coveram
+Coveram 100mg
+Coveram 120mg
+Coveram 150mg
+Coveram 160mg tablet
+Coveram 16mg tablet
+Coveram 1g tablet
+Coveram 200mg
+Coveram 250mg
+Coveram 300mg
+Coveram 300mg tablet
+Coveram 325mg
+Coveram 60mg
+Coveram 60mg tablet
+Coveram 75mg
+Coveram 81mg
+Coveram capsule
+Coveram effervescent
+Coveram tablet
+Crestor
+Crestor 100mg
+Crestor 10mg tablet
+Crestor 120mg
+Crestor 150mg
+Crestor 160mg tablet
+Crestor 16mg tablet
+Crestor 1g tablet
+Crestor 200mg
+Crestor 250mg
+Crestor 300mg
+Crestor 300mg tablet
+Crestor 325mg
+Crestor 60mg
+Crestor 60mg tablet
+Crestor 75mg
+Crestor 81mg
+Crestor capsule
+Crestor effervescent
+Crestor tablet
+Daktarin
+Daktarin 100mg
+Daktarin 120mg
+Daktarin 150mg
+Daktarin 160mg cream 1%
+Daktarin 16mg cream 1%
+Daktarin 1g cream 1%
+Daktarin 2% cream
+Daktarin 200mg
+Daktarin 250mg
+Daktarin 300mg
+Daktarin 300mg cream 1%
+Daktarin 325mg
+Daktarin 60mg
+Daktarin 60mg cream 1%
+Daktarin 75mg
+Daktarin 81mg
+Daktarin cream 1%
+Daktarin cream 2%
+Daktarin gel 1%
+Daktarin ointment
+Dalacin C
+Dalacin C 100mg
+Dalacin C 120mg
+Dalacin C 150mg
+Dalacin C 160mg tablet
+Dalacin C 16mg tablet
+Dalacin C 1g tablet
+Dalacin C 200mg
+Dalacin C 250mg
+Dalacin C 300mg
+Dalacin C 300mg capsule
+Dalacin C 300mg tablet
+Dalacin C 325mg
+Dalacin C 60mg
+Dalacin C 60mg tablet
+Dalacin C 75mg
+Dalacin C 81mg
+Dalacin C capsule
+Dalacin C effervescent
+Dalacin C tablet
+Depon
+Depon 100mg
+Depon 120mg
+Depon 150mg
+Depon 160mg tablet
+Depon 16mg tablet
+Depon 1g tablet
+Depon 200mg
+Depon 250mg
+Depon 300mg
+Depon 300mg tablet
+Depon 325mg
+Depon 500mg tablet
+Depon 60mg
+Depon 60mg tablet
+Depon 75mg
+Depon 81mg
+Depon capsule
+Depon effervescent
+Depon tablet
+Differin
+Differin 100mg
+Differin 120mg
+Differin 150mg
+Differin 160mg cream 1%
+Differin 16mg cream 1%
+Differin 1g cream 1%
+Differin 200mg
+Differin 250mg
+Differin 300mg
+Differin 300mg cream 1%
+Differin 325mg
+Differin 60mg
+Differin 60mg cream 1%
+Differin 75mg
+Differin 81mg
+Differin cream 1%
+Differin cream 2%
+Differin gel 1%
+Differin ointment
+Diovan
+Diovan 100mg
+Diovan 120mg
+Diovan 150mg
+Diovan 160mg tablet
+Diovan 16mg tablet
+Diovan 1g tablet
+Diovan 200mg
+Diovan 250mg
+Diovan 300mg
+Diovan 300mg tablet
+Diovan 325mg
+Diovan 60mg
+Diovan 60mg tablet
+Diovan 75mg
+Diovan 81mg
+Diovan capsule
+Diovan effervescent
+Diovan tablet
+Domperidone
+Domperidone 100mg
+Domperidone 120mg
+Domperidone 150mg
+Domperidone 160mg tablet
+Domperidone 16mg tablet
+Domperidone 1g tablet
+Domperidone 200mg
+Domperidone 250mg
+Domperidone 300mg
+Domperidone 300mg tablet
+Domperidone 325mg
+Domperidone 60mg
+Domperidone 60mg tablet
+Domperidone 75mg
+Domperidone 81mg
+Domperidone capsule
+Domperidone effervescent
+Domperidone tablet
+Eliquis
+Eliquis 100mg
+Eliquis 120mg
+Eliquis 150mg
+Eliquis 160mg tablet
+Eliquis 16mg tablet
+Eliquis 1g tablet
+Eliquis 200mg
+Eliquis 250mg
+Eliquis 300mg
+Eliquis 300mg tablet
+Eliquis 325mg
+Eliquis 5mg tablet
+Eliquis 60mg
+Eliquis 60mg tablet
+Eliquis 75mg
+Eliquis 81mg
+Eliquis capsule
+Eliquis effervescent
+Eliquis tablet
+Elocon
+Elocon 100mg
+Elocon 120mg
+Elocon 150mg
+Elocon 160mg tablet
+Elocon 16mg tablet
+Elocon 1g tablet
+Elocon 200mg
+Elocon 250mg
+Elocon 300mg
+Elocon 300mg tablet
+Elocon 325mg
+Elocon 60mg
+Elocon 60mg tablet
+Elocon 75mg
+Elocon 81mg
+Elocon capsule
+Elocon effervescent
+Elocon tablet
+Enterogermina
+Enterogermina 100mg
+Enterogermina 120mg
+Enterogermina 150mg
+Enterogermina 160mg suspension
+Enterogermina 16mg suspension
+Enterogermina 1g suspension
+Enterogermina 200mg
+Enterogermina 250mg
+Enterogermina 300mg
+Enterogermina 300mg suspension
+Enterogermina 325mg
+Enterogermina 60mg
+Enterogermina 60mg suspension
+Enterogermina 75mg
+Enterogermina 81mg
+Enterogermina sachet
+Enterogermina suspension
+Enterogermina suspension 2B
+Flagyl
+Flagyl 100mg
+Flagyl 120mg
+Flagyl 150mg
+Flagyl 160mg tablet
+Flagyl 16mg tablet
+Flagyl 1g tablet
+Flagyl 200mg
+Flagyl 250mg
+Flagyl 300mg
+Flagyl 300mg tablet
+Flagyl 325mg
+Flagyl 500mg tablet
+Flagyl 60mg
+Flagyl 60mg tablet
+Flagyl 75mg
+Flagyl 81mg
+Flagyl capsule
+Flagyl effervescent
+Flagyl tablet
+Flixotide
+Flixotide 100mg
+Flixotide 120mg
+Flixotide 150mg
+Flixotide 160mg inhaler
+Flixotide 16mg inhaler
+Flixotide 1g inhaler
+Flixotide 200mg
+Flixotide 250mg
+Flixotide 300mg
+Flixotide 300mg inhaler
+Flixotide 325mg
+Flixotide 60mg
+Flixotide 60mg inhaler
+Flixotide 75mg
+Flixotide 81mg
+Flixotide inhaler
+Flixotide spray
+Folic Acid
+Folic Acid 100mg
+Folic Acid 120mg
+Folic Acid 150mg
+Folic Acid 160mg tablet
+Folic Acid 16mg tablet
+Folic Acid 1g tablet
+Folic Acid 200mg
+Folic Acid 250mg
+Folic Acid 300mg
+Folic Acid 300mg tablet
+Folic Acid 325mg
+Folic Acid 60mg
+Folic Acid 60mg tablet
+Folic Acid 75mg
+Folic Acid 81mg
+Folic Acid capsule
+Folic Acid effervescent
+Folic Acid tablet
+Forxiga
+Forxiga 100mg
+Forxiga 10mg tablet
+Forxiga 120mg
+Forxiga 150mg
+Forxiga 160mg tablet
+Forxiga 16mg tablet
+Forxiga 1g tablet
+Forxiga 200mg
+Forxiga 250mg
+Forxiga 300mg
+Forxiga 300mg tablet
+Forxiga 325mg
+Forxiga 60mg
+Forxiga 60mg tablet
+Forxiga 75mg
+Forxiga 81mg
+Forxiga capsule
+Forxiga effervescent
+Forxiga tablet
+Fucicort
+Fucicort 100mg
+Fucicort 120mg
+Fucicort 150mg
+Fucicort 160mg cream 1%
+Fucicort 16mg cream 1%
+Fucicort 1g cream 1%
+Fucicort 200mg
+Fucicort 250mg
+Fucicort 300mg
+Fucicort 300mg cream 1%
+Fucicort 325mg
+Fucicort 60mg
+Fucicort 60mg cream 1%
+Fucicort 75mg
+Fucicort 81mg
+Fucicort cream 1%
+Fucicort cream 2%
+Fucicort gel 1%
+Fucicort ointment
+Fucidin
+Fucidin 100mg
+Fucidin 120mg
+Fucidin 150mg
+Fucidin 160mg cream 1%
+Fucidin 16mg cream 1%
+Fucidin 1g cream 1%
+Fucidin 2% cream
+Fucidin 200mg
+Fucidin 250mg
+Fucidin 300mg
+Fucidin 300mg cream 1%
+Fucidin 325mg
+Fucidin 60mg
+Fucidin 60mg cream 1%
+Fucidin 75mg
+Fucidin 81mg
+Fucidin cream 1%
+Fucidin cream 2%
+Fucidin gel 1%
+Fucidin ointment
+Galvus
+Galvus 100mg
+Galvus 120mg
+Galvus 150mg
+Galvus 160mg tablet
+Galvus 16mg tablet
+Galvus 1g tablet
+Galvus 200mg
+Galvus 250mg
+Galvus 300mg
+Galvus 300mg tablet
+Galvus 325mg
+Galvus 60mg
+Galvus 60mg tablet
+Galvus 75mg
+Galvus 81mg
+Galvus capsule
+Galvus effervescent
+Galvus tablet
+Gaviscon
+Gaviscon 100mg
+Gaviscon 120mg
+Gaviscon 150mg
+Gaviscon 160mg suspension
+Gaviscon 16mg suspension
+Gaviscon 1g suspension
+Gaviscon 200mg
+Gaviscon 250mg
+Gaviscon 300mg
+Gaviscon 300mg suspension
+Gaviscon 325mg
+Gaviscon 60mg
+Gaviscon 60mg suspension
+Gaviscon 75mg
+Gaviscon 81mg
+Gaviscon Advance suspension
+Gaviscon sachet
+Gaviscon suspension
+Glucophage
+Glucophage 1000mg tablet
+Glucophage 100mg
+Glucophage 120mg
+Glucophage 150mg
+Glucophage 160mg tablet
+Glucophage 16mg tablet
+Glucophage 1g tablet
+Glucophage 200mg
+Glucophage 250mg
+Glucophage 300mg
+Glucophage 300mg tablet
+Glucophage 325mg
+Glucophage 60mg
+Glucophage 60mg tablet
+Glucophage 75mg
+Glucophage 81mg
+Glucophage XR
+Glucophage XR 100mg
+Glucophage XR 120mg
+Glucophage XR 150mg
+Glucophage XR 160mg tablet
+Glucophage XR 16mg tablet
+Glucophage XR 1g tablet
+Glucophage XR 200mg
+Glucophage XR 250mg
+Glucophage XR 300mg
+Glucophage XR 300mg tablet
+Glucophage XR 325mg
+Glucophage XR 60mg
+Glucophage XR 60mg tablet
+Glucophage XR 750mg tablet
+Glucophage XR 75mg
+Glucophage XR 81mg
+Glucophage XR capsule
+Glucophage XR effervescent
+Glucophage XR tablet
+Glucophage capsule
+Glucophage effervescent
+Glucophage tablet
+Hepatrombin
+Hepatrombin 100mg
+Hepatrombin 120mg
+Hepatrombin 150mg
+Hepatrombin 160mg tablet
+Hepatrombin 16mg tablet
+Hepatrombin 1g tablet
+Hepatrombin 200mg
+Hepatrombin 250mg
+Hepatrombin 300mg
+Hepatrombin 300mg tablet
+Hepatrombin 325mg
+Hepatrombin 60mg
+Hepatrombin 60mg tablet
+Hepatrombin 75mg
+Hepatrombin 81mg
+Hepatrombin capsule
+Hepatrombin effervescent
+Hepatrombin tablet
+Hexalen
+Hexalen 100mg
+Hexalen 120mg
+Hexalen 150mg
+Hexalen 160mg syrup
+Hexalen 16mg syrup
+Hexalen 1g syrup
+Hexalen 200mg
+Hexalen 250mg
+Hexalen 300mg
+Hexalen 300mg syrup
+Hexalen 325mg
+Hexalen 60mg
+Hexalen 60mg syrup
+Hexalen 75mg
+Hexalen 81mg
+Hexalen lozenges
+Hexalen spray
+Hexalen syrup
+Hydrocort
+Hydrocort 100mg
+Hydrocort 120mg
+Hydrocort 150mg
+Hydrocort 160mg cream 1%
+Hydrocort 16mg cream 1%
+Hydrocort 1g cream 1%
+Hydrocort 200mg
+Hydrocort 250mg
+Hydrocort 300mg
+Hydrocort 300mg cream 1%
+Hydrocort 325mg
+Hydrocort 60mg
+Hydrocort 60mg cream 1%
+Hydrocort 75mg
+Hydrocort 81mg
+Hydrocort cream 1%
+Hydrocort cream 2%
+Hydrocort gel 1%
+Hydrocort ointment
+Hylo Comod
+Hylo Comod 100mg
+Hylo Comod 120mg
+Hylo Comod 150mg
+Hylo Comod 160mg tablet
+Hylo Comod 16mg tablet
+Hylo Comod 1g tablet
+Hylo Comod 200mg
+Hylo Comod 250mg
+Hylo Comod 300mg
+Hylo Comod 300mg tablet
+Hylo Comod 325mg
+Hylo Comod 60mg
+Hylo Comod 60mg tablet
+Hylo Comod 75mg
+Hylo Comod 81mg
+Hylo Comod capsule
+Hylo Comod effervescent
+Hylo Comod tablet
+Imodium
+Imodium 100mg
+Imodium 120mg
+Imodium 150mg
+Imodium 160mg tablet
+Imodium 16mg tablet
+Imodium 1g tablet
+Imodium 200mg
+Imodium 250mg
+Imodium 2mg capsule
+Imodium 300mg
+Imodium 300mg tablet
+Imodium 325mg
+Imodium 60mg
+Imodium 60mg tablet
+Imodium 75mg
+Imodium 81mg
+Imodium capsule
+Imodium effervescent
+Imodium tablet
+Janumet
+Janumet 100mg
+Janumet 120mg
+Janumet 150mg
+Janumet 160mg tablet
+Janumet 16mg tablet
+Janumet 1g tablet
+Janumet 200mg
+Janumet 250mg
+Janumet 300mg
+Janumet 300mg tablet
+Janumet 325mg
+Janumet 60mg
+Janumet 60mg tablet
+Janumet 75mg
+Janumet 81mg
+Janumet capsule
+Janumet effervescent
+Janumet tablet
+Jardiance
+Jardiance 100mg
+Jardiance 10mg tablet
+Jardiance 120mg
+Jardiance 150mg
+Jardiance 160mg tablet
+Jardiance 16mg tablet
+Jardiance 1g tablet
+Jardiance 200mg
+Jardiance 250mg
+Jardiance 300mg
+Jardiance 300mg tablet
+Jardiance 325mg
+Jardiance 60mg
+Jardiance 60mg tablet
+Jardiance 75mg
+Jardiance 81mg
+Jardiance capsule
+Jardiance effervescent
+Jardiance tablet
+Klacid
+Klacid 100mg
+Klacid 120mg
+Klacid 150mg
+Klacid 160mg tablet
+Klacid 16mg tablet
+Klacid 1g tablet
+Klacid 200mg
+Klacid 250mg
+Klacid 300mg
+Klacid 300mg tablet
+Klacid 325mg
+Klacid 500mg tablet
+Klacid 60mg
+Klacid 60mg tablet
+Klacid 75mg
+Klacid 81mg
+Klacid capsule
+Klacid effervescent
+Klacid tablet
+Klaricid
+Klaricid 100mg
+Klaricid 120mg
+Klaricid 150mg
+Klaricid 160mg tablet
+Klaricid 16mg tablet
+Klaricid 1g tablet
+Klaricid 200mg
+Klaricid 250mg
+Klaricid 300mg
+Klaricid 300mg tablet
+Klaricid 325mg
+Klaricid 60mg
+Klaricid 60mg tablet
+Klaricid 75mg
+Klaricid 81mg
+Klaricid capsule
+Klaricid effervescent
+Klaricid tablet
+Lescol
+Lescol 100mg
+Lescol 120mg
+Lescol 150mg
+Lescol 160mg tablet
+Lescol 16mg tablet
+Lescol 1g tablet
+Lescol 200mg
+Lescol 250mg
+Lescol 300mg
+Lescol 300mg tablet
+Lescol 325mg
+Lescol 60mg
+Lescol 60mg tablet
+Lescol 75mg
+Lescol 81mg
+Lescol capsule
+Lescol effervescent
+Lescol tablet
+Levocetirizine Generics
+Levocetirizine Generics 100mg
+Levocetirizine Generics 120mg
+Levocetirizine Generics 150mg
+Levocetirizine Generics 160mg tablet
+Levocetirizine Generics 16mg tablet
+Levocetirizine Generics 1g tablet
+Levocetirizine Generics 200mg
+Levocetirizine Generics 250mg
+Levocetirizine Generics 300mg
+Levocetirizine Generics 300mg tablet
+Levocetirizine Generics 325mg
+Levocetirizine Generics 60mg
+Levocetirizine Generics 60mg tablet
+Levocetirizine Generics 75mg
+Levocetirizine Generics 81mg
+Levocetirizine Generics capsule
+Levocetirizine Generics effervescent
+Levocetirizine Generics tablet
+Lipitor
+Lipitor 100mg
+Lipitor 120mg
+Lipitor 150mg
+Lipitor 160mg tablet
+Lipitor 16mg tablet
+Lipitor 1g tablet
+Lipitor 200mg
+Lipitor 20mg tablet
+Lipitor 250mg
+Lipitor 300mg
+Lipitor 300mg tablet
+Lipitor 325mg
+Lipitor 60mg
+Lipitor 60mg tablet
+Lipitor 75mg
+Lipitor 81mg
+Lipitor capsule
+Lipitor effervescent
+Lipitor tablet
+Lopresor
+Lopresor 100mg
+Lopresor 120mg
+Lopresor 150mg
+Lopresor 160mg tablet
+Lopresor 16mg tablet
+Lopresor 1g tablet
+Lopresor 200mg
+Lopresor 250mg
+Lopresor 300mg
+Lopresor 300mg tablet
+Lopresor 325mg
+Lopresor 60mg
+Lopresor 60mg tablet
+Lopresor 75mg
+Lopresor 81mg
+Lopresor capsule
+Lopresor effervescent
+Lopresor tablet
+Losec
+Losec 100mg
+Losec 120mg
+Losec 150mg
+Losec 160mg tablet
+Losec 16mg tablet
+Losec 1g tablet
+Losec 200mg
+Losec 20mg capsule
+Losec 250mg
+Losec 300mg
+Losec 300mg tablet
+Losec 325mg
+Losec 60mg
+Losec 60mg tablet
+Losec 75mg
+Losec 81mg
+Losec MUPS
+Losec MUPS 100mg
+Losec MUPS 120mg
+Losec MUPS 150mg
+Losec MUPS 160mg tablet
+Losec MUPS 16mg tablet
+Losec MUPS 1g tablet
+Losec MUPS 200mg
+Losec MUPS 250mg
+Losec MUPS 300mg
+Losec MUPS 300mg tablet
+Losec MUPS 325mg
+Losec MUPS 60mg
+Losec MUPS 60mg tablet
+Losec MUPS 75mg
+Losec MUPS 81mg
+Losec MUPS capsule
+Losec MUPS effervescent
+Losec MUPS tablet
+Losec capsule
+Losec effervescent
+Losec tablet
+Maalox
+Maalox 100mg
+Maalox 120mg
+Maalox 150mg
+Maalox 160mg suspension
+Maalox 16mg suspension
+Maalox 1g suspension
+Maalox 200mg
+Maalox 250mg
+Maalox 300mg
+Maalox 300mg suspension
+Maalox 325mg
+Maalox 60mg
+Maalox 60mg suspension
+Maalox 75mg
+Maalox 81mg
+Maalox sachet
+Maalox suspension
+Micardis
+Micardis 100mg
+Micardis 120mg
+Micardis 150mg
+Micardis 160mg tablet
+Micardis 16mg tablet
+Micardis 1g tablet
+Micardis 200mg
+Micardis 250mg
+Micardis 300mg
+Micardis 300mg tablet
+Micardis 325mg
+Micardis 60mg
+Micardis 60mg tablet
+Micardis 75mg
+Micardis 81mg
+Micardis capsule
+Micardis effervescent
+Micardis tablet
+Monurol
+Monurol 100mg
+Monurol 120mg
+Monurol 150mg
+Monurol 160mg tablet
+Monurol 16mg tablet
+Monurol 1g tablet
+Monurol 200mg
+Monurol 250mg
+Monurol 300mg
+Monurol 300mg tablet
+Monurol 325mg
+Monurol 60mg
+Monurol 60mg tablet
+Monurol 75mg
+Monurol 81mg
+Monurol capsule
+Monurol effervescent
+Monurol tablet
+Nebilet
+Nebilet 100mg
+Nebilet 120mg
+Nebilet 150mg
+Nebilet 160mg tablet
+Nebilet 16mg tablet
+Nebilet 1g tablet
+Nebilet 200mg
+Nebilet 250mg
+Nebilet 300mg
+Nebilet 300mg tablet
+Nebilet 325mg
+Nebilet 60mg
+Nebilet 60mg tablet
+Nebilet 75mg
+Nebilet 81mg
+Nebilet capsule
+Nebilet effervescent
+Nebilet tablet
+Nexium
+Nexium 100mg
+Nexium 120mg
+Nexium 150mg
+Nexium 160mg tablet
+Nexium 16mg tablet
+Nexium 1g tablet
+Nexium 200mg
+Nexium 20mg tablet
+Nexium 250mg
+Nexium 300mg
+Nexium 300mg tablet
+Nexium 325mg
+Nexium 60mg
+Nexium 60mg tablet
+Nexium 75mg
+Nexium 81mg
+Nexium Control
+Nexium Control 100mg
+Nexium Control 120mg
+Nexium Control 150mg
+Nexium Control 160mg tablet
+Nexium Control 16mg tablet
+Nexium Control 1g tablet
+Nexium Control 200mg
+Nexium Control 250mg
+Nexium Control 300mg
+Nexium Control 300mg tablet
+Nexium Control 325mg
+Nexium Control 60mg
+Nexium Control 60mg tablet
+Nexium Control 75mg
+Nexium Control 81mg
+Nexium Control capsule
+Nexium Control effervescent
+Nexium Control tablet
+Nexium capsule
+Nexium effervescent
+Nexium tablet
+Niflamol
+Niflamol 100mg
+Niflamol 120mg
+Niflamol 150mg
+Niflamol 160mg tablet
+Niflamol 16mg tablet
+Niflamol 1g tablet
+Niflamol 200mg
+Niflamol 250mg
+Niflamol 300mg
+Niflamol 300mg tablet
+Niflamol 325mg
+Niflamol 60mg
+Niflamol 60mg tablet
+Niflamol 75mg
+Niflamol 81mg
+Niflamol capsule
+Niflamol effervescent
+Niflamol tablet
+Norvasc
+Norvasc 100mg
+Norvasc 120mg
+Norvasc 150mg
+Norvasc 160mg tablet
+Norvasc 16mg tablet
+Norvasc 1g tablet
+Norvasc 200mg
+Norvasc 250mg
+Norvasc 300mg
+Norvasc 300mg tablet
+Norvasc 325mg
+Norvasc 60mg
+Norvasc 60mg tablet
+Norvasc 75mg
+Norvasc 81mg
+Norvasc capsule
+Norvasc effervescent
+Norvasc tablet
+Nurofen
+Nurofen 100mg
+Nurofen 120mg
+Nurofen 150mg
+Nurofen 160mg tablet
+Nurofen 16mg tablet
+Nurofen 1g tablet
+Nurofen 200mg
+Nurofen 200mg capsule
+Nurofen 250mg
+Nurofen 300mg
+Nurofen 300mg tablet
+Nurofen 325mg
+Nurofen 60mg
+Nurofen 60mg tablet
+Nurofen 75mg
+Nurofen 81mg
+Nurofen capsule
+Nurofen effervescent
+Nurofen tablet
+Otrivin
+Otrivin 100mg
+Otrivin 120mg
+Otrivin 150mg
+Otrivin 160mg inhaler
+Otrivin 16mg inhaler
+Otrivin 1g inhaler
+Otrivin 200mg
+Otrivin 250mg
+Otrivin 300mg
+Otrivin 300mg inhaler
+Otrivin 325mg
+Otrivin 60mg
+Otrivin 60mg inhaler
+Otrivin 75mg
+Otrivin 81mg
+Otrivin inhaler
+Otrivin spray
+Panadol
+Panadol 100mg
+Panadol 120mg
+Panadol 150mg
+Panadol 160mg tablet
+Panadol 16mg tablet
+Panadol 1g tablet
+Panadol 200mg
+Panadol 250mg
+Panadol 300mg
+Panadol 300mg tablet
+Panadol 325mg
+Panadol 500mg effervescent
+Panadol 60mg
+Panadol 60mg tablet
+Panadol 75mg
+Panadol 81mg
+Panadol capsule
+Panadol effervescent
+Panadol tablet
+Perskindol
+Perskindol 100mg
+Perskindol 120mg
+Perskindol 150mg
+Perskindol 160mg tablet
+Perskindol 16mg tablet
+Perskindol 1g tablet
+Perskindol 200mg
+Perskindol 250mg
+Perskindol 300mg
+Perskindol 300mg tablet
+Perskindol 325mg
+Perskindol 60mg
+Perskindol 60mg tablet
+Perskindol 75mg
+Perskindol 81mg
+Perskindol capsule
+Perskindol effervescent
+Perskindol tablet
+Plavix
+Plavix 100mg
+Plavix 120mg
+Plavix 150mg
+Plavix 160mg tablet
+Plavix 16mg tablet
+Plavix 1g tablet
+Plavix 200mg
+Plavix 250mg
+Plavix 300mg
+Plavix 300mg tablet
+Plavix 325mg
+Plavix 60mg
+Plavix 60mg tablet
+Plavix 75mg
+Plavix 75mg tablet
+Plavix 81mg
+Plavix capsule
+Plavix effervescent
+Plavix tablet
+Ponotex
+Ponotex 100mg
+Ponotex 120mg
+Ponotex 150mg
+Ponotex 160mg tablet
+Ponotex 16mg tablet
+Ponotex 1g tablet
+Ponotex 200mg
+Ponotex 250mg
+Ponotex 300mg
+Ponotex 300mg tablet
+Ponotex 325mg
+Ponotex 60mg
+Ponotex 60mg tablet
+Ponotex 75mg
+Ponotex 81mg
+Ponotex capsule
+Ponotex effervescent
+Ponotex tablet
+Ponstan
+Ponstan 100mg
+Ponstan 120mg
+Ponstan 150mg
+Ponstan 160mg tablet
+Ponstan 16mg tablet
+Ponstan 1g tablet
+Ponstan 200mg
+Ponstan 250mg
+Ponstan 300mg
+Ponstan 300mg tablet
+Ponstan 325mg
+Ponstan 500mg tablet
+Ponstan 60mg
+Ponstan 60mg tablet
+Ponstan 75mg
+Ponstan 81mg
+Ponstan capsule
+Ponstan effervescent
+Ponstan tablet
+Pradaxa
+Pradaxa 100mg
+Pradaxa 120mg
+Pradaxa 150mg
+Pradaxa 160mg tablet
+Pradaxa 16mg tablet
+Pradaxa 1g tablet
+Pradaxa 200mg
+Pradaxa 250mg
+Pradaxa 300mg
+Pradaxa 300mg tablet
+Pradaxa 325mg
+Pradaxa 60mg
+Pradaxa 60mg tablet
+Pradaxa 75mg
+Pradaxa 81mg
+Pradaxa capsule
+Pradaxa effervescent
+Pradaxa tablet
+Primperan
+Primperan 100mg
+Primperan 120mg
+Primperan 150mg
+Primperan 160mg tablet
+Primperan 16mg tablet
+Primperan 1g tablet
+Primperan 200mg
+Primperan 250mg
+Primperan 300mg
+Primperan 300mg tablet
+Primperan 325mg
+Primperan 60mg
+Primperan 60mg tablet
+Primperan 75mg
+Primperan 81mg
+Primperan capsule
+Primperan effervescent
+Primperan tablet
+Prospan
+Prospan 100mg
+Prospan 120mg
+Prospan 150mg
+Prospan 160mg syrup
+Prospan 16mg syrup
+Prospan 1g syrup
+Prospan 200mg
+Prospan 250mg
+Prospan 300mg
+Prospan 300mg syrup
+Prospan 325mg
+Prospan 60mg
+Prospan 60mg syrup
+Prospan 75mg
+Prospan 81mg
+Prospan lozenges
+Prospan spray
+Prospan syrup
+Pulmicort
+Pulmicort 100mg
+Pulmicort 120mg
+Pulmicort 150mg
+Pulmicort 160mg inhaler
+Pulmicort 16mg inhaler
+Pulmicort 1g inhaler
+Pulmicort 200mg
+Pulmicort 250mg
+Pulmicort 300mg
+Pulmicort 300mg inhaler
+Pulmicort 325mg
+Pulmicort 60mg
+Pulmicort 60mg inhaler
+Pulmicort 75mg
+Pulmicort 81mg
+Pulmicort inhaler
+Pulmicort spray
+Refresh Tears
+Refresh Tears 100mg
+Refresh Tears 120mg
+Refresh Tears 150mg
+Refresh Tears 160mg tablet
+Refresh Tears 16mg tablet
+Refresh Tears 1g tablet
+Refresh Tears 200mg
+Refresh Tears 250mg
+Refresh Tears 300mg
+Refresh Tears 300mg tablet
+Refresh Tears 325mg
+Refresh Tears 60mg
+Refresh Tears 60mg tablet
+Refresh Tears 75mg
+Refresh Tears 81mg
+Refresh Tears capsule
+Refresh Tears effervescent
+Refresh Tears tablet
+Reparil
+Reparil 100mg
+Reparil 120mg
+Reparil 150mg
+Reparil 160mg tablet
+Reparil 16mg tablet
+Reparil 1g tablet
+Reparil 200mg
+Reparil 250mg
+Reparil 300mg
+Reparil 300mg tablet
+Reparil 325mg
+Reparil 60mg
+Reparil 60mg tablet
+Reparil 75mg
+Reparil 81mg
+Reparil capsule
+Reparil effervescent
+Reparil tablet
+Rhinostop
+Rhinostop 100mg
+Rhinostop 120mg
+Rhinostop 150mg
+Rhinostop 160mg tablet
+Rhinostop 16mg tablet
+Rhinostop 1g tablet
+Rhinostop 200mg
+Rhinostop 250mg
+Rhinostop 300mg
+Rhinostop 300mg tablet
+Rhinostop 325mg
+Rhinostop 60mg
+Rhinostop 60mg tablet
+Rhinostop 75mg
+Rhinostop 81mg
+Rhinostop capsule
+Rhinostop effervescent
+Rhinostop tablet
+Salospir
+Salospir 100mg
+Salospir 100mg tablet
+Salospir 120mg
+Salospir 150mg
+Salospir 160mg tablet
+Salospir 16mg tablet
+Salospir 1g tablet
+Salospir 200mg
+Salospir 250mg
+Salospir 300mg
+Salospir 300mg tablet
+Salospir 325mg
+Salospir 60mg
+Salospir 60mg tablet
+Salospir 75mg
+Salospir 81mg
+Salospir capsule
+Salospir effervescent
+Salospir tablet
+Seloken
+Seloken 100mg
+Seloken 120mg
+Seloken 150mg
+Seloken 160mg tablet
+Seloken 16mg tablet
+Seloken 1g tablet
+Seloken 200mg
+Seloken 250mg
+Seloken 300mg
+Seloken 300mg tablet
+Seloken 325mg
+Seloken 60mg
+Seloken 60mg tablet
+Seloken 75mg
+Seloken 81mg
+Seloken capsule
+Seloken effervescent
+Seloken tablet
+Seretide
+Seretide 100mg
+Seretide 120mg
+Seretide 150mg
+Seretide 160mg inhaler
+Seretide 16mg inhaler
+Seretide 1g inhaler
+Seretide 200mg
+Seretide 250/50 inhaler
+Seretide 250mg
+Seretide 300mg
+Seretide 300mg inhaler
+Seretide 325mg
+Seretide 60mg
+Seretide 60mg inhaler
+Seretide 75mg
+Seretide 81mg
+Seretide inhaler
+Seretide spray
+Silomat
+Silomat 100mg
+Silomat 120mg
+Silomat 150mg
+Silomat 160mg inhaler
+Silomat 16mg inhaler
+Silomat 1g inhaler
+Silomat 200mg
+Silomat 250mg
+Silomat 300mg
+Silomat 300mg inhaler
+Silomat 325mg
+Silomat 60mg
+Silomat 60mg inhaler
+Silomat 75mg
+Silomat 81mg
+Silomat inhaler
+Silomat spray
+Sintrom
+Sintrom 100mg
+Sintrom 120mg
+Sintrom 150mg
+Sintrom 160mg tablet
+Sintrom 16mg tablet
+Sintrom 1g tablet
+Sintrom 200mg
+Sintrom 250mg
+Sintrom 300mg
+Sintrom 300mg tablet
+Sintrom 325mg
+Sintrom 60mg
+Sintrom 60mg tablet
+Sintrom 75mg
+Sintrom 81mg
+Sintrom capsule
+Sintrom effervescent
+Sintrom tablet
+Skinoren
+Skinoren 100mg
+Skinoren 120mg
+Skinoren 150mg
+Skinoren 160mg cream 1%
+Skinoren 16mg cream 1%
+Skinoren 1g cream 1%
+Skinoren 200mg
+Skinoren 250mg
+Skinoren 300mg
+Skinoren 300mg cream 1%
+Skinoren 325mg
+Skinoren 60mg
+Skinoren 60mg cream 1%
+Skinoren 75mg
+Skinoren 81mg
+Skinoren cream 1%
+Skinoren cream 2%
+Skinoren gel 1%
+Skinoren ointment
+Smecta
+Smecta 100mg
+Smecta 120mg
+Smecta 150mg
+Smecta 160mg suspension
+Smecta 16mg suspension
+Smecta 1g suspension
+Smecta 200mg
+Smecta 250mg
+Smecta 300mg
+Smecta 300mg suspension
+Smecta 325mg
+Smecta 3g sachet
+Smecta 60mg
+Smecta 60mg suspension
+Smecta 75mg
+Smecta 81mg
+Smecta sachet
+Smecta suspension
+Solpadeine
+Solpadeine 100mg
+Solpadeine 120mg
+Solpadeine 150mg
+Solpadeine 160mg tablet
+Solpadeine 16mg tablet
+Solpadeine 1g tablet
+Solpadeine 200mg
+Solpadeine 250mg
+Solpadeine 300mg
+Solpadeine 300mg tablet
+Solpadeine 325mg
+Solpadeine 500mg/30mg effervescent
+Solpadeine 60mg
+Solpadeine 60mg tablet
+Solpadeine 75mg
+Solpadeine 81mg
+Solpadeine capsule
+Solpadeine effervescent
+Solpadeine tablet
+Strepsils
+Strepsils 100mg
+Strepsils 120mg
+Strepsils 150mg
+Strepsils 160mg syrup
+Strepsils 16mg syrup
+Strepsils 1g syrup
+Strepsils 200mg
+Strepsils 250mg
+Strepsils 300mg
+Strepsils 300mg syrup
+Strepsils 325mg
+Strepsils 60mg
+Strepsils 60mg syrup
+Strepsils 75mg
+Strepsils 81mg
+Strepsils lozenges
+Strepsils spray
+Strepsils syrup
+Supradyn
+Supradyn 100mg
+Supradyn 120mg
+Supradyn 150mg
+Supradyn 160mg tablet
+Supradyn 16mg tablet
+Supradyn 1g tablet
+Supradyn 200mg
+Supradyn 250mg
+Supradyn 300mg
+Supradyn 300mg tablet
+Supradyn 325mg
+Supradyn 60mg
+Supradyn 60mg tablet
+Supradyn 75mg
+Supradyn 81mg
+Supradyn capsule
+Supradyn effervescent
+Supradyn tablet
+Suprax
+Suprax 100mg
+Suprax 120mg
+Suprax 150mg
+Suprax 160mg tablet
+Suprax 16mg tablet
+Suprax 1g tablet
+Suprax 200mg
+Suprax 250mg
+Suprax 300mg
+Suprax 300mg tablet
+Suprax 325mg
+Suprax 60mg
+Suprax 60mg tablet
+Suprax 75mg
+Suprax 81mg
+Suprax capsule
+Suprax effervescent
+Suprax tablet
+Symbicort
+Symbicort 100mg
+Symbicort 120mg
+Symbicort 150mg
+Symbicort 160mg inhaler
+Symbicort 16mg inhaler
+Symbicort 1g inhaler
+Symbicort 200/6 inhaler
+Symbicort 200mg
+Symbicort 250mg
+Symbicort 300mg
+Symbicort 300mg inhaler
+Symbicort 325mg
+Symbicort 60mg
+Symbicort 60mg inhaler
+Symbicort 75mg
+Symbicort 81mg
+Symbicort inhaler
+Symbicort spray
+Tamiflu
+Tamiflu 100mg
+Tamiflu 120mg
+Tamiflu 150mg
+Tamiflu 160mg tablet
+Tamiflu 16mg tablet
+Tamiflu 1g tablet
+Tamiflu 200mg
+Tamiflu 250mg
+Tamiflu 300mg
+Tamiflu 300mg tablet
+Tamiflu 325mg
+Tamiflu 60mg
+Tamiflu 60mg tablet
+Tamiflu 75mg
+Tamiflu 81mg
+Tamiflu capsule
+Tamiflu effervescent
+Tamiflu tablet
+Tantum Verde
+Tantum Verde 100mg
+Tantum Verde 120mg
+Tantum Verde 150mg
+Tantum Verde 160mg syrup
+Tantum Verde 16mg syrup
+Tantum Verde 1g syrup
+Tantum Verde 200mg
+Tantum Verde 250mg
+Tantum Verde 300mg
+Tantum Verde 300mg syrup
+Tantum Verde 325mg
+Tantum Verde 60mg
+Tantum Verde 60mg syrup
+Tantum Verde 75mg
+Tantum Verde 81mg
+Tantum Verde lozenges
+Tantum Verde spray
+Tantum Verde syrup
+Tasectan
+Tasectan 100mg
+Tasectan 120mg
+Tasectan 150mg
+Tasectan 160mg suspension
+Tasectan 16mg suspension
+Tasectan 1g suspension
+Tasectan 200mg
+Tasectan 250mg
+Tasectan 300mg
+Tasectan 300mg suspension
+Tasectan 325mg
+Tasectan 500mg capsule
+Tasectan 60mg
+Tasectan 60mg suspension
+Tasectan 75mg
+Tasectan 81mg
+Tasectan sachet
+Tasectan suspension
+Tavanic
+Tavanic 100mg
+Tavanic 120mg
+Tavanic 150mg
+Tavanic 160mg tablet
+Tavanic 16mg tablet
+Tavanic 1g tablet
+Tavanic 200mg
+Tavanic 250mg
+Tavanic 300mg
+Tavanic 300mg tablet
+Tavanic 325mg
+Tavanic 500mg tablet
+Tavanic 60mg
+Tavanic 60mg tablet
+Tavanic 75mg
+Tavanic 81mg
+Tavanic capsule
+Tavanic effervescent
+Tavanic tablet
+Tenormin
+Tenormin 100mg
+Tenormin 120mg
+Tenormin 150mg
+Tenormin 160mg tablet
+Tenormin 16mg tablet
+Tenormin 1g tablet
+Tenormin 200mg
+Tenormin 250mg
+Tenormin 300mg
+Tenormin 300mg tablet
+Tenormin 325mg
+Tenormin 60mg
+Tenormin 60mg tablet
+Tenormin 75mg
+Tenormin 81mg
+Tenormin capsule
+Tenormin effervescent
+Tenormin tablet
+Thermogel
+Thermogel 100mg
+Thermogel 120mg
+Thermogel 150mg
+Thermogel 160mg tablet
+Thermogel 16mg tablet
+Thermogel 1g tablet
+Thermogel 200mg
+Thermogel 250mg
+Thermogel 300mg
+Thermogel 300mg tablet
+Thermogel 325mg
+Thermogel 60mg
+Thermogel 60mg tablet
+Thermogel 75mg
+Thermogel 81mg
+Thermogel capsule
+Thermogel effervescent
+Thermogel tablet
+Trajenta
+Trajenta 100mg
+Trajenta 120mg
+Trajenta 150mg
+Trajenta 160mg tablet
+Trajenta 16mg tablet
+Trajenta 1g tablet
+Trajenta 200mg
+Trajenta 250mg
+Trajenta 300mg
+Trajenta 300mg tablet
+Trajenta 325mg
+Trajenta 60mg
+Trajenta 60mg tablet
+Trajenta 75mg
+Trajenta 81mg
+Trajenta capsule
+Trajenta effervescent
+Trajenta tablet
+Urotric
+Urotric 100mg
+Urotric 120mg
+Urotric 150mg
+Urotric 160mg tablet
+Urotric 16mg tablet
+Urotric 1g tablet
+Urotric 200mg
+Urotric 250mg
+Urotric 300mg
+Urotric 300mg tablet
+Urotric 325mg
+Urotric 60mg
+Urotric 60mg tablet
+Urotric 75mg
+Urotric 81mg
+Urotric capsule
+Urotric effervescent
+Urotric tablet
+Ventolin
+Ventolin 100mg
+Ventolin 120mg
+Ventolin 150mg
+Ventolin 160mg inhaler
+Ventolin 16mg inhaler
+Ventolin 1g inhaler
+Ventolin 200mg
+Ventolin 250mg
+Ventolin 300mg
+Ventolin 300mg inhaler
+Ventolin 325mg
+Ventolin 60mg
+Ventolin 60mg inhaler
+Ventolin 75mg
+Ventolin 81mg
+Ventolin inhaler
+Ventolin inhaler 100mcg
+Ventolin spray
+Vibramycin
+Vibramycin 100mg
+Vibramycin 100mg capsule
+Vibramycin 120mg
+Vibramycin 150mg
+Vibramycin 160mg tablet
+Vibramycin 16mg tablet
+Vibramycin 1g tablet
+Vibramycin 200mg
+Vibramycin 250mg
+Vibramycin 300mg
+Vibramycin 300mg tablet
+Vibramycin 325mg
+Vibramycin 60mg
+Vibramycin 60mg tablet
+Vibramycin 75mg
+Vibramycin 81mg
+Vibramycin capsule
+Vibramycin effervescent
+Vibramycin tablet
+Victoza
+Victoza 100mg
+Victoza 120mg
+Victoza 150mg
+Victoza 160mg tablet
+Victoza 16mg tablet
+Victoza 1g tablet
+Victoza 200mg
+Victoza 250mg
+Victoza 300mg
+Victoza 300mg tablet
+Victoza 325mg
+Victoza 60mg
+Victoza 60mg tablet
+Victoza 75mg
+Victoza 81mg
+Victoza capsule
+Victoza effervescent
+Victoza tablet
+Visine
+Visine 100mg
+Visine 120mg
+Visine 150mg
+Visine 160mg tablet
+Visine 16mg tablet
+Visine 1g tablet
+Visine 200mg
+Visine 250mg
+Visine 300mg
+Visine 300mg tablet
+Visine 325mg
+Visine 60mg
+Visine 60mg tablet
+Visine 75mg
+Visine 81mg
+Visine capsule
+Visine effervescent
+Visine tablet
+Vitabiotics Feroglobin
+Vitabiotics Feroglobin 100mg
+Vitabiotics Feroglobin 120mg
+Vitabiotics Feroglobin 150mg
+Vitabiotics Feroglobin 160mg tablet
+Vitabiotics Feroglobin 16mg tablet
+Vitabiotics Feroglobin 1g tablet
+Vitabiotics Feroglobin 200mg
+Vitabiotics Feroglobin 250mg
+Vitabiotics Feroglobin 300mg
+Vitabiotics Feroglobin 300mg tablet
+Vitabiotics Feroglobin 325mg
+Vitabiotics Feroglobin 60mg
+Vitabiotics Feroglobin 60mg tablet
+Vitabiotics Feroglobin 75mg
+Vitabiotics Feroglobin 81mg
+Vitabiotics Feroglobin capsule
+Vitabiotics Feroglobin effervescent
+Vitabiotics Feroglobin tablet
+Vitamin D3
+Vitamin D3 100mg
+Vitamin D3 120mg
+Vitamin D3 150mg
+Vitamin D3 160mg tablet
+Vitamin D3 16mg tablet
+Vitamin D3 1g tablet
+Vitamin D3 200mg
+Vitamin D3 250mg
+Vitamin D3 300mg
+Vitamin D3 300mg tablet
+Vitamin D3 325mg
+Vitamin D3 60mg
+Vitamin D3 60mg tablet
+Vitamin D3 75mg
+Vitamin D3 81mg
+Vitamin D3 capsule
+Vitamin D3 effervescent
+Vitamin D3 tablet
+Voltaren
+Voltaren 100mg
+Voltaren 120mg
+Voltaren 150mg
+Voltaren 160mg cream 1%
+Voltaren 16mg cream 1%
+Voltaren 1g cream 1%
+Voltaren 200mg
+Voltaren 250mg
+Voltaren 300mg
+Voltaren 300mg cream 1%
+Voltaren 325mg
+Voltaren 60mg
+Voltaren 60mg cream 1%
+Voltaren 75mg
+Voltaren 81mg
+Voltaren Emulgel
+Voltaren Emulgel 1% gel
+Voltaren Emulgel 100mg
+Voltaren Emulgel 120mg
+Voltaren Emulgel 150mg
+Voltaren Emulgel 160mg cream 1%
+Voltaren Emulgel 16mg cream 1%
+Voltaren Emulgel 1g cream 1%
+Voltaren Emulgel 200mg
+Voltaren Emulgel 250mg
+Voltaren Emulgel 300mg
+Voltaren Emulgel 300mg cream 1%
+Voltaren Emulgel 325mg
+Voltaren Emulgel 60mg
+Voltaren Emulgel 60mg cream 1%
+Voltaren Emulgel 75mg
+Voltaren Emulgel 81mg
+Voltaren Emulgel cream 1%
+Voltaren Emulgel cream 2%
+Voltaren Emulgel gel 1%
+Voltaren Emulgel ointment
+Voltaren cream 1%
+Voltaren cream 2%
+Voltaren gel 1%
+Voltaren ointment
+Vytorin
+Vytorin 100mg
+Vytorin 120mg
+Vytorin 150mg
+Vytorin 160mg tablet
+Vytorin 16mg tablet
+Vytorin 1g tablet
+Vytorin 200mg
+Vytorin 250mg
+Vytorin 300mg
+Vytorin 300mg tablet
+Vytorin 325mg
+Vytorin 60mg
+Vytorin 60mg tablet
+Vytorin 75mg
+Vytorin 81mg
+Vytorin capsule
+Vytorin effervescent
+Vytorin tablet
+Xarelto
+Xarelto 100mg
+Xarelto 120mg
+Xarelto 150mg
+Xarelto 160mg tablet
+Xarelto 16mg tablet
+Xarelto 1g tablet
+Xarelto 200mg
+Xarelto 20mg tablet
+Xarelto 250mg
+Xarelto 300mg
+Xarelto 300mg tablet
+Xarelto 325mg
+Xarelto 60mg
+Xarelto 60mg tablet
+Xarelto 75mg
+Xarelto 81mg
+Xarelto capsule
+Xarelto effervescent
+Xarelto tablet
+Xozal
+Xozal 100mg
+Xozal 120mg
+Xozal 150mg
+Xozal 160mg tablet
+Xozal 16mg tablet
+Xozal 1g tablet
+Xozal 200mg
+Xozal 250mg
+Xozal 300mg
+Xozal 300mg tablet
+Xozal 325mg
+Xozal 60mg
+Xozal 60mg tablet
+Xozal 75mg
+Xozal 81mg
+Xozal capsule
+Xozal effervescent
+Xozal tablet
+Zantac
+Zantac 100mg
+Zantac 120mg
+Zantac 150mg
+Zantac 160mg tablet
+Zantac 16mg tablet
+Zantac 1g tablet
+Zantac 200mg
+Zantac 250mg
+Zantac 300mg
+Zantac 300mg tablet
+Zantac 325mg
+Zantac 60mg
+Zantac 60mg tablet
+Zantac 75mg
+Zantac 81mg
+Zantac capsule
+Zantac effervescent
+Zantac tablet
+Zinnat
+Zinnat 100mg
+Zinnat 120mg
+Zinnat 150mg
+Zinnat 160mg tablet
+Zinnat 16mg tablet
+Zinnat 1g tablet
+Zinnat 200mg
+Zinnat 250mg
+Zinnat 300mg
+Zinnat 300mg tablet
+Zinnat 325mg
+Zinnat 500mg tablet
+Zinnat 60mg
+Zinnat 60mg tablet
+Zinnat 75mg
+Zinnat 81mg
+Zinnat capsule
+Zinnat effervescent
+Zinnat tablet
+Zithromax
+Zithromax 100mg
+Zithromax 120mg
+Zithromax 150mg
+Zithromax 160mg tablet
+Zithromax 16mg tablet
+Zithromax 1g tablet
+Zithromax 200mg
+Zithromax 250mg
+Zithromax 300mg
+Zithromax 300mg tablet
+Zithromax 325mg
+Zithromax 500mg tablet
+Zithromax 60mg
+Zithromax 60mg tablet
+Zithromax 75mg
+Zithromax 81mg
+Zithromax capsule
+Zithromax effervescent
+Zithromax tablet
+Zocor
+Zocor 100mg
+Zocor 120mg
+Zocor 150mg
+Zocor 160mg tablet
+Zocor 16mg tablet
+Zocor 1g tablet
+Zocor 200mg
+Zocor 20mg tablet
+Zocor 250mg
+Zocor 300mg
+Zocor 300mg tablet
+Zocor 325mg
+Zocor 60mg
+Zocor 60mg tablet
+Zocor 75mg
+Zocor 81mg
+Zocor capsule
+Zocor effervescent
+Zocor tablet
+Zovirax
+Zovirax 100mg
+Zovirax 120mg
+Zovirax 150mg
+Zovirax 160mg cream 1%
+Zovirax 16mg cream 1%
+Zovirax 1g cream 1%
+Zovirax 200mg
+Zovirax 250mg
+Zovirax 300mg
+Zovirax 300mg cream 1%
+Zovirax 325mg
+Zovirax 5% cream
+Zovirax 60mg
+Zovirax 60mg cream 1%
+Zovirax 75mg
+Zovirax 81mg
+Zovirax cream 1%
+Zovirax cream 2%
+Zovirax gel 1%
+Zovirax ointment
+Zyrtec
+Zyrtec 100mg
+Zyrtec 120mg
+Zyrtec 150mg
+Zyrtec 160mg tablet
+Zyrtec 16mg tablet
+Zyrtec 1g tablet
+Zyrtec 200mg
+Zyrtec 250mg
+Zyrtec 300mg
+Zyrtec 300mg tablet
+Zyrtec 325mg
+Zyrtec 60mg
+Zyrtec 60mg tablet
+Zyrtec 75mg
+Zyrtec 81mg
+Zyrtec capsule
+Zyrtec effervescent
+Zyrtec tablet
 Zocor 20mg
 Zovirax 5% cream
 Zylapour 300mg
