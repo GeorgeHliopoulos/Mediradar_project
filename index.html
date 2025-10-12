@@ -41,17 +41,68 @@
     /* Autocomplete dropdown */
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
+    /* Badge styles */
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
   </style>
+
+  <!-- Inline manifest (PWA) -->
+  <script id="app-manifest" type="application/json">
+  {
+    "name": "MediRadar",
+    "short_name": "MediRadar",
+    "description": "Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f6fbfb",
+    "theme_color": "#29a3a3",
+    "icons": [
+      { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' ry='14' width='64' height='64' fill='%2329a3a3'/%3E%3Cpath fill='white' d='M30 6h4v6a16 16 0 0 1 18 18h6v4h-6a16 16 0 0 1-18 18v6h-4v-6A16 16 0 0 1 12 34H6v-4h6A16 16 0 0 1 30 12z'/%3E%3Ccircle cx='32' cy='32' r='10' fill='white'/%3E%3C/svg%3E", "sizes":"64x64", "type":"image/svg+xml", "purpose": "any maskable" }
+    ]
+  }
+  </script>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
+
+  <!-- Top bar: flags + theme -->
+  <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-3 z-50">
+    <div></div>
+    <div class="flex items-center gap-2 ml-auto">
+      <!-- Language toggle -->
+      <div class="flex items-center rounded-xl overflow-hidden bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur">
+        <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
+          <!-- Greek flag -->
+          <svg width="14" height="10" viewBox="0 0 27 18" aria-hidden="true">
+            <rect width="27" height="18" fill="#0D5EAF"/>
+            <g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g>
+            <rect width="10" height="10" fill="#0D5EAF"/><rect x="4" width="2" height="10" fill="#fff"/><rect y="4" width="10" height="2" fill="#fff"/>
+          </svg> EL
+        </button>
+        <button id="lang-en" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 opacity-90 hover:opacity-100">
+          <!-- UK flag -->
+          <svg width="14" height="10" viewBox="0 0 28 20" aria-hidden="true">
+            <rect width="28" height="20" fill="#012169"/>
+            <path d="M0,0 L28,20 M28,0 L0,20" stroke="#fff" stroke-width="5"/>
+            <path d="M0,0 L28,20 M28,0 L0,20" stroke="#C8102E" stroke-width="3"/>
+            <rect x="11" width="6" height="20" fill="#fff"/><rect y="7" width="28" height="6" fill="#fff"/>
+            <rect x="12" width="4" height="20" fill="#C8102E"/><rect y="8" width="28" height="4" fill="#C8102E"/>
+          </svg> EN
+        </button>
+      </div>
+      <!-- Theme toggle -->
+      <button id="theme-toggle" class="px-2 py-1.5 rounded-xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur hover:bg-white">
+        <span id="icon-sun" class="hidden">🌞</span>
+        <span id="icon-moon">🌙</span>
+      </button>
+    </div>
+  </div>
 
   <!-- SPLASH -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <!-- Διακριτικό κουμπί για επαγγελματίες -->
     <a href="/pharmacy.html"
        class="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm hover:bg-white transition text-sm">
-      <span>Για επαγγελματίες</span>
-      <span class="hidden sm:inline text-slate-500">/ Είσοδος φαρμακείων</span>
+      <span id="t-pro">Για επαγγελματίες</span>
+      <span class="hidden sm:inline text-slate-500">/ <span id="t-pharm-login">Είσοδος φαρμακείων</span></span>
     </a>
 
     <div class="w-full max-w-xl text-center">
@@ -63,20 +114,23 @@
       </div>
 
       <h1 class="mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight">MediRadar</h1>
-      <p class="mt-2 text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
+      <p id="t-hero" class="mt-2 text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
 
-      <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-4 gap-3">
         <button id="cta-search"
           class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
-          Αναζήτηση Φαρμάκου
+          <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
         </button>
         <button id="cta-how"
           class="px-5 py-3 rounded-xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
-          Πώς λειτουργεί
+          <span id="t-howBTN">Πώς λειτουργεί</span>
         </button>
         <button id="cta-signin"
           class="px-5 py-3 rounded-xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
-          Σύνδεση
+          <span id="t-signinBTN">Σύνδεση</span>
+        </button>
+        <button id="cta-install" class="px-5 py-3 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
+          📲 <span id="t-installBTN">Εγκατάσταση</span>
         </button>
       </div>
     </div>
@@ -84,27 +138,23 @@
 
   <!-- APP -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
-    <!-- Κοινός header με "επιστροφή" -->
+    <!-- Header με επιστροφή + pharmacy link -->
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← Αρχική</button>
-          <span class="font-semibold">Αναζήτηση Φαρμάκου</span>
+          <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
+          <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
-        <a href="/pharmacy.html" class="text-sm underline underline-offset-4">Είσοδος φαρμακείου</a>
+        <a href="/pharmacy.html" class="text-sm underline underline-offset-4"><span id="t-pharmLogin2">Είσοδος φαρμακείου</span></a>
       </div>
     </header>
 
-    <!-- Κάρτες πεδίων με ICON + AUTOCOMPLETE -->
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
-      <!-- Όνομα Φαρμάκου -->
+      <!-- Medicine -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
-          <!-- εικονίδιο αναζήτησης -->
-          <span class="w-6 h-6 grid place-items-center">
-            🔎
-          </span>
-          Όνομα Φαρμάκου
+          <span class="w-6 h-6 grid place-items-center">🔎</span>
+          <span id="t-medname">Όνομα Φαρμάκου</span>
         </label>
         <div class="mt-2 relative">
           <input id="medicine-name" type="text" autocomplete="off"
@@ -112,15 +162,14 @@
                  placeholder="π.χ. Augmentin 875mg" />
           <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
         </div>
-        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-formatTip">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
       </div>
 
-      <!-- Δραστική Ουσία -->
+      <!-- Substance -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
-          <!-- εικονίδιο δοκιμαστικού σωλήνα -->
           <span class="w-6 h-6 grid place-items-center">🧪</span>
-          Δραστική Ουσία <span class="text-slate-400 ml-1">(προαιρετικά)</span>
+          <span id="t-substance">Δραστική Ουσία</span> <span class="text-slate-400 ml-1" id="t-optional">(προαιρετικά)</span>
         </label>
         <div class="mt-2 relative">
           <input id="active-substance" type="text" autocomplete="off"
@@ -128,189 +177,336 @@
                  placeholder="π.χ. Παρακεταμόλη" />
           <div id="ac-substance" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
         </div>
-        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Παράδειγμα δοσολογίας: Paracetamol 500mg.</p>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-doseEx">Παράδειγμα δοσολογίας: Paracetamol 500mg.</p>
       </div>
 
-      <!-- Τύπος + Ποσότητα -->
+      <!-- Type + Quantity -->
       <div class="grid sm:grid-cols-2 gap-4">
         <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
           <label class="text-sm font-semibold flex items-center gap-2">
             <span class="w-6 h-6 grid place-items-center">💊</span>
-            Τύπος Φαρμάκου
+            <span id="t-type">Τύπος Φαρμάκου</span>
           </label>
           <select id="medicine-type"
                   class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">— Επιλογή —</option>
-            <option>Σκόνη</option>
-            <option>Υγρό</option>
-            <option>Χάπι</option>
-            <option>Δερματική Κρέμα</option>
-            <option>Αλοιφή</option>
-            <option>Πένα (προγεμισμένη)</option>
-            <option>Επίθεμα</option>
+            <option value="">— <span id="t-select">Επιλογή</span> —</option>
+            <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
+            <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
+            <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
           </select>
         </div>
 
         <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
           <label class="text-sm font-semibold flex items-center gap-2">
             <span class="w-6 h-6 grid place-items-center">📦</span>
-            Ποσότητα (τεμάχια/κουτιά)
+            <span id="t-qty">Ποσότητα (τεμάχια/κουτιά)</span>
           </label>
           <input id="quantity" type="number" min="1" value="1" required
                  class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
         </div>
       </div>
 
-      <!-- Πόλη -->
+      <!-- Generic -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <p class="text-sm font-semibold flex items-center gap-2">
+          <span class="w-6 h-6 grid place-items-center">✅</span>
+          <span id="t-genericQ">Αν δεν υπάρχει το εμπορικό, να προταθεί γενόσημο;</span>
+        </p>
+        <div class="mt-3 flex gap-4">
+          <label class="inline-flex items-center gap-2"><input type="radio" name="allow-generic" value="YES" class="size-4 accent-brand-600" checked><span id="t-yes">ΝΑΙ</span></label>
+          <label class="inline-flex items-center gap-2"><input type="radio" name="allow-generic" value="NO" class="size-4 accent-brand-600"><span id="t-no">ΟΧΙ</span></label>
+        </div>
+      </div>
+
+      <!-- City dropdown -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">📍</span>
-          Πόλη
+          <span id="t-city">Πόλη</span>
         </label>
-        <input id="city" type="text" required placeholder="π.χ. Αθήνα"
-               class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+        <select id="city" required
+                class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+          <option value="">— <span id="t-select2">Επιλογή</span> —</option>
+          <option>Αγρίνιο</option><option>Αλεξανδρούπολη</option><option>Αθήνα</option>
+          <option>Βέροια</option><option>Βόλος</option><option>Γιάννενα</option>
+          <option>Γλυφάδα</option><option>Δράμα</option><option>Ελευσίνα</option>
+          <option>Ηράκλειο</option><option>Θεσσαλονίκη</option><option>Καβάλα</option>
+          <option>Καλαμάτα</option><option>Κατερίνη</option><option>Κέρκυρα</option>
+          <option>Κοζάνη</option><option>Κομοτηνή</option><option>Κόρινθος</option>
+          <option>Λαμία</option><option>Λάρισα</option><option>Μυτιλήνη</option>
+          <option>Ναύπλιο</option><option>Ξάνθη</option><option>Πάτρα</option>
+          <option>Πύργος</option><option>Ρέθυμνο</option><option>Ρόδος</option>
+          <option>Σέρρες</option><option>Τρίκαλα</option><option>Χαλκίδα</option>
+          <option>Χανιά</option>
+        </select>
       </div>
 
-      <!-- GDPR + Υποβολή -->
+      <!-- GDPR + Submit -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="inline-flex items-start gap-3">
           <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
-          <span class="text-sm">Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
+          <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
         </label>
         <div class="mt-4 flex justify-end">
           <button id="submitBtn" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
-            Υποβολή Αναζήτησης
+            <span id="t-submit">Υποβολή Αναζήτησης</span>
           </button>
         </div>
       </div>
     </section>
+
+    <!-- MOCK Results -->
+    <section id="results" class="hidden mt-6">
+      <h2 class="text-xl font-bold mb-3" id="t-results">Αποτελέσματα (demo UI)</h2>
+      <div class="grid gap-3" id="resultsList"></div>
+      <button id="newSearch" class="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800"><span id="t-newSearch">Νέα αναζήτηση</span></button>
+    </section>
   </main>
 
-  <!-- HOW-IT-WORKS modal -->
+  <!-- HOW -->
   <div id="modal-how" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-lg font-bold">Πώς λειτουργεί το MediRadar</h3>
+        <h3 class="text-lg font-bold" id="t-howTitle">Πώς λειτουργεί το MediRadar</h3>
         <button id="how-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
       </div>
-      <div class="p-5 leading-relaxed text-slate-700 dark:text-slate-300">
-        <ol class="list-decimal pl-5 space-y-2">
-          <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή δραστική).</li>
-          <li>Η αίτησή σου στέλνεται στα κοντινά φαρμακεία.</li>
-          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά – θα το δεις άμεσα.</li>
-          <li>Επιλέγεις φαρμακείο και περνάς για <strong>self pick-up</strong>.</li>
-          <li>Δεν ζητάμε τιμές∙ μόνο διαθεσιμότητα.</li>
-        </ol>
-      </div>
+      <div id="how-body" class="p-5 leading-relaxed text-slate-700 dark:text-slate-300"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="how-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Συνέχεια</button>
+        <button id="how-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-continue">Συνέχεια</span></button>
       </div>
     </div>
   </div>
 
-  <!-- GDPR modal (μικρό placeholder) -->
+  <!-- GDPR -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+    <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-bold">Όροι Αναζήτησης & GDPR</h3>
+        <h3 class="text-lg font-bold" id="t-gdprTitle">Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης</h3>
         <button id="gdpr-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
       </div>
-      <div class="p-5 text-sm text-slate-700 dark:text-slate-300">
-        <p><strong>Σκοπός:</strong> ενημέρωση διαθεσιμότητας φαρμάκων από φαρμακεία.</p>
-        <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία.</p>
-        <p><strong>Δεδομένα:</strong> όνομα/δραστική, τύπος, ποσότητα, πόλη.</p>
-        <p><strong>Διατήρηση:</strong> έως 30 ημέρες (ανωνυμοποίηση/διαγραφή μετά).</p>
-      </div>
+      <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">ΟΚ</button>
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">OK</button>
       </div>
     </div>
   </div>
 
   <script>
-    /* ---------- Navigation (Splash <-> App) ---------- */
+    /* ---------- Theme ---------- */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+    function setTheme(mode){
+      const dark = mode==='dark';
+      html.classList.toggle('dark', dark);
+      iconSun.classList.toggle('hidden', !dark);
+      iconMoon.classList.toggle('hidden', dark);
+      localStorage.setItem('mediradar-theme', dark?'dark':'light');
+    }
+    setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
+
+    /* ---------- i18n ---------- */
+    const strings = {
+      el:{
+        hero:'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
+        searchBTN:'Αναζήτηση Φαρμάκου', howBTN:'Πώς λειτουργεί', signinBTN:'Σύνδεση', installBTN:'Εγκατάσταση',
+        searchTitle:'Αναζήτηση Φαρμάκου', home:'Αρχική', medname:'Όνομα Φαρμάκου',
+        formatTip:'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
+        substance:'Δραστική Ουσία', optional:'(προαιρετικά)', doseEx:'Παράδειγμα δοσολογίας: Paracetamol 500mg.',
+        type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή',
+        genericQ:'Αν δεν υπάρχει το εμπορικό, να προταθεί γενόσημο;', yes:'ΝΑΙ', no:'ΟΧΙ',
+        city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης',
+        results:'Αποτελέσματα (demo UI)', newSearch:'Νέα αναζήτηση', pro:'Για επαγγελματίες', pharmLogin:'Είσοδος φαρμακείων',
+        howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια',
+        howBody:`<ol class="list-decimal pl-5 space-y-2">
+          <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή/και δραστική ουσία).</li>
+          <li>Η αίτηση στέλνεται στα κοντινά φαρμακεία.</li>
+          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά· αν έχει μόνο γενόσημο, το βλέπεις με σχετικό σήμα.</li>
+          <li>Επιλέγεις φαρμακείο και περνάς για <strong>self pick-up</strong>.</li>
+          <li>Δεν ζητάμε τιμές· στόχος είναι αποκλειστικά η διαθεσιμότητα.</li>
+        </ol>`,
+        gdprHTML:`<p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (νομική οντότητα: <em>συμπλήρωσε επωνυμία/ΑΦΜ/έδρα</em>, email: <em>συμπλήρωσε</em>).</p>
+        <p><strong>Σκοπός:</strong> Διαβίβαση αιτημάτων αναζήτησης φαρμάκων σε φαρμακεία για ενημέρωση αποκλειστικά περί διαθεσιμότητας.</p>
+        <p><strong>Νομικές βάσεις (GDPR 6):</strong> (b) εκτέλεση αιτήματος/σύμβασης για τα αναγκαία στοιχεία· (a) συναίνεση για προαιρετικά στοιχεία.</p>
+        <p><strong>Δεδομένα:</strong> ονομασία φαρμάκου, δραστική (προαιρετικά), τύπος, ποσότητα, πόλη, προτίμηση γενόσημου. Δεν συλλέγονται ιατρικά δεδομένα διάγνωσης.</p>
+        <p><strong>Αποδέκτες:</strong> Φαρμακεία της περιοχής. Πάροχοι υποδομών (εκτελούντες άρθρου 28) με συμβάσεις.</p>
+        <p><strong>Διαβιβάσεις εκτός ΕΟΧ:</strong> μόνο με κατάλληλες διασφαλίσεις (SCCs κ.λπ.).</p>
+        <p><strong>Διατήρηση:</strong> έως 30 ημέρες και κατόπιν ανωνυμοποίηση/διαγραφή, εκτός νόμιμης υποχρέωσης.</p>
+        <p><strong>Δικαιώματα:</strong> πρόσβαση, διόρθωση, διαγραφή, περιορισμός, εναντίωση, φορητότητα· επικοινωνία στο <em>email</em>. Δικαίωμα καταγγελίας στην ΑΠΔΠΧ.</p>
+        <p><strong>Ασφάλεια:</strong> κρυπτογράφηση, έλεγχοι πρόσβασης, καταγραφή συμβάντων. Πρόσβαση των φαρμακείων μόνο στα απολύτως αναγκαία στοιχεία.</p>
+        <p><strong>Cookies:</strong> μόνο λειτουργικά (γλώσσα/θέμα). Καμία διαφήμιση χωρίς συναίνεση.</p>
+        <p><strong>Ενημέρωση Πολιτικής:</strong> ενδέχεται να επικαιροποιείται. Τελευταία ενημέρωση: <span id="gdpr-date"></span>.</p>`
+      },
+      en:{
+        hero:'Instant availability check at nearby pharmacies.',
+        searchBTN:'Medicine Search', howBTN:'How it works', signinBTN:'Sign in', installBTN:'Install',
+        searchTitle:'Medicine Search', home:'Home', medname:'Medicine Name',
+        formatTip:'Tip: Brand name + dosage (e.g. “500mg”).',
+        substance:'Active Substance', optional:'(optional)', doseEx:'Dosage example: Paracetamol 500mg.',
+        type:'Medicine Type', qty:'Quantity (units/boxes)', select:'Select',
+        genericQ:'If the brand is unavailable, suggest a generic?', yes:'YES', no:'NO',
+        city:'City', accept:'I accept the', submit:'Submit Search',
+        results:'Results (demo UI)', newSearch:'New search', pro:'For professionals', pharmLogin:'Pharmacy login',
+        howTitle:'How MediRadar works', continue:'Continue',
+        howBody:`<ol class="list-decimal pl-5 space-y-2">
+          <li>Type what you need (brand and/or active substance).</li>
+          <li>Your request is sent to nearby pharmacies.</li>
+          <li>Any pharmacy with <strong>availability</strong> replies “Available”; if only a generic is available, you’ll see a badge.</li>
+          <li>Pick a pharmacy and go for <strong>self pick-up</strong>.</li>
+          <li>No prices collected—availability only.</li>
+        </ol>`,
+        gdprHTML:`<p><strong>Controller:</strong> MediRadar (legal entity: <em>fill in</em>, email: <em>fill in</em>).</p>
+        <p><strong>Purpose:</strong> Forwarding medicine search requests to pharmacies to inform about <em>availability</em> only.</p>
+        <p><strong>Legal bases (GDPR 6):</strong> (b) contract/steps at data subject’s request for necessary data; (a) consent for optional data.</p>
+        <p><strong>Data:</strong> medicine name, active substance (optional), type, quantity, city, generic preference. No diagnosis data.</p>
+        <p><strong>Recipients:</strong> Pharmacies in the area. Hosting/messaging providers as processors under Art. 28.</p>
+        <p><strong>Transfers outside EEA:</strong> only with appropriate safeguards (SCCs etc.).</p>
+        <p><strong>Retention:</strong> up to 30 days then anonymization/deletion, unless required by law.</p>
+        <p><strong>Rights:</strong> access, rectification, erasure, restriction, objection, portability; contact <em>email</em>. Complaint to the DPA.</p>
+        <p><strong>Security:</strong> encryption, access controls, event logging. Pharmacies see only what is necessary per request.</p>
+        <p><strong>Cookies:</strong> functional only (language/theme). No ads without consent.</p>
+        <p><strong>Policy updates:</strong> may change. Last update: <span id="gdpr-date"></span>.</p>`
+      }
+    };
+    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
+    function t(k){ return strings[state.lang][k]; }
+    function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
+    function setHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
+
+    function applyLang(){
+      document.documentElement.lang = state.lang;
+      setText('t-hero', t('hero'));
+      setText('t-searchBTN', t('searchBTN')); setText('t-howBTN', t('howBTN')); setText('t-signinBTN', t('signinBTN')); setText('t-installBTN', t('installBTN'));
+      setText('t-searchTitle', t('searchTitle')); setText('t-home', t('home'));
+      setText('t-medname', t('medname')); setText('t-formatTip', t('formatTip'));
+      setText('t-substance', t('substance')); setText('t-optional', t('optional')); setText('t-doseEx', t('doseEx'));
+      setText('t-type', t('type')); setText('t-qty', t('qty')); 
+      document.querySelectorAll('#medicine-type option[value=""]').forEach(o=>o.textContent = '— ' + t('select') + ' —');
+      setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
+      setText('t-city', t('city')); setText('t-accept', t('accept')); setText('t-submit', t('submit'));
+      setText('t-results', t('results')); setText('t-newSearch', t('newSearch'));
+      setText('t-pro', t('pro')); setText('t-pharm-login', t('pharmLogin')); setText('t-pharmLogin2', t('pharmLogin'));
+      setText('t-select2', t('select'));
+      setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
+      setHTML('how-body', t('howBody')); setHTML('gdpr-body', t('gdprHTML'));
+      document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
+      document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Παρακεταμόλη':'e.g. Paracetamol';
+      document.getElementById('quantity').placeholder = state.lang==='el'?'π.χ. 1':'e.g. 1';
+      localStorage.setItem('mediradar-lang', state.lang);
+    }
+    document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
+    document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
+
+    /* ---------- Navigation ---------- */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
+    document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
+    document.getElementById('backHome').addEventListener('click', ()=>{ app.classList.add('hidden'); splash.classList.remove('hidden'); document.getElementById('results').classList.add('hidden'); });
 
-    document.getElementById('cta-search').addEventListener('click', ()=>{
-      splash.classList.add('hidden');
-      app.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    document.getElementById('backHome').addEventListener('click', ()=>{
-      app.classList.add('hidden');
-      splash.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    document.getElementById('cta-how').addEventListener('click', ()=>{
-      const m = document.getElementById('modal-how'); m.classList.remove('hidden'); m.classList.add('flex');
-    });
-    document.getElementById('how-close').onclick = ()=> document.getElementById('modal-how').classList.add('hidden');
-    document.getElementById('how-ok').onclick    = ()=> document.getElementById('modal-how').classList.add('hidden');
+    /* ---------- Modals ---------- */
+    const modalHow = document.getElementById('modal-how');
+    document.getElementById('cta-how').onclick = ()=> { modalHow.classList.remove('hidden'); modalHow.classList.add('flex'); };
+    document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
+    document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
 
     const modalGdpr = document.getElementById('gdpr-modal');
-    document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
+    document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); document.getElementById('gdpr-date').textContent = new Date().toISOString().slice(0,10); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
 
-    document.getElementById('cta-signin').addEventListener('click', ()=>{
-      alert('Σύνδεση: θα προστεθεί αργότερα (Supabase Auth).');
-    });
-
-    /* ---------- Autocomplete (τοπικό demo) ---------- */
-    const AC_MEDICINES = [
-      'Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg',
-      'Algofren 400mg','Zylapour 300mg','Salospir 100mg','Tavor 1mg',
-      'Vibramycin 100mg','Amoxil 500mg','Losec 20mg','Plavix 75mg',
-      'Zyrtec 10mg','Cetirizine 10mg','Amoxil 875/125mg'
-    ];
-    const AC_SUBSTANCES = [
-      'Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg',
-      'Amoxicillin/Clavulanate 875/125mg','Aspirin 100mg','Cetirizine 10mg'
-    ];
-
+    /* ---------- Autocomplete (demo) ---------- */
+    const AC_MEDICINES = ['Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg'];
+    const AC_SUBSTANCES = ['Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg','Cetirizine 10mg','Aspirin 100mg'];
     function attachAutocomplete(inputId, listId, data){
       const input = document.getElementById(inputId);
       const list = document.getElementById(listId);
       let idx = -1;
-
       function render(items){
-        list.innerHTML = items.map((x,i)=>`
-          <div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">
-            ${x}
-          </div>`).join('');
+        list.innerHTML = items.map((x,i)=>`<div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">${x}</div>`).join('');
         list.classList.toggle('hidden', items.length===0);
       }
-      function filter(q){
-        if(!q){ render([]); return; }
-        const res = data.filter(s => s.toLowerCase().includes(q.toLowerCase())).slice(0,6);
-        render(res);
-      }
+      function filter(q){ if(!q){ render([]); return; } render(data.filter(s=>s.toLowerCase().includes(q.toLowerCase())).slice(0,6)); }
       input.addEventListener('input', ()=>{ idx=-1; filter(input.value.trim()); });
       input.addEventListener('keydown', (e)=>{
-        const items = [...list.querySelectorAll('.ac-item')];
-        if(!items.length) return;
+        const items = [...list.querySelectorAll('.ac-item')]; if(!items.length) return;
         if(e.key==='ArrowDown'){ idx=(idx+1)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
         else if(e.key==='ArrowUp'){ idx=(idx-1+items.length)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
         else if(e.key==='Enter'){ if(idx>=0){ input.value = items[idx].dataset.val; render([]); } }
         else if(e.key==='Escape'){ render([]); }
       });
-      list.addEventListener('click', (e)=>{
-        const item = e.target.closest('.ac-item'); if(!item) return;
-        input.value = item.dataset.val; list.classList.add('hidden');
-      });
+      list.addEventListener('click', (e)=>{ const item = e.target.closest('.ac-item'); if(!item) return; input.value = item.dataset.val; list.classList.add('hidden'); });
       document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
     }
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-    /* ---------- Dummy submit (UI μόνο) ---------- */
+    /* ---------- Submit (UI demo + mock results) ---------- */
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
-      // Εδώ αργότερα θα κουμπώσει το backend fetch.
-      alert('Αναζήτηση στάλθηκε (UI demo).');
+      const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
+      const list = document.getElementById('resultsList'); list.innerHTML='';
+      // mock 2 αποτελέσματα, το 1ο generic αν ο χρήστης επέτρεψε generic
+      const items = [
+        { name:'Φαρμακείο Ιάκωβος', dist:'2.1km', eta:'Έτοιμο', generic: allowGeneric },
+        { name:'Φαρμακείο Νίκη', dist:'3.0km', eta:'Έτοιμο', generic: false }
+      ];
+      items.forEach(it=>{
+        const card = document.createElement('div');
+        card.className = 'rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="font-semibold">${it.name}</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">${it.dist} · ${it.eta}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            ${it.generic ? `<span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span>` : ''}
+            <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm">Επιλογή</button>
+          </div>`;
+        list.appendChild(card);
+      });
+      document.getElementById('results').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('results').offsetTop - 20, behavior:'smooth' });
     });
+    document.getElementById('newSearch').addEventListener('click', ()=>{ document.getElementById('results').classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
+
+    /* ---------- PWA: manifest + SW + install prompt ---------- */
+    // attach manifest from inline JSON
+    (function(){
+      const m = document.getElementById('app-manifest').textContent;
+      const blob = new Blob([m], { type:'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest'; link.href = url; document.head.appendChild(link);
+    })();
+
+    // Create a minimal service worker on the fly
+    if('serviceWorker' in navigator){
+      const swCode = `
+        const CACHE='mediradar-v1';
+        self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./']))); self.skipWaiting(); });
+        self.addEventListener('activate',e=>{ e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch',e=>{ e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request))); });
+      `;
+      const blob = new Blob([swCode], {type:'text/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blob));
+    }
+
+    // Install prompt
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('cta-install');
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden');
+    });
+    installBtn.addEventListener('click', async ()=>{
+      if(!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice; deferredPrompt = null; installBtn.classList.add('hidden');
+    });
+
+    /* ---------- Init ---------- */
+    applyLang();
   </script>
 </body>
 </html>
