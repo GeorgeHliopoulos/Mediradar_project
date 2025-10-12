@@ -13,8 +13,11 @@
       theme: {
         extend: {
           fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
-          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
-          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
+          colors: {
+            brand:{ 500:'#29a3a3',600:'#208181',700:'#196464' },
+            mapblue:'#2563eb'
+          },
+          boxShadow:{ soft:'0 16px 40px rgba(2,6,23,.12)'}
         }
       }
     }
@@ -37,19 +40,18 @@
         radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
         linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
     }
-    .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
-    .ac-item { cursor:pointer }
-    .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
-    @keyframes pulseHourglass {
-      0% { transform: translateY(0) rotate(0deg); opacity:.9 }
-      50% { transform: translateY(-2px) rotate(180deg); opacity:1 }
-      100% { transform: translateY(0) rotate(360deg); opacity:.9 }
-    }
-    /* scan overlay frame */
+    .ac-list{ position:absolute; inset-inline:0; top:100%; z-index:40 }
+    .ac-item{ cursor:pointer }
     .scan-frame::after{
       content:''; position:absolute; inset:8%; border:3px solid rgba(255,255,255,.85);
       border-radius:16px; box-shadow:0 0 0 100vmax rgba(0,0,0,.25); pointer-events:none;
     }
+    @keyframes hourglass {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hg{ animation:hourglass 2.2s linear infinite }
   </style>
 
   <!-- PWA -->
@@ -57,16 +59,16 @@
   <meta name="theme-color" content="#29a3a3" />
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
-  <!-- Confetti canvas -->
+  <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none" style="display:none"></canvas>
 
-  <!-- Separate PRO button (top-left) -->
+  <!-- PRO (top-left) -->
   <a id="pro-floating" href="/pharmacy.html"
-     class="fixed top-3 left-3 z-50 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-white/20 text-sm">
+     class="fixed top-3 left-3 z-50 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur border border-slate-200 dark:border-slate-700 hover:bg-white text-sm">
     Για επαγγελματίες
   </a>
 
-  <!-- Language + Theme (top-right) -->
+  <!-- Lang + Theme (top-right) -->
   <div class="fixed top-3 right-3 z-50 flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
     <div class="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
       <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
@@ -129,10 +131,23 @@
           <a href="#" id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></a>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
-        <!-- κρυφό στο app: το ξεχωριστό pro button ήδη κρύβεται -->
-        <span class="text-sm opacity-70"> </span>
+        <span class="text-sm opacity-70">&nbsp;</span>
       </div>
     </header>
+
+    <!-- Sticky PENDING banner -->
+    <div id="pendingBanner" class="hidden sticky top-[60px] z-20 mb-4">
+      <div class="rounded-2xl border border-amber-300/80 bg-amber-50/95 dark:bg-amber-900/50 dark:border-amber-800 backdrop-blur px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="text-2xl hg">⌛</div>
+          <div>
+            <div class="font-semibold" id="t-pendingTitle">Αναμονή απαντήσεων από φαρμακεία</div>
+            <div class="text-xs text-amber-800/90 dark:text-amber-100/90" id="t-pendingHint">Μείνε στη σελίδα — αν τη κλείσεις, θα συνεχίσουμε να κρατάμε την αναμονή και θα επανέλθει όταν γυρίσεις.</div>
+          </div>
+        </div>
+        <span class="text-xs opacity-70" id="reqIdBadge"></span>
+      </div>
+    </div>
 
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
       <!-- Medicine -->
@@ -145,6 +160,7 @@
           <input id="medicine-name" type="text" autocomplete="off"
                  class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
                  placeholder="π.χ. Augmentin 875mg" />
+          <div id="err-med" class="mt-1 text-xs text-rose-600 hidden"></div>
           <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
         </div>
         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-formatTip">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
@@ -174,11 +190,12 @@
           </label>
           <select id="medicine-type"
                   class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">— <span id="t-select">Επιλογή</span> —</option>
+            <option value="">{— <span id="t-select1">Επιλογή</span> —}</option>
             <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
             <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
             <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
           </select>
+          <div id="err-type" class="mt-1 text-xs text-rose-600 hidden"></div>
         </div>
 
         <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
@@ -188,10 +205,11 @@
           </label>
           <input id="quantity" type="number" min="1" value="1" required
                  class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+          <div id="err-qty" class="mt-1 text-xs text-rose-600 hidden"></div>
         </div>
       </div>
 
-      <!-- Generic (polite) -->
+      <!-- Generic -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <p class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">✅</span>
@@ -211,7 +229,7 @@
         </label>
         <select id="city" required
                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-          <option value="">— <span id="t-select2">Επιλογή</span> —</option>
+          <option value="">{— <span id="t-select2">Επιλογή</span> —}</option>
           <option>Αγρίνιο</option><option>Αλεξανδρούπολη</option><option>Αθήνα</option>
           <option>Βέροια</option><option>Βόλος</option><option>Γιάννενα</option>
           <option>Γλυφάδα</option><option>Δράμα</option><option>Ελευσίνα</option>
@@ -224,6 +242,7 @@
           <option>Σέρρες</option><option>Τρίκαλα</option><option>Χαλκίδα</option>
           <option>Χανιά</option>
         </select>
+        <div id="err-city" class="mt-1 text-xs text-rose-600 hidden"></div>
       </div>
 
       <!-- RX + scan (optional) -->
@@ -255,6 +274,7 @@
           <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
           <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
         </label>
+        <div id="err-gdpr" class="mt-1 text-xs text-rose-600 hidden"></div>
         <div class="mt-4 flex justify-end">
           <button id="submitBtn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
             <span id="t-submit">Υποβολή Αναζήτησης</span>
@@ -263,24 +283,34 @@
       </div>
     </section>
 
-    <!-- Pending + Results -->
-    <section id="pending" class="hidden mt-6">
-      <div class="rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800">
-        <div class="flex items-center gap-3">
-          <div style="animation:pulseHourglass 1.5s linear infinite">⏳</div>
-          <div class="text-sm" id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</div>
-        </div>
-      </div>
-    </section>
-
+    <!-- Results -->
     <section id="results" class="hidden mt-6">
       <h2 class="text-xl font-bold mb-3" id="t-results">Αποτελέσματα (demo UI)</h2>
       <div class="grid gap-3" id="resultsList"></div>
       <button id="newSearch" class="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800"><span id="t-newSearch">Νέα αναζήτηση</span></button>
     </section>
+
+    <!-- Active Hold (60') -->
+    <section id="hold" class="hidden mt-6">
+      <div class="rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="font-semibold" id="holdTitle">Κράτηση 60’ για παραλαβή</div>
+            <div class="text-sm text-slate-600 dark:text-slate-300" id="holdPharm"></div>
+          </div>
+          <div class="text-2xl font-extrabold tabular-nums" id="holdTTL">60:00</div>
+        </div>
+        <div class="mt-3 flex gap-2 flex-wrap">
+          <a id="holdCall" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Κλήση</a>
+          <a id="holdMaps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-mapblue text-white font-semibold hover:bg-blue-700">Άνοιγμα σε Χάρτες</a>
+          <button id="holdExtend" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">+15’ Extend</button>
+        </div>
+        <div id="extendMsg" class="mt-2 text-xs text-slate-600 dark:text-slate-400"></div>
+      </div>
+    </section>
   </main>
 
-  <!-- HOW -->
+  <!-- HOW modal -->
   <div id="modal-how" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -294,7 +324,7 @@
     </div>
   </div>
 
-  <!-- GDPR -->
+  <!-- GDPR modal -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -308,7 +338,7 @@
     </div>
   </div>
 
-  <!-- Pharmacy details modal -->
+  <!-- Pharmacy modal (kept, but HOLD view now βασικό) -->
   <div id="pharm-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -321,7 +351,7 @@
       </div>
       <div class="px-5 pb-5 flex gap-2 justify-end">
         <a id="pm-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Κλήση</a>
-        <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800">Άνοιγμα σε Χάρτες</a>
+        <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-mapblue text-white font-semibold hover:bg-blue-700">Άνοιγμα σε Χάρτες</a>
       </div>
     </div>
   </div>
@@ -356,10 +386,21 @@
         type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή',
         genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης',
-        results:'Αποτελέσματα (demo UI)', newSearch:'Νέα αναζήτηση', pro:'Για επαγγελματίες',
+        results:'Αποτελέσματα (demo UI)', newSearch:'Νέα αναζήτηση',
+        pendingTitle:'Αναμονή απαντήσεων από φαρμακεία',
+        pendingHint:'Μείνε στη σελίδα — αν τη κλείσεις, θα συνεχίσουμε να κρατάμε την αναμονή και θα επανέλθει όταν γυρίσεις.',
         howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια',
-        pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…',
-        rx:'Προαιρετικά: Αριθμός συνταγής', rxHelp:'Διευκολύνει το φαρμακείο να εντοπίσει σωστό σκεύασμα/δοσολογία.'
+        rx:'Προαιρετικά: Αριθμός συνταγής', rxHelp:'Διευκολύνει το φαρμακείο να εντοπίσει σωστό σκεύασμα/δοσολογία.',
+        holdTitle:'Κράτηση 60’ για παραλαβή',
+        extendWarn:'Μπορείς να κάνεις παράταση μόνο μία φορά ανά 24 ώρες.',
+        extendDone:'Έγινε παράταση +15’. Νέος χρόνος:',
+        errors:{
+          med:'Συμπλήρωσε το όνομα φαρμάκου.',
+          type:'Επίλεξε τύπο φαρμάκου.',
+          qty:'Η ποσότητα πρέπει να είναι τουλάχιστον 1.',
+          city:'Επίλεξε πόλη.',
+          gdpr:'Πρέπει να αποδεχτείς τους όρους.'
+        }
       },
       en:{
         hero:'Instant availability check at nearby pharmacies.',
@@ -370,10 +411,21 @@
         type:'Medicine Type', qty:'Quantity (units/boxes)', select:'Select',
         genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?',
         yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search',
-        results:'Results (demo UI)', newSearch:'New search', pro:'For professionals',
+        results:'Results (demo UI)', newSearch:'New search',
+        pendingTitle:'Waiting for pharmacy responses',
+        pendingHint:'Please stay on the page — if you close it, we’ll keep the request pending and restore it when you return.',
         howTitle:'How MediRadar works', continue:'Continue',
-        pending:'Waiting for responses from nearby pharmacies…',
-        rx:'Optional: Prescription number', rxHelp:'Helps the pharmacy identify the correct product/dosage quickly.'
+        rx:'Optional: Prescription number', rxHelp:'Helps the pharmacy identify the correct product/dosage quickly.',
+        holdTitle:'60’ reservation for self pick-up',
+        extendWarn:'You can extend only once per 24 hours.',
+        extendDone:'Extended +15’. New time:',
+        errors:{
+          med:'Please enter medicine name.',
+          type:'Please select medicine type.',
+          qty:'Quantity must be at least 1.',
+          city:'Please select a city.',
+          gdpr:'You must accept the terms.'
+        }
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
@@ -389,36 +441,38 @@
       setText('t-type', t('type')); setText('t-qty', t('qty'));
       setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
       setText('t-city', t('city')); setText('t-accept', t('accept')); setText('t-submit', t('submit'));
-      setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
-      setText('t-rx', t('rx')); setText('t-rxHelp', t('rxHelp'));
+      setText('t-results', t('results')); setText('t-newSearch', t('newSearch'));
+      document.getElementById('pendingBanner').querySelector('#t-pendingTitle').textContent = t('pendingTitle');
+      document.getElementById('pendingBanner').querySelector('#t-pendingHint').textContent = t('pendingHint');
+      setText('holdTitle', t('holdTitle'));
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       localStorage.setItem('mediradar-lang', state.lang);
+      // refresh messages on screen if needed
+      if(document.getElementById('extendMsg').dataset.state==='warn') document.getElementById('extendMsg').textContent = t('extendWarn');
     }
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
     document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
 
-    /* ---------- Navigation ---------- */
+    /* ---------- Nav ---------- */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
-    const pending = document.getElementById('pending');
     const results = document.getElementById('results');
     const proFloating = document.getElementById('pro-floating');
+    const pendingBanner = document.getElementById('pendingBanner');
 
     function enterApp(){
       splash.classList.add('hidden'); app.classList.remove('hidden');
-      // κρύψε το pro κουμπί στη φόρμα
       proFloating.classList.add('hidden');
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
     function backHome(e){
       if(e) e.preventDefault();
       app.classList.add('hidden'); splash.classList.remove('hidden');
-      pending.classList.add('hidden'); results.classList.add('hidden');
+      results.classList.add('hidden'); hideHold(); hidePending();
       proFloating.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
-
     document.getElementById('cta-search').addEventListener('click', enterApp);
     document.getElementById('backHome').addEventListener('click', backHome);
 
@@ -443,7 +497,7 @@
     document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
     document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
 
-    /* ---------- GDPR modal ---------- */
+    /* ---------- GDPR modal (kept) ---------- */
     const modalGdpr = document.getElementById('gdpr-modal');
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
@@ -483,12 +537,8 @@
       confettiCanvas.style.display = 'block';
       const colors = ['#F78DA7','#84C5F4','#C3A6F4','#FFE08A','#9DE0D6'];
       const particles = Array.from({length: 150}, ()=> ({
-        x: Math.random()*innerWidth,
-        y: -20,
-        vx:(Math.random()-.5)*2,
-        vy: Math.random()*3+2,
-        size: Math.random()*6+3,
-        color: colors[Math.floor(Math.random()*colors.length)],
+        x: Math.random()*innerWidth, y: -20, vx:(Math.random()-.5)*2, vy: Math.random()*3+2,
+        size: Math.random()*6+3, color: colors[Math.floor(Math.random()*colors.length)],
         rot: Math.random()*360, vr:(Math.random()-.5)*10
       }));
       const start = performance.now();
@@ -505,24 +555,115 @@
       requestAnimationFrame(tick);
     }
 
-    /* ---------- Submit: Pending -> Results ---------- */
-    const list = document.getElementById('resultsList');
-    const pendingSection = document.getElementById('pending');
+    /* ---------- Persisted Request/Hold ---------- */
+    const PERSIST_KEY = 'mr-state';
+    function saveState(obj){ localStorage.setItem(PERSIST_KEY, JSON.stringify(obj)); }
+    function loadState(){ try{ return JSON.parse(localStorage.getItem(PERSIST_KEY)||'{}'); }catch{ return {}; } }
+    function clearState(){ localStorage.removeItem(PERSIST_KEY); }
 
-    function showPending(){
-      pendingSection.classList.remove('hidden');
-      results.classList.add('hidden');
-      // auto-scroll ώστε να φαίνεται αμέσως
-      pendingSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    /* ---------- Pending ---------- */
+    const reqBadge = document.getElementById('reqIdBadge');
+    function showPending(reqId){
+      reqBadge.textContent = reqId ? `ID: ${reqId}` : '';
+      pendingBanner.classList.remove('hidden');
+      pendingBanner.scrollIntoView({ behavior:'smooth', block:'start' });
     }
-    function hidePending(){ pendingSection.classList.add('hidden'); }
+    function hidePending(){ pendingBanner.classList.add('hidden'); }
 
+    /* ---------- Hold Countdown + Extend ---------- */
+    const holdSec = document.getElementById('hold');
+    const holdTTL = document.getElementById('holdTTL');
+    const holdPharm = document.getElementById('holdPharm');
+    const holdCall = document.getElementById('holdCall');
+    const holdMaps = document.getElementById('holdMaps');
+    const holdExtend = document.getElementById('holdExtend');
+    const extendMsg = document.getElementById('extendMsg');
+    let holdTimer=null, holdUntil=0;
+
+    function two(n){ return n.toString().padStart(2,'0'); }
+    function renderTTL(){
+      const rem = Math.max(0, Math.floor((holdUntil - Date.now())/1000));
+      const m = Math.floor(rem/60), s = rem%60;
+      holdTTL.textContent = `${two(m)}:${two(s)}`;
+      if(rem<=0){ clearInterval(holdTimer); holdTimer=null; clearState(); hideHold(); }
+    }
+    function startHold(pharm){
+      holdSec.classList.remove('hidden'); results.classList.add('hidden'); hidePending();
+      holdPharm.textContent = pharm.name + ' — ' + pharm.addr;
+      holdCall.href = `tel:${pharm.tel.replace(/\s+/g,'')}`;
+      holdMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(pharm.addr)}${pharm.lat?`@${pharm.lat},${pharm.lng},17z`:''}`;
+      holdUntil = Date.now() + 60*60*1000; // 60'
+      const state = loadState();
+      saveState({ ...state, status:'hold', hold:{ until:holdUntil, pharm, extendedAt:state?.hold?.extendedAt||null } });
+      renderTTL(); clearInterval(holdTimer); holdTimer = setInterval(renderTTL, 1000);
+      holdSec.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+    function restoreHold(data){
+      const { pharm, until, extendedAt } = data.hold;
+      holdSec.classList.remove('hidden'); results.classList.add('hidden');
+      holdPharm.textContent = pharm.name + ' — ' + pharm.addr;
+      holdCall.href = `tel:${pharm.tel.replace(/\s+/g,'')}`;
+      holdMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(pharm.addr)}${pharm.lat?`@${pharm.lat},${pharm.lng},17z`:''}`;
+      holdUntil = until; renderTTL(); clearInterval(holdTimer); holdTimer = setInterval(renderTTL, 1000);
+      if(extendedAt){ extendMsg.dataset.state='done'; extendMsg.textContent = strings[state.lang].extendDone + ' ' }
+      holdSec.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+    function hideHold(){ holdSec.classList.add('hidden'); clearInterval(holdTimer); holdTimer=null; }
+
+    holdExtend.addEventListener('click', ()=>{
+      const st = loadState();
+      const last = st?.hold?.extendedAt;
+      const now = Date.now();
+      const oneDay = 24*60*60*1000;
+      if(last && (now - last) < oneDay){
+        extendMsg.dataset.state='warn';
+        extendMsg.textContent = strings[state.lang].extendWarn;
+        return;
+      }
+      holdUntil += 15*60*1000;
+      renderTTL();
+      saveState({ ...st, hold:{ ...st.hold, until:holdUntil, extendedAt: now } });
+      extendMsg.dataset.state='done';
+      extendMsg.textContent = strings[state.lang].extendDone + ' ' + holdTTL.textContent;
+    });
+
+    /* ---------- Form Validation ---------- */
+    function showErr(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.remove('hidden'); }
+    function hideErr(id){ document.getElementById(id).classList.add('hidden'); }
+    function validate(){
+      let ok=true;
+      const med=document.getElementById('medicine-name').value.trim();
+      const type=document.getElementById('medicine-type').value.trim();
+      const qty=parseInt(document.getElementById('quantity').value||'0',10);
+      const city=document.getElementById('city').value.trim();
+      const gdpr=document.getElementById('gdpr-checkbox').checked;
+
+      if(!med){ showErr('err-med', strings[state.lang].errors.med); ok=false; } else hideErr('err-med');
+      if(!type){ showErr('err-type', strings[state.lang].errors.type); ok=false; } else hideErr('err-type');
+      if(!(qty>=1)){ showErr('err-qty', strings[state.lang].errors.qty); ok=false; } else hideErr('err-qty');
+      if(!city){ showErr('err-city', strings[state.lang].errors.city); ok=false; } else hideErr('err-city');
+      if(!gdpr){ showErr('err-gdpr', strings[state.lang].errors.gdpr); ok=false; } else hideErr('err-gdpr');
+
+      return ok;
+    }
+
+    /* ---------- Submit: persist Pending, then demo Answers ---------- */
+    const list = document.getElementById('resultsList');
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
+      if(!validate()) return;
+
       fireConfetti(2500);
-      showPending();
-      // simulate 3s wait
+
+      // create & persist pending request
+      const reqId = 'MR-' + Math.random().toString(36).slice(2,8).toUpperCase();
+      saveState({ status:'pending', reqId, createdAt: Date.now() });
+      showPending(reqId);
+
+      // DEMO: simulate answers after 3s
       setTimeout(()=>{
+        const st = loadState();
+        if(st.status!=='pending') return; // if user already in hold, skip
         hidePending();
         list.innerHTML='';
         const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
@@ -539,7 +680,7 @@
               <div class="text-xs text-slate-600 dark:text-slate-400">${it.dist}</div>
             </div>
             <div class="flex items-center gap-2">
-              ${it.generic ? `<span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span>` : ''}
+              ${it.generic ? `<span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span>` : ''}
               <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm select-pharm">Επιλογή</button>
             </div>`;
           card.dataset.addr = it.addr; card.dataset.tel = it.tel; card.dataset.name = it.name;
@@ -551,28 +692,15 @@
       }, 3000);
     });
 
-    document.getElementById('newSearch').addEventListener('click', ()=>{ results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-
-    /* ---------- Details modal ---------- */
-    const pm = document.getElementById('pharm-modal');
-    const pmTitle = document.getElementById('pm-title');
-    const pmAddr  = document.getElementById('pm-address');
-    const pmPhone = document.getElementById('pm-phone');
-    const pmCall  = document.getElementById('pm-call');
-    const pmMaps  = document.getElementById('pm-maps');
-    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
-
+    /* ---------- Select pharmacy -> start HOLD ---------- */
     document.getElementById('resultsList').addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
       const card = btn.closest('div.rounded-xl');
-      const name = card.dataset.name, addr = card.dataset.addr, tel = card.dataset.tel;
-      const lat = card.dataset.lat, lng = card.dataset.lng;
-      pmTitle.textContent = name;
-      pmAddr.textContent  = 'Διεύθυνση: ' + addr;
-      pmPhone.textContent = 'Τηλέφωνο: ' + tel;
-      pmCall.href = `tel:${tel.replace(/\s+/g,'')}`;
-      pmMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(addr)}${lat?`@${lat},${lng},17z`:''}`;
-      pm.classList.remove('hidden'); pm.classList.add('flex');
+      const pharm = {
+        name: card.dataset.name, addr: card.dataset.addr, tel: card.dataset.tel,
+        lat: parseFloat(card.dataset.lat||'0'), lng: parseFloat(card.dataset.lng||'0')
+      };
+      startHold(pharm);
     });
 
     /* ---------- Scanner with overlay + torch ---------- */
@@ -588,7 +716,6 @@
       const src=document.getElementById('zxing-lib').getAttribute('data-src');
       await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.body.appendChild(s); });
     }
-
     async function startScan(){
       scanArea.classList.remove('hidden');
       try{
@@ -625,16 +752,13 @@
         stopScan();
       }
     }
-
     function stopScan(){
       scanning=false;
       if(zxingInterval){ clearInterval(zxingInterval); zxingInterval=null; }
       if(zxingReader){ try{zxingReader.reset();}catch{} zxingReader=null; }
       if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; }
-      videoEl.pause(); videoEl.srcObject=null; scanArea.classList.add('hidden');
-      torchBtn.classList.add('hidden');
+      videoEl.pause(); videoEl.srcObject=null; scanArea.classList.add('hidden'); torchBtn.classList.add('hidden');
     }
-
     let torchOn=false;
     torchBtn.addEventListener('click', async ()=>{
       if(!videoTrack || !videoTrack.applyConstraints) return;
@@ -664,10 +788,18 @@
     });
     window.addEventListener('appinstalled', ()=>{ installBtn.classList.add('hidden'); });
 
-    /* ---------- Init ---------- */
-    applyLang();
-    // κρύψε pro button όταν μπαίνεις στη φόρμα
-    document.getElementById('cta-search').addEventListener('click', ()=> proFloating.classList.add('hidden'));
+    /* ---------- Restore persisted state on load ---------- */
+    function restore(){
+      applyLang();
+      const st = loadState();
+      if(!st.status) return;
+      enterApp(); // ensure we’re in app view
+      if(st.status==='pending'){ showPending(st.reqId); }
+      else if(st.status==='hold' && st.hold?.until && st.hold?.pharm){
+        restoreHold(st);
+      }
+    }
+    restore();
   </script>
 </body>
 </html>
