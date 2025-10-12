@@ -3,155 +3,228 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MediRadar – Pharmacy Console</title>
+  <title>MediRadar</title>
 
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#29a3a3" />
-
-  <!-- Tailwind CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          colors: {
-            brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' }
-          },
-          boxShadow: { soft:'0 12px 28px rgba(15,23,42,.12)' }
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
+          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
         }
       }
     }
   </script>
 
   <style>
+    /* Έντονο χρωματιστό φόντο που ξεθωριάζει */
     .app-bg{
       background:
-        radial-gradient(900px 500px at 10% -10%, rgba(132,197,244,.25), transparent 60%),
-        radial-gradient(700px 420px at 110% 0%, rgba(199,166,244,.20), transparent 55%),
-        radial-gradient(900px 520px at 30% 120%, rgba(247,141,167,.16), transparent 60%),
-        radial-gradient(700px 420px at 120% 120%, rgba(157,224,214,.18), transparent 60%),
-        linear-gradient(180deg, #f7fbfb, #f8fafc 40%, #f8fafc);
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.24), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.22), transparent 60%),
+        linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
+    }
+    .dark .app-bg{
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.15), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.14), transparent 60%),
+        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
     }
   </style>
 </head>
-<body class="min-h-full app-bg text-slate-900">
-  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-2xl bg-brand-500 text-white grid place-items-center shadow-inner">
-          <svg viewBox="0 0 24 24" class="w-5 h-5"><path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/></svg>
-        </div>
-        <span class="text-xl font-semibold">MediRadar – Pharmacy Console</span>
+<body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
+
+  <!-- SPLASH -->
+  <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
+    <!-- Διακριτικό κουμπί για επαγγελματίες -->
+    <a href="/pharmacy.html"
+       class="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm hover:bg-white transition text-sm">
+      <span>Για επαγγελματίες</span>
+      <span class="hidden sm:inline text-slate-500">/ Είσοδος φαρμακείων</span>
+    </a>
+
+    <div class="w-full max-w-xl text-center">
+      <!-- Λογότυπο (placeholder SVG – βάλε το δικό σου όταν είναι έτοιμο) -->
+      <div class="mx-auto w-24 h-24 rounded-3xl bg-brand-600 text-white grid place-items-center shadow-soft">
+        <svg viewBox="0 0 24 24" class="w-10 h-10" aria-hidden="true">
+          <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/>
+        </svg>
+      </div>
+
+      <h1 class="mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight">MediRadar</h1>
+      <p class="mt-2 text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
+
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <button id="cta-search"
+          class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
+          Αναζήτηση Φαρμάκου
+        </button>
+        <button id="cta-how"
+          class="px-5 py-3 rounded-xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
+          Πώς λειτουργεί
+        </button>
+        <button id="cta-signin"
+          class="px-5 py-3 rounded-xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
+          Σύνδεση
+        </button>
       </div>
     </div>
-  </header>
+  </section>
 
-  <main class="max-w-3xl mx-auto px-4 py-6">
-    <section class="rounded-2xl bg-white/90 shadow-soft border border-slate-200 p-5">
-      <h1 class="text-2xl font-bold mb-1">Δήλωση Διαθεσιμότητας</h1>
-      <p class="text-slate-600 mb-5">Συμπλήρωσε το token του πελάτη και τα στοιχεία φαρμακείου για να δηλώσεις «Διαθέσιμο».</p>
+  <!-- APP (κρυφό μέχρι να πατηθεί “Αναζήτηση”) -->
+  <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
+    <header class="sticky top-0 z-30 -mt-3 mb-4">
+      <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <a href="#" id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← Αρχική</a>
+          <span class="font-semibold">Αναζήτηση Φαρμάκου</span>
+        </div>
+        <a href="/pharmacy.html" class="text-sm underline underline-offset-4">Είσοδος φαρμακείου</a>
+      </div>
+    </header>
 
-      <form id="form" class="grid grid-cols-1 gap-4">
+    <!-- ΕΔΩ βάλε τη φόρμα σου (κρατάω ένα απλό scaffold) -->
+    <section class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-5 shadow-soft">
+      <form id="medicine-form" class="grid gap-4">
         <div>
-          <label class="block text-sm font-medium mb-1">API Key (ασφαλές)</label>
-          <input id="apiKey" type="password" required
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                 placeholder="εισαγωγή API key" />
-          <p class="text-xs text-slate-500 mt-1">Το API key ΔΕΝ αποθηκεύεται. Ζητήστε το από τον διαχειριστή.</p>
+          <label class="block text-sm font-semibold mb-1">Όνομα Φαρμάκου</label>
+          <input id="medicine-name" type="text" required placeholder="π.χ. Augmentin 875mg"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">Token Αίτησης (status_token)</label>
-          <input id="token" type="text" required
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                 placeholder="π.χ. a1b2c3d4" />
+          <label class="block text-sm font-semibold mb-1">Δραστική Ουσία (προαιρετικά)</label>
+          <input id="active-substance" type="text" placeholder="π.χ. Παρακεταμόλη"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
         </div>
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Όνομα Φαρμακείου</label>
-            <input id="pharmacy_name" type="text" required
-                   class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                   placeholder="π.χ. Φαρμακείο Ιάκωβος" />
+            <label class="block text-sm font-semibold mb-1">Τύπος Φαρμάκου</label>
+            <select id="medicine-type" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+              <option value="">— Επιλογή —</option>
+              <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
+              <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
+              <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
+            </select>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Τηλέφωνο</label>
-            <input id="phone" type="tel"
-                   class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                   placeholder="+30 21X XXXX XXX" />
+            <label class="block text-sm font-semibold mb-1">Ποσότητα (τεμάχια/κουτιά)</label>
+            <input id="quantity" type="number" min="1" value="1" required
+                   class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-1">Διεύθυνση</label>
-          <input id="address" type="text"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                 placeholder="π.χ. Σταδίου 1, Αθήνα" />
+          <label class="block text-sm font-semibold mb-1">Πόλη</label>
+          <input id="city" type="text" required placeholder="π.χ. Αθήνα"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-1">Latitude (προαιρετικό)</label>
-            <input id="lat" type="number" step="any"
-                   class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                   placeholder="37.98" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">Longitude (προαιρετικό)</label>
-            <input id="lng" type="number" step="any"
-                   class="w-full px-3 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-4 focus:ring-brand-500/30"
-                   placeholder="23.73" />
-          </div>
-        </div>
+        <label class="inline-flex items-start gap-3 mt-2">
+          <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
+          <span class="text-sm">Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
+        </label>
 
-        <div class="flex gap-3 justify-end pt-2">
-          <button type="reset" class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100">Καθαρισμός</button>
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Δήλωση Διαθεσιμότητας</button>
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
+            Υποβολή Αναζήτησης
+          </button>
         </div>
       </form>
-
-      <div id="msg" class="mt-4 text-sm"></div>
     </section>
   </main>
 
+  <!-- HOW-IT-WORKS modal -->
+  <div id="modal-how" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="text-lg font-bold">Πώς λειτουργεί το MediRadar</h3>
+        <button id="how-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+      </div>
+      <div class="p-5 leading-relaxed text-slate-700 dark:text-slate-300">
+        <ol class="list-decimal pl-5 space-y-2">
+          <li>Πληκτρολογείς τι ψάχνεις (εμπορική ονομασία ή δραστική).</li>
+          <li>Η αίτησή σου στέλνεται στα κοντινά φαρμακεία.</li>
+          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά – θα το δεις αμέσως.</li>
+          <li>Επιλέγεις φαρμακείο και περνάς για <strong>self pick-up</strong>. Μπορείς να χρησιμοποιήσεις όποιον τρόπο πληρωμής διαθέτει το κατάστημα.</li>
+          <li>Δεν ζητάμε τιμές∙ το ενδιαφέρον είναι μόνο η διαθεσιμότητα.</li>
+        </ol>
+      </div>
+      <div class="px-5 pb-5 flex justify-end">
+        <button id="how-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Συνέχεια</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GDPR modal (placeholder) -->
+  <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b">
+        <h3 class="text-lg font-bold">Όροι Αναζήτησης & GDPR</h3>
+        <button id="gdpr-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+      </div>
+      <div class="p-5 text-sm text-slate-700 dark:text-slate-300">
+        <p><strong>Σκοπός:</strong> ενημέρωση διαθεσιμότητας φαρμάκων από φαρμακεία.</p>
+        <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία.</p>
+        <p><strong>Δεδομένα:</strong> όνομα/δραστική, τύπος, ποσότητα, πόλη.</p>
+        <p><strong>Διατήρηση:</strong> έως 30 ημέρες (ανωνυμοποίηση/διαγραφή μετά).</p>
+      </div>
+      <div class="px-5 pb-5 flex justify-end">
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">ΟΚ</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const form = document.getElementById('form');
-    const msg  = document.getElementById('msg');
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
 
-    form.addEventListener('submit', async (e)=>{
+    // CTAs
+    document.getElementById('cta-search').addEventListener('click', ()=>{
+      splash.classList.add('hidden');
+      app.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    document.getElementById('cta-how').addEventListener('click', ()=> {
+      document.getElementById('modal-how').classList.remove('hidden');
+      document.getElementById('modal-how').classList.add('flex');
+    });
+    document.getElementById('cta-signin').addEventListener('click', ()=>{
+      // εδώ αργότερα κουμπώνουμε Supabase Auth (Google/Email)
+      alert('Σύνδεση: θα προστεθεί με Supabase Auth.');
+    });
+
+    // Back to splash
+    document.getElementById('backHome').addEventListener('click', (e)=>{
       e.preventDefault();
-      msg.textContent = 'Αποστολή...';
+      app.classList.add('hidden');
+      splash.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
-      const apiKey = document.getElementById('apiKey').value.trim();
-      const body = {
-        token: document.getElementById('token').value.trim(),
-        pharmacy_name: document.getElementById('pharmacy_name').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        address: document.getElementById('address').value.trim(),
-        lat: parseFloat(document.getElementById('lat').value || '0') || null,
-        lng: parseFloat(document.getElementById('lng').value || '0') || null
-      };
+    // Modals
+    const modalHow = document.getElementById('modal-how');
+    document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
+    document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
 
-      if(!apiKey){ msg.textContent = 'Χρειάζεται API key.'; return; }
+    const modalGdpr = document.getElementById('gdpr-modal');
+    document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
+    document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
+    document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
 
-      try{
-        const res = await fetch('/.netlify/functions/pharmacy-reply', {
-          method:'POST',
-          headers: { 'Content-Type':'application/json', 'X-API-Key': apiKey },
-          body: JSON.stringify(body)
-        });
-        const j = await res.json();
-        if(res.ok && j.ok){
-          msg.innerHTML = '<span class="text-emerald-700">✔ Η διαθεσιμότητα καταχωρήθηκε.</span>';
-          form.reset();
-        }else{
-          msg.innerHTML = `<span class="text-rose-700">⚠ Σφάλμα: ${j.error || res.status}</span>`;
-        }
-      }catch(err){
-        console.error(err);
-        msg.innerHTML = '<span class="text-rose-700">⚠ Σφάλμα δικτύου</span>';
-      }
+    // Demo submit (αντικατέστησε με το πραγματικό σου fetch)
+    document.getElementById('medicine-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      alert('Αναζήτηση στάλθηκε (demo). Θα συνδέσουμε το backend που έχουμε έτοιμο).');
     });
   </script>
 </body>
