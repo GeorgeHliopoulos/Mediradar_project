@@ -47,18 +47,18 @@
     }
   </style>
 
-  <!-- PWA: use your existing manifest and SW in root -->
+  <!-- PWA (υπάρχουν στο root) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#29a3a3" />
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
+  <!-- Confetti canvas -->
+  <canvas id="confetti" class="fixed inset-0 pointer-events-none" style="display:none"></canvas>
 
-  <!-- Top bar (right aligned): language + theme -->
+  <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="ml-auto w-fit flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
-      <!-- Pro link -->
-      <a href="/pharmacy.html" class="hidden sm:inline text-sm px-2 py-1 rounded-lg hover:bg-white/70 dark:hover:bg-white/20" id="t-pro">Για επαγγελματίες</a>
-      <!-- Lang -->
+      <a id="pro-link" href="/pharmacy.html" class="hidden sm:inline text-sm px-2 py-1 rounded-lg hover:bg-white/70 dark:hover:bg-white/20">Για επαγγελματίες</a>
       <div class="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
         <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
           <svg width="14" height="10" viewBox="0 0 27 18" aria-hidden="true">
@@ -77,7 +77,6 @@
           </svg> EN
         </button>
       </div>
-      <!-- Theme -->
       <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-white/20">
         <span id="icon-sun" class="hidden">🌞</span><span id="icon-moon">🌙</span>
       </button>
@@ -87,7 +86,6 @@
   <!-- SPLASH -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <div class="w-full max-w-4xl text-center">
-      <!-- Logo -->
       <div class="mx-auto w-24 h-24 rounded-3xl bg-brand-600 text-white grid place-items-center shadow-soft">
         <svg viewBox="0 0 24 24" class="w-10 h-10" aria-hidden="true">
           <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/>
@@ -97,7 +95,6 @@
       <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">MediRadar</h1>
       <p id="t-hero" class="mt-2 text-lg text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
 
-      <!-- Buttons centered -->
       <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
         <button id="cta-search" class="px-6 py-4 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
           <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
@@ -114,9 +111,8 @@
         📲 <span id="t-installBTN">Εγκατάσταση</span>
       </button>
 
-      <!-- Pro link (mobile) -->
       <div class="sm:hidden mt-4">
-        <a href="/pharmacy.html" class="text-sm underline" id="t-pro-m">Για επαγγελματίες</a>
+        <a id="pro-link-m" href="/pharmacy.html" class="text-sm underline">Για επαγγελματίες</a>
       </div>
     </div>
   </section>
@@ -126,10 +122,11 @@
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
+          <a href="#" id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></a>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
-        <a href="/pharmacy.html" class="text-sm underline underline-offset-4" id="t-pharmLogin2">Είσοδος φαρμακείου</a>
+        <!-- κρύβεται στο app -->
+        <a id="pharm-link-header" href="/pharmacy.html" class="text-sm underline underline-offset-4">Είσοδος φαρμακείου</a>
       </div>
     </header>
 
@@ -190,7 +187,7 @@
         </div>
       </div>
 
-      <!-- Generic (polite wording) -->
+      <!-- Generic (polite) -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <p class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">✅</span>
@@ -202,7 +199,7 @@
         </div>
       </div>
 
-      <!-- City dropdown -->
+      <!-- City -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">📍</span>
@@ -376,10 +373,10 @@
       setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
       setText('t-city', t('city')); setText('t-accept', t('accept')); setText('t-submit', t('submit'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
-      setText('t-pro', t('pro')); setText('t-pro-m', t('pro')); setText('t-pharmLogin2', t('pharmLogin'));
+      document.getElementById('pharm-link-header').textContent = t('pharmLogin');
+      document.getElementById('pro-link').textContent = t('pro'); document.getElementById('pro-link-m').textContent = t('pro');
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
       setHTML('gdpr-body', t('gdprHTML'));
-      // placeholders
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       localStorage.setItem('mediradar-lang', state.lang);
@@ -390,8 +387,29 @@
     /* ---------- Navigation ---------- */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
-    document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-    document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); app.classList.add('hidden'); splash.classList.remove('hidden'); document.getElementById('results').classList.add('hidden'); document.getElementById('pending').classList.add('hidden'); });
+    const pending = document.getElementById('pending');
+    const results = document.getElementById('results');
+    const proTop = document.getElementById('pro-link');
+    const proTopMobile = document.getElementById('pro-link-m');
+    const pharmHeader = document.getElementById('pharm-link-header');
+
+    function enterApp(){
+      splash.classList.add('hidden'); app.classList.remove('hidden');
+      // κρύψε όλα τα pro links όταν είμαστε στη φόρμα
+      proTop.classList.add('hidden'); proTopMobile.classList.add('hidden'); pharmHeader.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    }
+    function backHome(e){
+      if(e) e.preventDefault();
+      // show splash, hide sections, reset pro links
+      app.classList.add('hidden'); splash.classList.remove('hidden');
+      pending.classList.add('hidden'); results.classList.add('hidden');
+      proTop.classList.remove('hidden'); proTopMobile.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    }
+
+    document.getElementById('cta-search').addEventListener('click', enterApp);
+    document.getElementById('backHome').addEventListener('click', backHome);
 
     /* ---------- Modals ---------- */
     const modalHow = document.getElementById('modal-how');
@@ -400,7 +418,7 @@
           <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή/και δραστική ουσία).</li>
           <li>Η αίτηση στέλνεται στα κοντινά φαρμακεία.</li>
           <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά· αν έχει μόνο γενόσημο, θα το δεις με ειδικό σήμα.</li>
-          <li>Επιλέγεις φαρμακείο και πας για <strong>self pick-up</strong> με όποιον τρόπο πληρωμής θες.</li>
+          <li>Επιλέγεις φαρμακείο και πας για <strong>self pick-up</strong>.</li>
           <li>Δεν συλλέγουμε τιμές· μόνο διαθεσιμότητα.</li></ol>`
         : `<ol class="list-decimal pl-5 space-y-2">
           <li>Type what you need (brand / active).</li>
@@ -444,18 +462,47 @@
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-    /* ---------- Submit: Pending -> Results -> Details ---------- */
-    const pending = document.getElementById('pending');
-    const results = document.getElementById('results');
-    const list = document.getElementById('resultsList');
+    /* ---------- Confetti (2.5s) ---------- */
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    function fireConfetti(duration=2500){
+      confettiCanvas.width = innerWidth; confettiCanvas.height = innerHeight;
+      confettiCanvas.style.display = 'block';
+      const colors = ['#F78DA7','#84C5F4','#C3A6F4','#FFE08A','#9DE0D6'];
+      const particles = Array.from({length: 150}, ()=> ({
+        x: Math.random()*innerWidth,
+        y: -20,
+        vx:(Math.random()-.5)*2,
+        vy: Math.random()*3+2,
+        size: Math.random()*6+3,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rot: Math.random()*360, vr:(Math.random()-.5)*10
+      }));
+      const start = performance.now();
+      function tick(ts){
+        const elapsed = ts - start;
+        ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        particles.forEach(p=>{
+          p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.rot+=p.vr;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore();
+        });
+        if(elapsed<duration) requestAnimationFrame(tick); else confettiCanvas.style.display='none';
+      }
+      requestAnimationFrame(tick);
+    }
 
+    /* ---------- Submit: Pending (3s) -> Results -> Details ---------- */
+    const list = document.getElementById('resultsList');
     function showPending(){ document.getElementById('t-pending').textContent = t('pending'); pending.classList.remove('hidden'); results.classList.add('hidden'); }
     function hidePending(){ pending.classList.add('hidden'); }
 
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
+      // confetti when sending
+      fireConfetti(2500);
       showPending();
-      // simulate network wait
+      // simulate 3s wait
       setTimeout(()=>{
         hidePending();
         list.innerHTML='';
@@ -476,17 +523,13 @@
               ${it.generic ? `<span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span>` : ''}
               <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm select-pharm">Επιλογή</button>
             </div>`;
-          // stash details
-          card.dataset.addr = it.addr;
-          card.dataset.tel = it.tel;
-          card.dataset.name = it.name;
-          card.dataset.lat = it.lat;
-          card.dataset.lng = it.lng;
+          card.dataset.addr = it.addr; card.dataset.tel = it.tel; card.dataset.name = it.name;
+          card.dataset.lat = it.lat; card.dataset.lng = it.lng;
           list.appendChild(card);
         });
         results.classList.remove('hidden');
         window.scrollTo({ top: results.offsetTop - 20, behavior:'smooth' });
-      }, 1200);
+      }, 3000);
     });
 
     document.getElementById('newSearch').addEventListener('click', ()=>{ results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
@@ -513,7 +556,7 @@
       pm.classList.remove('hidden'); pm.classList.add('flex');
     });
 
-    /* ---------- PWA: register SW + install prompt ---------- */
+    /* ---------- PWA ---------- */
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('/service-worker.js').catch(console.warn);
     }
@@ -532,6 +575,11 @@
 
     /* ---------- Init ---------- */
     applyLang();
+
+    // όταν μπαίνεις στη σελίδα αναζήτησης, κρύψε τα pro links
+    document.getElementById('cta-search').addEventListener('click', ()=>{
+      proTop.classList.add('hidden'); proTopMobile.classList.add('hidden'); pharmHeader.classList.add('hidden');
+    });
   </script>
 </body>
 </html>
