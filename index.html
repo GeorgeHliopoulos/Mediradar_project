@@ -21,23 +21,26 @@
   </script>
 
   <style>
-    /* Έντονο χρωματιστό φόντο που ξεθωριάζει */
+    /* Ζωντανό φόντο που ξεθωριάζει */
     .app-bg{
       background:
         radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
-        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.24), transparent 58%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
         radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.22), transparent 60%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
         linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
     }
     .dark .app-bg{
       background:
-        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.15), transparent 60%),
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
         radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
         radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.14), transparent 60%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
         linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
     }
+    /* Autocomplete dropdown */
+    .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
+    .ac-item { cursor:pointer }
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
@@ -52,7 +55,7 @@
     </a>
 
     <div class="w-full max-w-xl text-center">
-      <!-- Λογότυπο (placeholder SVG – βάλε το δικό σου όταν είναι έτοιμο) -->
+      <!-- Logo placeholder -->
       <div class="mx-auto w-24 h-24 rounded-3xl bg-brand-600 text-white grid place-items-center shadow-soft">
         <svg viewBox="0 0 24 24" class="w-10 h-10" aria-hidden="true">
           <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/>
@@ -79,67 +82,107 @@
     </div>
   </section>
 
-  <!-- APP (κρυφό μέχρι να πατηθεί “Αναζήτηση”) -->
+  <!-- APP -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
+    <!-- Κοινός header με "επιστροφή" -->
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          <a href="#" id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← Αρχική</a>
+          <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← Αρχική</button>
           <span class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
         <a href="/pharmacy.html" class="text-sm underline underline-offset-4">Είσοδος φαρμακείου</a>
       </div>
     </header>
 
-    <!-- ΕΔΩ βάλε τη φόρμα σου (κρατάω ένα απλό scaffold) -->
-    <section class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-5 shadow-soft">
-      <form id="medicine-form" class="grid gap-4">
-        <div>
-          <label class="block text-sm font-semibold mb-1">Όνομα Φαρμάκου</label>
-          <input id="medicine-name" type="text" required placeholder="π.χ. Augmentin 875mg"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+    <!-- Κάρτες πεδίων με ICON + AUTOCOMPLETE -->
+    <section class="grid grid-cols-1 gap-4 sm:gap-5">
+      <!-- Όνομα Φαρμάκου -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="text-sm font-semibold flex items-center gap-2">
+          <!-- εικονίδιο αναζήτησης -->
+          <span class="w-6 h-6 grid place-items-center">
+            🔎
+          </span>
+          Όνομα Φαρμάκου
+        </label>
+        <div class="mt-2 relative">
+          <input id="medicine-name" type="text" autocomplete="off"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
+                 placeholder="π.χ. Augmentin 875mg" />
+          <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
+        </div>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
+      </div>
+
+      <!-- Δραστική Ουσία -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="text-sm font-semibold flex items-center gap-2">
+          <!-- εικονίδιο δοκιμαστικού σωλήνα -->
+          <span class="w-6 h-6 grid place-items-center">🧪</span>
+          Δραστική Ουσία <span class="text-slate-400 ml-1">(προαιρετικά)</span>
+        </label>
+        <div class="mt-2 relative">
+          <input id="active-substance" type="text" autocomplete="off"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
+                 placeholder="π.χ. Παρακεταμόλη" />
+          <div id="ac-substance" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
+        </div>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Παράδειγμα δοσολογίας: Paracetamol 500mg.</p>
+      </div>
+
+      <!-- Τύπος + Ποσότητα -->
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+          <label class="text-sm font-semibold flex items-center gap-2">
+            <span class="w-6 h-6 grid place-items-center">💊</span>
+            Τύπος Φαρμάκου
+          </label>
+          <select id="medicine-type"
+                  class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+            <option value="">— Επιλογή —</option>
+            <option>Σκόνη</option>
+            <option>Υγρό</option>
+            <option>Χάπι</option>
+            <option>Δερματική Κρέμα</option>
+            <option>Αλοιφή</option>
+            <option>Πένα (προγεμισμένη)</option>
+            <option>Επίθεμα</option>
+          </select>
         </div>
 
-        <div>
-          <label class="block text-sm font-semibold mb-1">Δραστική Ουσία (προαιρετικά)</label>
-          <input id="active-substance" type="text" placeholder="π.χ. Παρακεταμόλη"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+          <label class="text-sm font-semibold flex items-center gap-2">
+            <span class="w-6 h-6 grid place-items-center">📦</span>
+            Ποσότητα (τεμάχια/κουτιά)
+          </label>
+          <input id="quantity" type="number" min="1" value="1" required
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
         </div>
+      </div>
 
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-semibold mb-1">Τύπος Φαρμάκου</label>
-            <select id="medicine-type" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-              <option value="">— Επιλογή —</option>
-              <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
-              <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
-              <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Ποσότητα (τεμάχια/κουτιά)</label>
-            <input id="quantity" type="number" min="1" value="1" required
-                   class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
-          </div>
-        </div>
+      <!-- Πόλη -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="text-sm font-semibold flex items-center gap-2">
+          <span class="w-6 h-6 grid place-items-center">📍</span>
+          Πόλη
+        </label>
+        <input id="city" type="text" required placeholder="π.χ. Αθήνα"
+               class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+      </div>
 
-        <div>
-          <label class="block text-sm font-semibold mb-1">Πόλη</label>
-          <input id="city" type="text" required placeholder="π.χ. Αθήνα"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
-        </div>
-
-        <label class="inline-flex items-start gap-3 mt-2">
+      <!-- GDPR + Υποβολή -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="inline-flex items-start gap-3">
           <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
           <span class="text-sm">Αποδέχομαι τους <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
         </label>
-
-        <div class="flex justify-end pt-2">
-          <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
+        <div class="mt-4 flex justify-end">
+          <button id="submitBtn" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
             Υποβολή Αναζήτησης
           </button>
         </div>
-      </form>
+      </div>
     </section>
   </main>
 
@@ -152,11 +195,11 @@
       </div>
       <div class="p-5 leading-relaxed text-slate-700 dark:text-slate-300">
         <ol class="list-decimal pl-5 space-y-2">
-          <li>Πληκτρολογείς τι ψάχνεις (εμπορική ονομασία ή δραστική).</li>
+          <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή δραστική).</li>
           <li>Η αίτησή σου στέλνεται στα κοντινά φαρμακεία.</li>
-          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά – θα το δεις αμέσως.</li>
-          <li>Επιλέγεις φαρμακείο και περνάς για <strong>self pick-up</strong>. Μπορείς να χρησιμοποιήσεις όποιον τρόπο πληρωμής διαθέτει το κατάστημα.</li>
-          <li>Δεν ζητάμε τιμές∙ το ενδιαφέρον είναι μόνο η διαθεσιμότητα.</li>
+          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά – θα το δεις άμεσα.</li>
+          <li>Επιλέγεις φαρμακείο και περνάς για <strong>self pick-up</strong>.</li>
+          <li>Δεν ζητάμε τιμές∙ μόνο διαθεσιμότητα.</li>
         </ol>
       </div>
       <div class="px-5 pb-5 flex justify-end">
@@ -165,7 +208,7 @@
     </div>
   </div>
 
-  <!-- GDPR modal (placeholder) -->
+  <!-- GDPR modal (μικρό placeholder) -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -185,46 +228,88 @@
   </div>
 
   <script>
+    /* ---------- Navigation (Splash <-> App) ---------- */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
 
-    // CTAs
     document.getElementById('cta-search').addEventListener('click', ()=>{
       splash.classList.add('hidden');
       app.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    document.getElementById('cta-how').addEventListener('click', ()=> {
-      document.getElementById('modal-how').classList.remove('hidden');
-      document.getElementById('modal-how').classList.add('flex');
-    });
-    document.getElementById('cta-signin').addEventListener('click', ()=>{
-      // εδώ αργότερα κουμπώνουμε Supabase Auth (Google/Email)
-      alert('Σύνδεση: θα προστεθεί με Supabase Auth.');
-    });
-
-    // Back to splash
-    document.getElementById('backHome').addEventListener('click', (e)=>{
-      e.preventDefault();
+    document.getElementById('backHome').addEventListener('click', ()=>{
       app.classList.add('hidden');
       splash.classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Modals
-    const modalHow = document.getElementById('modal-how');
-    document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
-    document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
+    document.getElementById('cta-how').addEventListener('click', ()=>{
+      const m = document.getElementById('modal-how'); m.classList.remove('hidden'); m.classList.add('flex');
+    });
+    document.getElementById('how-close').onclick = ()=> document.getElementById('modal-how').classList.add('hidden');
+    document.getElementById('how-ok').onclick    = ()=> document.getElementById('modal-how').classList.add('hidden');
 
     const modalGdpr = document.getElementById('gdpr-modal');
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
 
-    // Demo submit (αντικατέστησε με το πραγματικό σου fetch)
-    document.getElementById('medicine-form').addEventListener('submit', (e)=>{
+    document.getElementById('cta-signin').addEventListener('click', ()=>{
+      alert('Σύνδεση: θα προστεθεί αργότερα (Supabase Auth).');
+    });
+
+    /* ---------- Autocomplete (τοπικό demo) ---------- */
+    const AC_MEDICINES = [
+      'Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg',
+      'Algofren 400mg','Zylapour 300mg','Salospir 100mg','Tavor 1mg',
+      'Vibramycin 100mg','Amoxil 500mg','Losec 20mg','Plavix 75mg',
+      'Zyrtec 10mg','Cetirizine 10mg','Amoxil 875/125mg'
+    ];
+    const AC_SUBSTANCES = [
+      'Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg',
+      'Amoxicillin/Clavulanate 875/125mg','Aspirin 100mg','Cetirizine 10mg'
+    ];
+
+    function attachAutocomplete(inputId, listId, data){
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      let idx = -1;
+
+      function render(items){
+        list.innerHTML = items.map((x,i)=>`
+          <div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">
+            ${x}
+          </div>`).join('');
+        list.classList.toggle('hidden', items.length===0);
+      }
+      function filter(q){
+        if(!q){ render([]); return; }
+        const res = data.filter(s => s.toLowerCase().includes(q.toLowerCase())).slice(0,6);
+        render(res);
+      }
+      input.addEventListener('input', ()=>{ idx=-1; filter(input.value.trim()); });
+      input.addEventListener('keydown', (e)=>{
+        const items = [...list.querySelectorAll('.ac-item')];
+        if(!items.length) return;
+        if(e.key==='ArrowDown'){ idx=(idx+1)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
+        else if(e.key==='ArrowUp'){ idx=(idx-1+items.length)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
+        else if(e.key==='Enter'){ if(idx>=0){ input.value = items[idx].dataset.val; render([]); } }
+        else if(e.key==='Escape'){ render([]); }
+      });
+      list.addEventListener('click', (e)=>{
+        const item = e.target.closest('.ac-item'); if(!item) return;
+        input.value = item.dataset.val; list.classList.add('hidden');
+      });
+      document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
+    }
+    attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
+    attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
+
+    /* ---------- Dummy submit (UI μόνο) ---------- */
+    document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
-      alert('Αναζήτηση στάλθηκε (demo). Θα συνδέσουμε το backend που έχουμε έτοιμο).');
+      // Εδώ αργότερα θα κουμπώσει το backend fetch.
+      alert('Αναζήτηση στάλθηκε (UI demo).');
     });
   </script>
 </body>
