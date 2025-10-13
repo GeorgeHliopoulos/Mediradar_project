@@ -1,1 +1,396 @@
+<!DOCTYPE html>
+<html lang="el" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MediRadar • Pharmacy Portal</title>
+
+  <!-- ENV: συμπλήρωσε τα δικά σου -->
+  <script>
+    window.ENV = {
+      SUPABASE_URL: "https://qzerrisyowkfkmcyxmav.supabase.co",
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk"
+    };
+  </script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'], display:['Manrope','Inter'] },
+          colors: {
+            brand:{50:'#e6f6f6',200:'#a3e0df',300:'#79cfcf',400:'#4fbcbc',500:'#29a3a3',600:'#208181',700:'#196464',800:'#134b4b'},
+            warn:{500:'#f59e0b'}, success:{600:'#059669'}
+          },
+          boxShadow:{ soft:'0 12px 28px rgba(15,23,42,.10)'}
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    .app-bg{
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(132,197,244,.20), transparent 60%),
+        radial-gradient(700px 420px at 110% 0%, rgba(199,166,244,.16), transparent 55%),
+        radial-gradient(900px 520px at 30% 120%, rgba(247,141,167,.12), transparent 60%),
+        radial-gradient(700px 420px at 120% 120%, rgba(157,224,214,.14), transparent 60%),
+        linear-gradient(180deg, #f7fbfb, #f7fafc 40%, #f7fafc);
+    }
+    .dark .app-bg{
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(132,197,244,.18), transparent 60%),
+        radial-gradient(700px 420px at 110% 0%, rgba(199,166,244,.16), transparent 55%),
+        radial-gradient(900px 520px at 30% 120%, rgba(247,141,167,.10), transparent 60%),
+        radial-gradient(700px 420px at 120% 120%, rgba(157,224,214,.10), transparent 60%),
+        linear-gradient(180deg, #0b1515, #090f0f 45%, #090f0f);
+    }
+    .icon-emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.06)); }
+    .badge{ padding:.25rem .5rem; border-radius:.5rem; font-size:.75rem; font-weight:600 }
+  </style>
+</head>
+<body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
+  <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/" class="px-3 py-1.5 rounded-xl bg-slate-900/5 dark:bg-white/10 hover:opacity-90">← Αρχική</a>
+        <span class="text-lg font-display font-bold">MediRadar • Portal Φαρμακείου</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center rounded-xl overflow-hidden bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-700">
+          <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold bg-slate-900/5 dark:bg-white/10 flex items-center gap-1" title="Ελληνικά">
+            <svg width="14" height="10" viewBox="0 0 27 18" class="icon-emoji"><rect width="27" height="18" fill="#0D5EAF"/><g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g><rect width="10" height="10" fill="#0D5EAF"/><rect x="4" width="2" height="10" fill="#fff"/><rect y="4" width="10" height="2" fill="#fff"/></svg> EL
+          </button>
+          <button id="lang-en" class="px-2 py-1.5 text-xs font-semibold opacity-90 hover:opacity-100 flex items-center gap-1" title="English">
+            <svg width="14" height="10" viewBox="0 0 28 20" class="icon-emoji"><rect width="28" height="20" fill="#012169"/><path d="M0,0 L28,20 M28,0 L0,20" stroke="#fff" stroke-width="5"/><path d="M0,0 L28,20 M28,0 L0,20" stroke="#C8102E" stroke-width="3"/><rect x="11" width="6" height="20" fill="#fff"/><rect y="7" width="28" height="6" fill="#fff"/><rect x="12" width="4" height="20" fill="#C8102E"/><rect y="8" width="28" height="4" fill="#C8102E"/></svg> EN
+          </button>
+        </div>
+        <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-slate-900/5 dark:hover:bg-white/10" title="Light / Dark">
+          <svg id="icon-sun" viewBox="0 0 24 24" class="w-5 h-5 hidden icon-emoji" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="#FFD064"/><g stroke="#FFD064" stroke-width="2" stroke-linecap="round"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M4.2 4.2l2.2 2.2"/><path d="M17.6 17.6l2.2 2.2"/><path d="M19.8 4.2l-2.2 2.2"/><path d="M6.4 17.6l-2.2 2.2"/></g></svg>
+          <svg id="icon-moon" viewBox="0 0 24 24" class="w-5 h-5 icon-emoji" aria-hidden="true"><path d="M12 2a9.5 9.5 0 1 0 8 15.5A8 8 0 0 1 12 2Z" fill="#C9D6FF"/></svg>
+        </button>
+        <button id="btn-signout" class="hidden px-3 py-1.5 rounded-xl bg-slate-900/5 dark:bg-white/10 hover:opacity-90">Αποσύνδεση</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+    <!-- AUTH -->
+    <section id="auth-card" class="max-w-md mx-auto">
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200/70 dark:border-slate-800 shadow-soft p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-2xl bg-brand-600 text-white grid place-items-center">
+            <svg viewBox="0 0 24 24" class="w-6 h-6"><path fill="currentColor" d="M12 3a9 9 0 1 1-9 9a9 9 0 0 1 9-9m0 2a7 7 0 1 0 7 7a7 7 0 0 0-7-7m-1 3h2v5h-2zm1 7.25a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 12 15.25"/></svg>
+          </div>
+          <div>
+            <h1 id="t-title" class="text-xl font-display font-bold leading-tight">Είσοδος Φαρμακείου</h1>
+            <p id="t-sub" class="text-sm text-slate-500 dark:text-slate-400">Sign in to manage incoming requests.</p>
+          </div>
+        </div>
+
+        <div class="grid gap-3">
+          <input id="auth-email" type="email" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="email@pharmacy.gr" />
+          <input id="auth-pass" type="password" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="••••••••" />
+          <button id="auth-login" class="px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Σύνδεση</button>
+          <button id="auth-google" class="px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2">
+            <img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> <span id="t-google">Σύνδεση με Google</span>
+          </button>
+          <div class="flex items-center justify-between text-sm">
+            <button id="auth-forgot" class="underline hover:opacity-80">Ξέχασα τον κωδικό</button>
+            <button id="auth-signup" class="underline hover:opacity-80">Δημιουργία λογαριασμού</button>
+          </div>
+          <p id="auth-msg" class="text-sm text-slate-500 dark:text-slate-400"></p>
+          <div class="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 text-sm">
+            <strong>Σημείωση:</strong> Η πρόσβαση ενεργοποιείται για emails που έχουν εγκριθεί από το MediRadar.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOT APPROVED -->
+    <section id="not-approved" class="hidden max-w-xl mx-auto">
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200/70 dark:border-slate-800 shadow-soft p-6">
+        <h2 class="text-lg font-display font-bold mb-2" id="t-na-title">Ο λογαριασμός δεν είναι ενεργοποιημένος</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-3" id="t-na-desc">Το email σου δεν έχει αντιστοιχιστεί με ενεργό φαρμακείο. Αν πιστεύεις ότι πρόκειται για λάθος, επικοινώνησε μαζί μας.</p>
+        <a href="mailto:support@mediradar.gr" class="inline-block px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90">Επικοινωνία</a>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dash" class="hidden">
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 shadow-soft p-6 mb-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-slate-500 dark:text-slate-400" id="t-pharm">Φαρμακείο</div>
+            <div class="text-lg font-semibold" id="ph-name">—</div>
+            <div class="text-sm text-slate-500" id="ph-addr">—</div>
+          </div>
+          <div class="text-right">
+            <div class="badge bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200" id="ph-active">Ενεργό</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-display font-bold text-lg" id="t-pending">Εισερχόμενα αιτήματα</h3>
+            <button id="btn-refresh" class="px-3 py-1.5 rounded-xl bg-slate-900/5 dark:bg-white/10 hover:opacity-90">↻</button>
+          </div>
+          <div id="list-pending" class="grid gap-3"></div>
+          <p id="empty-pending" class="text-sm text-slate-500 mt-2 hidden">Κανένα νέο αίτημα.</p>
+        </div>
+
+        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 shadow-soft p-5">
+          <h3 class="font-display font-bold text-lg mb-3" id="t-recent">Πρόσφατα</h3>
+          <div id="list-recent" class="grid gap-3"></div>
+          <p id="empty-recent" class="text-sm text-slate-500 mt-2 hidden">Δεν υπάρχουν ακόμα καταχωρήσεις.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-3 rounded-xl bg-slate-900 text-white text-sm shadow-xl"></div>
+
+  <script>
+    /* THEME */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const iconSun = document.getElementById('icon-sun');
+    const iconMoon = document.getElementById('icon-moon');
+    function setTheme(mode){
+      const dark = mode==='dark';
+      html.classList.toggle('dark', dark);
+      iconSun.classList.toggle('hidden', !dark);
+      iconMoon.classList.toggle('hidden', dark);
+      localStorage.setItem('mediradar-theme', dark?'dark':'light');
+    }
+    setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
+
+    /* I18N */
+    const strings = {
+      el:{ title:'Είσοδος Φαρμακείου', sub:'Συνδέσου για να δεις αιτήματα πελατών.',
+           google:'Σύνδεση με Google', pending:'Εισερχόμενα αιτήματα', recent:'Πρόσφατα',
+           pharm:'Φαρμακείο', naTitle:'Ο λογαριασμός δεν είναι ενεργοποιημένος',
+           naDesc:'Το email σου δεν έχει αντιστοιχιστεί με ενεργό φαρμακείο.' },
+      en:{ title:'Pharmacy Login', sub:'Sign in to manage incoming requests.',
+           google:'Sign in with Google', pending:'Incoming requests', recent:'Recent',
+           pharm:'Pharmacy', naTitle:'Account not activated',
+           naDesc:'Your email is not associated with an active pharmacy.' }
+    };
+    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
+    function t(k){ return strings[state.lang][k]; }
+    function applyLang(){
+      document.getElementById('t-title').textContent=t('title');
+      document.getElementById('t-sub').textContent=t('sub');
+      document.getElementById('t-google').textContent=t('google');
+      document.getElementById('t-pending').textContent=t('pending');
+      document.getElementById('t-recent').textContent=t('recent');
+      document.getElementById('t-pharm').textContent=t('pharm');
+      document.getElementById('t-na-title').textContent=t('naTitle');
+      document.getElementById('t-na-desc').textContent=t('naDesc');
+      localStorage.setItem('mediradar-lang', state.lang);
+    }
+    document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
+    document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
+    applyLang();
+
+    /* TOAST */
+    const toast = document.getElementById('toast');
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.remove('hidden'); toast.style.opacity=0; toast.style.transform='translate(-50%,10px)';
+      requestAnimationFrame(()=>{ toast.style.transition='.18s ease'; toast.style.opacity=1; toast.style.transform='translate(-50%,0)'; });
+      setTimeout(()=>{ toast.style.opacity=0; setTimeout(()=>toast.classList.add('hidden'), 250); }, 2200);
+    }
+
+    /* SUPABASE */
+    let sb=null, session=null, pharmacy=null;
+    function initSupabase(){
+      const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+      if(!SUPABASE_URL || !SUPABASE_ANON_KEY){ alert('Missing Supabase ENV.'); return; }
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    initSupabase();
+
+    const authCard = document.getElementById('auth-card');
+    const dash = document.getElementById('dash');
+    const notApproved = document.getElementById('not-approved');
+    const btnSignout = document.getElementById('btn-signout');
+
+    async function checkSession(){
+      const { data:{ session:s } } = await sb.auth.getSession();
+      session = s; 
+      if(!session){
+        authCard.classList.remove('hidden');
+        dash.classList.add('hidden'); notApproved.classList.add('hidden');
+        btnSignout.classList.add('hidden');
+        return;
+      }
+      btnSignout.classList.remove('hidden');
+      await loadPharmacy();
+    }
+
+    async function loadPharmacy(){
+      const email = session.user.email;
+      const { data, error } = await sb.from('pharmacies').select('*').eq('email', email).limit(1).maybeSingle();
+      if(error){ console.error(error); showToast('DB error'); return; }
+      if(!data){
+        authCard.classList.add('hidden');
+        dash.classList.add('hidden');
+        notApproved.classList.remove('hidden');
+        return;
+      }
+      pharmacy = data;
+      document.getElementById('ph-name').textContent = pharmacy.name || email;
+      document.getElementById('ph-addr').textContent = pharmacy.address || '';
+      document.getElementById('ph-active').textContent = pharmacy.is_active ? (state.lang==='el'?'Ενεργό':'Active') : (state.lang==='el'?'Ανενεργό':'Inactive');
+
+      authCard.classList.add('hidden');
+      notApproved.classList.add('hidden');
+      dash.classList.remove('hidden');
+      refreshLists();
+    }
+
+    async function refreshLists(){
+      const { data:pending, error:pErr } = await sb.from('requests')
+        .select('*').eq('status','pending').order('created_at', { ascending:false }).limit(50);
+      if(pErr){ console.error(pErr); showToast('DB error'); return; }
+      renderPending(pending||[]);
+      const { data:recent, error:rErr } = await sb.from('requests')
+        .select('*').eq('pharmacy_id', pharmacy.id).order('updated_at', { ascending:false }).limit(50);
+      if(rErr){ console.error(rErr); return; }
+      renderRecent(recent||[]);
+    }
+
+    function pill(x){ return `<span class="badge bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${x}</span>`; }
+
+    function renderPending(rows){
+      const wrap = document.getElementById('list-pending');
+      const empty = document.getElementById('empty-pending');
+      wrap.innerHTML='';
+      if(!rows.length){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      for(const r of rows){
+        const isGeneric = r.allow_generic === true || r.allow_generic === 'ΝΑΙ';
+        const el = document.createElement('div');
+        el.className = "rounded-xl border border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-slate-900/60";
+        el.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-semibold">${r.medicine_name}</div>
+              <div class="text-xs text-slate-500">${r.city || '-'} · ${r.quantity || 1} τεμ.</div>
+              <div class="mt-1 flex flex-wrap gap-1">
+                ${r.active_substance? pill(r.active_substance):''}
+                ${r.medicine_type? pill(r.medicine_type):''}
+                ${isGeneric? `<span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">Γενόσημο OK</span>`:''}
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="badge bg-warn-500/10 text-warn-500 border border-warn-500/20">Pending</span>
+              <button data-id="${r.id}" class="btn-accept px-3 py-1.5 rounded-xl bg-success-600 text-white hover:opacity-90">Διαθέσιμο</button>
+            </div>
+          </div>
+        `;
+        wrap.appendChild(el);
+      }
+      wrap.querySelectorAll('.btn-accept').forEach(btn=>{
+        btn.addEventListener('click', ()=> setAvailable(btn.getAttribute('data-id')));
+      });
+    }
+
+    function renderRecent(rows){
+      const wrap = document.getElementById('list-recent');
+      const empty = document.getElementById('empty-recent');
+      wrap.innerHTML='';
+      if(!rows.length){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      for(const r of rows){
+        const el = document.createElement('div');
+        el.className = "rounded-xl border border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-slate-900/60";
+        el.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="font-semibold">${r.medicine_name}</div>
+              <div class="text-xs text-slate-500">${r.city || '-'} · ${r.quantity || 1} τεμ.</div>
+              <div class="mt-1 flex flex-wrap gap-1">
+                <span class="badge ${r.status==='available'?'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200':'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}">${r.status}</span>
+              </div>
+            </div>
+            <div class="text-right text-xs text-slate-500">${new Date(r.updated_at||r.created_at).toLocaleString()}</div>
+          </div>
+        `;
+        wrap.appendChild(el);
+      }
+    }
+
+    async function setAvailable(requestId){
+      try{
+        const { error:rpcErr } = await sb.rpc('set_available', { request_id: requestId, ph_id: pharmacy.id });
+        if(rpcErr){
+          const { error:upErr } = await sb.from('requests').update({
+            status:'available',
+            pharmacy_id: pharmacy.id,
+            pharmacy_name: pharmacy.name,
+            pharmacy_phone: pharmacy.phone || null,
+            pharmacy_address: pharmacy.address || null
+          }).eq('id', requestId);
+          if(upErr) throw upErr;
+        }
+        showToast(state.lang==='el'?'Δήλωσες διαθεσιμότητα.':'Marked as available.');
+        refreshLists();
+      }catch(e){ console.error(e); showToast('Error'); }
+    }
+
+    // AUTH
+    document.getElementById('auth-login').addEventListener('click', async ()=>{
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      if(!email || !pass) return showToast(state.lang==='el'?'Συμπλήρωσε email/κωδικό.':'Enter email/password.');
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if(error){ showToast(error.message); return; }
+      showToast(state.lang==='el'?'Καλώς ήρθες.':'Welcome.');
+      checkSession();
+    });
+
+    document.getElementById('auth-signup').addEventListener('click', async ()=>{
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      if(!email || !pass) return showToast(state.lang==='el'?'Συμπλήρωσε email/κωδικό.':'Enter email/password.');
+      const { error } = await sb.auth.signUp({ email, password: pass });
+      if(error){ showToast(error.message); return; }
+      showToast(state.lang==='el'?'Έλεγξε το email για επιβεβαίωση.':'Check your email to confirm.');
+    });
+
+    document.getElementById('auth-google').addEventListener('click', async ()=>{
+      const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: location.href }});
+      if(error){ showToast(error.message); }
+    });
+
+    document.getElementById('auth-forgot').addEventListener('click', async ()=>{
+      const email = document.getElementById('auth-email').value.trim();
+      if(!email) return showToast(state.lang==='el'?'Γράψε το email πρώτα.':'Enter your email first.');
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/reset.html' });
+      if(error) showToast(error.message); else showToast(state.lang==='el'?'Στείλαμε email ανάκτησης.':'Password reset email sent.');
+    });
+
+    document.getElementById('btn-refresh').addEventListener('click', refreshLists);
+    document.getElementById('btn-signout').addEventListener('click', async ()=>{
+      await sb.auth.signOut();
+      pharmacy=null; session=null;
+      showToast(state.lang==='el'?'Αποσυνδέθηκες.':'Signed out.');
+      checkSession();
+    });
+
+    checkSession();
+  </script>
+</body>
+</html>
 
