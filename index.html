@@ -57,6 +57,12 @@
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ✅ SUPABASE ENV ΓΙΑ BROWSER -->
+  <script>
+    window.SUPABASE_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk"; // <-- βάλε το anon public key σου εδώ
+  </script>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
   <!-- Confetti -->
@@ -123,7 +129,7 @@
     </div>
   </section>
 
-  <!-- APP (ίδιο) -->
+  <!-- APP (search UI) -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
@@ -135,7 +141,7 @@
       </div>
     </header>
 
-    <!-- Sticky Pending -->
+    <!-- Sticky Pending banner -->
     <div id="pendingBanner" class="hidden sticky top-[60px] z-20 mb-4">
       <div class="rounded-2xl border border-amber-300/80 bg-amber-50/95 dark:bg-amber-900/50 dark:border-amber-800 backdrop-blur px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -149,7 +155,7 @@
       </div>
     </div>
 
-    <!-- Φόρμα (μόνο αλλαγή στα default options) -->
+    <!-- Φόρμα -->
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
       <!-- Medicine -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
@@ -339,7 +345,7 @@
     </div>
   </div>
 
-  <!-- Pharmacy info modal (kept) -->
+  <!-- Pharmacy info modal -->
   <div id="pharm-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -365,7 +371,6 @@
         <button id="auth-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
       </div>
       <div class="p-5 space-y-4">
-        <!-- Email/Password -->
         <div class="space-y-2">
           <label class="text-sm font-semibold flex items-center gap-2"><span>✉️</span><span id="auth-emailLbl">Email</span></label>
           <input id="auth-email" type="email" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="you@example.com" />
@@ -379,7 +384,6 @@
 
         <div class="flex items-center gap-3"><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div><span class="text-xs opacity-70">ή</span><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div></div>
 
-        <!-- Social -->
         <div class="grid gap-2">
           <button id="auth-google" class="px-4 py-2 rounded-xl bg-google text-white font-semibold hover:opacity-95 flex items-center justify-center gap-2">
             <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 34 29.1 37 24 37c-7 0-13-6-13-13s6-13 13-13c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 12 3 2 13 2 25s10 22 22 22c11 0 21-8 21-22 0-1.6-.2-3.1-.4-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.2 16.3 18.7 13 24 13c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 15.4 3 7.9 7.8 6.3 14.7z"/><path fill="#4CAF50" d="M24 47c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29.1 37 24.6 39 20 39c-5.1 0-9.4-3.3-11-7.9l-6.6 5.1C7.9 42.2 15.4 47 24 47z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.3 3.8-5.7 6.5-11.3 6.5-6.3 0-11.5-5.2-11.5-11.5S17.7 11.5 24 11.5c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 12 3 2 13 2 25s10 22 22 22c11 0 21-8 21-22 0-1.6-.2-3.1-.4-4.5z"/></svg>
@@ -471,8 +475,8 @@
       setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
       setText('t-city', t('city')); setText('t-accept', t('accept')); setText('t-submit', t('submit'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch'));
-      document.getElementById('pendingBanner').querySelector('#t-pendingTitle').textContent = t('pendingTitle');
-      document.getElementById('pendingBanner').querySelector('#t-pendingHint').textContent = t('pendingHint');
+      document.getElementById('pendingBanner').querySelector('#t-pendingTitle')?.textContent = t('pendingTitle');
+      document.getElementById('pendingBanner').querySelector('#t-pendingHint')?.textContent = t('pendingHint');
       setText('holdTitle', t('holdTitle'));
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
@@ -813,7 +817,6 @@
       const { data: { user } } = await sb.auth.getUser();
       userBadge.textContent = user ? (user.email || user.user_metadata?.name || 'User') : '';
     }
-    // email login/signup
     document.getElementById('auth-login').addEventListener('click', async ()=>{
       if(!sb) return;
       const email = document.getElementById('auth-email').value.trim();
@@ -833,7 +836,6 @@
       if(error){ msg.className='text-sm text-rose-600'; msg.textContent = error.message; return; }
       msg.className='text-sm text-emerald-600'; msg.textContent = state.lang==='el'?'Έγινε εγγραφή. Έλεγξε το email σου.':'Signed up. Check your email.';
     });
-    // Google / Apple
     async function oauth(provider){
       if(!sb) return;
       const { error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: location.origin } });
