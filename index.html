@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>MediRadar</title>
 
-  <!-- Manifest (ώστε να είναι PWA) -->
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#29a3a3" />
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Manrope:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -46,6 +47,10 @@
         linear-gradient(180deg, #0b1515, #090f0f 45%, #090f0f);
     }
     .icon-emoji{ filter: drop-shadow(0 1px 0 rgba(0,0,0,.06)); }
+    .toast-enter{ opacity:0; transform: translate(-50%,10px); }
+    .toast-enter-active{ opacity:1; transform: translate(-50%,0); transition:.18s ease-out; }
+    .toast-exit{ opacity:1; }
+    .toast-exit-active{ opacity:0; transition:.25s ease-in; }
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
@@ -54,11 +59,11 @@
   <header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur border-b border-slate-200/70 dark:border-slate-800">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between">
       <div class="text-lg font-display font-bold">MediRadar</div>
+
       <div class="flex items-center gap-2">
-        <!-- Για επαγγελματίες: οδηγεί ΣΤΟ portal -->
-        <a href="/pharmacy.html" id="pro-link" class="px-3 py-1.5 rounded-xl bg-slate-900/5 dark:bg-white/10 hover:opacity-90">
-          Για επαγγελματίες
-        </a>
+        <!-- Για επαγγελματίες -->
+        <a href="/pharmacy.html" class="px-3 py-1.5 rounded-xl bg-slate-900/5 dark:bg-white/10 hover:opacity-90">Για επαγγελματίες</a>
+
         <!-- Γλώσσα -->
         <div class="flex items-center rounded-xl overflow-hidden bg-slate-900/5 dark:bg-white/10 border border-slate-200/60 dark:border-slate-700">
           <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold bg-slate-900/5 dark:bg-white/10 flex items-center gap-1" title="Ελληνικά">
@@ -68,6 +73,7 @@
             <svg width="14" height="10" viewBox="0 0 28 20" class="icon-emoji"><rect width="28" height="20" fill="#012169"/><path d="M0,0 L28,20 M28,0 L0,20" stroke="#fff" stroke-width="5"/><path d="M0,0 L28,20 M28,0 L0,20" stroke="#C8102E" stroke-width="3"/><rect x="11" width="6" height="20" fill="#fff"/><rect y="7" width="28" height="6" fill="#fff"/><rect x="12" width="4" height="20" fill="#C8102E"/><rect y="8" width="28" height="4" fill="#C8102E"/></svg> EN
           </button>
         </div>
+
         <!-- Theme -->
         <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-slate-900/5 dark:hover:bg-white/10" title="Light / Dark">
           <svg id="icon-sun" viewBox="0 0 24 24" class="w-5 h-5 hidden icon-emoji" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="#FFD064"/><g stroke="#FFD064" stroke-width="2" stroke-linecap="round"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M4.2 4.2l2.2 2.2"/><path d="M17.6 17.6l2.2 2.2"/><path d="M19.8 4.2l-2.2 2.2"/><path d="M6.4 17.6l-2.2 2.2"/></g></svg>
@@ -77,8 +83,8 @@
     </div>
   </header>
 
-  <!-- Splash -->
-  <main class="mx-auto max-w-5xl px-4 sm:px-6 py-12">
+  <!-- Hero -->
+  <main class="mx-auto max-w-5xl px-4 sm:px-6 py-10">
     <section class="text-center">
       <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-brand-600 text-white grid place-items-center shadow-soft">
         <svg viewBox="0 0 24 24" class="w-9 h-9"><path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/></svg>
@@ -93,20 +99,18 @@
       </div>
     </section>
 
-    <!-- (Mini) Φόρμα αναζήτησης – placeholder, για να μην αλλάξουμε τη ροή σου -->
+    <!-- Search (όπως πριν) -->
     <section id="search" class="mt-10">
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200/70 dark:border-slate-800 shadow-soft p-6">
         <h2 class="font-display text-xl font-bold mb-3">Αναζήτηση</h2>
-        <div class="grid gap-3 sm:grid-cols-2">
-          <input id="med-name" type="text" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="π.χ. Augmentin 875mg">
-          <select id="city" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <input id="med-name" type="text" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500 placeholder:text-slate-400 dark:placeholder:text-slate-400/80" placeholder="π.χ. Augmentin 875mg" />
+          <select id="city" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-300 focus:border-brand-500">
             <option value="">— Επιλογή πόλης —</option>
             <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option><option>Ηράκλειο</option>
             <option>Λάρισα</option><option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
           </select>
-          <div class="sm:col-span-2 flex justify-end">
-            <button id="btn-search" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Υποβολή Αναζήτησης</button>
-          </div>
+          <button id="btn-search" class="px-5 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Υποβολή Αναζήτησης</button>
         </div>
       </div>
     </section>
@@ -119,11 +123,25 @@
         <h3 class="text-lg font-display font-bold">Πώς λειτουργεί</h3>
         <button id="how-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">×</button>
       </div>
-      <div class="p-5 text-sm text-slate-700 dark:text-slate-300">
-        <p>Πληκτρολογείς το φάρμακο και την πόλη σου. Τα φαρμακεία λαμβάνουν το αίτημά σου και όταν υπάρχει διαθεσιμότητα, σε ενημερώνουμε για self pick-up.</p>
+      <div class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-2">
+        <p>Πληκτρολογείς το φάρμακο και την πόλη σου. Τα φαρμακεία λαμβάνουν το αίτημά σου. Όταν υπάρχει διαθεσιμότητα, ενημερώνεσαι άμεσα για self pick-up.</p>
+        <p>Δεν συλλέγουμε τιμές — μας ενδιαφέρει μόνο η διαθεσιμότητα.</p>
       </div>
       <div class="px-5 pb-5 flex justify-end">
         <button id="how-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">ΟΚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign-in modal (placeholder για πελάτη) -->
+  <div id="signin-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-soft border border-slate-200 dark:border-slate-800 p-6">
+      <h3 class="text-lg font-display font-bold mb-3">Σύνδεση</h3>
+      <div class="grid gap-3">
+        <input id="c-email" type="email" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="email@domain.com" />
+        <input id="c-pass"  type="password" class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="••••••••" />
+        <button id="c-login" class="px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Σύνδεση</button>
+        <button id="c-close" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:opacity-95">Κλείσιμο</button>
       </div>
     </div>
   </div>
@@ -132,7 +150,7 @@
   <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-3 rounded-xl bg-slate-900 text-white text-sm shadow-xl"></div>
 
   <script>
-    // Theme
+    /* Theme */
     const html = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle');
     const iconSun = document.getElementById('icon-sun');
@@ -147,36 +165,47 @@
     setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
 
-    // Language (placeholder)
+    /* Lang (light) */
     const langEL = document.getElementById('lang-el');
     const langEN = document.getElementById('lang-en');
-    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
-    function applyLang(){ localStorage.setItem('mediradar-lang', state.lang); }
-    langEL.addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
-    langEN.addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
+    langEL.addEventListener('click', ()=> localStorage.setItem('mediradar-lang','el'));
+    langEN.addEventListener('click', ()=> localStorage.setItem('mediradar-lang','en'));
 
-    // How it works modal
-    const modal = document.getElementById('how-modal');
-    document.getElementById('btn-how').addEventListener('click', ()=> modal.classList.remove('hidden'));
-    document.getElementById('how-close').addEventListener('click', ()=> modal.classList.add('hidden'));
-    document.getElementById('how-ok').addEventListener('click', ()=> modal.classList.add('hidden'));
+    /* How it works modal */
+    const howModal = document.getElementById('how-modal');
+    document.getElementById('btn-how').addEventListener('click', ()=> howModal.classList.remove('hidden'));
+    document.getElementById('how-close').addEventListener('click', ()=> howModal.classList.add('hidden'));
+    document.getElementById('how-ok').addEventListener('click', ()=> howModal.classList.add('hidden'));
 
-    // Toast helper
+    /* Sign-in modal (placeholder) */
+    const sModal = document.getElementById('signin-modal');
+    document.getElementById('btn-signin').addEventListener('click', ()=> sModal.classList.remove('hidden'));
+    document.getElementById('c-close').addEventListener('click', ()=> sModal.classList.add('hidden'));
+    document.getElementById('c-login').addEventListener('click', ()=>{
+      sModal.classList.add('hidden');
+      showToast('✅ Συνδέθηκες (demo)');
+    });
+
+    /* Toasts */
     const toast = document.getElementById('toast');
     function showToast(msg){
       toast.textContent = msg;
-      toast.classList.remove('hidden'); toast.style.opacity=0; toast.style.transform='translate(-50%,10px)';
-      requestAnimationFrame(()=>{ toast.style.transition='.18s ease'; toast.style.opacity=1; toast.style.transform='translate(-50%,0)'; });
-      setTimeout(()=>{ toast.style.opacity=0; setTimeout(()=>toast.classList.add('hidden'), 260); }, 2200);
+      toast.classList.remove('hidden'); toast.classList.add('toast-enter');
+      requestAnimationFrame(()=> toast.classList.add('toast-enter-active'));
+      setTimeout(()=>{
+        toast.classList.remove('toast-enter','toast-enter-active'); toast.classList.add('toast-exit');
+        requestAnimationFrame(()=> toast.classList.add('toast-exit-active'));
+        setTimeout(()=>{ toast.classList.add('hidden'); toast.classList.remove('toast-exit','toast-exit-active'); }, 260);
+      }, 2200);
     }
 
-    // Dummy search submit
+    /* Dummy search submit */
     document.getElementById('btn-search').addEventListener('click', ()=>{
       showToast('✅ Αναζήτηση στάλθηκε');
       document.getElementById('search').scrollIntoView({ behavior:'smooth' });
     });
 
-    // PWA: service worker register (αν έχεις service-worker.js στο root)
+    /* PWA SW register */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
