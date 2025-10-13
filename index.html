@@ -15,7 +15,8 @@
           fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
           colors: {
             brand:{ 500:'#29a3a3',600:'#208181',700:'#196464' },
-            mapblue:'#2563eb'
+            mapblue:'#2563eb',
+            google:'#4285F4', apple:'#111827'
           },
           boxShadow:{ soft:'0 16px 40px rgba(2,6,23,.12)'}
         }
@@ -46,17 +47,16 @@
       content:''; position:absolute; inset:8%; border:3px solid rgba(255,255,255,.85);
       border-radius:16px; box-shadow:0 0 0 100vmax rgba(0,0,0,.25); pointer-events:none;
     }
-    @keyframes hourglass {
-      0% { transform: rotate(0deg); }
-      50% { transform: rotate(180deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes hourglass { 0%{transform:rotate(0)} 50%{transform:rotate(180deg)} 100%{transform:rotate(360deg)} }
     .hg{ animation:hourglass 2.2s linear infinite }
   </style>
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#29a3a3" />
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
   <!-- Confetti -->
@@ -123,7 +123,7 @@
     </div>
   </section>
 
-  <!-- APP -->
+  <!-- APP (ίδιο) -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
@@ -131,11 +131,11 @@
           <a href="#" id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></a>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
-        <span class="text-sm opacity-70">&nbsp;</span>
+        <span class="text-sm opacity-70" id="userBadge"></span>
       </div>
     </header>
 
-    <!-- Sticky PENDING banner -->
+    <!-- Sticky Pending -->
     <div id="pendingBanner" class="hidden sticky top-[60px] z-20 mb-4">
       <div class="rounded-2xl border border-amber-300/80 bg-amber-50/95 dark:bg-amber-900/50 dark:border-amber-800 backdrop-blur px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -149,6 +149,7 @@
       </div>
     </div>
 
+    <!-- Φόρμα (μόνο αλλαγή στα default options) -->
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
       <!-- Medicine -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
@@ -190,7 +191,7 @@
           </label>
           <select id="medicine-type"
                   class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">{— <span id="t-select1">Επιλογή</span> —}</option>
+            <option value="">— Επιλογή —</option>
             <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
             <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
             <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
@@ -229,7 +230,7 @@
         </label>
         <select id="city" required
                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-          <option value="">{— <span id="t-select2">Επιλογή</span> —}</option>
+          <option value="">— Επιλογή —</option>
           <option>Αγρίνιο</option><option>Αλεξανδρούπολη</option><option>Αθήνα</option>
           <option>Βέροια</option><option>Βόλος</option><option>Γιάννενα</option>
           <option>Γλυφάδα</option><option>Δράμα</option><option>Ελευσίνα</option>
@@ -290,7 +291,7 @@
       <button id="newSearch" class="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800"><span id="t-newSearch">Νέα αναζήτηση</span></button>
     </section>
 
-    <!-- Active Hold (60') -->
+    <!-- Hold 60' -->
     <section id="hold" class="hidden mt-6">
       <div class="rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 p-4">
         <div class="flex items-center justify-between gap-3">
@@ -338,7 +339,7 @@
     </div>
   </div>
 
-  <!-- Pharmacy modal (kept, but HOLD view now βασικό) -->
+  <!-- Pharmacy info modal (kept) -->
   <div id="pharm-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -352,6 +353,48 @@
       <div class="px-5 pb-5 flex gap-2 justify-end">
         <a id="pm-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Κλήση</a>
         <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-mapblue text-white font-semibold hover:bg-blue-700">Άνοιγμα σε Χάρτες</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGN-IN modal -->
+  <div id="auth-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b">
+        <h3 class="text-lg font-bold" id="auth-title">Σύνδεση</h3>
+        <button id="auth-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <!-- Email/Password -->
+        <div class="space-y-2">
+          <label class="text-sm font-semibold flex items-center gap-2"><span>✉️</span><span id="auth-emailLbl">Email</span></label>
+          <input id="auth-email" type="email" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="you@example.com" />
+          <label class="text-sm font-semibold flex items-center gap-2 mt-2"><span>🔒</span><span id="auth-passLbl">Κωδικός</span></label>
+          <input id="auth-pass" type="password" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="••••••••" />
+          <div class="flex gap-2 mt-2">
+            <button id="auth-login" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Σύνδεση</button>
+            <button id="auth-signup" class="px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800">Εγγραφή</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3"><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div><span class="text-xs opacity-70">ή</span><div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div></div>
+
+        <!-- Social -->
+        <div class="grid gap-2">
+          <button id="auth-google" class="px-4 py-2 rounded-xl bg-google text-white font-semibold hover:opacity-95 flex items-center justify-center gap-2">
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 34 29.1 37 24 37c-7 0-13-6-13-13s6-13 13-13c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 12 3 2 13 2 25s10 22 22 22c11 0 21-8 21-22 0-1.6-.2-3.1-.4-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.2 16.3 18.7 13 24 13c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 15.4 3 7.9 7.8 6.3 14.7z"/><path fill="#4CAF50" d="M24 47c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29.1 37 24.6 39 20 39c-5.1 0-9.4-3.3-11-7.9l-6.6 5.1C7.9 42.2 15.4 47 24 47z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.3 3.8-5.7 6.5-11.3 6.5-6.3 0-11.5-5.2-11.5-11.5S17.7 11.5 24 11.5c3.1 0 6 .9 8.3 2.9l5.7-5.7C34.8 5.4 29.7 3 24 3 12 3 2 13 2 25s10 22 22 22c11 0 21-8 21-22 0-1.6-.2-3.1-.4-4.5z"/></svg>
+            Google
+          </button>
+          <button id="auth-apple" class="px-4 py-2 rounded-xl bg-apple text-white font-semibold hover:opacity-95 flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 448 512"><path fill="currentColor" d="M350.5 129.6c-17.6 20.7-46.3 36.8-75.6 34.6-3-27.1 8.4-55.8 25.4-73.8 18-19.5 49.8-33.2 75.1-34.2 3.3 27.5-10 55.3-24.9 73.4zM399.8 357.8c-7.2 16.4-15.3 31.8-25 46.4-17.1 25.1-31.1 42.7-55.6 42.9-23.7.2-31.3-13.9-58.4-13.9-27.1 0-35.5 13.5-58 14.1-23.4.6-41.2-23.2-58.3-48.2-31.7-45.9-56-129.8-23.4-186.4 16.1-27.9 44.8-45.6 76.1-45.9 23.8-.3 46.3 15.7 58.4 15.7 12 0 40.3-19.4 68.1-16.6 11.6.5 44.2 4.7 65.1 35.4-1.7 1.1-38.9 22.9-38.6 68.8.4 54.9 47.6 73.1 48.3 73.4-.4 1.4-7.5 25.2-18.7 49.9z"/></svg>
+            Apple
+          </button>
+        </div>
+
+        <div class="text-center">
+          <button id="auth-guest" class="text-sm underline hover:opacity-80">Συνέχεια ως επισκέπτης</button>
+        </div>
+        <div id="auth-msg" class="text-sm"></div>
       </div>
     </div>
   </div>
@@ -377,8 +420,7 @@
 
     /* ---------- i18n ---------- */
     const strings = {
-      el:{
-        hero:'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
+      el:{ hero:'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
         searchBTN:'Αναζήτηση Φαρμάκου', howBTN:'Πώς λειτουργεί', signinBTN:'Σύνδεση', installBTN:'Εγκατάσταση',
         searchTitle:'Αναζήτηση Φαρμάκου', home:'Αρχική', medname:'Όνομα Φαρμάκου',
         formatTip:'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
@@ -394,16 +436,9 @@
         holdTitle:'Κράτηση 60’ για παραλαβή',
         extendWarn:'Μπορείς να κάνεις παράταση μόνο μία φορά ανά 24 ώρες.',
         extendDone:'Έγινε παράταση +15’. Νέος χρόνος:',
-        errors:{
-          med:'Συμπλήρωσε το όνομα φαρμάκου.',
-          type:'Επίλεξε τύπο φαρμάκου.',
-          qty:'Η ποσότητα πρέπει να είναι τουλάχιστον 1.',
-          city:'Επίλεξε πόλη.',
-          gdpr:'Πρέπει να αποδεχτείς τους όρους.'
-        }
+        errors:{ med:'Συμπλήρωσε το όνομα φαρμάκου.', type:'Επίλεξε τύπο φαρμάκου.', qty:'Η ποσότητα πρέπει να είναι τουλάχιστον 1.', city:'Επίλεξε πόλη.', gdpr:'Πρέπει να αποδεχτείς τους όρους.' }
       },
-      en:{
-        hero:'Instant availability check at nearby pharmacies.',
+      en:{ hero:'Instant availability check at nearby pharmacies.',
         searchBTN:'Medicine Search', howBTN:'How it works', signinBTN:'Sign in', installBTN:'Install',
         searchTitle:'Medicine Search', home:'Home', medname:'Medicine Name',
         formatTip:'Tip: Brand name + dosage (e.g. “500mg”).',
@@ -419,13 +454,7 @@
         holdTitle:'60’ reservation for self pick-up',
         extendWarn:'You can extend only once per 24 hours.',
         extendDone:'Extended +15’. New time:',
-        errors:{
-          med:'Please enter medicine name.',
-          type:'Please select medicine type.',
-          qty:'Quantity must be at least 1.',
-          city:'Please select a city.',
-          gdpr:'You must accept the terms.'
-        }
+        errors:{ med:'Please enter medicine name.', type:'Please select medicine type.', qty:'Quantity must be at least 1.', city:'Please select a city.', gdpr:'You must accept the terms.' }
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
@@ -448,8 +477,13 @@
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       localStorage.setItem('mediradar-lang', state.lang);
-      // refresh messages on screen if needed
-      if(document.getElementById('extendMsg').dataset.state==='warn') document.getElementById('extendMsg').textContent = t('extendWarn');
+      // Auth labels
+      document.getElementById('auth-title').textContent = state.lang==='el'?'Σύνδεση':'Sign in';
+      document.getElementById('auth-emailLbl').textContent = state.lang==='el'?'Email':'Email';
+      document.getElementById('auth-passLbl').textContent = state.lang==='el'?'Κωδικός':'Password';
+      document.getElementById('auth-login').textContent = state.lang==='el'?'Σύνδεση':'Sign in';
+      document.getElementById('auth-signup').textContent = state.lang==='el'?'Εγγραφή':'Sign up';
+      document.getElementById('auth-guest').textContent = state.lang==='el'?'Συνέχεια ως επισκέπτης':'Continue as guest';
     }
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
     document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
@@ -460,6 +494,7 @@
     const results = document.getElementById('results');
     const proFloating = document.getElementById('pro-floating');
     const pendingBanner = document.getElementById('pendingBanner');
+    const userBadge = document.getElementById('userBadge');
 
     function enterApp(){
       splash.classList.add('hidden'); app.classList.remove('hidden');
@@ -497,7 +532,7 @@
     document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
     document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
 
-    /* ---------- GDPR modal (kept) ---------- */
+    /* ---------- GDPR modal ---------- */
     const modalGdpr = document.getElementById('gdpr-modal');
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
@@ -555,7 +590,7 @@
       requestAnimationFrame(tick);
     }
 
-    /* ---------- Persisted Request/Hold ---------- */
+    /* ---------- Persist ---------- */
     const PERSIST_KEY = 'mr-state';
     function saveState(obj){ localStorage.setItem(PERSIST_KEY, JSON.stringify(obj)); }
     function loadState(){ try{ return JSON.parse(localStorage.getItem(PERSIST_KEY)||'{}'); }catch{ return {}; } }
@@ -570,7 +605,7 @@
     }
     function hidePending(){ pendingBanner.classList.add('hidden'); }
 
-    /* ---------- Hold Countdown + Extend ---------- */
+    /* ---------- Hold ---------- */
     const holdSec = document.getElementById('hold');
     const holdTTL = document.getElementById('holdTTL');
     const holdPharm = document.getElementById('holdPharm');
@@ -579,7 +614,6 @@
     const holdExtend = document.getElementById('holdExtend');
     const extendMsg = document.getElementById('extendMsg');
     let holdTimer=null, holdUntil=0;
-
     function two(n){ return n.toString().padStart(2,'0'); }
     function renderTTL(){
       const rem = Math.max(0, Math.floor((holdUntil - Date.now())/1000));
@@ -592,9 +626,9 @@
       holdPharm.textContent = pharm.name + ' — ' + pharm.addr;
       holdCall.href = `tel:${pharm.tel.replace(/\s+/g,'')}`;
       holdMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(pharm.addr)}${pharm.lat?`@${pharm.lat},${pharm.lng},17z`:''}`;
-      holdUntil = Date.now() + 60*60*1000; // 60'
-      const state = loadState();
-      saveState({ ...state, status:'hold', hold:{ until:holdUntil, pharm, extendedAt:state?.hold?.extendedAt||null } });
+      holdUntil = Date.now() + 60*60*1000;
+      const state0 = loadState();
+      saveState({ ...state0, status:'hold', hold:{ until:holdUntil, pharm, extendedAt:state0?.hold?.extendedAt||null } });
       renderTTL(); clearInterval(holdTimer); holdTimer = setInterval(renderTTL, 1000);
       holdSec.scrollIntoView({ behavior:'smooth', block:'start' });
     }
@@ -627,7 +661,7 @@
       extendMsg.textContent = strings[state.lang].extendDone + ' ' + holdTTL.textContent;
     });
 
-    /* ---------- Form Validation ---------- */
+    /* ---------- Validation ---------- */
     function showErr(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.remove('hidden'); }
     function hideErr(id){ document.getElementById(id).classList.add('hidden'); }
     function validate(){
@@ -637,35 +671,26 @@
       const qty=parseInt(document.getElementById('quantity').value||'0',10);
       const city=document.getElementById('city').value.trim();
       const gdpr=document.getElementById('gdpr-checkbox').checked;
-
       if(!med){ showErr('err-med', strings[state.lang].errors.med); ok=false; } else hideErr('err-med');
       if(!type){ showErr('err-type', strings[state.lang].errors.type); ok=false; } else hideErr('err-type');
       if(!(qty>=1)){ showErr('err-qty', strings[state.lang].errors.qty); ok=false; } else hideErr('err-qty');
       if(!city){ showErr('err-city', strings[state.lang].errors.city); ok=false; } else hideErr('err-city');
       if(!gdpr){ showErr('err-gdpr', strings[state.lang].errors.gdpr); ok=false; } else hideErr('err-gdpr');
-
       return ok;
     }
 
-    /* ---------- Submit: persist Pending, then demo Answers ---------- */
+    /* ---------- Submit (demo) ---------- */
     const list = document.getElementById('resultsList');
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
       if(!validate()) return;
-
       fireConfetti(2500);
-
-      // create & persist pending request
       const reqId = 'MR-' + Math.random().toString(36).slice(2,8).toUpperCase();
       saveState({ status:'pending', reqId, createdAt: Date.now() });
       showPending(reqId);
-
-      // DEMO: simulate answers after 3s
       setTimeout(()=>{
-        const st = loadState();
-        if(st.status!=='pending') return; // if user already in hold, skip
-        hidePending();
-        list.innerHTML='';
+        const st = loadState(); if(st.status!=='pending') return;
+        hidePending(); list.innerHTML='';
         const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
         const items = [
           { name:'Φαρμακείο Ιάκωβος', dist:'2.1km', generic: allowGeneric, addr:'Ιπποκράτους 12, Αθήνα', tel:'+30 2101234567', lat:37.984, lng:23.735 },
@@ -675,10 +700,8 @@
           const card = document.createElement('div');
           card.className = 'rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between';
           card.innerHTML = `
-            <div>
-              <div class="font-semibold">${it.name}</div>
-              <div class="text-xs text-slate-600 dark:text-slate-400">${it.dist}</div>
-            </div>
+            <div><div class="font-semibold">${it.name}</div>
+                 <div class="text-xs text-slate-600 dark:text-slate-400">${it.dist}</div></div>
             <div class="flex items-center gap-2">
               ${it.generic ? `<span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span>` : ''}
               <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm select-pharm">Επιλογή</button>
@@ -692,7 +715,6 @@
       }, 3000);
     });
 
-    /* ---------- Select pharmacy -> start HOLD ---------- */
     document.getElementById('resultsList').addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
       const card = btn.closest('div.rounded-xl');
@@ -703,7 +725,7 @@
       startHold(pharm);
     });
 
-    /* ---------- Scanner with overlay + torch ---------- */
+    /* ---------- Scanner ---------- */
     const scanBtn = document.getElementById('scan-barcode');
     const stopBtn = document.getElementById('stop-scan');
     const scanArea = document.getElementById('scan-area');
@@ -724,15 +746,12 @@
         videoTrack = mediaStream.getVideoTracks()[0];
         const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
         if(capabilities.torch){ torchBtn.classList.remove('hidden'); } else { torchBtn.classList.add('hidden'); }
-
         if('BarcodeDetector' in window){
           const detector = new BarcodeDetector({ formats:['code_128','ean_13','qr_code','upc_a','upc_e','code_39','itf','codabar','data_matrix','pdf417','aztec'] });
           const loop = async ()=>{ if(!scanning) return;
-            try{
-              const res = await detector.detect(videoEl);
+            try{ const res = await detector.detect(videoEl);
               if(res && res.length){ rxInput.value = res[0].rawValue || ''; stopScan(); return; }
-            }catch{}
-            requestAnimationFrame(loop);
+            }catch{} requestAnimationFrame(loop);
           }; loop();
         }else{
           await loadZXing();
@@ -746,11 +765,7 @@
             }catch{}
           }, 800);
         }
-      }catch(e){
-        console.error(e);
-        alert(state.lang==='el'?'Δεν ήταν δυνατή η πρόσβαση στην κάμερα.':'Camera access failed.');
-        stopScan();
-      }
+      }catch(e){ alert(state.lang==='el'?'Δεν ήταν δυνατή η πρόσβαση στην κάμερα.':'Camera access failed.'); stopScan(); }
     }
     function stopScan(){
       scanning=false;
@@ -762,11 +777,7 @@
     let torchOn=false;
     torchBtn.addEventListener('click', async ()=>{
       if(!videoTrack || !videoTrack.applyConstraints) return;
-      try{
-        torchOn = !torchOn;
-        await videoTrack.applyConstraints({ advanced:[{ torch: torchOn }] });
-        torchBtn.textContent = torchOn ? '🔦 On' : '🔦';
-      }catch(e){ console.warn('Torch not supported:', e); }
+      try{ torchOn = !torchOn; await videoTrack.applyConstraints({ advanced:[{ torch: torchOn }] }); torchBtn.textContent = torchOn ? '🔦 On' : '🔦'; }catch{}
     });
     scanBtn.addEventListener('click', startScan);
     stopBtn.addEventListener('click', stopScan);
@@ -777,27 +788,68 @@
     }
     let deferredPrompt=null;
     const installBtn = document.getElementById('cta-install');
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden');
-    });
-    installBtn.addEventListener('click', async ()=>{
-      if(!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt=null; installBtn.classList.add('hidden');
-    });
-    window.addEventListener('appinstalled', ()=>{ installBtn.classList.add('hidden'); });
+    window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden'); });
+    installBtn.addEventListener('click', async ()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.classList.add('hidden'); });
+    window.addEventListener('appinstalled', ()=> installBtn.classList.add('hidden'));
 
-    /* ---------- Restore persisted state on load ---------- */
+    /* ---------- AUTH (Supabase) ---------- */
+    const AUTH_URL = window.SUPABASE_URL || (typeof process!=='undefined' && process.env && process.env.SUPABASE_URL);
+    const AUTH_KEY = window.SUPABASE_ANON_KEY || (typeof process!=='undefined' && process.env && process.env.SUPABASE_ANON_KEY);
+    const sb = (AUTH_URL && AUTH_KEY) ? supabase.createClient(AUTH_URL, AUTH_KEY) : null;
+
+    const authModal = document.getElementById('auth-modal');
+    const openAuth = ()=> { authModal.classList.remove('hidden'); authModal.classList.add('flex'); };
+    const closeAuth = ()=> authModal.classList.add('hidden');
+
+    document.getElementById('cta-signin').addEventListener('click', ()=>{
+      if(!sb){ alert('Supabase env variables missing (SUPABASE_URL / SUPABASE_ANON_KEY).'); return; }
+      openAuth();
+    });
+    document.getElementById('auth-close').onclick = closeAuth;
+    document.getElementById('auth-guest').onclick = closeAuth;
+
+    async function showUser(){
+      if(!sb) return;
+      const { data: { user } } = await sb.auth.getUser();
+      userBadge.textContent = user ? (user.email || user.user_metadata?.name || 'User') : '';
+    }
+    // email login/signup
+    document.getElementById('auth-login').addEventListener('click', async ()=>{
+      if(!sb) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-pass').value;
+      const msg = document.getElementById('auth-msg'); msg.textContent='';
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if(error){ msg.className='text-sm text-rose-600'; msg.textContent = error.message; return; }
+      msg.className='text-sm text-emerald-600'; msg.textContent = state.lang==='el'?'Συνδέθηκες επιτυχώς.':'Signed in.';
+      closeAuth(); showUser();
+    });
+    document.getElementById('auth-signup').addEventListener('click', async ()=>{
+      if(!sb) return;
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-pass').value;
+      const msg = document.getElementById('auth-msg'); msg.textContent='';
+      const { error } = await sb.auth.signUp({ email, password: pass });
+      if(error){ msg.className='text-sm text-rose-600'; msg.textContent = error.message; return; }
+      msg.className='text-sm text-emerald-600'; msg.textContent = state.lang==='el'?'Έγινε εγγραφή. Έλεγξε το email σου.':'Signed up. Check your email.';
+    });
+    // Google / Apple
+    async function oauth(provider){
+      if(!sb) return;
+      const { error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: location.origin } });
+      if(error) alert(error.message);
+    }
+    document.getElementById('auth-google').onclick = ()=> oauth('google');
+    document.getElementById('auth-apple').onclick  = ()=> oauth('apple');
+
+    /* ---------- Restore ---------- */
     function restore(){
-      applyLang();
+      applyLang(); showUser();
       const st = loadState();
       if(!st.status) return;
-      enterApp(); // ensure we’re in app view
+      enterApp();
       if(st.status==='pending'){ showPending(st.reqId); }
-      else if(st.status==='hold' && st.hold?.until && st.hold?.pharm){
-        restoreHold(st);
-      }
+      else if(st.status==='hold' && st.hold?.until && st.hold?.pharm){ restoreHold(st); }
     }
     restore();
   </script>
