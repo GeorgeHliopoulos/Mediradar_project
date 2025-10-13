@@ -67,13 +67,13 @@
   <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none" style="display:none"></canvas>
 
-  <!-- Για επαγγελματίες (πάνω-αριστερά) -->
+  <!-- Για επαγγελματίες -->
   <a id="pro-floating" href="/pharmacy.html"
      class="fixed top-3 left-3 z-50 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur border border-slate-200 dark:border-slate-700 hover:bg-white text-sm">
     Για επαγγελματίες
   </a>
 
-  <!-- Γλώσσα + Θέμα (πάνω-δεξιά) -->
+  <!-- Γλώσσα + Θέμα -->
   <div class="fixed top-3 right-3 z-50 flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
     <div class="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
       <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
@@ -474,8 +474,13 @@
       setText('t-genericQ', t('genericQ')); setText('t-yes', t('yes')); setText('t-no', t('no'));
       setText('t-city', t('city')); setText('t-accept', t('accept')); setText('t-submit', t('submit'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch'));
-      document.getElementById('pendingBanner').querySelector('#t-pendingTitle')?.textContent = t('pendingTitle');
-      document.getElementById('pendingBanner').querySelector('#t-pendingHint')?.textContent = t('pendingHint');
+
+      // ΔΙΟΡΘΩΣΗ: χωρίς optional-chaining στην ΑΡΙΣΤΕΡΗ πλευρά
+      const pTitle = document.querySelector('#pendingBanner #t-pendingTitle');
+      if (pTitle) pTitle.textContent = t('pendingTitle');
+      const pHint  = document.querySelector('#pendingBanner #t-pendingHint');
+      if (pHint)  pHint.textContent  = t('pendingHint');
+
       setText('holdTitle', t('holdTitle'));
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
@@ -541,7 +546,6 @@
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
-    // Body (σύντομη πολιτική)
     document.getElementById('gdpr-body').innerHTML = `
       <p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (συμπλήρωσε στοιχεία).</p>
       <p><strong>Σκοπός:</strong> Διαβίβαση αναζήτησης σε φαρμακεία για ενημέρωση διαθεσιμότητας/χρόνου παραλαβής.</p>
@@ -793,8 +797,8 @@
       if(!videoTrack || !videoTrack.applyConstraints) return;
       try{ torchOn = !torchOn; await videoTrack.applyConstraints({ advanced:[{ torch: torchOn }] }); torchBtn.textContent = torchOn ? '🔦 On' : '🔦'; }catch{}
     });
-    scanBtn.addEventListener('click', startScan);
-    stopBtn.addEventListener('click', stopScan);
+    document.getElementById('scan-barcode').addEventListener('click', startScan);
+    document.getElementById('stop-scan').addEventListener('click', stopScan);
 
     /* ---------- PWA ---------- */
     if('serviceWorker' in navigator){
