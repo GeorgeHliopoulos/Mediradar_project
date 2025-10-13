@@ -15,8 +15,7 @@
           fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
           colors: {
             brand:{ 500:'#29a3a3',600:'#208181',700:'#196464' },
-            mapblue:'#2563eb',
-            google:'#4285F4', apple:'#111827'
+            mapblue:'#2563eb', google:'#4285F4', apple:'#111827'
           },
           boxShadow:{ soft:'0 16px 40px rgba(2,6,23,.12)'}
         }
@@ -58,23 +57,23 @@
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- ✅ SUPABASE ENV ΓΙΑ BROWSER -->
+  <!-- SUPABASE ENV ΓΙΑ BROWSER -->
   <script>
     window.SUPABASE_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk"; // <-- βάλε το anon public key σου εδώ
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk"; /* <-- ΒΑΛΕ ΤΟ ΔΙΚΟ ΣΟΥ anon public key */
   </script>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
   <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none" style="display:none"></canvas>
 
-  <!-- PRO (top-left) -->
+  <!-- Για επαγγελματίες (πάνω-αριστερά) -->
   <a id="pro-floating" href="/pharmacy.html"
      class="fixed top-3 left-3 z-50 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur border border-slate-200 dark:border-slate-700 hover:bg-white text-sm">
     Για επαγγελματίες
   </a>
 
-  <!-- Lang + Theme (top-right) -->
+  <!-- Γλώσσα + Θέμα (πάνω-δεξιά) -->
   <div class="fixed top-3 right-3 z-50 flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
     <div class="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
       <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
@@ -141,7 +140,7 @@
       </div>
     </header>
 
-    <!-- Sticky Pending banner -->
+    <!-- Sticky Pending -->
     <div id="pendingBanner" class="hidden sticky top-[60px] z-20 mb-4">
       <div class="rounded-2xl border border-amber-300/80 bg-amber-50/95 dark:bg-amber-900/50 dark:border-amber-800 backdrop-blur px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -481,6 +480,7 @@
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       localStorage.setItem('mediradar-lang', state.lang);
+
       // Auth labels
       document.getElementById('auth-title').textContent = state.lang==='el'?'Σύνδεση':'Sign in';
       document.getElementById('auth-emailLbl').textContent = state.lang==='el'?'Email':'Email';
@@ -541,6 +541,16 @@
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
+    // Body (σύντομη πολιτική)
+    document.getElementById('gdpr-body').innerHTML = `
+      <p><strong>Υπεύθυνος Επεξεργασίας:</strong> MediRadar (συμπλήρωσε στοιχεία).</p>
+      <p><strong>Σκοπός:</strong> Διαβίβαση αναζήτησης σε φαρμακεία για ενημέρωση διαθεσιμότητας/χρόνου παραλαβής.</p>
+      <p><strong>Νομική βάση:</strong> GDPR 6(1)(b) και 6(1)(a) για προαιρετικά στοιχεία (αριθμός συνταγής/σάρωση).</p>
+      <p><strong>Δεδομένα:</strong> Όνομα φαρμάκου, δραστική, τύπος, ποσότητα, γενόσημο, πόλη, (προαιρετικά) αριθμός συνταγής/barcode.</p>
+      <p><strong>Διατήρηση:</strong> Έως 30 ημέρες, έπειτα ανωνυμοποίηση/διαγραφή εκτός νόμιμης υποχρέωσης.</p>
+      <p><strong>Δικαιώματα:</strong> Πρόσβαση, διόρθωση, διαγραφή, περιορισμός, φορητότητα, εναντίωση.</p>
+      <p><strong>Ασφάλεια:</strong> HTTPS, έλεγχος πρόσβασης, καταγραφή συμβάντων. Εκτελούντες βάσει άρθρου 28.</p>
+    `;
 
     /* ---------- Autocomplete (demo) ---------- */
     const AC_MEDICINES = ['Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg'];
@@ -799,14 +809,24 @@
     /* ---------- AUTH (Supabase) ---------- */
     const AUTH_URL = window.SUPABASE_URL || (typeof process!=='undefined' && process.env && process.env.SUPABASE_URL);
     const AUTH_KEY = window.SUPABASE_ANON_KEY || (typeof process!=='undefined' && process.env && process.env.SUPABASE_ANON_KEY);
-    const sb = (AUTH_URL && AUTH_KEY) ? supabase.createClient(AUTH_URL, AUTH_KEY) : null;
+    let sb = null;
+    function tryInitSupabase(){
+      try {
+        if (AUTH_URL && AUTH_KEY && window.supabase && !sb) {
+          sb = window.supabase.createClient(AUTH_URL, AUTH_KEY);
+        }
+      } catch (e) { console.warn('Supabase init failed:', e); }
+    }
+    tryInitSupabase();
+    window.addEventListener('load', tryInitSupabase);
 
     const authModal = document.getElementById('auth-modal');
     const openAuth = ()=> { authModal.classList.remove('hidden'); authModal.classList.add('flex'); };
     const closeAuth = ()=> authModal.classList.add('hidden');
 
     document.getElementById('cta-signin').addEventListener('click', ()=>{
-      if(!sb){ alert('Supabase env variables missing (SUPABASE_URL / SUPABASE_ANON_KEY).'); return; }
+      tryInitSupabase();
+      if(!sb){ alert('Supabase is not ready yet. Check connection and try again.'); return; }
       openAuth();
     });
     document.getElementById('auth-close').onclick = closeAuth;
@@ -818,7 +838,7 @@
       userBadge.textContent = user ? (user.email || user.user_metadata?.name || 'User') : '';
     }
     document.getElementById('auth-login').addEventListener('click', async ()=>{
-      if(!sb) return;
+      tryInitSupabase(); if(!sb) return;
       const email = document.getElementById('auth-email').value.trim();
       const pass  = document.getElementById('auth-pass').value;
       const msg = document.getElementById('auth-msg'); msg.textContent='';
@@ -828,7 +848,7 @@
       closeAuth(); showUser();
     });
     document.getElementById('auth-signup').addEventListener('click', async ()=>{
-      if(!sb) return;
+      tryInitSupabase(); if(!sb) return;
       const email = document.getElementById('auth-email').value.trim();
       const pass  = document.getElementById('auth-pass').value;
       const msg = document.getElementById('auth-msg'); msg.textContent='';
@@ -837,7 +857,7 @@
       msg.className='text-sm text-emerald-600'; msg.textContent = state.lang==='el'?'Έγινε εγγραφή. Έλεγξε το email σου.':'Signed up. Check your email.';
     });
     async function oauth(provider){
-      if(!sb) return;
+      tryInitSupabase(); if(!sb) return;
       const { error } = await sb.auth.signInWithOAuth({ provider, options:{ redirectTo: location.origin } });
       if(error) alert(error.message);
     }
