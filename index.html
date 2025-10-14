@@ -56,28 +56,11 @@
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="ml-auto w-fit flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
-      <!-- Pro link -->
       <a href="/pharmacy.html" class="hidden sm:inline text-sm px-2 py-1 rounded-lg hover:bg-white/70 dark:hover:bg-white/20" id="t-pro">Για επαγγελματίες</a>
-      <!-- Lang -->
       <div class="flex items-center rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-        <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">
-          <svg width="14" height="10" viewBox="0 0 27 18" aria-hidden="true">
-            <rect width="27" height="18" fill="#0D5EAF"/>
-            <g fill="#fff"><rect y="2" width="27" height="2"/><rect y="6" width="27" height="2"/><rect y="10" width="27" height="2"/><rect y="14" width="27" height="2"/></g>
-            <rect width="10" height="10" fill="#0D5EAF"/><rect x="4" width="2" height="10" fill="#fff"/><rect y="4" width="10" height="2" fill="#fff"/>
-          </svg> EL
-        </button>
-        <button id="lang-en" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 opacity-90 hover:opacity-100">
-          <svg width="14" height="10" viewBox="0 0 28 20" aria-hidden="true">
-            <rect width="28" height="20" fill="#012169"/>
-            <path d="M0,0 L28,20 M28,0 L0,20" stroke="#fff" stroke-width="5"/>
-            <path d="M0,0 L28,20 M28,0 L0,20" stroke="#C8102E" stroke-width="3"/>
-            <rect x="11" width="6" height="20" fill="#fff"/><rect y="7" width="28" height="6" fill="#fff"/>
-            <rect x="12" width="4" height="20" fill="#C8102E"/><rect y="8" width="28" height="4" fill="#C8102E"/>
-          </svg> EN
-        </button>
+        <button id="lang-el" class="px-2 py-1.5 text-xs font-semibold flex items-center gap-1 bg-white/70 dark:bg-white/10">🇬🇷 EL</button>
+        <button id="lang-en" class="px-2 py-1.5 text-xs font-semibold opacity-90 hover:opacity-100">🇬🇧 EN</button>
       </div>
-      <!-- Theme -->
       <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-white/20">
         <span id="icon-sun" class="hidden">🌞</span><span id="icon-moon">🌙</span>
       </button>
@@ -236,19 +219,37 @@
       </div>
     </section>
 
-    <!-- Pending + Results -->
+    <!-- Pending -->
     <section id="pending" class="hidden mt-6">
       <div class="rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800">
         <div class="flex items-center gap-3">
           <div style="animation:pulseHourglass 1.5s linear infinite">⏳</div>
-          <div class="text-sm" id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</div>
+          <div class="text-sm">
+            <span id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</span>
+            <span class="ml-2 font-semibold" id="wait-elapsed">(0s)</span>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Results -->
     <section id="results" class="hidden mt-6">
       <h2 class="text-xl font-bold mb-3" id="t-results">Αποτελέσματα (demo UI)</h2>
       <div class="grid gap-3" id="resultsList"></div>
+
+      <!-- Self pickup timer -->
+      <div id="pickup-box" class="hidden mt-4 rounded-2xl p-4 border border-emerald-300 bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100 dark:border-emerald-800">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="text-sm">
+            ✅ <strong>Self pick-up</strong> • <span id="pickup-timer">60:00</span>
+            <span class="ml-2 text-slate-500 dark:text-slate-400">– Ελέγξτε το ωράριο του φαρμακείου</span>
+          </div>
+          <button id="extend-btn" class="px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/60 dark:hover:bg-emerald-800/40 text-sm">
+            Extend +15’
+          </button>
+        </div>
+      </div>
+
       <button id="newSearch" class="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800"><span id="t-newSearch">Νέα αναζήτηση</span></button>
     </section>
   </main>
@@ -294,12 +295,12 @@
       </div>
       <div class="px-5 pb-5 flex gap-2 justify-end">
         <a id="pm-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Κλήση</a>
-        <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800">Άνοιγμα σε Χάρτες</a>
+        <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700">Άνοιγμα σε Χάρτες</a>
       </div>
     </div>
   </div>
 
-  <!-- Customer Sign-in modal (FIXED CENTERED) -->
+  <!-- Customer Sign-in modal -->
   <div id="signin-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-soft border border-slate-200 dark:border-slate-800 p-6">
       <h3 class="text-lg font-display font-bold mb-3">Σύνδεση</h3>
@@ -395,8 +396,23 @@
     /* ---------- Navigation ---------- */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
-    document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-    document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); app.classList.add('hidden'); splash.classList.remove('hidden'); document.getElementById('results').classList.add('hidden'); document.getElementById('pending').classList.add('hidden'); });
+    const pending = document.getElementById('pending');
+    const results = document.getElementById('results');
+
+    function goHome(){
+      app.classList.add('hidden');
+      splash.classList.remove('hidden');
+      pending.classList.add('hidden');
+      results.classList.add('hidden');
+      stopWaitTimer();
+      stopPickupTimer();
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    }
+
+    document.getElementById('cta-search').addEventListener('click', ()=>{
+      splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' });
+    });
+    document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); goHome(); });
 
     /* ---------- Modals ---------- */
     const modalHow = document.getElementById('modal-how');
@@ -406,7 +422,7 @@
           <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή/και δραστική ουσία).</li>
           <li>Η αίτηση στέλνεται στα κοντινά φαρμακεία.</li>
           <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά· αν έχει μόνο γενόσημο, θα το δεις με ειδικό σήμα.</li>
-          <li>Επιλέγεις φαρμακείο και πας για <strong>self pick-up</strong> με όποιον τρόπο πληρωμής θες.</li>
+          <li>Επιλέγεις φαρμακείο και πας για <strong>self pick-up</strong>.</li>
           <li>Δεν συλλέγουμε τιμές· μόνο διαθεσιμότητα.</li></ol>`
         : `<ol class="list-decimal pl-5 space-y-2">
           <li>Type what you need (brand / active).</li>
@@ -424,7 +440,7 @@
     document.getElementById('gdpr-close').onclick= ()=> { modalGdpr.classList.add('hidden'); modalGdpr.classList.remove('flex'); };
     document.getElementById('gdpr-ok').onclick   = ()=> { modalGdpr.classList.add('hidden'); modalGdpr.classList.remove('flex'); };
 
-    /* ---- Customer Sign-in modal (centered fix) ---- */
+    /* ---- Customer Sign-in modal ---- */
     const signinModal = document.getElementById('signin-modal');
     document.getElementById('cta-signin').onclick = ()=> { signinModal.classList.remove('hidden'); signinModal.classList.add('flex'); };
     document.getElementById('c-close').onclick    = ()=> { signinModal.classList.add('hidden'); signinModal.classList.remove('flex'); };
@@ -456,25 +472,39 @@
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-    /* ---------- Submit: Pending -> Results -> Details ---------- */
-    const pending = document.getElementById('pending');
-    const results = document.getElementById('results');
-    const list = document.getElementById('resultsList');
+    /* ---------- Pending wait timer ---------- */
+    let waitTimer = null, waitStart = 0;
+    const waitSpan = document.getElementById('wait-elapsed');
+    function startWaitTimer(){
+      waitStart = Date.now();
+      stopWaitTimer();
+      waitTimer = setInterval(()=>{
+        const s = Math.floor((Date.now()-waitStart)/1000);
+        waitSpan.textContent = `(${s}s)`;
+      }, 500);
+    }
+    function stopWaitTimer(){ if(waitTimer){ clearInterval(waitTimer); waitTimer=null; waitSpan.textContent=''; } }
 
-    function showPending(){ document.getElementById('t-pending').textContent = t('pending'); pending.classList.remove('hidden'); results.classList.add('hidden'); }
-    function hidePending(){ pending.classList.add('hidden'); }
+    /* ---------- Submit: Pending -> Results -> Details ---------- */
+    const list = document.getElementById('resultsList');
 
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
-      // required checks
       const name = document.getElementById('medicine-name').value.trim();
       if(!name){ alert('Συμπλήρωσε το όνομα φαρμάκου'); return; }
       if(!document.getElementById('city').value){ alert('Επίλεξε πόλη'); return; }
       if(!document.getElementById('gdpr-checkbox').checked){ alert('Αποδέξου τους όρους'); return; }
 
-      showPending();
+      // show pending + timer
+      document.getElementById('t-pending').textContent = t('pending');
+      pending.classList.remove('hidden'); results.classList.add('hidden');
+      startWaitTimer();
+
+      // simulate network (π.χ. 6s)
       setTimeout(()=>{
-        hidePending();
+        stopWaitTimer();
+        pending.classList.add('hidden');
+
         list.innerHTML='';
         const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
         const items = [
@@ -499,7 +529,7 @@
         });
         results.classList.remove('hidden');
         window.scrollTo({ top: results.offsetTop - 20, behavior:'smooth' });
-      }, 1200);
+      }, 6000);
     });
 
     document.getElementById('newSearch').addEventListener('click', ()=>{ results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
@@ -524,6 +554,45 @@
       pmCall.href = `tel:${tel.replace(/\s+/g,'')}`;
       pmMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(addr)}${lat?`@${lat},${lng},17z`:''}`;
       pm.classList.remove('hidden'); pm.classList.add('flex');
+
+      // ξεκινάμε self pickup countdown
+      startPickupTimer(60*60); // 60 λεπτά
+    });
+
+    /* ---------- Self pick-up countdown + extend ---------- */
+    const pickupBox   = document.getElementById('pickup-box');
+    const pickupTimer = document.getElementById('pickup-timer');
+    const extendBtn   = document.getElementById('extend-btn');
+    let pickupInterval=null, remaining=0;
+
+    function fmt(sec){ const m=String(Math.floor(sec/60)).padStart(2,'0'); const s=String(sec%60).padStart(2,'0'); return `${m}:${s}`; }
+    function stopPickupTimer(){ if(pickupInterval){ clearInterval(pickupInterval); pickupInterval=null; } pickupBox.classList.add('hidden'); }
+
+    function startPickupTimer(seconds){
+      remaining = seconds;
+      pickupBox.classList.remove('hidden');
+      pickupTimer.textContent = fmt(remaining);
+      // enable/disable extend based on localStorage (1 φορά / 24h)
+      const last = localStorage.getItem('pickup-extend-date');
+      const today = new Date().toISOString().slice(0,10);
+      extendBtn.disabled = (last===today);
+      extendBtn.classList.toggle('opacity-50', extendBtn.disabled);
+
+      if(pickupInterval) clearInterval(pickupInterval);
+      pickupInterval = setInterval(()=>{
+        remaining--; if(remaining<=0){ stopPickupTimer(); return; }
+        pickupTimer.textContent = fmt(remaining);
+      },1000);
+    }
+
+    extendBtn.addEventListener('click', ()=>{
+      if(extendBtn.disabled) return;
+      remaining += 15*60; // +15'
+      pickupTimer.textContent = fmt(remaining);
+      const today = new Date().toISOString().slice(0,10);
+      localStorage.setItem('pickup-extend-date', today);
+      extendBtn.disabled = true;
+      extendBtn.classList.add('opacity-50');
     });
 
     /* ---------- PWA ---------- */
