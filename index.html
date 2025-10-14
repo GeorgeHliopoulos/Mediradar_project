@@ -60,7 +60,7 @@
   <!-- Top-right controls (language + theme) -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="ml-auto w-fit flex items-center gap-2 rounded-2xl bg-white/85 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
-      <!-- Για επαγγελματίες (link μόνο στο splash) -->
+      <!-- Για επαγγελματίες -->
       <a href="/pharmacy.html" class="hidden sm:inline text-sm px-2 py-1 rounded-lg hover:bg-white/70 dark:hover:bg-white/20" id="link-pro">Για επαγγελματίες</a>
 
       <!-- Language with flags -->
@@ -103,7 +103,7 @@
       <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">MediRadar</h1>
       <p id="t-hero" class="mt-2 text-lg text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
 
-      <!-- Buttons centered -->
+      <!-- Buttons -->
       <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
         <button id="cta-search" class="px-6 py-4 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-brand-300">
           <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
@@ -139,7 +139,6 @@
               <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-300">← <span id="t-home">Αρχική</span></button>
               <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
             </div>
-            <!-- κρύβουμε το “Για επαγγελματίες” μέσα στη φόρμα -->
           </div>
 
           <div class="p-5 grid grid-cols-1 gap-4 sm:gap-5">
@@ -247,7 +246,7 @@
               </div>
             </div>
 
-            <!-- Sticky Pending (hidden initially) -->
+            <!-- Sticky Pending -->
             <section id="pending" class="hidden sticky top-2 z-30">
               <div class="rounded-xl px-4 py-3 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-50 flex items-center gap-3 shadow">
                 <span class="spin-hourglass" aria-hidden="true">⏳</span>
@@ -306,6 +305,33 @@
       <div class="px-5 pb-5 flex justify-end">
         <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-brand-300">OK</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Sign-in modal (NEW) -->
+  <div id="signin-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4 z-40">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b">
+        <h3 class="text-lg font-bold" id="si-title">Σύνδεση</h3>
+        <button id="si-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+      </div>
+      <div class="p-5 space-y-3">
+        <label class="block text-sm">Email</label>
+        <input id="si-email" type="email" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="you@example.com" />
+        <label class="block text-sm">Κωδικός</label>
+        <input id="si-pass" type="password" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="••••••••" />
+        <button id="si-submit" class="w-full mt-2 px-4 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Σύνδεση</button>
+        <div class="flex items-center gap-2 my-2">
+          <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div><span class="text-xs">ή</span><div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+        </div>
+        <button id="si-google" class="w-full px-4 py-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2">
+          <img alt="" src="https://www.gstatic.com/devrel-devsite/prod/vfdb04a1ad5d6c6e2f8b9b1c4c7e522e2a9a6b9c2b9c0a/google/images/lockup.svg" class="h-4" />
+          Google
+        </button>
+        <button id="si-apple" class="w-full px-4 py-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800"> Apple</button>
+        <button id="si-guest" class="w-full px-4 py-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800">Συνέχεια ως επισκέπτης</button>
+      </div>
+      <div class="px-5 pb-5 text-xs text-slate-500">* Demo UI — συνδέσεις backend θα μπουν αργότερα.</div>
     </div>
   </div>
 
@@ -430,7 +456,6 @@
       searchModal.classList.add('hidden');
       splash.classList.remove('hidden');
       linkPro.classList.remove('hidden');
-      // καθάρισε μόνο οθόνη αποτελεσμάτων/κλεψύδρας
       document.getElementById('pending').classList.add('hidden');
       document.getElementById('results').classList.add('hidden');
     }
@@ -438,6 +463,17 @@
     document.getElementById('cta-search').addEventListener('click', openSearch);
     document.getElementById('closeSearch').addEventListener('click', backToHome);
     document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); backToHome(); });
+
+    // Sign-in modal open/close
+    const signModal = document.getElementById('signin-modal');
+    document.getElementById('cta-signin').addEventListener('click', ()=>{
+      signModal.classList.remove('hidden'); signModal.classList.add('flex');
+    });
+    document.getElementById('si-close').addEventListener('click', ()=> signModal.classList.add('hidden'));
+    document.getElementById('si-submit').addEventListener('click', ()=>{ showToast(state.lang==='el'?'Demo: θα μπει auth.':'Demo: auth coming soon.'); signModal.classList.add('hidden'); });
+    document.getElementById('si-google').addEventListener('click', ()=>{ showToast('Google OAuth (demo)'); signModal.classList.add('hidden'); });
+    document.getElementById('si-apple').addEventListener('click', ()=>{ showToast('Apple Sign in (demo)'); signModal.classList.add('hidden'); });
+    document.getElementById('si-guest').addEventListener('click', ()=>{ showToast(state.lang==='el'?'Συνέχεια ως επισκέπτης':'Continue as guest'); signModal.classList.add('hidden'); });
 
     // How modal
     const modalHow = document.getElementById('modal-how');
@@ -553,8 +589,8 @@
 
       // simulate network + pharmacy answers
       setTimeout(()=>{
+        // 1) γεμίζουμε αποτελέσματα
         skeletons.classList.add('hidden');
-        // render results (no countdown yet; θα ξεκινήσει αφού επιλέξει φαρμακείο)
         const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
         const items = [
           { name:'Φαρμακείο Ιάκωβος', dist:'2.1km', generic: allowGeneric, addr:'Ιπποκράτους 12, Αθήνα', tel:'+30 210 1234567', lat:37.984, lng:23.735, open:'🕒 Κλείνει στις 17:00' },
@@ -580,6 +616,9 @@
           card.dataset.lng = it.lng;
           list.appendChild(card);
         });
+
+        // 2) κρύβουμε την κλεψύδρα ΜΕΤΑ τη φόρτωση αποτελεσμάτων
+        hidePending();
         window.scrollTo({ top: 0, behavior:'smooth' });
       }, 1200);
     });
