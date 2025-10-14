@@ -67,8 +67,8 @@
   </div>
 
   <!-- Μεγάλη κλεψύδρα αναμονής (πάνω) -->
-  <div id="pending-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[min(760px,92vw)]">
-    <div class="rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 shadow-soft">
+  <div id="pending-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[min(760px,92vw)] pointer-events-none">
+    <div class="pointer-events-auto rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 shadow-soft">
       <div class="flex items-center gap-4">
         <div class="text-4xl" style="animation:spinHourglass 1.2s linear infinite">⏳</div>
         <div class="text-sm sm:text-base">
@@ -113,7 +113,7 @@
     </div>
   </section>
 
-  <!-- APP (ίδιο layout με πριν) -->
+  <!-- APP -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
@@ -231,7 +231,7 @@
       </div>
     </section>
 
-    <!-- Self pick-up timer (πάνω από αποτελέσματα) -->
+    <!-- Self pick-up timer -->
     <section id="pickup-box" class="hidden mt-6">
       <div class="rounded-2xl p-4 border border-emerald-300 bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100 dark:border-emerald-800">
         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -243,9 +243,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Pending (κρατάμε για συμβατότητα, αλλά δεν τη χρησιμοποιούμε εμφανώς) -->
-    <section id="pending" class="hidden mt-6"></section>
 
     <!-- Results -->
     <section id="results" class="hidden mt-6">
@@ -283,7 +280,7 @@
     </div>
   </div>
 
-  <!-- Pharmacy details modal (με κουμπί επιβεβαίωσης) -->
+  <!-- Pharmacy details modal -->
   <div id="pharm-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -300,6 +297,48 @@
           <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700">Άνοιγμα σε Χάρτες</a>
         </div>
         <button id="pm-confirm" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Επιβεβαίωση & Έναρξη 60’</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL (πελάτης) -->
+  <div id="login-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4 z-[70]">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 class="text-lg font-bold">Σύνδεση</h3>
+        <button id="login-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+      </div>
+      <div class="p-5 space-y-3">
+        <label class="block text-sm">
+          Email
+          <input id="login-email" type="email" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
+        </label>
+        <label class="block text-sm">
+          Κωδικός
+          <input id="login-pass" type="password" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="••••••••">
+        </label>
+
+        <div class="flex items-center justify-between pt-1">
+          <button id="login-email-btn" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Σύνδεση</button>
+          <button id="login-guest" class="text-sm underline hover:opacity-80">Συνέχεια ως επισκέπτης</button>
+        </div>
+
+        <div class="flex items-center gap-2 pt-3">
+          <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+          <span class="text-xs text-slate-500">ή</span>
+          <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="login-google" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2">
+            <span>🟢</span> Google
+          </button>
+          <button id="login-apple" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2">
+            <span>🍎</span> Apple
+          </button>
+        </div>
+
+        <button id="login-forgot" class="block text-sm underline hover:opacity-80">Ξέχασα τον κωδικό</button>
       </div>
     </div>
   </div>
@@ -376,6 +415,16 @@
     document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
+
+    /* ---------- Login modal (UI only) ---------- */
+    const loginModal = document.getElementById('login-modal');
+    document.getElementById('cta-signin').onclick = ()=>{ loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); };
+    document.getElementById('login-close').onclick = ()=> loginModal.classList.add('hidden');
+    document.getElementById('login-email-btn').onclick = ()=> loginModal.classList.add('hidden');
+    document.getElementById('login-google').onclick = ()=> loginModal.classList.add('hidden');
+    document.getElementById('login-apple').onclick  = ()=> loginModal.classList.add('hidden');
+    document.getElementById('login-guest').onclick  = ()=> loginModal.classList.add('hidden');
+    document.getElementById('login-forgot').onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
 
     /* ---------- Autocomplete (demo) ---------- */
     const AC_MEDICINES = ['Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg'];
@@ -493,8 +542,9 @@
     const pmConfirm = document.getElementById('pm-confirm');
     document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
 
+    const resultsList = document.getElementById('resultsList');
     let selectedPharmacy=null;
-    list.addEventListener('click', (e)=>{
+    resultsList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
       const card = btn.closest('div.rounded-xl');
       selectedPharmacy = {name:card.dataset.name, addr:card.dataset.addr, tel:card.dataset.tel, lat:card.dataset.lat, lng:card.dataset.lng};
@@ -505,6 +555,14 @@
       pmMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(selectedPharmacy.addr)}${selectedPharmacy.lat?`@${selectedPharmacy.lat},${selectedPharmacy.lng},17z`:''}`;
       pm.classList.remove('hidden'); pm.classList.add('flex');
     });
+
+    const pickupBox=document.getElementById('pickup-box');
+    let pInt=null, remaining=0;
+    function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`;}
+    function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox.classList.add('hidden'); }
+    const pickupTimer=document.getElementById('pickup-timer'), extendBtn=document.getElementById('extend-btn');
+    function startPickupTimer(sec){ remaining=sec; pickupBox.classList.remove('hidden'); pickupTimer.textContent=fmt(remaining); const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10); extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled); if(pInt) clearInterval(pInt); pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimer.textContent=fmt(remaining)},1000)}
+    extendBtn.onclick=()=>{ if(extendBtn.disabled) return; remaining+=15*60; pickupTimer.textContent=fmt(remaining); const today=new Date().toISOString().slice(0,10); localStorage.setItem('pickup-extend-date',today); extendBtn.disabled=true; extendBtn.classList.add('opacity-50') };
 
     pmConfirm.onclick = ()=>{ pm.classList.add('hidden'); startPickupTimer(60*60); document.getElementById('pickup-box').scrollIntoView({behavior:'smooth',block:'start'}); };
 
@@ -523,6 +581,13 @@
       await deferredPrompt.userChoice;
       deferredPrompt=null; installBtn.classList.add('hidden');
     });
+
+    /* ---------- Helpers ---------- */
+    const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
+    let waitT=null, waitStart=0;
+    function showPending(){ waitStart=Date.now(); pendingToast.classList.remove('hidden'); if(waitT) clearInterval(waitT); waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500); window.scrollTo({top:0,behavior:'smooth'}) }
+    function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
+    function confetti(ms=3500){const c=document.getElementById('confetti'),ctx=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;c.style.display='block';const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));let run=true;const end=performance.now()+ms;(function loop(t){if(t>end)run=false;ctx.clearRect(0,0,W,H);P.forEach(p=>{if(run)p.vy+=.02;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`;ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);ctx.restore()});if(run)requestAnimationFrame(loop);else{c.style.display='none';ctx.clearRect(0,0,W,H)}})(performance.now())}
 
     /* ---------- Init ---------- */
     applyLang();
