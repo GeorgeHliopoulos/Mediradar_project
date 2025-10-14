@@ -52,7 +52,7 @@
   <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none z-[60]" style="display:none;"></canvas>
 
-  <!-- Top bar: pro + lang + theme -->
+  <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="ml-auto w-fit flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1">
       <a href="/pharmacy.html" class="hidden sm:inline text-sm px-2 py-1 rounded-lg hover:bg-white/70 dark:hover:bg-white/20" id="t-pro">Για επαγγελματίες</a>
@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <!-- Μεγάλη κλεψύδρα αναμονής (πάνω) -->
+  <!-- Pending toast (πάνω) -->
   <div id="pending-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[min(760px,92vw)] pointer-events-none">
     <div class="pointer-events-auto rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 shadow-soft">
       <div class="flex items-center gap-4">
@@ -344,7 +344,7 @@
   </div>
 
   <script>
-    /* ---------- Theme ---------- */
+    /* ========== Theme ========== */
     const html = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle');
     const iconSun = document.getElementById('icon-sun');
@@ -359,7 +359,7 @@
     setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
 
-    /* ---------- i18n ---------- */
+    /* ========== i18n ========== */
     const strings = {
       el:{hero:'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',searchBTN:'Αναζήτηση Φαρμάκου', howBTN:'Πώς λειτουργεί', signinBTN:'Σύνδεση', installBTN:'Εγκατάσταση',searchTitle:'Αναζήτηση Φαρμάκου', home:'Αρχική', medname:'Όνομα Φαρμάκου', formatTip:'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',substance:'Δραστική Ουσία', optional:'(προαιρετικά)', doseEx:'Παράδειγμα δοσολογίας: Paracetamol 500mg.', type:'Τύπος Φαρμάκου', qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή', genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);', yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης', results:'Αποτελέσματα (demo UI)', newSearch:'Νέα αναζήτηση', pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων'},
       en:{hero:'Instant availability check at nearby pharmacies.',searchBTN:'Medicine Search', howBTN:'How it works', signinBTN:'Sign in', installBTN:'Install',searchTitle:'Medicine Search', home:'Home', medname:'Medicine Name', formatTip:'Tip: Brand name + dosage (e.g. “500mg”).',substance:'Active Substance', optional:'(optional)', doseEx:'Dosage example: Paracetamol 500mg.', type:'Medicine Type', qty:'Quantity (units/boxes)', select:'Select', genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?', yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search', results:'Results (demo UI)', newSearch:'New search', pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login'}
@@ -377,7 +377,6 @@
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
       setText('t-pro', t('pro')); setText('t-pro-m', t('pro')); setText('t-pharmLogin2', t('pharmLogin'));
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
-      // placeholders
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       localStorage.setItem('mediradar-lang', state.lang);
@@ -385,15 +384,16 @@
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
     document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
 
-    /* ---------- Navigation ---------- */
+    /* ========== Navigation ========== */
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
     document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
     document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); stopPickupTimer(); app.classList.add('hidden'); splash.classList.remove('hidden'); hidePending(); document.getElementById('results').classList.add('hidden'); document.getElementById('pickup-box').classList.add('hidden'); });
 
-    /* ---------- Modals ---------- */
+    /* ========== Modals (How/GDPR/Login) ========== */
     const modalHow = document.getElementById('modal-how');
-    document.getElementById('cta-how').onclick = ()=> { modalHow.classList.remove('hidden'); modalHow.classList.add('flex'); 
+    document.getElementById('cta-how').onclick = ()=> { 
+      modalHow.classList.remove('hidden'); modalHow.classList.add('flex'); 
       const body = state.lang==='el' ? `<ol class="list-decimal pl-5 space-y-2">
           <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή/και δραστική ουσία).</li>
           <li>Η αίτηση στέλνεται στα κοντινά φαρμακεία.</li>
@@ -416,7 +416,6 @@
     document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
 
-    /* ---------- Login modal (UI only) ---------- */
     const loginModal = document.getElementById('login-modal');
     document.getElementById('cta-signin').onclick = ()=>{ loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); };
     document.getElementById('login-close').onclick = ()=> loginModal.classList.add('hidden');
@@ -426,7 +425,7 @@
     document.getElementById('login-guest').onclick  = ()=> loginModal.classList.add('hidden');
     document.getElementById('login-forgot').onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
 
-    /* ---------- Autocomplete (demo) ---------- */
+    /* ========== Autocomplete (demo) ========== */
     const AC_MEDICINES = ['Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg'];
     const AC_SUBSTANCES = ['Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg','Cetirizine 10mg','Aspirin 100mg'];
     function attachAutocomplete(inputId, listId, data){
@@ -452,43 +451,73 @@
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-    /* ---------- Pending toast + Confetti ---------- */
+    /* ========== Pending + Confetti ========== */
     const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
     let waitT=null, waitStart=0;
     function showPending(){ waitStart=Date.now(); pendingToast.classList.remove('hidden'); if(waitT) clearInterval(waitT); waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500); window.scrollTo({top:0,behavior:'smooth'}) }
     function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
-    function confetti(ms=3500){const c=document.getElementById('confetti'),ctx=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;c.style.display='block';const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));let run=true;const end=performance.now()+ms;(function loop(t){if(t>end)run=false;ctx.clearRect(0,0,W,H);P.forEach(p=>{if(run)p.vy+=.02;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`;ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);ctx.restore()});if(run)requestAnimationFrame(loop);else{c.style.display='none';ctx.clearRect(0,0,W,H)}})(performance.now())}
+    function fireConfetti(ms=3500){
+      const c=document.getElementById('confetti'),ctx=c.getContext('2d');
+      const W=c.width=innerWidth,H=c.height=innerHeight; c.style.display='block';
+      const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));
+      let run=true; const end=performance.now()+ms;
+      (function loop(t){ if(t>end) run=false;
+        ctx.clearRect(0,0,W,H);
+        P.forEach(p=>{ if(run) p.vy+=.02; p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
+          if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
+          ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); ctx.restore();
+        });
+        if(run) requestAnimationFrame(loop); else { c.style.display='none'; ctx.clearRect(0,0,W,H); }
+      })(performance.now());
+    }
 
-    /* ---------- Submit: Pending -> Results -> Details ---------- */
+    /* ========== Results + Pharmacy modal + Pickup timer ========== */
     const results = document.getElementById('results');
-    const list = document.getElementById('resultsList');
-    const pickupBox=document.getElementById('pickup-box'), pickupTimer=document.getElementById('pickup-timer'), extendBtn=document.getElementById('extend-btn');
+    const resultsList = document.getElementById('resultsList');
+    const pickupBox=document.getElementById('pickup-box');
+    const pickupTimerEl=document.getElementById('pickup-timer');
+    const extendBtn=document.getElementById('extend-btn');
     let pInt=null, remaining=0;
 
     function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`;}
     function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox.classList.add('hidden'); }
-    function startPickupTimer(sec){ remaining=sec; pickupBox.classList.remove('hidden'); pickupTimer.textContent=fmt(remaining); const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10); extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled); if(pInt) clearInterval(pInt); pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimer.textContent=fmt(remaining)},1000)}
-    extendBtn.onclick=()=>{ if(extendBtn.disabled) return; remaining+=15*60; pickupTimer.textContent=fmt(remaining); const today=new Date().toISOString().slice(0,10); localStorage.setItem('pickup-extend-date',today); extendBtn.disabled=true; extendBtn.classList.add('opacity-50') };
+    function startPickupTimer(sec){
+      remaining=sec; pickupBox.classList.remove('hidden'); pickupTimerEl.textContent=fmt(remaining);
+      const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
+      extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
+      if(pInt) clearInterval(pInt);
+      pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
+    }
+    extendBtn.onclick=()=>{ if(extendBtn.disabled) return; remaining+=15*60; pickupTimerEl.textContent=fmt(remaining); const today=new Date().toISOString().slice(0,10); localStorage.setItem('pickup-extend-date',today); extendBtn.disabled=true; extendBtn.classList.add('opacity-50') };
+
+    const pm = document.getElementById('pharm-modal');
+    const pmTitle = document.getElementById('pm-title');
+    const pmAddr  = document.getElementById('pm-address');
+    const pmPhone = document.getElementById('pm-phone');
+    const pmCall  = document.getElementById('pm-call');
+    const pmMaps  = document.getElementById('pm-maps');
+    const pmConfirm = document.getElementById('pm-confirm');
+    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
+
+    let selectedPharmacy=null;
 
     document.getElementById('submitBtn').addEventListener('click', (e)=>{
       e.preventDefault();
-      // basic required
       if(!document.getElementById('medicine-name').value.trim()) return alert(state.lang==='el'?'Συμπλήρωσε το όνομα φαρμάκου':'Enter medicine name');
       if(!document.getElementById('city').value) return alert(state.lang==='el'?'Επίλεξε πόλη':'Select city');
       if(!document.getElementById('gdpr-checkbox').checked) return alert(state.lang==='el'?'Αποδέξου τους όρους':'Accept terms');
 
-      // Confetti + pending επάνω
-      confetti(3500);
+      fireConfetti(3500);
       showPending();
 
-      // demo καθυστέρηση
       setTimeout(()=>{
         hidePending();
-        list.innerHTML='';
+        resultsList.innerHTML='';
         const allowGeneric = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
 
-        // --- Demo ωράρια & label ανοιχτό/κλειστό ---
-        const now=new Date(), day=now.getDay(); // 0=Κυρ
+        // ωράρια demo
+        const now=new Date(), day=now.getDay();
         function openInfo(hours){
           const h=hours[day]; if(!h||!h.o||!h.c) return {open:false,label:'🔴 Κλειστό'};
           const [oh,om]=h.o.split(':').map(Number), [ch,cm]=h.c.split(':').map(Number);
@@ -517,33 +546,18 @@
             <div class="flex items-center gap-2">
               <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm select-pharm">Επιλογή</button>
             </div>`;
-          // details
           card.dataset.addr = it.addr;
           card.dataset.tel = it.tel;
           card.dataset.name = it.name;
           card.dataset.lat = it.lat;
           card.dataset.lng = it.lng;
-          list.appendChild(card);
+          resultsList.appendChild(card);
         });
         results.classList.remove('hidden');
         window.scrollTo({ top: results.offsetTop - 20, behavior:'smooth' });
       }, 4500);
     });
 
-    document.getElementById('newSearch').addEventListener('click', ()=>{ results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-
-    // Modal details + Επιβεβαίωση => start timer
-    const pm = document.getElementById('pharm-modal');
-    const pmTitle = document.getElementById('pm-title');
-    const pmAddr  = document.getElementById('pm-address');
-    const pmPhone = document.getElementById('pm-phone');
-    const pmCall  = document.getElementById('pm-call');
-    const pmMaps  = document.getElementById('pm-maps');
-    const pmConfirm = document.getElementById('pm-confirm');
-    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
-
-    const resultsList = document.getElementById('resultsList');
-    let selectedPharmacy=null;
     resultsList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
       const card = btn.closest('div.rounded-xl');
@@ -556,17 +570,16 @@
       pm.classList.remove('hidden'); pm.classList.add('flex');
     });
 
-    const pickupBox=document.getElementById('pickup-box');
-    let pInt=null, remaining=0;
-    function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`;}
-    function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox.classList.add('hidden'); }
-    const pickupTimer=document.getElementById('pickup-timer'), extendBtn=document.getElementById('extend-btn');
-    function startPickupTimer(sec){ remaining=sec; pickupBox.classList.remove('hidden'); pickupTimer.textContent=fmt(remaining); const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10); extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled); if(pInt) clearInterval(pInt); pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimer.textContent=fmt(remaining)},1000)}
-    extendBtn.onclick=()=>{ if(extendBtn.disabled) return; remaining+=15*60; pickupTimer.textContent=fmt(remaining); const today=new Date().toISOString().slice(0,10); localStorage.setItem('pickup-extend-date',today); extendBtn.disabled=true; extendBtn.classList.add('opacity-50') };
+    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
+    document.getElementById('pm-confirm').onclick = ()=>{
+      pm.classList.add('hidden');
+      startPickupTimer(60*60);
+      document.getElementById('pickup-box').scrollIntoView({behavior:'smooth',block:'start'});
+    };
 
-    pmConfirm.onclick = ()=>{ pm.classList.add('hidden'); startPickupTimer(60*60); document.getElementById('pickup-box').scrollIntoView({behavior:'smooth',block:'start'}); };
+    document.getElementById('newSearch').addEventListener('click', ()=>{ results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
 
-    /* ---------- PWA ---------- */
+    /* ========== PWA install ========== */
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('/service-worker.js').catch(console.warn);
     }
@@ -582,14 +595,7 @@
       deferredPrompt=null; installBtn.classList.add('hidden');
     });
 
-    /* ---------- Helpers ---------- */
-    const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
-    let waitT=null, waitStart=0;
-    function showPending(){ waitStart=Date.now(); pendingToast.classList.remove('hidden'); if(waitT) clearInterval(waitT); waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500); window.scrollTo({top:0,behavior:'smooth'}) }
-    function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
-    function confetti(ms=3500){const c=document.getElementById('confetti'),ctx=c.getContext('2d');const W=c.width=innerWidth,H=c.height=innerHeight;c.style.display='block';const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));let run=true;const end=performance.now()+ms;(function loop(t){if(t>end)run=false;ctx.clearRect(0,0,W,H);P.forEach(p=>{if(run)p.vy+=.02;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`;ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);ctx.restore()});if(run)requestAnimationFrame(loop);else{c.style.display='none';ctx.clearRect(0,0,W,H)}})(performance.now())}
-
-    /* ---------- Init ---------- */
+    /* ========== Init ========== */
     applyLang();
   </script>
 </body>
