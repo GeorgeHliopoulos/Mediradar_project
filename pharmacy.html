@@ -2,15 +2,28 @@
 <html lang="el" class="h-full">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MediRadar • Portal Φαρμακείων</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MediRadar • Φαρμακείο</title>
+
+  <!-- iOS PWA basics -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Supabase env + SDK -->
-  <script src="/env.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
+          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
+        }
+      }
+    }
+  </script>
 
   <style>
     .app-bg{
@@ -21,137 +34,320 @@
         radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
         linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
     }
+    .dark .app-bg{
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
+        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
+    }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
+    .btn { @apply px-3 py-2 rounded-lg text-sm font-semibold; }
   </style>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#29a3a3" />
 </head>
-<body class="min-h-full app-bg text-slate-900 font-sans">
-  <header class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="text-sm underline">← Αρχική</a>
-    <div class="font-semibold">Portal Φαρμακείων</div>
-    <button id="logout" class="text-sm underline">Έξοδος</button>
-  </header>
+<body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
 
-  <main class="max-w-4xl mx-auto px-4 pb-16">
-    <!-- Auth card -->
-    <section id="auth-card" class="rounded-2xl bg-white/90 border border-slate-200 shadow p-4 max-w-md mx-auto mt-6">
-      <h2 class="text-lg font-bold mb-3">Σύνδεση Φαρμακείου</h2>
-      <label class="block text-sm mb-2">Email
-        <input id="email" type="email" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300" placeholder="pharmacy@email.com">
-      </label>
-      <label class="block text-sm mb-3">Κωδικός
-        <input id="pass" type="password" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300" placeholder="••••••••">
-      </label>
-      <button id="login" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 w-full">Σύνδεση</button>
-      <p class="text-xs text-slate-500 mt-2">* Ο λογαριασμός δημιουργείται από το MediRadar (ή ενεργοποιείται μέσω email).</p>
-    </section>
+  <!-- Top -->
+  <div class="sticky top-0 z-30 p-3">
+    <div class="mx-auto max-w-4xl flex items-center justify-between rounded-2xl bg-white/85 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800 px-3 py-2">
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← Αρχική</a>
+        <span class="font-semibold">Πίνακας Φαρμακείου</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">🌗</button>
+      </div>
+    </div>
+  </div>
 
-    <!-- Dashboard -->
-    <section id="dash" class="hidden mt-8">
-      <div class="rounded-2xl bg-white/90 border border-slate-200 shadow p-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold">Αιτήματα σε εκκρεμότητα</h2>
-          <button id="refresh" class="px-3 py-2 rounded-lg border hover:bg-slate-50">Ανανέωση</button>
+  <main class="mx-auto max-w-4xl px-4 pb-24">
+    <!-- Pharmacy selector -->
+    <section class="mt-4 grid gap-4">
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur p-4 border border-slate-200 dark:border-slate-800 shadow-soft">
+        <h2 class="text-lg font-bold mb-2">Στοιχεία Φαρμακείου</h2>
+
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">Επιλογή υπάρχοντος</label>
+            <select id="pharmacy-select" class="mt-1 w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800">
+              <option value="">— Επιλογή —</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btn-load-pharmacies" class="btn border hover:bg-slate-50 dark:hover:bg-slate-800">Ανανέωση λίστας</button>
+            <button id="btn-new-pharmacy" class="btn border hover:bg-slate-50 dark:hover:bg-slate-800">Νέο φαρμακείο</button>
+          </div>
         </div>
-        <div id="list" class="mt-4 grid gap-3"></div>
+
+        <div id="new-pharmacy-form" class="mt-4 hidden grid sm:grid-cols-2 gap-3">
+          <input id="np-name" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Όνομα (π.χ. Φαρμακείο Ιάκωβος)">
+          <input id="np-address" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Διεύθυνση">
+          <input id="np-phone" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Τηλέφωνο">
+          <input id="np-city" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Πόλη (όπως στους πελάτες)">
+          <div class="sm:col-span-2 flex justify-end">
+            <button id="np-save" class="btn bg-brand-600 text-white hover:bg-brand-700">Αποθήκευση</button>
+          </div>
+        </div>
+
+        <div id="pharmacy-badge" class="mt-3 hidden">
+          <span class="badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Επιλεγμένο:</span>
+          <span id="pharmacy-name" class="font-semibold"></span>
+        </div>
+      </div>
+
+      <!-- Hours -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur p-4 border border-slate-200 dark:border-slate-800 shadow-soft">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold">Ωράριο</h2>
+          <button id="hours-save" class="btn border hover:bg-slate-50 dark:hover:bg-slate-800">Αποθήκευση Ωραρίου</button>
+        </div>
+        <p class="text-sm text-slate-500 mt-1">Συμπλήρωσε ώρες (24h, π.χ. 08:00–17:00). Άφησε κενό για «Κλειστό».</p>
+        <div id="hours-grid" class="mt-3 grid sm:grid-cols-2 gap-2"></div>
+      </div>
+
+      <!-- Requests -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur p-4 border border-slate-200 dark:border-slate-800 shadow-soft">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold">Αιτήματα πελατών</h2>
+          <div class="flex items-center gap-2">
+            <select id="city-filter" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800">
+              <option value="">Όλες οι πόλεις</option>
+            </select>
+            <button id="refresh-requests" class="btn border hover:bg-slate-50 dark:hover:bg-slate-800">Ανανέωση</button>
+          </div>
+        </div>
+        <div id="requests-list" class="mt-3 grid gap-3"></div>
       </div>
     </section>
   </main>
 
+  <!-- ENV -->
+  <script src="/env.js"></script>
   <script>
-    const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    window.ENV = window.ENV || { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' };
+  </script>
 
-    const authCard = document.getElementById('auth-card');
-    const dash = document.getElementById('dash');
-    const email = document.getElementById('email');
-    const pass = document.getElementById('pass');
-    const loginBtn = document.getElementById('login');
-    const logoutBtn = document.getElementById('logout');
-    const refreshBtn = document.getElementById('refresh');
-    const list = document.getElementById('list');
+  <!-- Supabase client -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    let pharmacyProfile = null; // { id, name, ... }
-
-    async function getPharmacyProfile(userId){
-      // Απλή αντιστοίχιση: pharmacies.user_id = auth.user.id
-      const { data, error } = await supabase.from('pharmacies').select('id,name,city').eq('user_id', userId).single();
-      if(error) return null;
-      return data;
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+      alert('Λείπουν τα Supabase κλειδιά. Ρύθμισε /env.js.');
     }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function loadPending(){
-      list.innerHTML = '<div class="text-sm text-slate-500">Φόρτωση…</div>';
-      // Εμφάνιση όλων των pending (ή μόνο για ίδια πόλη αν θέλεις)
-      const { data, error } = await supabase
-        .from('requests')
-        .select('id,med_name,active_substance,med_type,qty,city,allow_generic,created_at,status')
-        .eq('status','pending')
-        .order('created_at',{ascending:false})
-        .limit(50);
-      if(error){ list.innerHTML = `<div class="text-sm text-red-600">Σφάλμα: ${error.message}</div>`; return; }
-      if(!data || data.length===0){ list.innerHTML = `<div class="text-sm text-slate-500">Καμία εκκρεμότητα.</div>`; return; }
+    /* ---------- Theme ---------- */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    function setTheme(mode){
+      const dark = mode==='dark';
+      html.classList.toggle('dark', dark);
+      localStorage.setItem('mediradar-theme', dark?'dark':'light');
+    }
+    setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
 
-      list.innerHTML = '';
-      data.forEach(r=>{
-        const card = document.createElement('div');
-        card.className = 'rounded-xl border border-slate-200 p-4 bg-white flex items-center justify-between';
-        card.innerHTML = `
-          <div class="text-sm">
-            <div class="font-semibold">${r.med_name}</div>
-            <div class="text-xs text-slate-600">${r.active_substance||''} • ${r.med_type||''} • ${r.qty||1} τμχ</div>
-            <div class="text-xs text-slate-500 mt-1">Πόλη: ${r.city} • ${r.allow_generic ? '🧬 επιτρέπεται γενόσημο' : 'εμπορικό μόνο'}</div>
-          </div>
-          <div class="flex gap-2">
-            <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm btn-available">Διαθέσιμο</button>
+    /* ---------- UI refs ---------- */
+    const sel = (id)=>document.getElementById(id);
+    const pharmSelect = sel('pharmacy-select');
+    const btnLoadPharmacies = sel('btn-load-pharmacies');
+    const btnNewPharmacy = sel('btn-new-pharmacy');
+    const newPharmForm = sel('new-pharmacy-form');
+    const npName = sel('np-name');
+    const npAddress = sel('np-address');
+    const npPhone = sel('np-phone');
+    const npCity = sel('np-city');
+    const npSave = sel('np-save');
+    const badge = sel('pharmacy-badge');
+    const badgeName = sel('pharmacy-name');
+
+    const hoursGrid = sel('hours-grid');
+    const hoursSaveBtn = sel('hours-save');
+
+    const cityFilter = sel('city-filter');
+    const refreshBtn = sel('refresh-requests');
+    const requestsList = sel('requests-list');
+
+    /* ---------- State ---------- */
+    let pharmacy = null;  // { id, name, address, phone, city, hours }
+    const DAYS = ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'];
+
+    /* ---------- Helpers ---------- */
+    function toast(msg){ console.log('[toast]', msg); }
+    function setBadge(p){ if(!p){ badge.classList.add('hidden'); return; } badge.classList.remove('hidden'); badgeName.textContent = p.name || ''; }
+    function hoursInputsFromJSON(hours){
+      hoursGrid.innerHTML='';
+      for(let i=0;i<7;i++){
+        const row=document.createElement('div');
+        row.className='grid grid-cols-[56px,1fr] items-center gap-2';
+        const day=DAYS[i];
+        const val=hours?.[i]||{};
+        row.innerHTML=`
+          <label class="text-sm">${day}</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input data-day="${i}" data-k="o" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Άνοιγμα (π.χ. 08:00)" value="${val.o||''}">
+            <input data-day="${i}" data-k="c" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Κλείσιμο (π.χ. 17:00)" value="${val.c||''}">
           </div>`;
-        card.dataset.reqId = r.id;
-        list.appendChild(card);
+        hoursGrid.appendChild(row);
+      }
+    }
+    function hoursJSONFromInputs(){
+      const obj={};
+      [...hoursGrid.querySelectorAll('input')].forEach(inp=>{
+        const d=+inp.dataset.day, k=inp.dataset.k, v=inp.value.trim();
+        obj[d]=obj[d]||{};
+        if(v) obj[d][k]=v;
+      });
+      // καθάρισε κενές μέρες
+      Object.keys(obj).forEach(d=>{ if(!obj[d].o || !obj[d].c) delete obj[d]; });
+      return obj;
+    }
+
+    /* ---------- Load cities for filter ---------- */
+    async function loadCities(){
+      const { data, error } = await supabase.from('requests')
+        .select('city')
+        .not('city','is',null);
+      if(error){ console.warn(error); return; }
+      const uniq = [...new Set(data.map(r=>r.city).filter(Boolean))].sort();
+      cityFilter.innerHTML = '<option value="">Όλες οι πόλεις</option>' + uniq.map(c=>`<option>${c}</option>`).join('');
+    }
+
+    /* ---------- Pharmacies ---------- */
+    async function loadPharmacies(){
+      pharmSelect.innerHTML = '<option value="">— Επιλογή —</option>';
+      const { data, error } = await supabase.from('pharmacies').select('id,name,city').order('name');
+      if(error){ alert('Σφάλμα φόρτωσης φαρμακείων'); console.error(error); return; }
+      data.forEach(p=>{
+        const opt=document.createElement('option');
+        opt.value=p.id; opt.textContent=`${p.name}${p.city?` • ${p.city}`:''}`;
+        pharmSelect.appendChild(opt);
       });
     }
 
-    async function setAvailable(requestId){
-      if(!pharmacyProfile){ alert('Δεν βρέθηκε προφίλ φαρμακείου.'); return; }
-      // insert response
-      const { error } = await supabase.from('responses').insert({
-        request_id: requestId,
-        pharmacy_id: pharmacyProfile.id,
-        generic_only: false
-      });
-      if(error){ alert('Σφάλμα: ' + error.message); return; }
-      // δεν αλλάζουμε status εδώ — το frontend πελάτη μέσω RPC βλέπει το response
-      loadPending();
+    async function loadPharmacy(id){
+      const { data, error } = await supabase.from('pharmacies').select('*').eq('id', id).single();
+      if(error){ console.error(error); alert('Σφάλμα φόρτωσης στοιχείων φαρμακείου'); return; }
+      pharmacy = data;
+      setBadge(pharmacy);
+      hoursInputsFromJSON(pharmacy.hours || {});
     }
 
-    loginBtn.onclick = async ()=>{
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.value.trim(), password: pass.value });
-      if(error){ alert('Login error: ' + error.message); return; }
-      pharmacyProfile = await getPharmacyProfile(data.user.id);
-      if(!pharmacyProfile){ alert('Δεν βρέθηκε καταχώριση φαρμακείου για αυτόν τον χρήστη.'); }
-      authCard.classList.add('hidden'); dash.classList.remove('hidden'); loadPending();
-    };
-
-    logoutBtn.onclick = async ()=>{
-      await supabase.auth.signOut();
-      pharmacyProfile=null;
-      dash.classList.add('hidden'); authCard.classList.remove('hidden');
-    };
-
-    refreshBtn.onclick = loadPending;
-
-    list.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.btn-available'); if(!btn) return;
-      const card = btn.closest('div.rounded-xl');
-      const reqId = parseInt(card.dataset.reqId,10);
-      setAvailable(reqId);
+    btnLoadPharmacies.addEventListener('click', loadPharmacies);
+    btnNewPharmacy.addEventListener('click', ()=> newPharmForm.classList.toggle('hidden'));
+    npSave.addEventListener('click', async ()=>{
+      if(!npName.value.trim() || !npAddress.value.trim()){
+        alert('Συμπλήρωσε τουλάχιστον Όνομα & Διεύθυνση'); return;
+      }
+      const ins = { name: npName.value.trim(), address: npAddress.value.trim(), phone: npPhone.value.trim()||null, city: npCity.value.trim()||null, hours: {} };
+      const { data, error } = await supabase.from('pharmacies').insert(ins).select('id,name').single();
+      if(error){ console.error(error); alert('Σφάλμα δημιουργίας φαρμακείου'); return; }
+      newPharmForm.classList.add('hidden');
+      npName.value=npAddress.value=npPhone.value=npCity.value='';
+      await loadPharmacies();
+      pharmSelect.value = data.id;
+      await loadPharmacy(data.id);
+      toast('Δημιουργήθηκε φαρμακείο');
     });
 
-    // auto-session
-    (async ()=>{
-      const { data: { user } } = await supabase.auth.getUser();
-      if(user){
-        pharmacyProfile = await getPharmacyProfile(user.id);
-        authCard.classList.add('hidden'); dash.classList.remove('hidden');
-        loadPending();
+    pharmSelect.addEventListener('change', async ()=>{
+      const id=pharmSelect.value;
+      if(!id){ pharmacy=null; setBadge(null); hoursInputsFromJSON({}); return; }
+      await loadPharmacy(id);
+    });
+
+    hoursSaveBtn.addEventListener('click', async ()=>{
+      if(!pharmacy){ alert('Επίλεξε φαρμακείο'); return; }
+      const hours = hoursJSONFromInputs();
+      const { error } = await supabase.from('pharmacies').update({ hours }).eq('id', pharmacy.id);
+      if(error){ console.error(error); alert('Σφάλμα αποθήκευσης ωραρίου'); return; }
+      toast('Αποθηκεύτηκε το ωράριο');
+    });
+
+    /* ---------- Requests list ---------- */
+    function requestCard(r){
+      const wrap=document.createElement('div');
+      wrap.className='rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4';
+      wrap.innerHTML=`
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="font-semibold">${r.med_name || '(χωρίς όνομα)'}</div>
+            <div class="text-xs text-slate-500">${r.active_substance || ''}</div>
+            <div class="text-xs mt-1 text-slate-600 dark:text-slate-400">
+              Πόλη: <span class="font-medium">${r.city || '-'}</span> • Ποσότητα: <span class="font-medium">${r.quantity || 1}</span>
+              ${r.med_type ? `• Τύπος: <span class="font-medium">${r.med_type}</span>`:''}
+              ${r.allow_generic ? `• <span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">Ισοδύναμο OK</span>`:''}
+            </div>
+          </div>
+          <div class="text-xs opacity-70">${new Date(r.created_at).toLocaleString()}</div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button class="btn bg-emerald-600 text-white hover:bg-emerald-700" data-action="available">Διαθέσιμο</button>
+          <button class="btn bg-amber-500 text-white hover:bg-amber-600" data-action="generic">Γενόσημο</button>
+          <button class="btn border hover:bg-slate-50 dark:hover:bg-slate-800" data-action="unavailable">Μη διαθέσιμο</button>
+        </div>
+      `;
+      // wire buttons
+      wrap.querySelectorAll('button[data-action]').forEach(btn=>{
+        btn.addEventListener('click', ()=> respond(r, btn.dataset.action));
+      });
+      return wrap;
+    }
+
+    async function respond(r, action){
+      try{
+        if(!pharmacy){ alert('Επίλεξε φαρμακείο πρώτα'); return; }
+        const status = action==='available' ? 'available' : (action==='generic' ? 'generic' : 'unavailable');
+        const payload = {
+          request_id: r.id,
+          pharmacy_id: pharmacy.id,
+          status,
+          message: null
+        };
+        const { error } = await supabase.from('responses').insert(payload);
+        if(error){ console.error(error); alert('Σφάλμα καταχώρησης απάντησης'); return; }
+        // Προαιρετικά αλλά χρήσιμο UX: ενημέρωσε ότι υπάρχουν απαντήσεις
+        await supabase.from('requests').update({ status: 'has_responses' }).eq('id', r.id);
+        toast('Καταχωρήθηκε απάντηση');
+      }catch(e){
+        console.error(e); alert('Απέτυχε η απάντηση');
       }
-    })();
+    }
+
+    async function loadRequests(){
+      requestsList.innerHTML = '<div class="text-sm text-slate-500">Φόρτωση…</div>';
+      // φίλτρο πόλης: δείξε pending ή has_responses (ώστε να μπορούν να απαντήσουν κι άλλα φαρμακεία)
+      let q = supabase.from('requests').select('*').in('status',['pending','has_responses']).order('created_at', { ascending:false }).limit(100);
+      if(cityFilter.value) q = q.eq('city', cityFilter.value);
+      const { data, error } = await q;
+      if(error){ console.error(error); requestsList.innerHTML='<div class="text-red-600">Σφάλμα φόρτωσης αιτημάτων</div>'; return; }
+      requestsList.innerHTML='';
+      if(!data.length){ requestsList.innerHTML='<div class="text-sm text-slate-500">Δεν βρέθηκαν αιτήματα.</div>'; return; }
+      data.forEach(r=> requestsList.appendChild(requestCard(r)));
+    }
+
+    refreshBtn.addEventListener('click', loadRequests);
+    cityFilter.addEventListener('change', loadRequests);
+
+    /* ---------- Realtime (προαιρετικό αλλά ωραίο) ---------- */
+    // Όταν προστίθεται νέο request, ανανέωσε λίστα.
+    const ch = supabase.channel('requests-rt')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'requests' }, payload => {
+        // ελαφρύ refresh για να εμφανιστεί πρώτο
+        loadRequests();
+      })
+      .subscribe((s)=>console.log('Realtime:', s));
+
+    /* ---------- Boot ---------- */
+    await loadPharmacies();
+    await loadCities();
+    hoursInputsFromJSON({}); // empty
+    await loadRequests();
   </script>
 </body>
 </html>
