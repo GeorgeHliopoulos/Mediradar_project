@@ -1,9 +1,20 @@
 [build]
   publish = "."
-  command = ""
 
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-  external_node_modules = ["@supabase/supabase-js"]
+# Functions (αν έχεις Netlify functions)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
+# Σέρβιρε το env.js κανονικά (όχι rewrite)
+[[redirects]]
+  from = "/env.js"
+  to = "/env.js"
+  status = 200
+
+# SPA fallback ΜΟΝΟ για ό,τι δεν είναι static
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
