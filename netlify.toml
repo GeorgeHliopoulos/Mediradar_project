@@ -1,19 +1,19 @@
 [build]
   publish = "."
 
-# Functions (αν έχεις Netlify functions)
+# Netlify Functions (αν έχεις)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# Σέρβιρε το env.js κανονικά (όχι rewrite)
+# ΣΕΡΒΙΡΕ κανονικά το env.js (όχι rewrite)
 [[redirects]]
   from = "/env.js"
   to = "/env.js"
   status = 200
 
-# SPA fallback ΜΟΝΟ για ό,τι δεν είναι static
+# SPA fallback για τα υπόλοιπα
 [[redirects]]
   from = "/*"
   to = "/index.html"
