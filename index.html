@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MediRadar</title>
 
+  <!-- Favicon (inline για να μην έχεις 404) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%2329a3a3'/%3E%3Cpath d='M30 8h4v7a15 15 0 0 1 15 15h7v4h-7a15 15 0 0 1-15 15v7h-4v-7a15 15 0 0 1-15-15h-7v-4h7a15 15 0 0 1 15-15z' fill='white'/%3E%3Ccircle cx='32' cy='30' r='8' fill='white'/%3E%3C/svg%3E">
+
   <!-- Android/Chrome PWA -->
   <meta name="mobile-web-app-capable" content="yes">
   <!-- iOS PWA -->
@@ -48,8 +51,6 @@
     .ac-item { cursor:pointer }
     .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
     @keyframes spinHourglass { 0%{transform:rotate(0)} 50%{transform:rotate(180deg)} 100%{transform:rotate(360deg)} }
-
-    /* μικρό, διακριτικό toast για ειδοποιήσεις */
     #push-toast { transition: transform .25s ease, opacity .25s ease; }
     #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
   </style>
@@ -238,7 +239,7 @@
         <select id="city" required
                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
           <option value="">— Επιλογή —</option>
-          <!-- Μεγάλα αστικά κέντρα -->
+          <!-- Μεγάλα αστικά κέντρα + extra -->
           <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
           <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
           <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
@@ -247,10 +248,10 @@
           <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
           <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
           <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
-          <option>Ιωάννινα</option><option>Αγρίνιο</option><option>Βέροια</option>
-          <option>Δράμα</option><option>Κατερίνη</option><option>Κοζάνη</option>
-          <option>Ναύπλιο</option><option>Πύργος</option><option>Γλυφάδα</option>
-          <!-- Αττική – δημοφιλείς δήμοι -->
+          <option>Αγρίνιο</option><option>Βέροια</option><option>Δράμα</option>
+          <option>Κατερίνη</option><option>Κοζάνη</option><option>Ναύπλιο</option>
+          <option>Πύργος</option><option>Γλυφάδα</option>
+          <!-- Αττική – δήμοι -->
           <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
           <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
           <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
@@ -392,13 +393,11 @@
     </div>
   </div>
 
-  <!-- ===== ENV LOAD ===== -->
-  <script src="/env.js"></script>
+  <!-- ===== ENV (INLINE — αφαιρέσαμε το /env.js για να μη σκάει) ===== -->
   <script>
     window.ENV = window.ENV || {
       SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
       SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
-      /* ΒΑΛΕ εδώ το PUBLIC VAPID KEY σου */
       VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
     };
   </script>
@@ -607,7 +606,7 @@
         quantity: payload.quantity,
         allow_generic: payload.allow_generic,
         city: payload.city
-      }).select('id,status_token,created_at').single();
+      }).select('id,created_at').single();   // <-- status_token αφαιρέθηκε
       if(error) throw error;
       return data;
     }
@@ -669,7 +668,7 @@
     resultsList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
       const card = btn.closest('div.rounded-xl');
-      selectedPharmacy = {name:card.dataset.name, addr:card.dataset.addr, tel:card.dataset.tel, lat:card.dataset.lat, lng:card.dataset.lng};
+      const selectedPharmacy = {name:card.dataset.name, addr:card.dataset.addr, tel:card.dataset.tel, lat:card.dataset.lat, lng:card.dataset.lng};
       pmTitle.textContent = selectedPharmacy.name;
       pmAddr.textContent  = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (selectedPharmacy.addr || '—');
       pmPhone.textContent = (state.lang==='el'?'Τηλέφωνο: ':'Phone: ') + (selectedPharmacy.tel || '—');
@@ -683,9 +682,9 @@
       pm.classList.add('hidden');
       const sec = 60*60;
       startPickupTimer(sec);
-      if(hasSupabase() && currentRequest?.id){
+      if(hasSupabase() && window.currentRequest?.id){
         const untilISO = new Date(Date.now()+sec*1000).toISOString();
-        await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', currentRequest.id);
+        await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
       }
       document.getElementById('pickup-box').scrollIntoView({behavior:'smooth',block:'start'});
     };
@@ -715,7 +714,7 @@
         let inserted = null;
         if(hasSupabase()){
           inserted = await createRequest({ med_name, active_substance, med_type, quantity, allow_generic, city });
-          currentRequest = inserted;
+          window.currentRequest = inserted;
           localStorage.setItem(LS_REQ, JSON.stringify({ id: inserted.id, created_at: inserted.created_at }));
         }
 
@@ -777,7 +776,6 @@
         auth: key.auth || '',
         user_agent: navigator.userAgent
       };
-      // upsert με onConflict:endpoint
       const { error } = await sb().from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
       if (error) console.warn('save sub error', error);
     }
@@ -788,7 +786,6 @@
         const publicKey = (window.ENV && window.ENV.VAPID_PUBLIC_KEY) || '';
         if (!publicKey) return;
 
-        // Αν έχει ήδη permission granted, προχώρα κατευθείαν
         if (Notification.permission === 'granted') {
           const existing = await reg.pushManager.getSubscription();
           if (existing) { await saveSubscriptionToSupabase(existing); return; }
@@ -800,11 +797,9 @@
           return;
         }
 
-        // Αν είναι default -> δείξε το μικρό toast
         if (Notification.permission === 'default') {
           pushToast.classList.remove('hidden');
         }
-        // Αν είναι denied -> μην ενοχλείς
       }catch(err){ console.warn('push subscribe error', err); }
     }
 
@@ -836,7 +831,6 @@
           window.location.reload();
         });
 
-        // 3c: φρόντισε για push subscription
         await ensurePushSubscribed(reg);
       }).catch(console.warn);
     }
@@ -856,7 +850,7 @@
     applyLang();
     try{
       const saved = JSON.parse(localStorage.getItem(LS_REQ) || 'null');
-      if(saved?.id){ currentRequest = saved; }
+      if(saved?.id){ window.currentRequest = saved; }
     }catch{}
   </script>
 </body>
