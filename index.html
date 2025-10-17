@@ -48,6 +48,10 @@
     .ac-item { cursor:pointer }
     .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
     @keyframes spinHourglass { 0%{transform:rotate(0)} 50%{transform:rotate(180deg)} 100%{transform:rotate(360deg)} }
+
+    /* μικρό, διακριτικό toast για ειδοποιήσεις */
+    #push-toast { transition: transform .25s ease, opacity .25s ease; }
+    #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
   </style>
 
   <!-- PWA -->
@@ -90,6 +94,19 @@
           <div id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</div>
           <div class="mt-1 font-semibold opacity-80"><span id="wait-elapsed">0s</span></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- μικρό push toast -->
+  <div id="push-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[min(680px,94vw)]">
+    <div class="rounded-2xl p-4 border border-sky-300/70 bg-sky-50 text-sky-900 dark:bg-sky-900/30 dark:text-sky-100 dark:border-sky-800 shadow-soft flex items-center justify-between gap-3">
+      <div class="text-sm">
+        🔔 Θες να λαμβάνεις ειδοποίηση όταν απαντά ένα φαρμακείο;
+      </div>
+      <div class="flex gap-2">
+        <button id="push-deny" class="px-3 py-1.5 rounded-xl border hover:bg-white/70 dark:hover:bg-white/10 text-sm">Όχι τώρα</button>
+        <button id="push-allow" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white font-semibold text-sm">Ενεργοποίηση</button>
       </div>
     </div>
   </div>
@@ -181,9 +198,12 @@
           <select id="medicine-type"
                   class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
             <option value="">— Επιλογή —</option>
-            <option>Σκόνη</option><option>Υγρό</option><option>Χάπι</option>
-            <option>Δερματική Κρέμα</option><option>Αλοιφή</option>
-            <option>Πένα (προγεμισμένη)</option><option>Επίθεμα</option>
+            <option>Χάπι</option><option>Κάψουλα</option><option>Σκόνη</option>
+            <option>Υγρό</option><option>Σιρόπι</option><option>Σταγόνες</option>
+            <option>Εισπνεόμενο</option><option>Σπρέι</option><option>Ρινικό σπρέι</option>
+            <option>Οφθαλμικές σταγόνες</option><option>Αλοιφή</option><option>Δερματική Κρέμα</option>
+            <option>Ζελέ</option><option>Επίθεμα</option><option>Υπόθετο</option>
+            <option>Πένα (προγεμισμένη)</option><option>Διάλυμα έγχυσης</option>
           </select>
         </div>
 
@@ -218,17 +238,31 @@
         <select id="city" required
                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
           <option value="">— Επιλογή —</option>
-          <option>Αγρίνιο</option><option>Αλεξανδρούπολη</option><option>Αθήνα</option>
-          <option>Βέροια</option><option>Βόλος</option><option>Γιάννενα</option>
-          <option>Γλυφάδα</option><option>Δράμα</option><option>Ελευσίνα</option>
-          <option>Ηράκλειο</option><option>Θεσσαλονίκη</option><option>Καβάλα</option>
-          <option>Καλαμάτα</option><option>Κατερίνη</option><option>Κέρκυρα</option>
-          <option>Κοζάνη</option><option>Κομοτηνή</option><option>Κόρινθος</option>
-          <option>Λαμία</option><option>Λάρισα</option><option>Μυτιλήνη</option>
-          <option>Ναύπλιο</option><option>Ξάνθη</option><option>Πάτρα</option>
-          <option>Πύργος</option><option>Ρέθυμνο</option><option>Ρόδος</option>
-          <option>Σέρρες</option><option>Τρίκαλα</option><option>Χαλκίδα</option>
-          <option>Χανιά</option>
+          <!-- Μεγάλα αστικά κέντρα -->
+          <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
+          <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
+          <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
+          <option>Καλαμάτα</option><option>Καβάλα</option><option>Ξάνθη</option>
+          <option>Κομοτηνή</option><option>Αλεξανδρούπολη</option><option>Σέρρες</option>
+          <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
+          <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
+          <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
+          <option>Ιωάννινα</option><option>Αγρίνιο</option><option>Βέροια</option>
+          <option>Δράμα</option><option>Κατερίνη</option><option>Κοζάνη</option>
+          <option>Ναύπλιο</option><option>Πύργος</option><option>Γλυφάδα</option>
+          <!-- Αττική – δημοφιλείς δήμοι -->
+          <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
+          <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
+          <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
+          <option>Παλαιό Φάληρο</option><option>Άλιμος</option><option>Ιλίου</option>
+          <option>Ζωγράφου</option><option>Γαλάτσι</option><option>Βύρωνας</option>
+          <option>Δάφνη</option><option>Ηλιούπολη</option><option>Νίκαια</option>
+          <option>Κορυδαλλός</option><option>Πετρούπολη</option><option>Αργυρούπολη</option>
+          <option>Ηράκλειο Αττικής</option><option>Νέα Φιλαδέλφεια</option><option>Νέα Χαλκηδόνα</option>
+          <!-- Κρήτη extra -->
+          <option>Σητεία</option><option>Ιεράπετρα</option><option>Άγιος Νικόλαος</option>
+          <!-- Νησιά extra -->
+          <option>Κως</option><option>Σάμος</option><option>Σύρος</option><option>Πάρος</option><option>Νάξος</option>
         </select>
       </div>
 
@@ -363,7 +397,9 @@
   <script>
     window.ENV = window.ENV || {
       SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
+      /* ΒΑΛΕ εδώ το PUBLIC VAPID KEY σου */
+      VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
     };
   </script>
 
@@ -462,8 +498,18 @@
     document.getElementById('login-forgot').onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
 
     /* ========== Autocomplete (demo) ========== */
-    const AC_MEDICINES = ['Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg','Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg'];
-    const AC_SUBSTANCES = ['Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg','Cetirizine 10mg','Aspirin 100mg'];
+    const AC_MEDICINES = [
+      'Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg',
+      'Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg',
+      'Losec 20mg','Xanax 0.5mg','Amoxil 1000mg','Clavulin 875/125mg','Aspirin Protect 100mg',
+      'Voltaren 50mg','Neurofen Express 400mg','Prospan Sirup','Synagis 100mg','Otrivin 0.1% Spray',
+      'Betadine 10%','Fucidin 2%','Daktarin Gel','Gaviscon Double Action','Imodium 2mg'
+    ];
+    const AC_SUBSTANCES = [
+      'Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg',
+      'Cetirizine 10mg','Acetylsalicylic acid 100mg','Doxycycline 100mg','Omeprazole 20mg',
+      'Loratadine 10mg','Metformin 1000mg','Atorvastatin 20mg','Levocetirizine 5mg'
+    ];
     function attachAutocomplete(inputId, listId, data){
       const input = document.getElementById(inputId);
       const list = document.getElementById(listId);
@@ -472,7 +518,7 @@
         list.innerHTML = items.map((x,i)=>`<div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">${x}</div>`).join('');
         list.classList.toggle('hidden', items.length===0);
       }
-      function filter(q){ if(!q){ render([]); return; } render(data.filter(s=>s.toLowerCase().includes(q.toLowerCase())).slice(0,6)); }
+      function filter(q){ if(!q){ render([]); return; } render(data.filter(s=>s.toLowerCase().includes(q.toLowerCase())).slice(0,10)); }
       input.addEventListener('input', ()=>{ idx=-1; filter(input.value.trim()); });
       input.addEventListener('keydown', (e)=>{
         const items = [...list.querySelectorAll('.ac-item')]; if(!items.length) return;
@@ -511,8 +557,6 @@
     /* ========== Supabase helpers ========== */
     function sb(){ return window.supabase; }
     function hasSupabase(){ return !!(window.supabase && window.ENV && window.ENV.SUPABASE_URL); }
-
-    // Persist last request in localStorage
     const LS_REQ = 'mr:lastRequest';
 
     /* ========== Results + Pharmacy modal + Pickup timer ========== */
@@ -710,9 +754,75 @@
       }
     });
 
+    /* ===================== Web Push (3c) ===================== */
+    const pushToast = document.getElementById('push-toast');
+    const btnPushAllow = document.getElementById('push-allow');
+    const btnPushDeny  = document.getElementById('push-deny');
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
+      return outputArray;
+    }
+
+    async function saveSubscriptionToSupabase(sub) {
+      if (!hasSupabase()) return;
+      const key = sub.keys || {};
+      const row = {
+        endpoint: sub.endpoint,
+        p256dh: key.p256dh || '',
+        auth: key.auth || '',
+        user_agent: navigator.userAgent
+      };
+      // upsert με onConflict:endpoint
+      const { error } = await sb().from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
+      if (error) console.warn('save sub error', error);
+    }
+
+    async function ensurePushSubscribed(reg) {
+      try{
+        if (!('Notification' in window) || !('PushManager' in window)) return;
+        const publicKey = (window.ENV && window.ENV.VAPID_PUBLIC_KEY) || '';
+        if (!publicKey) return;
+
+        // Αν έχει ήδη permission granted, προχώρα κατευθείαν
+        if (Notification.permission === 'granted') {
+          const existing = await reg.pushManager.getSubscription();
+          if (existing) { await saveSubscriptionToSupabase(existing); return; }
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey)
+          });
+          await saveSubscriptionToSupabase(sub);
+          return;
+        }
+
+        // Αν είναι default -> δείξε το μικρό toast
+        if (Notification.permission === 'default') {
+          pushToast.classList.remove('hidden');
+        }
+        // Αν είναι denied -> μην ενοχλείς
+      }catch(err){ console.warn('push subscribe error', err); }
+    }
+
+    btnPushAllow?.addEventListener('click', async ()=>{
+      pushToast.classList.add('hidden');
+      try{
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') return;
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) return;
+        await ensurePushSubscribed(reg);
+      }catch(e){ console.warn(e); }
+    });
+    btnPushDeny?.addEventListener('click', ()=> pushToast.classList.add('hidden'));
+
     /* ========== PWA install & SW update flow ========== */
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+      navigator.serviceWorker.register('/service-worker.js').then(async reg => {
         if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
@@ -725,6 +835,9 @@
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload();
         });
+
+        // 3c: φρόντισε για push subscription
+        await ensurePushSubscribed(reg);
       }).catch(console.warn);
     }
     let deferredPrompt=null;
