@@ -13,7 +13,7 @@
   <!-- env.js MUST stay first so window.ENV is populated before any other scripts -->
   <script src="/env.js"></script>
   <script>
-    if (!window.ENV || !ENV.SUPABASE_URL || !ENV.SUPABASE_ANON_KEY) {
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
       const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
       window.__ENV_LOAD_ERROR = true;
       window.__ENV_LOAD_ERROR_MESSAGE = msg;
