@@ -29,6 +29,7 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
   - **Server-only (available exclusively to Netlify Functions via `process.env`):**
     - `SUPABASE_SERVICE_ROLE` and any other sensitive Supabase credentials. These values never reach the browser.
 - To keep Deploy Previews working, open **Site configuration → Build & deploy → Environment** in Netlify and either copy the production variables to the "Deploy previews" context or define the same `SUPABASE_URL`, `SUPABASE_ANON_KEY` (and optional `VAPID_PUBLIC_KEY`) there. After each preview build, visit the preview URL and run `window.ENV` in the browser console to verify the values were injected.
+- Use the in-app **Diagnostics** button (top-right of each page) to inspect `window.ENV` and run a REST probe against Supabase. A `200`/`206` response confirms that the anon key is accepted by the `rest/v1` endpoint.
 - For local development keep your `env.js` (and any `.env` files) out of version control—the `.gitignore` already covers them.
 - Netlify Functions continue to access their secrets strictly through `process.env` (see files under [`netlify/functions/`](./netlify/functions)).
 

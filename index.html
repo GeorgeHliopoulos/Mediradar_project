@@ -109,6 +109,31 @@
     </div>
   </div>
 
+  <div id="diagnostics-modal" class="hidden fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm p-4 items-center justify-center">
+    <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h2 class="text-lg font-bold">Diagnostics</h2>
+        <div class="flex items-center gap-2">
+          <button id="diagnostics-refresh" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold bg-white/70 dark:bg-slate-900/40 hover:bg-white">Run check</button>
+          <button id="diagnostics-close" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+        </div>
+      </div>
+      <div class="px-5 py-4 space-y-4 text-sm">
+        <p class="text-slate-600 dark:text-slate-400">Χρησιμοποίησε τον έλεγχο για να επιβεβαιώσεις ότι τα public Supabase keys φορτώθηκαν και ότι η REST API απαντά σωστά.</p>
+        <div>
+          <div class="font-semibold">window.ENV</div>
+          <pre id="diagnostics-env" class="mt-2 rounded-xl bg-slate-900/90 text-slate-100 text-xs p-3 whitespace-pre-wrap break-all">(pending)</pre>
+        </div>
+        <div>
+          <div class="font-semibold">REST probe</div>
+          <p class="text-xs text-slate-500">GET <span id="diagnostics-rest-url" class="break-all"></span></p>
+          <div class="mt-2 text-xs">Status: <span id="diagnostics-rest-status">—</span></div>
+          <pre id="diagnostics-rest-body" class="mt-2 rounded-xl bg-slate-100 dark:bg-slate-900/60 p-3 text-xs whitespace-pre-wrap break-all">(pending)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none z-[60]" style="display:none;"></canvas>
 
@@ -126,6 +151,8 @@
           <span aria-hidden="true">🇬🇧</span> EN
         </button>
       </div>
+
+      <button id="diagnostics-open" data-diagnostics-open class="hidden sm:inline px-2 py-1.5 rounded-xl text-xs font-semibold hover:bg-white/70 dark:hover:bg-white/20">Diagnostics</button>
 
       <!-- Theme -->
       <button id="theme-toggle" class="px-2 py-1.5 rounded-xl hover:bg-white/70 dark:hover:bg-white/20">
@@ -188,8 +215,9 @@
         📲 <span id="t-installBTN">Εγκατάσταση</span>
       </button>
 
-      <div class="sm:hidden mt-4">
+      <div class="sm:hidden mt-4 flex flex-col items-center gap-2">
         <a href="/pharmacy.html" class="text-sm underline" id="t-pro-m">Για επαγγελματίες</a>
+        <button data-diagnostics-open class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 bg-white/80">Diagnostics</button>
       </div>
     </div>
   </section>
@@ -440,6 +468,86 @@
       </div>
     </div>
   </div>
+
+  <script>
+    (function(){
+      const triggers = document.querySelectorAll('[data-diagnostics-open]');
+      const modal = document.getElementById('diagnostics-modal');
+      const closeBtn = document.getElementById('diagnostics-close');
+      const refreshBtn = document.getElementById('diagnostics-refresh');
+      const envPre = document.getElementById('diagnostics-env');
+      const restUrlEl = document.getElementById('diagnostics-rest-url');
+      const restStatusEl = document.getElementById('diagnostics-rest-status');
+      const restBodyEl = document.getElementById('diagnostics-rest-body');
+
+      if (!modal || !triggers.length) return;
+
+      function closeModal(){
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      async function runDiagnostics(){
+        const env = window.ENV || {};
+        try {
+          envPre.textContent = JSON.stringify(env, null, 2);
+        } catch (err) {
+          envPre.textContent = 'Unable to serialise window.ENV';
+        }
+
+        const hasKeys = !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY);
+        const baseUrl = (env.SUPABASE_URL || '').replace(/\/$/, '');
+        const restUrl = hasKeys ? `${baseUrl}/rest/v1/requests?select=id,created_at&limit=1` : '—';
+        restUrlEl.textContent = restUrl;
+
+        if (!hasKeys) {
+          restStatusEl.textContent = 'Missing SUPABASE_URL / SUPABASE_ANON_KEY';
+          restBodyEl.textContent = 'Ορίζει τα public Supabase κλειδιά στα Netlify environment variables.';
+          return;
+        }
+
+        restStatusEl.textContent = 'Running…';
+        restBodyEl.textContent = '…';
+
+        try {
+          const response = await fetch(restUrl, {
+            headers: {
+              apikey: env.SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+              Accept: 'application/json'
+            },
+            cache: 'no-store'
+          });
+          restStatusEl.textContent = `${response.status} ${response.statusText}`;
+          const raw = await response.text();
+          let display = raw;
+          try {
+            display = JSON.stringify(JSON.parse(raw), null, 2);
+          } catch (_) {}
+          restBodyEl.textContent = (display || '(empty)').slice(0, 1000);
+        } catch (error) {
+          restStatusEl.textContent = 'Fetch error';
+          restBodyEl.textContent = String(error);
+        }
+      }
+
+      function openModal(){
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        runDiagnostics();
+      }
+
+      triggers.forEach((btn)=> btn.addEventListener('click', openModal));
+      modal.addEventListener('click', (event)=>{ if (event.target === modal) closeModal(); });
+      closeBtn?.addEventListener('click', closeModal);
+      refreshBtn?.addEventListener('click', runDiagnostics);
+      document.addEventListener('keydown', (event)=>{
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+    })();
+  </script>
 
   <!-- Supabase client -->
   <script type="module">
