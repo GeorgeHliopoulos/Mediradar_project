@@ -10,43 +10,43 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#29a3a3" />
 
+  <!-- env.js MUST stay first so window.ENV is populated before any other scripts -->
   <script src="/env.js"></script>
   <script>
-    (function(){
+    (function ensurePublicEnv(){
       const env = window.ENV || {};
       const missing = !env.SUPABASE_URL || !env.SUPABASE_ANON_KEY;
       if (!missing) return;
 
-      const message = 'Το dashboard φαρμακείων χρειάζεται τα public Supabase keys (SUPABASE_URL, SUPABASE_ANON_KEY). Πρόσθεσέ τα στα Netlify Environment variables (Site configuration → Build & deploy → Environment → Deploy previews).';
+      const message = 'Το dashboard φαρμακείων χρειάζεται τα public Supabase keys (SUPABASE_URL, SUPABASE_ANON_KEY). Πρόσθεσέ τα στα Netlify Environment variables (Deploy previews) ώστε να παραχθεί το env.js πριν εκκινήσει.';
       window.__ENV_LOAD_ERROR = true;
       window.__ENV_LOAD_ERROR_MESSAGE = message;
 
-      function renderBanner(){
-        const banner = document.getElementById('env-error-banner');
+      const showError = () => {
+        const banner = document.querySelector('[data-env-error]');
         if (banner) {
-          banner.style.display = 'block';
           banner.classList.remove('hidden');
+          banner.style.display = 'block';
           banner.setAttribute('role', 'alert');
-          const text = document.getElementById('env-error-text');
+          const text = banner.querySelector('[data-env-error-text]');
           if (text) {
             text.innerHTML = `<strong class="block text-base">Λείπουν public Supabase κλειδιά</strong><span class="block mt-1 text-sm">${message}</span>`;
           }
         } else if (document.body) {
           const fallback = document.createElement('div');
-          fallback.id = 'env-error-banner';
           fallback.style.cssText = 'background:#fee2e2;color:#7f1d1d;padding:16px;text-align:center;font-weight:600;';
           fallback.textContent = message;
           document.body.prepend(fallback);
         }
-      }
+      };
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderBanner);
+        document.addEventListener('DOMContentLoaded', showError);
       } else {
-        renderBanner();
+        showError();
       }
 
-      console.error('Missing public Supabase configuration');
+      console.error(message);
       throw new Error('Missing public Supabase configuration');
     })();
   </script>
@@ -71,9 +71,9 @@
   </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
-  <div id="env-error-banner" class="hidden" style="display:none;">
+  <div data-env-error class="hidden" style="display:none;">
     <div class="mx-auto max-w-3xl px-4 py-3 rounded-b-2xl border border-red-200 bg-red-100/90 text-red-900 shadow-lg">
-      <div id="env-error-text" class="text-sm leading-relaxed font-medium"></div>
+      <div data-env-error-text class="text-sm leading-relaxed font-medium"></div>
     </div>
   </div>
 
