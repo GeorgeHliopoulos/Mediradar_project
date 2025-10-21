@@ -14,6 +14,27 @@
 
   <!-- env.js MUST stay first so window.ENV is populated before any other scripts -->
   <script src="/env.js"></script>
+  <!-- env.js MUST stay first so window.ENV is populated before any other scripts -->
+  <script src="/env.js"></script>
+  <script>
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
+      window.__ENV_LOAD_ERROR = true;
+      window.__ENV_LOAD_ERROR_MESSAGE = msg;
+      const renderEnvError = () => {
+        if (!document.body) return;
+        document.body.innerHTML = '<div style="padding:16px;color:#b91c1c;background:#fee2e2">Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.</div>';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderEnvError, { once: true });
+      } else {
+        renderEnvError();
+      }
+      throw new Error('ENV not loaded');
+    }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
       const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';

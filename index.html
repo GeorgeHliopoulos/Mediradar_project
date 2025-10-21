@@ -15,10 +15,28 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
-  <link rel="stylesheet" href="/styles/tailwind-lite.css">
-
   <!-- env.js MUST be the first script so window.ENV is ready for all subsequent modules -->
   <script src="/env.js"></script>
+  <script>
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
+      window.__ENV_LOAD_ERROR = true;
+      window.__ENV_LOAD_ERROR_MESSAGE = msg;
+      const renderEnvError = () => {
+        if (!document.body) return;
+        document.body.innerHTML = '<div style="padding:16px;color:#b91c1c;background:#fee2e2">Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.</div>';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderEnvError, { once: true });
+      } else {
+        renderEnvError();
+      }
+      throw new Error('ENV not loaded');
+    }
+  </script>
+
+  <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
       const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';

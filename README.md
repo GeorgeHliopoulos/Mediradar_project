@@ -17,6 +17,7 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
 3. Serve the site with any static HTTP server (for example `npx serve .`).
 4. If you introduce new utility classes, regenerate the bundled stylesheet by running `python build_css.py` (the script derives utilitarian rules from the HTML/JS class usage and writes to `styles/tailwind-lite.css`).
 5. Ensure the Netlify functions directory is available to your local serverless runner if you need backend endpoints.
+4. Ensure the Netlify functions directory is available to your local serverless runner if you need backend endpoints.
 
 ## Environment & Secrets
 
