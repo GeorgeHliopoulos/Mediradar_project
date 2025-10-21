@@ -10,6 +10,14 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#29a3a3" />
 
+  <script src="/env.js"></script>
+  <script>
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      console.error('ENV not loaded correctly');
+      throw new Error('ENV not loaded correctly');
+    }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -97,21 +105,15 @@
     </section>
   </div>
 
-  <!-- ENV -->
-  <script src="/env.js"></script>
-  <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
-    };
-  </script>
-
   <!-- Supabase + App -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     /* ---------- setup ---------- */
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+      throw new Error('Missing Supabase environment configuration');
+    }
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const qs = (s, r=document)=>r.querySelector(s);
     const qsa = (s, r=document)=>[...r.querySelectorAll(s)];

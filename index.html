@@ -15,6 +15,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
+  <script src="/env.js"></script>
+  <script>
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      console.error('ENV not loaded correctly');
+      throw new Error('ENV not loaded correctly');
+    }
+  </script>
+
   <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -394,24 +402,14 @@
     </div>
   </div>
 
-  <!-- ===== ENV (INLINE — χωρίς /env.js) ===== -->
-  <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
-      VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
-    };
-  </script>
-
   <!-- Supabase client -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
-    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
-      console.error('Missing Supabase ENV');
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error('Missing Supabase environment configuration');
     }
     window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase ready:', !!window.supabase);
   </script>
 
   <!-- App JS -->
