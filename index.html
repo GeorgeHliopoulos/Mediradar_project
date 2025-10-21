@@ -18,42 +18,21 @@
   <!-- env.js MUST be the first script so window.ENV is ready for all subsequent modules -->
   <script src="/env.js"></script>
   <script>
-    (function ensurePublicEnv(){
-      const env = window.ENV || {};
-      const missing = !env.SUPABASE_URL || !env.SUPABASE_ANON_KEY;
-      if (!missing) return;
-
-      const message = 'Λείπουν τα public Supabase keys (SUPABASE_URL, SUPABASE_ANON_KEY). Ρύθμισέ τα στα Netlify Environment variables (Deploy previews) ώστε να δημιουργείται το env.js πριν φορτώσει η εφαρμογή.';
+    if (!window.ENV || !ENV.SUPABASE_URL || !ENV.SUPABASE_ANON_KEY) {
+      const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
       window.__ENV_LOAD_ERROR = true;
-      window.__ENV_LOAD_ERROR_MESSAGE = message;
-
-      const showError = () => {
-        const banner = document.querySelector('[data-env-error]');
-        if (banner) {
-          banner.classList.remove('hidden');
-          banner.style.display = 'block';
-          banner.setAttribute('role', 'alert');
-          const text = banner.querySelector('[data-env-error-text]');
-          if (text) {
-            text.innerHTML = `<strong class="block text-base">Ρύθμιση περιβάλλοντος απαιτείται</strong><span class="block mt-1 text-sm">${message}</span>`;
-          }
-        } else if (document.body) {
-          const fallback = document.createElement('div');
-          fallback.style.cssText = 'background:#fee2e2;color:#7f1d1d;padding:16px;text-align:center;font-weight:600;';
-          fallback.textContent = message;
-          document.body.prepend(fallback);
-        }
+      window.__ENV_LOAD_ERROR_MESSAGE = msg;
+      const renderEnvError = () => {
+        if (!document.body) return;
+        document.body.innerHTML = '<div style="padding:16px;color:#b91c1c;background:#fee2e2">Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.</div>';
       };
-
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', showError);
+        document.addEventListener('DOMContentLoaded', renderEnvError, { once: true });
       } else {
-        showError();
+        renderEnvError();
       }
-
-      console.error(message);
-      throw new Error('Missing public Supabase configuration');
-    })();
+      throw new Error('ENV not loaded');
+    }
   </script>
 
   <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
@@ -120,6 +99,13 @@
       </div>
       <div class="px-5 py-4 space-y-4 text-sm">
         <p class="text-slate-600 dark:text-slate-400">Χρησιμοποίησε τον έλεγχο για να επιβεβαιώσεις ότι τα public Supabase keys φορτώθηκαν και ότι η REST API απαντά σωστά.</p>
+        <div>
+          <div class="font-semibold">/env.js</div>
+          <div class="mt-2 grid gap-1 text-xs">
+            <div>Placement: <span id="diagnostics-envjs-placement">—</span></div>
+            <div>Network: <span id="diagnostics-envjs-status">—</span></div>
+          </div>
+        </div>
         <div>
           <div class="font-semibold">window.ENV</div>
           <pre id="diagnostics-env" class="mt-2 rounded-xl bg-slate-900/90 text-slate-100 text-xs p-3 whitespace-pre-wrap break-all">(pending)</pre>
@@ -479,6 +465,8 @@
       const restUrlEl = document.getElementById('diagnostics-rest-url');
       const restStatusEl = document.getElementById('diagnostics-rest-status');
       const restBodyEl = document.getElementById('diagnostics-rest-body');
+      const envJsPlacementEl = document.getElementById('diagnostics-envjs-placement');
+      const envJsStatusEl = document.getElementById('diagnostics-envjs-status');
 
       if (!modal || !triggers.length) return;
 
@@ -493,6 +481,28 @@
           envPre.textContent = JSON.stringify(env, null, 2);
         } catch (err) {
           envPre.textContent = 'Unable to serialise window.ENV';
+        }
+
+        if (envJsPlacementEl) {
+          const scriptEl = document.querySelector('head script[src="/env.js"]');
+          if (scriptEl) {
+            const scripts = Array.from(document.head.querySelectorAll('script'));
+            const idx = scripts.indexOf(scriptEl);
+            envJsPlacementEl.textContent = idx === 0 ? 'first <script> in <head>' : idx >= 0 ? `index ${idx} in <head>` : 'unknown';
+          } else {
+            envJsPlacementEl.textContent = 'not found';
+          }
+        }
+
+        if (envJsStatusEl) {
+          envJsStatusEl.textContent = 'Running…';
+          try {
+            const envResponse = await fetch('/env.js', { cache: 'no-store' });
+            const statusText = envResponse.statusText ? ` ${envResponse.statusText}` : '';
+            envJsStatusEl.textContent = `${envResponse.status}${statusText}`.trim();
+          } catch (error) {
+            envJsStatusEl.textContent = `Fetch error: ${error}`;
+          }
         }
 
         const hasKeys = !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY);

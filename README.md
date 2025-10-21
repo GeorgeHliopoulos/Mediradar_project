@@ -28,10 +28,17 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
     - `VAPID_PUBLIC_KEY` (optional) – the Web Push key used when enabling push notifications.
   - **Server-only (available exclusively to Netlify Functions via `process.env`):**
     - `SUPABASE_SERVICE_ROLE` and any other sensitive Supabase credentials. These values never reach the browser.
-- To keep Deploy Previews working, open **Site configuration → Build & deploy → Environment** in Netlify and either copy the production variables to the "Deploy previews" context or define the same `SUPABASE_URL`, `SUPABASE_ANON_KEY` (and optional `VAPID_PUBLIC_KEY`) there. After each preview build, visit the preview URL and run `window.ENV` in the browser console to verify the values were injected.
 - Use the in-app **Diagnostics** button (top-right of each page) to inspect `window.ENV` and run a REST probe against Supabase. A `200`/`206` response confirms that the anon key is accepted by the `rest/v1` endpoint.
 - For local development keep your `env.js` (and any `.env` files) out of version control—the `.gitignore` already covers them.
 - Netlify Functions continue to access their secrets strictly through `process.env` (see files under [`netlify/functions/`](./netlify/functions)).
+
+### Deploy Previews environment
+
+1. In Netlify open **Site configuration → Build & deploy → Environment** and expand the **Deploy previews** context.
+2. Add the public keys (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `VAPID_PUBLIC_KEY`) so the build script can emit `/env.js` during preview builds.
+3. After each preview finishes, open the preview URL and either run `window.ENV` in the browser console or click the in-app **Diagnostics** button to confirm:
+   - the `/env.js` request responds with `200` and loads before other scripts;
+   - the REST probe to `/rest/v1/requests?select=id&limit=1` returns `200`/`206` instead of `401`/`403`.
 
 ## Security notes
 
