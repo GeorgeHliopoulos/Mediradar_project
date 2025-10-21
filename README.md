@@ -17,7 +17,6 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
 3. Serve the site with any static HTTP server (for example `npx serve .`).
 4. If you introduce new utility classes, regenerate the bundled stylesheet by running `python build_css.py` (the script derives utilitarian rules from the HTML/JS class usage and writes to `styles/tailwind-lite.css`).
 5. Ensure the Netlify functions directory is available to your local serverless runner if you need backend endpoints.
-4. Ensure the Netlify functions directory is available to your local serverless runner if you need backend endpoints.
 
 ## Environment & Secrets
 
@@ -30,7 +29,6 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
     - `VAPID_PUBLIC_KEY` (optional) – the Web Push key used when enabling push notifications.
   - **Server-only (available exclusively to Netlify Functions via `process.env`):**
     - `SUPABASE_SERVICE_ROLE` and any other sensitive Supabase credentials. These values never reach the browser.
-- Use the in-app **Diagnostics** button (top-right of each page) to inspect `window.ENV` and run a Supabase RPC probe (`POST /rest/v1/rpc/get_request_status`) with a known status token. A `200` response accompanied by a non-empty payload confirms that the anon key is accepted by the RPC endpoint.
 - For local development keep your `env.js` (and any `.env` files) out of version control—the `.gitignore` already covers them.
 - Netlify Functions continue to access their secrets strictly through `process.env` (see files under [`netlify/functions/`](./netlify/functions)).
 
@@ -43,9 +41,19 @@ Single-page PWA that connects users with nearby pharmacies via Supabase-backed w
 
 1. In Netlify open **Site configuration → Build & deploy → Environment** and expand the **Deploy previews** context.
 2. Add the public keys (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `VAPID_PUBLIC_KEY`) so the build script can emit `/env.js` during preview builds.
-3. After each preview finishes, open the preview URL and either run `window.ENV` in the browser console or click the in-app **Diagnostics** button to confirm:
-   - the `/env.js` request responds with `200` and loads before other scripts;
-   - the RPC probe to `/rest/v1/rpc/get_request_status` (with a valid `p_token`) returns `200` with at least one row instead of `401`/`403`.
+3. After each preview finishes, open the preview URL and run `window.ENV` in the browser console to confirm the Supabase keys are present. You can also manually test the RPC endpoint from the console:
+   ```js
+   fetch(`${window.ENV.SUPABASE_URL}/rest/v1/rpc/get_request_status`, {
+     method: 'POST',
+     headers: {
+       apikey: window.ENV.SUPABASE_ANON_KEY,
+       Authorization: `Bearer ${window.ENV.SUPABASE_ANON_KEY}`,
+       'Content-Type': 'application/json'
+     },
+     body: JSON.stringify({ p_token: 'VALID_STATUS_TOKEN' })
+   }).then(r => r.json()).then(console.log)
+   ```
+   A `200` response with at least one row confirms the anon key is accepted by the RPC endpoint.
 
 ## Security notes
 

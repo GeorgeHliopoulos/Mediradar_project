@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 
 SOURCE_FILES = ['index.html', 'pharmacy.html']
@@ -383,9 +384,14 @@ for cls in classes:
             add_rule(f".{esc(cls)}", f"border-color: {value};")
 
 if 'bg-gradient-to-r' in class_set:
-    add_rule('.bg-gradient-to-r', 'background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-to, rgba(255,255,255,0)));')
+    add_rule('.bg-gradient-to-r', 'background-image: linear-gradient(to right, var(--tw-gradient-stops));')
 if 'from-brand-500' in class_set:
-    add_rule('.from-brand-500', '--tw-gradient-from: #29a3a3;')
+    add_rule(
+        '.from-brand-500',
+        '--tw-gradient-from: #29a3a3; '
+        '--tw-gradient-to: rgba(41,163,163,0); '
+        '--tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(41,163,163,0));'
+    )
 if 'to-brand-600' in class_set:
     add_rule('.to-brand-600', '--tw-gradient-to: #208181;')
 
@@ -501,4 +507,4 @@ if 'card' in class_set:
 styles_path = Path('styles')
 styles_path.mkdir(exist_ok=True)
 styles_path.joinpath('tailwind-lite.css').write_text('\n'.join(rules) + '\n')
-print('Generated', len(rules), 'rules')
+print('Generated', len(rules), 'rules', file=sys.stderr)
