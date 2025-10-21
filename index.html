@@ -38,15 +38,20 @@
   <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
-          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
-          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
-        }
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
+      window.__ENV_LOAD_ERROR = true;
+      window.__ENV_LOAD_ERROR_MESSAGE = msg;
+      const renderEnvError = () => {
+        if (!document.body) return;
+        document.body.innerHTML = '<div style="padding:16px;color:#b91c1c;background:#fee2e2">Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.</div>';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderEnvError, { once: true });
+      } else {
+        renderEnvError();
       }
+      throw new Error('ENV not loaded');
     }
   </script>
 
