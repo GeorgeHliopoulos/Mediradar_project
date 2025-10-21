@@ -394,13 +394,10 @@
     </div>
   </div>
 
-  <!-- ===== ENV (INLINE — χωρίς /env.js) ===== -->
+  <!-- Runtime configuration (provide window.ENV in env.js; see env.example.js) -->
+  <script src="/env.js"></script>
   <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
-      VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
-    };
+    window.ENV = window.ENV || {};
   </script>
 
   <!-- Supabase client -->
@@ -409,9 +406,10 @@
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
     if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
       console.error('Missing Supabase ENV');
+    } else {
+      window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase ready:', !!window.supabase);
     }
-    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase ready:', !!window.supabase);
   </script>
 
   <!-- App JS -->
