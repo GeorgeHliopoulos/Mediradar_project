@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Environment-specific configuration
+env.js
+env.local.js
+.env
+.env.*
+
+# Build outputs
+netlify/functions/*.zip
+
+# macOS
+.DS_Store

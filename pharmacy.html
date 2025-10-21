@@ -10,26 +10,75 @@
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#29a3a3" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/styles/tailwind-lite.css">
+
+  <!-- env.js MUST stay first so window.ENV is populated before any other scripts -->
+  <script src="/env.js"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
-          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
-          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
-        }
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+      const msg = 'Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.';
+      window.__ENV_LOAD_ERROR = true;
+      window.__ENV_LOAD_ERROR_MESSAGE = msg;
+      const renderEnvError = () => {
+        if (!document.body) return;
+        document.body.innerHTML = '<div style="padding:16px;color:#b91c1c;background:#fee2e2">Missing Supabase ENV (URL/ANON). Check Netlify env vars & /env.js include.</div>';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderEnvError, { once: true });
+      } else {
+        renderEnvError();
       }
+      throw new Error('ENV not loaded');
     }
   </script>
 
-  <style>
-    .card { @apply rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow; }
-    .btn  { @apply px-3 py-2 rounded-xl border font-semibold; }
-  </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
+  <div data-env-error class="hidden" style="display:none;">
+    <div class="mx-auto max-w-3xl px-4 py-3 rounded-b-2xl border border-red-200 bg-red-100/90 text-red-900 shadow-lg">
+      <div data-env-error-text class="text-sm leading-relaxed font-medium"></div>
+    </div>
+  </div>
+
+  <div id="diagnostics-modal" class="hidden fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm p-4 items-center justify-center">
+    <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-soft">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h2 class="text-lg font-bold">Diagnostics</h2>
+        <div class="flex items-center gap-2">
+          <button id="diagnostics-refresh" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold bg-white/70 dark:bg-slate-900/40 hover:bg-white">Run check</button>
+          <button id="diagnostics-close" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
+        </div>
+      </div>
+      <div class="px-5 py-4 space-y-4 text-sm">
+        <p class="text-slate-600 dark:text-slate-400">Επαλήθευσε ότι τα public Supabase κλειδιά φορτώθηκαν και ότι ένα απλό REST αίτημα δουλεύει πριν συνεχίσεις με το dashboard.</p>
+        <div>
+          <div class="font-semibold">/env.js</div>
+          <div class="mt-2 grid gap-1 text-xs">
+            <div>Placement: <span id="diagnostics-envjs-placement">—</span></div>
+            <div>Network: <span id="diagnostics-envjs-status">—</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="font-semibold">window.ENV</div>
+          <pre id="diagnostics-env" class="mt-2 rounded-xl bg-slate-900/90 text-slate-100 text-xs p-3 whitespace-pre-wrap break-all">(pending)</pre>
+        </div>
+        <div>
+          <div class="font-semibold">Status RPC</div>
+          <p class="text-xs text-slate-500">POST <span id="diagnostics-rest-url" class="break-all"></span></p>
+          <div class="mt-2 grid gap-2 text-xs">
+            <label class="block">
+              <span class="font-medium">Token (p_token)</span>
+              <input id="diagnostics-token" type="text" placeholder="π.χ. abcd1234"
+                     class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2" />
+            </label>
+            <div>Status: <span id="diagnostics-rest-status">—</span></div>
+            <div id="diagnostics-token-error" class="hidden text-red-600 dark:text-red-400"></div>
+          </div>
+          <pre id="diagnostics-rest-body" class="mt-2 rounded-xl bg-slate-100 dark:bg-slate-900/60 p-3 text-xs whitespace-pre-wrap break-all">(pending)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="max-w-5xl mx-auto p-4">
     <header class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-3">
@@ -37,6 +86,7 @@
         <h1 class="text-2xl font-extrabold">MediRadar • Φαρμακείο</h1>
       </div>
       <div class="flex items-center gap-2">
+        <button data-diagnostics-open class="btn hover:bg-slate-100 dark:hover:bg-slate-800 text-xs">Diagnostics</button>
         <button id="theme-toggle" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">🌙/🌞</button>
       </div>
     </header>
@@ -97,13 +147,142 @@
     </section>
   </div>
 
-  <!-- ENV -->
-  <script src="/env.js"></script>
   <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
-    };
+    (function(){
+      const triggers = document.querySelectorAll('[data-diagnostics-open]');
+      const modal = document.getElementById('diagnostics-modal');
+      const closeBtn = document.getElementById('diagnostics-close');
+      const refreshBtn = document.getElementById('diagnostics-refresh');
+      const envPre = document.getElementById('diagnostics-env');
+      const restUrlEl = document.getElementById('diagnostics-rest-url');
+      const restStatusEl = document.getElementById('diagnostics-rest-status');
+      const restBodyEl = document.getElementById('diagnostics-rest-body');
+      const tokenInput = document.getElementById('diagnostics-token');
+      const tokenErrorEl = document.getElementById('diagnostics-token-error');
+      const envJsPlacementEl = document.getElementById('diagnostics-envjs-placement');
+      const envJsStatusEl = document.getElementById('diagnostics-envjs-status');
+
+      if (!modal || !triggers.length) return;
+
+      function closeModal(){
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      async function runDiagnostics(){
+        const env = window.ENV || {};
+        try {
+          envPre.textContent = JSON.stringify(env, null, 2);
+        } catch (err) {
+          envPre.textContent = 'Unable to serialise window.ENV';
+        }
+
+        if (envJsPlacementEl) {
+          const scriptEl = document.querySelector('head script[src="/env.js"]');
+          if (scriptEl) {
+            const scripts = Array.from(document.head.querySelectorAll('script'));
+            const idx = scripts.indexOf(scriptEl);
+            envJsPlacementEl.textContent = idx === 0 ? 'first <script> in <head>' : idx >= 0 ? `index ${idx} in <head>` : 'unknown';
+          } else {
+            envJsPlacementEl.textContent = 'not found';
+          }
+        }
+
+        if (envJsStatusEl) {
+          envJsStatusEl.textContent = 'Running…';
+          try {
+            const envResponse = await fetch('/env.js', { cache: 'no-store' });
+            const statusText = envResponse.statusText ? ` ${envResponse.statusText}` : '';
+            envJsStatusEl.textContent = `${envResponse.status}${statusText}`.trim();
+          } catch (error) {
+            envJsStatusEl.textContent = `Fetch error: ${error}`;
+          }
+        }
+
+        const hasKeys = !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY);
+        const baseUrl = (env.SUPABASE_URL || '').replace(/\/$/, '');
+        const rpcUrl = hasKeys ? `${baseUrl}/rest/v1/rpc/get_request_status` : '—';
+        restUrlEl.textContent = rpcUrl;
+
+        if (!hasKeys) {
+          restStatusEl.textContent = 'Missing SUPABASE_URL / SUPABASE_ANON_KEY';
+          restBodyEl.textContent = 'Ορίζει τα public Supabase κλειδιά στα Netlify environment variables.';
+          tokenErrorEl?.classList.remove('hidden');
+          if (tokenErrorEl) tokenErrorEl.textContent = 'Χωρίς public keys δεν μπορεί να γίνει RPC κλήση.';
+          return;
+        }
+
+        const token = (tokenInput?.value || '').trim();
+        if (!token) {
+          restStatusEl.textContent = 'Token required';
+          restBodyEl.textContent = 'Δώσε status token (p_token) για να εκτελεστεί το RPC.';
+          tokenErrorEl?.classList.remove('hidden');
+          if (tokenErrorEl) tokenErrorEl.textContent = 'Συμπλήρωσε ένα token πριν τρέξεις τον έλεγχο.';
+          return;
+        }
+
+        if (tokenErrorEl) tokenErrorEl.classList.add('hidden');
+        restStatusEl.textContent = 'Running…';
+        restBodyEl.textContent = '…';
+
+        try {
+          const response = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: {
+              apikey: env.SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ p_token: token }),
+            cache: 'no-store'
+          });
+          restStatusEl.textContent = `${response.status} ${response.statusText}`.trim();
+          let payload = null;
+          try {
+            payload = await response.json();
+          } catch (parseErr) {
+            payload = null;
+          }
+
+          if (!response.ok) {
+            restBodyEl.textContent = payload ? JSON.stringify(payload, null, 2) : '(no body)';
+            tokenErrorEl?.classList.remove('hidden');
+            if (tokenErrorEl) tokenErrorEl.textContent = 'Η RPC κλήση απέτυχε – έλεγξε τα headers & τα Netlify env vars.';
+            return;
+          }
+
+          if (Array.isArray(payload) && payload.length) {
+            restBodyEl.textContent = JSON.stringify(payload[0], null, 2);
+            if (tokenErrorEl) tokenErrorEl.classList.add('hidden');
+          } else {
+            restBodyEl.textContent = JSON.stringify(payload, null, 2) || '(empty array)';
+            tokenErrorEl?.classList.remove('hidden');
+            if (tokenErrorEl) tokenErrorEl.textContent = 'Δεν βρέθηκε αίτηση για το συγκεκριμένο token.';
+          }
+        } catch (error) {
+          restStatusEl.textContent = 'Fetch error';
+          restBodyEl.textContent = String(error);
+          tokenErrorEl?.classList.remove('hidden');
+          if (tokenErrorEl) tokenErrorEl.textContent = 'Αποτυχία επικοινωνίας με το Supabase RPC endpoint.';
+        }
+      }
+
+      function openModal(){
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        runDiagnostics();
+      }
+
+      triggers.forEach((btn)=> btn.addEventListener('click', openModal));
+      modal.addEventListener('click', (event)=>{ if (event.target === modal) closeModal(); });
+      closeBtn?.addEventListener('click', closeModal);
+      refreshBtn?.addEventListener('click', runDiagnostics);
+      document.addEventListener('keydown', (event)=>{
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+    })();
   </script>
 
   <!-- Supabase + App -->
@@ -111,7 +290,13 @@
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
     /* ---------- setup ---------- */
+    if (window.__ENV_LOAD_ERROR) {
+      throw new Error(window.__ENV_LOAD_ERROR_MESSAGE || 'Missing Supabase environment configuration');
+    }
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+      throw new Error('Missing Supabase environment configuration');
+    }
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const qs = (s, r=document)=>r.querySelector(s);
     const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
