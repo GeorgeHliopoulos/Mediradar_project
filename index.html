@@ -191,36 +191,6 @@
           <span id="t-pro-m">Για επαγγελματίες</span>
         </button>
       </div>
-
-      <div class="mt-16 max-w-3xl mx-auto w-full relative sm:min-h-[240px]">
-        <div class="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm p-6 text-left text-slate-700 dark:text-slate-300 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:left-0">
-          <h2 id="t-faqTitle" class="text-xl font-semibold">Συχνές ερωτήσεις (σύντομα διαθέσιμες)</h2>
-          <p id="t-faqSoon" class="mt-2 text-sm">Ετοιμάζουμε ενότητα FAQ με τις πιο συχνές απορίες σας. Αν έχεις ερώτηση, ενημέρωσέ μας.</p>
-        </div>
-
-        <div class="mt-6 flex flex-col gap-4 items-center text-slate-500 dark:text-slate-400 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:right-0 sm:items-end sm:text-right">
-          <a id="faq-contact" href="mailto:info@mediradar.gr" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline sm:self-end">
-            ✉️ <span id="t-faqContact">Επικοινωνία: info@mediradar.gr</span>
-          </a>
-          <div class="flex flex-col items-center sm:items-end gap-3 text-center sm:text-right">
-            <p id="t-shareTitle" class="text-xs uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">Μοιράσου το MediRadar</p>
-            <div class="flex items-center gap-3">
-              <a id="share-facebook" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmediradar.gr" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο Facebook">
-                <span class="sr-only" id="t-shareFacebook">Κοινοποίηση στο Facebook</span>
-                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 22v-8.2h2.7l.4-3.2h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.6V4.2c-.3 0-1.2-.1-2.2-.1c-2.2 0-3.7 1.3-3.7 3.8v2.1H8.8v3.2h2.9V22h1.8Z"/></svg>
-              </a>
-              <a id="share-twitter" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fmediradar.gr" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο X">
-                <span class="sr-only" id="t-shareTwitter">Κοινοποίηση στο X</span>
-                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h4.4l3.2 4.7L15.7 3H20l-6.2 7.2L20 21h-4.4l-3.6-5.1L8.2 21H4l6.5-7.5L4 3Z"/></svg>
-              </a>
-              <a id="share-instagram" href="https://www.instagram.com/" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο Instagram">
-                <span class="sr-only" id="t-shareInstagram">Κοινοποίηση στο Instagram</span>
-                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5ZM12 9a3 3 0 1 0 3 3 3 3 0 0 0-3-3Zm6.25-2.75a1 1 0 1 1-1 1a1 1 0 0 1 1-1Z"/></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -378,12 +348,14 @@
     <!-- Results & status flow -->
     <section id="results" class="hidden mt-6">
       <div class="rounded-3xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
-        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
           <button type="button" data-go-home class="flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
             ← <span id="t-statusHome">Αρχική</span>
           </button>
-          <h3 id="t-statusHeading" class="flex-1 text-center text-base sm:text-lg font-semibold">Κατάσταση αιτήματος</h3>
-          <div class="w-10 h-10" aria-hidden="true"></div>
+          <h3 id="t-statusHeading" class="text-base sm:text-lg font-semibold">Κατάσταση αιτήματος</h3>
+          <button id="status-notify" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Ειδοποιήσεις">
+            🔔
+          </button>
         </div>
         <div class="p-6 space-y-8">
           <div id="results-pending" class="flex flex-col items-center gap-4 text-center py-10">
@@ -401,7 +373,6 @@
               <h4 id="t-statusListTitle" class="text-lg font-semibold">Φαρμακεία με διαθεσιμότητα</h4>
               <p id="t-statusListDesc" class="text-sm text-slate-500 dark:text-slate-400">Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.</p>
             </div>
-            <p id="distance-hint" class="hidden text-xs text-slate-500 dark:text-slate-400"></p>
             <div id="resultsList" class="space-y-3"></div>
           </div>
 
@@ -427,9 +398,6 @@
                 🧭 <span id="t-statusDirections">Οδηγίες</span>
               </a>
             </div>
-            <p id="extend-note" class="text-xs text-emerald-700 dark:text-emerald-200 text-center max-w-xs sm:max-w-sm mx-auto">
-              Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.
-            </p>
             <button id="status-done" data-go-home type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-sm font-semibold">
               <span id="t-statusBackHome">Επιστροφή στην αρχική</span>
             </button>
@@ -618,7 +586,7 @@
       </div>
       <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">OK</button>
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-gdprAccept">OK</span></button>
       </div>
     </div>
   </div>
@@ -781,30 +749,7 @@
         proRegisterHeading:'Στοιχεία φαρμακείου', proRegisterDesc:'Συμπλήρωσε τα στοιχεία του φαρμακείου για να ξεκινήσεις.',
         proFieldBusinessName:'Επωνυμία φαρμακείου', proFieldVat:'ΑΦΜ', proFieldContact:'Υπεύθυνος επικοινωνίας',
         proFieldEmail:'Email επικοινωνίας', proFieldPhone:'Τηλέφωνο', proFieldAddress:'Διεύθυνση', proFieldCity:'Πόλη',
-        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική',
-        statusHeading:'Κατάσταση αιτήματος', statusPendingTitle:'Αναζητούμε το φαρμακό σου…',
-        statusPendingDesc:'Θα ειδοποιηθείς μόλις απαντήσει κάποιο φαρμακείο.',
-        statusListTitle:'Φαρμακεία με διαθεσιμότητα', statusListDesc:'Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.',
-        statusAccept:'Επιβεβαίωση', statusReservedTitle:'Το φαρμακείο σε περιμένει', statusReservedHint:'Χρόνος κράτησης',
-        statusExtend:'+15 λεπτά', statusCall:'Κλήση', statusDirections:'Οδηγίες',
-        statusGenericBadge:'Διαθέσιμο γενόσημο', statusGenericShort:'Γενόσημο',
-        extendNote:'Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.',
-        extendNoteUsed:'Έχεις ήδη χρησιμοποιήσει την επέκταση μέσα στις τελευταίες 12 ώρες.',
-        statusBackHome:'Επιστροφή στην αρχική', statusEmptyTitle:'Δεν βρέθηκαν φαρμακεία',
-        statusEmptyBody:'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
-        statusEmptyCta:'Δοκίμασε ξανά',
-        distanceAway:'%s χλμ. από εσένα',
-        distanceHintLoading:'Υπολογίζουμε αποστάσεις βάσει της τοποθεσίας σου…',
-        distanceHintDenied:'Ενεργοποίησε την τοποθεσία του προγράμματος περιήγησης για να δεις αποστάσεις.',
-        distanceHintUnsupported:'Η συσκευή δεν υποστηρίζει υπηρεσίες τοποθεσίας.',
-        distanceHintUnavailable:'Δεν ήταν δυνατός ο υπολογισμός αποστάσεων αυτή τη στιγμή.',
-        shareTitle:'Μοιράσου το MediRadar',
-        shareFacebook:'Κοινοποίηση στο Facebook',
-        shareTwitter:'Κοινοποίηση στο X',
-        shareInstagram:'Κοινοποίηση στο Instagram',
-        faqTitle:'Συχνές ερωτήσεις (σύντομα διαθέσιμες)',
-        faqSoon:'Ετοιμάζουμε ενότητα FAQ με τις πιο συχνές απορίες σας. Αν έχεις ερώτηση, ενημέρωσέ μας.',
-        faqContact:'Επικοινωνία: info@mediradar.gr'
+        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική'
       },
       en:{
         hero:'Instant availability check at nearby pharmacies.',
@@ -839,38 +784,10 @@
         proRegisterHeading:'Pharmacy details', proRegisterDesc:'Share your business information to get started.',
         proFieldBusinessName:'Pharmacy name', proFieldVat:'VAT number', proFieldContact:'Primary contact',
         proFieldEmail:'Contact email', proFieldPhone:'Phone', proFieldAddress:'Address', proFieldCity:'City',
-        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home',
-        statusHeading:'Request status', statusPendingTitle:'Searching for your medicine…',
-        statusPendingDesc:'We will notify you as soon as a pharmacy responds.',
-        statusListTitle:'Pharmacies with availability', statusListDesc:'Choose the pharmacy that suits you for self pick-up.',
-        statusAccept:'Accept', statusReservedTitle:'Your pick-up is ready', statusReservedHint:'Reservation timer',
-        statusExtend:'+15 minutes', statusCall:'Call', statusDirections:'Directions',
-        statusGenericBadge:'Generic option available', statusGenericShort:'Generic',
-        extendNote:'You can use this extension only once every 12 hours.',
-        extendNoteUsed:'You have already used the extension within the last 12 hours.',
-        statusBackHome:'Back to home', statusEmptyTitle:'No pharmacies found',
-        statusEmptyBody:'We couldn’t find any pharmacies with availability right now. Please try again shortly or adjust your request.',
-        statusEmptyCta:'Try again',
-        distanceAway:'%s km from you',
-        distanceHintLoading:'Calculating distances based on your location…',
-        distanceHintDenied:'Enable location access in your browser to see distances.',
-        distanceHintUnsupported:'Your device does not support location services.',
-        distanceHintUnavailable:'We could not calculate distances right now.',
-        shareTitle:'Share MediRadar',
-        shareFacebook:'Share on Facebook',
-        shareTwitter:'Share on X',
-        shareInstagram:'Share on Instagram',
-        faqTitle:'FAQ (coming soon)',
-        faqSoon:'We are preparing an FAQ section with the most common questions. Let us know what you need.',
-        faqContact:'Contact: info@mediradar.gr'
+        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home'
       }
     };
-    const state = {
-      lang: localStorage.getItem('mediradar-lang') || 'el',
-      locationStatus: 'idle',
-      locationAttempted: false,
-      userCoords: null
-    };
+    const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
     let selectedPharmacy = null;
     function t(k){ return strings[state.lang][k]; }
     function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
@@ -919,30 +836,6 @@
       setText('t-proHaveAccount', t('proHaveAccount')); setText('t-proGoSignin', t('proGoSignin'));
       setText('t-proBackHome', t('proBackHome'));
       setText('t-optional', t('optional'));
-      setText('t-shareTitle', t('shareTitle'));
-      setText('t-shareFacebook', t('shareFacebook'));
-      setText('t-shareTwitter', t('shareTwitter'));
-      setText('t-shareInstagram', t('shareInstagram'));
-      setText('t-faqTitle', t('faqTitle'));
-      setText('t-faqSoon', t('faqSoon'));
-      setText('t-faqContact', t('faqContact'));
-      if(typeof refreshExtendNote === 'function') refreshExtendNote();
-      setText('t-statusHeading', t('statusHeading'));
-      setText('t-statusPendingTitle', t('statusPendingTitle'));
-      setText('t-statusPendingDesc', t('statusPendingDesc'));
-      setText('t-statusListTitle', t('statusListTitle'));
-      setText('t-statusListDesc', t('statusListDesc'));
-      setText('t-statusReservedTitle', t('statusReservedTitle'));
-      setText('t-statusReservedHint', t('statusReservedHint'));
-      setText('t-statusGenericBadge', t('statusGenericBadge'));
-      setText('t-statusExtend', t('statusExtend'));
-      setText('t-statusCall', t('statusCall'));
-      setText('t-statusDirections', t('statusDirections'));
-      setText('t-statusBackHome', t('statusBackHome'));
-      setText('t-statusEmptyTitle', t('statusEmptyTitle'));
-      setText('t-statusEmptyBody', t('statusEmptyBody'));
-      setText('t-statusEmptyCta', t('statusEmptyCta'));
-      setText('t-statusHome', t('home'));
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       document.getElementById('barcode-value').placeholder = t('barcodePlaceholder');
@@ -962,13 +855,6 @@
       document.getElementById('pro-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
       document.getElementById('barcode-start').setAttribute('aria-label', state.lang==='el'?'Σάρωση barcode':'Scan barcode');
       document.getElementById('barcode-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
-      document.getElementById('share-facebook')?.setAttribute('aria-label', t('shareFacebook'));
-      document.getElementById('share-twitter')?.setAttribute('aria-label', t('shareTwitter'));
-      document.getElementById('share-instagram')?.setAttribute('aria-label', t('shareInstagram'));
-      statusCallLink?.setAttribute('aria-label', t('statusCall'));
-      statusDirectionsLink?.setAttribute('aria-label', t('statusDirections'));
-      document.querySelectorAll('.status-accept-label').forEach(el=> el.textContent = t('statusAccept'));
-      document.querySelectorAll('.status-generic-label').forEach(el=> el.textContent = t('statusGenericShort'));
       if(document.getElementById('barcode-modal').classList.contains('hidden')){
         document.getElementById('barcode-status').textContent = t('barcodeStatusInit');
       }
@@ -978,7 +864,6 @@
       langEnBtn.dataset.active = state.lang==='en';
       langElBtn.setAttribute('aria-pressed', state.lang==='el');
       langEnBtn.setAttribute('aria-pressed', state.lang==='en');
-      updateDistanceHint();
       localStorage.setItem('mediradar-lang', state.lang);
     }
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
@@ -989,29 +874,22 @@
     const app = document.getElementById('app');
     function goHome(){
       stopPickupTimer();
-      if(demoTimeout){ clearTimeout(demoTimeout); demoTimeout=null; }
       app.classList.add('hidden');
       splash.classList.remove('hidden');
       hidePending();
-      const resultsSection = document.getElementById('results');
-      resultsSection?.classList.add('hidden');
-      document.getElementById('pickup-box')?.classList.add('hidden');
-      document.getElementById('results-pending')?.classList.remove('hidden');
-      document.getElementById('results-list')?.classList.add('hidden');
-      document.getElementById('results-empty')?.classList.add('hidden');
-      distanceHintEl?.classList.add('hidden');
-      selectedPharmacy = null;
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('pickup-box').classList.add('hidden');
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
     document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-    document.body.addEventListener('click', (event) => {
-      const btn = event.target.closest('[data-go-home]');
-      if(!btn) return;
-      event.preventDefault();
-      if (btn.dataset.closePro === 'true') {
-        closeProModal();
-      }
-      goHome();
+    document.querySelectorAll('[data-go-home]').forEach(btn => {
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (btn.dataset.closePro === 'true') {
+          closeProModal();
+        }
+        goHome();
+      });
     });
 
     /* ========== Modals (How/GDPR/Login) ========== */
@@ -1409,70 +1287,17 @@
     const resultsPending = document.getElementById('results-pending');
     const resultsListWrap = document.getElementById('results-list');
     const resultsEmpty = document.getElementById('results-empty');
-    const distanceHintEl = document.getElementById('distance-hint');
     const pickupBox = document.getElementById('pickup-box');
     const pickupTimerEl = document.getElementById('pickup-timer');
     const extendBtn = document.getElementById('extend-btn');
-    const extendNoteEl = document.getElementById('extend-note');
-    const EXTEND_STORAGE_KEY = 'pickup-extend-at';
-    const LEGACY_EXTEND_KEY = 'pickup-extend-date';
-    const EXTEND_COOLDOWN_MS = 12 * 60 * 60 * 1000;
     const statusReservedName = document.getElementById('status-reserved-name');
     const statusReservedAddress = document.getElementById('status-reserved-address');
     const statusReservedGeneric = document.getElementById('status-reserved-generic');
     const statusCallLink = document.getElementById('status-call');
     const statusDirectionsLink = document.getElementById('status-directions');
     const statusEmptyBtn = document.getElementById('status-empty-btn');
-
-    function readExtendTimestamp(){
-      const raw = localStorage.getItem(EXTEND_STORAGE_KEY);
-      if(raw){
-        const numeric = Number(raw);
-        if(!Number.isNaN(numeric)) return numeric;
-        const parsed = Date.parse(raw);
-        if(!Number.isNaN(parsed)) return parsed;
-        localStorage.removeItem(EXTEND_STORAGE_KEY);
-      }
-      const legacy = localStorage.getItem(LEGACY_EXTEND_KEY);
-      if(legacy){
-        localStorage.removeItem(LEGACY_EXTEND_KEY);
-        const parsedLegacy = Date.parse(legacy);
-        if(!Number.isNaN(parsedLegacy)){
-          localStorage.setItem(EXTEND_STORAGE_KEY, String(parsedLegacy));
-          return parsedLegacy;
-        }
-      }
-      return null;
-    }
-    function writeExtendTimestamp(ts){
-      localStorage.setItem(EXTEND_STORAGE_KEY, String(ts));
-      localStorage.removeItem(LEGACY_EXTEND_KEY);
-    }
-    function canUseExtend(){
-      const last = readExtendTimestamp();
-      return !last || (Date.now() - last) >= EXTEND_COOLDOWN_MS;
-    }
-    function refreshExtendNote(){
-      const key = extendBtn && extendBtn.disabled ? 'extendNoteUsed' : 'extendNote';
-      if(extendBtn){
-        extendBtn.setAttribute('title', t(key));
-        extendBtn.setAttribute('aria-disabled', extendBtn.disabled ? 'true' : 'false');
-      }
-      if(extendNoteEl){
-        extendNoteEl.textContent = t(key);
-      }
-    }
-    function updateExtendAvailability(){
-      if(!extendBtn) return true;
-      const allowed = canUseExtend();
-      extendBtn.disabled = !allowed;
-      extendBtn.classList.toggle('opacity-50', !allowed);
-      extendBtn.classList.toggle('cursor-not-allowed', !allowed);
-      refreshExtendNote();
-      return allowed;
-    }
-
-    let pInt=null, remaining=0, pollInt=null, demoTimeout=null;
+    const statusNotifyBtn = document.getElementById('status-notify');
+    let pInt=null, remaining=0, pollInt=null;
 
     function showResultsWrapper(){ results.classList.remove('hidden'); }
     function setResultsState(state){
@@ -1501,93 +1326,6 @@
       if(!el) return;
       el.classList.toggle('opacity-60', !enabled);
       el.classList.toggle('pointer-events-none', !enabled);
-    }
-
-    function updateDistanceHint(){
-      if(!distanceHintEl) return;
-      switch(state.locationStatus){
-        case 'loading':
-          distanceHintEl.textContent = t('distanceHintLoading');
-          distanceHintEl.classList.remove('hidden');
-          break;
-        case 'denied':
-          distanceHintEl.textContent = t('distanceHintDenied');
-          distanceHintEl.classList.remove('hidden');
-          break;
-        case 'unsupported':
-          distanceHintEl.textContent = t('distanceHintUnsupported');
-          distanceHintEl.classList.remove('hidden');
-          break;
-        case 'unavailable':
-          distanceHintEl.textContent = t('distanceHintUnavailable');
-          distanceHintEl.classList.remove('hidden');
-          break;
-        default:
-          distanceHintEl.classList.add('hidden');
-          break;
-      }
-    }
-
-    let locatingPromise = null;
-    async function requestUserLocation(){
-      if(state.userCoords) return state.userCoords;
-      if(state.locationStatus === 'denied' || state.locationStatus === 'unsupported'){
-        updateDistanceHint();
-        return null;
-      }
-      if(!('geolocation' in navigator)){
-        state.locationStatus = 'unsupported';
-        updateDistanceHint();
-        return null;
-      }
-      if(locatingPromise){
-        return locatingPromise;
-      }
-      state.locationAttempted = true;
-      state.locationStatus = 'loading';
-      updateDistanceHint();
-      locatingPromise = new Promise((resolve)=>{
-        navigator.geolocation.getCurrentPosition((pos)=>{
-          state.userCoords = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-          };
-          state.locationStatus = 'ready';
-          locatingPromise = null;
-          updateDistanceHint();
-          resolve(state.userCoords);
-        }, (err)=>{
-          locatingPromise = null;
-          if(err && err.code === err.PERMISSION_DENIED){
-            state.locationStatus = 'denied';
-          }else{
-            state.locationStatus = 'unavailable';
-          }
-          updateDistanceHint();
-          resolve(null);
-        }, {
-          enableHighAccuracy: true,
-          timeout: 8000,
-          maximumAge: 120000
-        });
-      });
-      return locatingPromise;
-    }
-
-    function haversineDistanceKm(lat1, lon1, lat2, lon2){
-      const R = 6371;
-      const toRad = (deg)=> deg * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    function formatDistance(km){
-      if(Number.isNaN(km)) return null;
-      const rounded = km >= 10 ? Math.round(km) : Math.round(km * 10) / 10;
-      return rounded.toFixed(rounded % 1 === 0 ? 0 : 1);
     }
     function populateReservedDetails(pharmacy){
       const fallbackName = state.lang==='el'?'Φαρμακείο':'Pharmacy';
@@ -1623,7 +1361,8 @@
     function startPickupTimer(sec){
       setResultsState('reserved');
       remaining=sec; pickupTimerEl.textContent=fmt(remaining);
-      updateExtendAvailability();
+      const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
+      extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
       if(pInt) clearInterval(pInt);
       pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
     }
@@ -1642,6 +1381,17 @@
         }
       };
     }
+
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
 
     statusEmptyBtn?.addEventListener('click', ()=>{
       hidePending();
@@ -1721,34 +1471,8 @@
 
     async function renderResults(items){
       resultsList.innerHTML='';
-      const safeItems = Array.isArray(items) ? items : [];
-      const hasGeoData = safeItems.some(item => {
-        const ph = item?.pharmacy || {};
-        const lat = ph.lat !== undefined && ph.lat !== null ? parseFloat(ph.lat) : NaN;
-        const lng = ph.lng !== undefined && ph.lng !== null ? parseFloat(ph.lng) : NaN;
-        return Number.isFinite(lat) && Number.isFinite(lng);
-      });
-      let coords = state.userCoords;
-      if(hasGeoData && !coords){
-        coords = await requestUserLocation();
-      }
-      if(!hasGeoData){
-        distanceHintEl?.classList.add('hidden');
-      } else if(!coords && state.locationStatus === 'idle'){
-        updateDistanceHint();
-      }
-      safeItems.forEach(item=>{
+      items.forEach(item=>{
         const ph=item.pharmacy || {};
-        const lat = ph.lat !== undefined && ph.lat !== null ? parseFloat(ph.lat) : null;
-        const lng = ph.lng !== undefined && ph.lng !== null ? parseFloat(ph.lng) : null;
-        let distanceLabel='';
-        if(coords && Number.isFinite(lat) && Number.isFinite(lng)){
-          const km = haversineDistanceKm(coords.lat, coords.lng, lat, lng);
-          const formatted = formatDistance(km);
-          if(formatted){
-            distanceLabel = t('distanceAway').replace('%s', formatted);
-          }
-        }
         const card = document.createElement('article');
         card.className = 'result-card flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/50 px-4 py-4 shadow-soft';
         card.innerHTML = `
@@ -1758,7 +1482,6 @@
           <div class="flex flex-col flex-1 min-w-0 text-left">
             <p class="font-semibold text-slate-900 dark:text-slate-100 truncate">${ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy')}</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${ph.address || '—'}</p>
-            ${distanceLabel ? `<p class="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><span aria-hidden="true">📍</span><span>${distanceLabel}</span></p>` : ''}
           </div>
           <div class="flex flex-col items-end gap-2 shrink-0">
             ${item.is_generic ? `<span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 text-xs font-semibold status-generic-label-wrapper"><span class="status-generic-label">${t('statusGenericShort')}</span></span>` : ''}
@@ -1774,31 +1497,11 @@
         card.dataset.generic = item.is_generic ? 'true' : 'false';
         resultsList.appendChild(card);
       });
-      if(safeItems.length){
+      if(items.length){
         setResultsState('list');
-        if(pushToast && !pushToast.dataset.shown){
-          pushToast.classList.remove('hidden');
-          pushToast.dataset.shown = 'true';
-        }
       }else{
         setResultsState('empty');
       }
-    }
-
-    function scheduleDemoResults(allow_generic, barcode){
-      if(pollInt){ clearInterval(pollInt); pollInt=null; }
-      if(demoTimeout){ clearTimeout(demoTimeout); }
-      demoTimeout = setTimeout(async ()=>{
-        hidePending();
-        const demoItems = [
-          { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
-          { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false },
-          { pharmacy:{ name:'PharmaPlus Care', address:'Αχαρνών 45, Αθήνα', phone:'+30 210 5556677', lat:37.997, lng:23.727 }, is_generic: false }
-        ];
-        if(barcode){ console.info('Submitted barcode:', barcode); }
-        await renderResults(demoItems);
-        demoTimeout = null;
-      }, 4500);
     }
 
     resultsList.addEventListener('click', (e)=>{
@@ -1836,7 +1539,6 @@
     document.getElementById('newSearch').addEventListener('click', ()=>{
       hidePending();
       stopPickupTimer();
-      if(demoTimeout){ clearTimeout(demoTimeout); demoTimeout=null; }
       results.classList.add('hidden');
       resultsPending?.classList.remove('hidden');
       resultsListWrap?.classList.add('hidden');
@@ -1890,7 +1592,17 @@
             }catch(err){ console.warn('poll error', err); }
           }, 3000);
         } else {
-          scheduleDemoResults(allow_generic, barcode);
+          setTimeout(()=>{
+            hidePending();
+          const items = [
+            { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
+            { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false }
+          ];
+          if(barcode){
+            console.info('Submitted barcode:', barcode);
+          }
+          renderResults(items);
+        }, 4500);
         }
       } catch(err){
         console.error(err);
@@ -1906,6 +1618,11 @@
     /* ===================== Web Push (3c) ===================== */
     const btnPushAllow = document.getElementById('push-allow');
     const btnPushDeny  = document.getElementById('push-deny');
+
+    statusNotifyBtn?.addEventListener('click', ()=>{
+      pushToast?.classList.remove('hidden');
+      pushToast?.scrollIntoView({ behavior:'smooth', block:'end' });
+    });
 
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
