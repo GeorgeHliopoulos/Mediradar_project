@@ -345,24 +345,79 @@
       </div>
     </section>
 
-    <!-- Self pick-up timer -->
-    <section id="pickup-box" class="hidden mt-6">
-      <div class="rounded-2xl p-4 border border-emerald-300 bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100 dark:border-emerald-800">
-        <div class="flex items-center justify-between flex-wrap gap-2">
-          <div class="text-sm">
-            ✅ <strong>Self pick-up</strong> • <span id="pickup-timer">60:00</span>
-            <span class="ml-2 text-slate-500 dark:text-slate-400">– Ελέγξτε το ωράριο του φαρμακείου</span>
+    <!-- Results & status flow -->
+    <section id="results" class="hidden mt-6">
+      <div class="rounded-3xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
+        <div class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+          <button type="button" data-go-home class="flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+            ← <span id="t-statusHome">Αρχική</span>
+          </button>
+          <h3 id="t-statusHeading" class="text-base sm:text-lg font-semibold">Κατάσταση αιτήματος</h3>
+          <button id="status-notify" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Ειδοποιήσεις">
+            🔔
+          </button>
+        </div>
+        <div class="p-6 space-y-8">
+          <div id="results-pending" class="flex flex-col items-center gap-4 text-center py-10">
+            <div class="relative">
+              <div class="h-16 w-16 rounded-full border-4 border-brand-500/30 border-t-brand-600 animate-spin"></div>
+            </div>
+            <div class="space-y-2">
+              <h4 id="t-statusPendingTitle" class="text-xl font-bold tracking-tight">Αναζητούμε το φαρμακό σου…</h4>
+              <p id="t-statusPendingDesc" class="text-sm text-slate-500 dark:text-slate-400">Θα ειδοποιηθείς μόλις απαντήσει ένα φαρμακείο.</p>
+            </div>
           </div>
-          <button id="extend-btn" class="px-3 py-1.5 rounded-lg border border-emerald-600 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/60 dark:hover:bg-emerald-800/40 text-sm">Extend +15’</button>
+
+          <div id="results-list" class="hidden space-y-4">
+            <div class="space-y-1">
+              <h4 id="t-statusListTitle" class="text-lg font-semibold">Φαρμακεία με διαθεσιμότητα</h4>
+              <p id="t-statusListDesc" class="text-sm text-slate-500 dark:text-slate-400">Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.</p>
+            </div>
+            <div id="resultsList" class="space-y-3"></div>
+          </div>
+
+          <div id="pickup-box" class="hidden flex flex-col items-center gap-5 text-center py-8 px-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-800">
+            <div id="t-statusReservedTitle" class="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-200">Το φαρμακείο σε περιμένει</div>
+            <div class="space-y-2">
+              <h4 id="status-reserved-name" class="text-2xl sm:text-3xl font-bold tracking-tight">City Pharmacy</h4>
+              <p id="status-reserved-address" class="text-sm text-slate-600 dark:text-slate-300">Ιπποκράτους 12, Αθήνα</p>
+            </div>
+            <div class="flex items-baseline gap-3">
+              <span id="pickup-timer" class="text-5xl font-extrabold tracking-tight">60:00</span>
+              <span id="t-statusReservedHint" class="text-sm text-emerald-700 dark:text-emerald-200">Χρόνος κράτησης</span>
+            </div>
+            <div id="status-reserved-generic" class="hidden px-3 py-1 rounded-full bg-emerald-100/70 dark:bg-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-200">🧬 <span id="t-statusGenericBadge">Διαθέσιμο γενόσημο</span></div>
+            <div class="flex flex-wrap justify-center gap-3">
+              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold">
+                <span id="t-statusExtend">+15 λεπτά</span>
+              </button>
+              <a id="status-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 opacity-60 pointer-events-none" href="#">
+                📞 <span id="t-statusCall">Κλήση</span>
+              </a>
+              <a id="status-directions" class="px-4 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 opacity-60 pointer-events-none" href="#" target="_blank" rel="noopener">
+                🧭 <span id="t-statusDirections">Οδηγίες</span>
+              </a>
+            </div>
+            <button id="status-done" data-go-home type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-sm font-semibold">
+              <span id="t-statusBackHome">Επιστροφή στην αρχική</span>
+            </button>
+          </div>
+
+          <div id="results-empty" class="hidden flex flex-col items-center gap-4 text-center py-10 px-4">
+            <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 grid place-items-center text-2xl">⚠️</div>
+            <h4 id="t-statusEmptyTitle" class="text-xl font-bold tracking-tight">Δεν βρέθηκαν φαρμακεία</h4>
+            <p id="t-statusEmptyBody" class="text-sm text-slate-500 dark:text-slate-400 max-w-md">Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.</p>
+            <button id="status-empty-btn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
+              <span id="t-statusEmptyCta">Δοκίμασε ξανά</span>
+            </button>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+          <button id="newSearch" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span id="t-newSearch">Νέα αναζήτηση</span>
+          </button>
         </div>
       </div>
-    </section>
-
-    <!-- Results -->
-    <section id="results" class="hidden mt-6">
-      <h2 class="text-xl font-bold mb-3" id="t-results">Αποτελέσματα</h2>
-      <div class="grid gap-3" id="resultsList"></div>
-      <button id="newSearch" class="mt-4 px-4 py-2 rounded-xl border hover:bg-slate-100 dark:hover:bg-slate-800"><span id="t-newSearch">Νέα αναζήτηση</span></button>
     </section>
   </main>
 
@@ -732,6 +787,7 @@
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
+    let selectedPharmacy = null;
     function t(k){ return strings[state.lang][k]; }
     function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
     function setHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
@@ -1161,7 +1217,14 @@
     /* ========== Pending + Confetti ========== */
     const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
     let waitT=null, waitStart=0;
-    function showPending(){ waitStart=Date.now(); pendingToast.classList.remove('hidden'); if(waitT) clearInterval(waitT); waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500); window.scrollTo({top:0,behavior:'smooth'}) }
+    function showPending(){
+      waitStart=Date.now();
+      pendingToast.classList.remove('hidden');
+      if(waitT) clearInterval(waitT);
+      waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500);
+      setResultsState('pending');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
     function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
     function fireConfetti(ms=3500){
       const c=document.getElementById('confetti'),ctx=c.getContext('2d');
@@ -1187,15 +1250,83 @@
     /* ========== Results + Pharmacy modal + Pickup timer ========== */
     const results = document.getElementById('results');
     const resultsList = document.getElementById('resultsList');
-    const pickupBox=document.getElementById('pickup-box');
-    const pickupTimerEl=document.getElementById('pickup-timer');
-    const extendBtn=document.getElementById('extend-btn');
+    const resultsPending = document.getElementById('results-pending');
+    const resultsListWrap = document.getElementById('results-list');
+    const resultsEmpty = document.getElementById('results-empty');
+    const pickupBox = document.getElementById('pickup-box');
+    const pickupTimerEl = document.getElementById('pickup-timer');
+    const extendBtn = document.getElementById('extend-btn');
+    const statusReservedName = document.getElementById('status-reserved-name');
+    const statusReservedAddress = document.getElementById('status-reserved-address');
+    const statusReservedGeneric = document.getElementById('status-reserved-generic');
+    const statusCallLink = document.getElementById('status-call');
+    const statusDirectionsLink = document.getElementById('status-directions');
+    const statusEmptyBtn = document.getElementById('status-empty-btn');
+    const statusNotifyBtn = document.getElementById('status-notify');
     let pInt=null, remaining=0, pollInt=null;
 
+    function showResultsWrapper(){ results.classList.remove('hidden'); }
+    function setResultsState(state){
+      showResultsWrapper();
+      resultsPending?.classList.toggle('hidden', state!=='pending');
+      resultsListWrap?.classList.toggle('hidden', state!=='list');
+      resultsEmpty?.classList.toggle('hidden', state!=='empty');
+      pickupBox?.classList.toggle('hidden', state!=='reserved');
+      if(state==='pending'){
+        resultsList.innerHTML='';
+        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
+        if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
+        statusReservedGeneric?.classList.add('hidden');
+      }
+      if(state==='empty'){
+        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
+        if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
+        statusReservedGeneric?.classList.add('hidden');
+      }
+      if(state==='pending' || state==='empty'){ selectedPharmacy = null; }
+      if(state!=='pending'){
+        results.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    }
+    function setLinkAvailability(el, enabled){
+      if(!el) return;
+      el.classList.toggle('opacity-60', !enabled);
+      el.classList.toggle('pointer-events-none', !enabled);
+    }
+    function populateReservedDetails(pharmacy){
+      const fallbackName = state.lang==='el'?'Φαρμακείο':'Pharmacy';
+      const fallbackAddress = state.lang==='el'?'Χωρίς διαθέσιμη διεύθυνση':'No address provided';
+      statusReservedName.textContent = pharmacy?.name || fallbackName;
+      statusReservedAddress.textContent = pharmacy?.addr || fallbackAddress;
+      statusReservedGeneric.classList.toggle('hidden', !pharmacy?.is_generic);
+      if(pharmacy?.tel){
+        const tel = pharmacy.tel.replace(/\s+/g,'');
+        statusCallLink.href = `tel:${tel}`;
+        setLinkAvailability(statusCallLink, true);
+      } else {
+        statusCallLink.href = '#';
+        setLinkAvailability(statusCallLink, false);
+      }
+      const querySource = pharmacy?.addr || pharmacy?.name || '';
+      if(querySource){
+        const encoded = encodeURIComponent(querySource);
+        let href = `https://www.google.com/maps?q=${encoded}`;
+        if(pharmacy?.lat && pharmacy?.lng){
+          href = `https://www.google.com/maps?q=${encoded}@${pharmacy.lat},${pharmacy.lng},17z`;
+        }
+        statusDirectionsLink.href = href;
+        setLinkAvailability(statusDirectionsLink, true);
+      } else {
+        statusDirectionsLink.href = '#';
+        setLinkAvailability(statusDirectionsLink, false);
+      }
+    }
+
     function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`;}
-    function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox.classList.add('hidden'); }
+    function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox?.classList.add('hidden'); }
     function startPickupTimer(sec){
-      remaining=sec; pickupBox.classList.remove('hidden'); pickupTimerEl.textContent=fmt(remaining);
+      setResultsState('reserved');
+      remaining=sec; pickupTimerEl.textContent=fmt(remaining);
       const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
       extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
       if(pInt) clearInterval(pInt);
@@ -1211,6 +1342,17 @@
         await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
       }
     };
+
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
 
     const pm = document.getElementById('pharm-modal');
     const pmTitle = document.getElementById('pm-title');
@@ -1280,33 +1422,49 @@
     function renderResults(items){
       resultsList.innerHTML='';
       items.forEach(item=>{
-        const ph=item.pharmacy;
-        const card = document.createElement('div');
-        card.className = 'rounded-xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between';
+        const ph=item.pharmacy || {};
+        const card = document.createElement('article');
+        card.className = 'result-card flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/50 px-4 py-4 shadow-soft';
         card.innerHTML = `
-          <div>
-            <div class="font-semibold">${ph.name || 'Φαρμακείο'}</div>
-            <div class="text-xs text-slate-600 dark:text-slate-400">${ph.address || '—'}</div>
-            ${item.is_generic ? `<div class="mt-1"><span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">🧬 Γενόσημο</span></div>` : ''}
+          <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-600 grid place-items-center shrink-0">
+            <span aria-hidden="true">💊</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm select-pharm">Επιλογή</button>
+          <div class="flex flex-col flex-1 min-w-0 text-left">
+            <p class="font-semibold text-slate-900 dark:text-slate-100 truncate">${ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy')}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${ph.address || '—'}</p>
+          </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+            ${item.is_generic ? `<span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 text-xs font-semibold status-generic-label-wrapper"><span class="status-generic-label">${t('statusGenericShort')}</span></span>` : ''}
+            <button class="select-pharm status-accept px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition">
+              <span class="status-accept-label">${t('statusAccept')}</span>
+            </button>
           </div>`;
-        card.dataset.name = ph.name || 'Φαρμακείο';
+        card.dataset.name = ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy');
         card.dataset.addr = ph.address || '';
         card.dataset.tel  = ph.phone || '';
         card.dataset.lat  = ph.lat || '';
         card.dataset.lng  = ph.lng || '';
+        card.dataset.generic = item.is_generic ? 'true' : 'false';
         resultsList.appendChild(card);
       });
-      results.classList.remove('hidden');
-      window.scrollTo({ top: results.offsetTop - 20, behavior:'smooth' });
+      if(items.length){
+        setResultsState('list');
+      }else{
+        setResultsState('empty');
+      }
     }
 
     resultsList.addEventListener('click', (e)=>{
       const btn = e.target.closest('.select-pharm'); if(!btn) return;
-      const card = btn.closest('div.rounded-xl');
-      const selectedPharmacy = {name:card.dataset.name, addr:card.dataset.addr, tel:card.dataset.tel, lat:card.dataset.lat, lng:card.dataset.lng};
+      const card = btn.closest('.result-card'); if(!card) return;
+      selectedPharmacy = {
+        name: card.dataset.name,
+        addr: card.dataset.addr,
+        tel: card.dataset.tel,
+        lat: card.dataset.lat,
+        lng: card.dataset.lng,
+        is_generic: card.dataset.generic === 'true'
+      };
       pmTitle.textContent = selectedPharmacy.name;
       pmAddr.textContent  = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (selectedPharmacy.addr || '—');
       pmPhone.textContent = (state.lang==='el'?'Τηλέφωνο: ':'Phone: ') + (selectedPharmacy.tel || '—');
@@ -1317,18 +1475,27 @@
 
     document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
     document.getElementById('pm-confirm').onclick = async ()=>{
+      if(!selectedPharmacy) return;
       pm.classList.add('hidden');
       const sec = 60*60;
+      populateReservedDetails(selectedPharmacy);
       startPickupTimer(sec);
       if(hasSupabase() && window.currentRequest?.id){
         const untilISO = new Date(Date.now()+sec*1000).toISOString();
         await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
       }
-      document.getElementById('pickup-box').scrollIntoView({behavior:'smooth',block:'start'});
     };
 
     document.getElementById('newSearch').addEventListener('click', ()=>{
-      results.classList.add('hidden'); window.scrollTo({ top: 0, behavior:'smooth' });
+      hidePending();
+      stopPickupTimer();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
     });
 
     /* ========== SUBMIT FLOW ========== */
@@ -1369,8 +1536,7 @@
                 clearInterval(pollInt); pollInt=null;
               }else if(Date.now()-startPoll > 120000){
                 hidePending();
-                results.classList.remove('hidden');
-                resultsList.innerHTML = `<div class="text-sm text-slate-600 dark:text-slate-300 p-3 rounded-xl border">Ακόμη δεν υπάρχουν απαντήσεις. Μπορείς να αφήσεις ανοιχτή τη σελίδα• θα ενημερωθεί αυτόματα.</div>`;
+                setResultsState('empty');
                 clearInterval(pollInt); pollInt=null;
               }
             }catch(err){ console.warn('poll error', err); }
@@ -1399,6 +1565,11 @@
     const pushToast = document.getElementById('push-toast');
     const btnPushAllow = document.getElementById('push-allow');
     const btnPushDeny  = document.getElementById('push-deny');
+
+    statusNotifyBtn?.addEventListener('click', ()=>{
+      pushToast?.classList.remove('hidden');
+      pushToast?.scrollIntoView({ behavior:'smooth', block:'end' });
+    });
 
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
