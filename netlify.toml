@@ -1,15 +1,5 @@
 [build]
-  command = "bash ./netlify-build.sh"
   publish = "."
-
-[context.production]
-  command = "bash ./netlify-build.sh"
-
-[context.deploy-preview]
-  command = "bash ./netlify-build.sh"
-
-[context.branch-deploy]
-  command = "bash ./netlify-build.sh"
 
 # Netlify Functions (αν έχεις)
 [[redirects]]
