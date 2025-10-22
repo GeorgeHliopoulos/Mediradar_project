@@ -192,14 +192,14 @@
         </button>
       </div>
 
-      <div class="mt-16 max-w-3xl mx-auto w-full grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-end">
-        <div class="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm p-6 text-left text-slate-700 dark:text-slate-300">
+      <div class="mt-16 max-w-3xl mx-auto w-full relative sm:min-h-[240px]">
+        <div class="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm p-6 text-left text-slate-700 dark:text-slate-300 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:left-0">
           <h2 id="t-faqTitle" class="text-xl font-semibold">Συχνές ερωτήσεις (σύντομα διαθέσιμες)</h2>
           <p id="t-faqSoon" class="mt-2 text-sm">Ετοιμάζουμε ενότητα FAQ με τις πιο συχνές απορίες σας. Αν έχεις ερώτηση, ενημέρωσέ μας.</p>
         </div>
 
-        <div class="flex flex-col gap-4 items-center sm:items-end text-slate-500 dark:text-slate-400">
-          <a id="faq-contact" href="mailto:info@mediradar.gr" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline sm:self-end sm:justify-end">
+        <div class="mt-6 flex flex-col gap-4 items-center text-slate-500 dark:text-slate-400 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:right-0 sm:items-end sm:text-right">
+          <a id="faq-contact" href="mailto:info@mediradar.gr" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline sm:self-end">
             ✉️ <span id="t-faqContact">Επικοινωνία: info@mediradar.gr</span>
           </a>
           <div class="flex flex-col items-center sm:items-end gap-3 text-center sm:text-right">
@@ -427,6 +427,9 @@
                 🧭 <span id="t-statusDirections">Οδηγίες</span>
               </a>
             </div>
+            <p id="extend-note" class="text-xs text-emerald-700 dark:text-emerald-200 text-center max-w-xs sm:max-w-sm mx-auto">
+              Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.
+            </p>
             <button id="status-done" data-go-home type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-sm font-semibold">
               <span id="t-statusBackHome">Επιστροφή στην αρχική</span>
             </button>
@@ -785,6 +788,8 @@
         statusAccept:'Επιβεβαίωση', statusReservedTitle:'Το φαρμακείο σε περιμένει', statusReservedHint:'Χρόνος κράτησης',
         statusExtend:'+15 λεπτά', statusCall:'Κλήση', statusDirections:'Οδηγίες',
         statusGenericBadge:'Διαθέσιμο γενόσημο', statusGenericShort:'Γενόσημο',
+        extendNote:'Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.',
+        extendNoteUsed:'Έχεις ήδη χρησιμοποιήσει την επέκταση μέσα στις τελευταίες 12 ώρες.',
         statusBackHome:'Επιστροφή στην αρχική', statusEmptyTitle:'Δεν βρέθηκαν φαρμακεία',
         statusEmptyBody:'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
         statusEmptyCta:'Δοκίμασε ξανά',
@@ -841,6 +846,8 @@
         statusAccept:'Accept', statusReservedTitle:'Your pick-up is ready', statusReservedHint:'Reservation timer',
         statusExtend:'+15 minutes', statusCall:'Call', statusDirections:'Directions',
         statusGenericBadge:'Generic option available', statusGenericShort:'Generic',
+        extendNote:'You can use this extension only once every 12 hours.',
+        extendNoteUsed:'You have already used the extension within the last 12 hours.',
         statusBackHome:'Back to home', statusEmptyTitle:'No pharmacies found',
         statusEmptyBody:'We couldn’t find any pharmacies with availability right now. Please try again shortly or adjust your request.',
         statusEmptyCta:'Try again',
@@ -919,6 +926,7 @@
       setText('t-faqTitle', t('faqTitle'));
       setText('t-faqSoon', t('faqSoon'));
       setText('t-faqContact', t('faqContact'));
+      if(typeof refreshExtendNote === 'function') refreshExtendNote();
       setText('t-statusHeading', t('statusHeading'));
       setText('t-statusPendingTitle', t('statusPendingTitle'));
       setText('t-statusPendingDesc', t('statusPendingDesc'));
@@ -1405,12 +1413,65 @@
     const pickupBox = document.getElementById('pickup-box');
     const pickupTimerEl = document.getElementById('pickup-timer');
     const extendBtn = document.getElementById('extend-btn');
+    const extendNoteEl = document.getElementById('extend-note');
+    const EXTEND_STORAGE_KEY = 'pickup-extend-at';
+    const LEGACY_EXTEND_KEY = 'pickup-extend-date';
+    const EXTEND_COOLDOWN_MS = 12 * 60 * 60 * 1000;
     const statusReservedName = document.getElementById('status-reserved-name');
     const statusReservedAddress = document.getElementById('status-reserved-address');
     const statusReservedGeneric = document.getElementById('status-reserved-generic');
     const statusCallLink = document.getElementById('status-call');
     const statusDirectionsLink = document.getElementById('status-directions');
     const statusEmptyBtn = document.getElementById('status-empty-btn');
+
+    function readExtendTimestamp(){
+      const raw = localStorage.getItem(EXTEND_STORAGE_KEY);
+      if(raw){
+        const numeric = Number(raw);
+        if(!Number.isNaN(numeric)) return numeric;
+        const parsed = Date.parse(raw);
+        if(!Number.isNaN(parsed)) return parsed;
+        localStorage.removeItem(EXTEND_STORAGE_KEY);
+      }
+      const legacy = localStorage.getItem(LEGACY_EXTEND_KEY);
+      if(legacy){
+        localStorage.removeItem(LEGACY_EXTEND_KEY);
+        const parsedLegacy = Date.parse(legacy);
+        if(!Number.isNaN(parsedLegacy)){
+          localStorage.setItem(EXTEND_STORAGE_KEY, String(parsedLegacy));
+          return parsedLegacy;
+        }
+      }
+      return null;
+    }
+    function writeExtendTimestamp(ts){
+      localStorage.setItem(EXTEND_STORAGE_KEY, String(ts));
+      localStorage.removeItem(LEGACY_EXTEND_KEY);
+    }
+    function canUseExtend(){
+      const last = readExtendTimestamp();
+      return !last || (Date.now() - last) >= EXTEND_COOLDOWN_MS;
+    }
+    function refreshExtendNote(){
+      const key = extendBtn && extendBtn.disabled ? 'extendNoteUsed' : 'extendNote';
+      if(extendBtn){
+        extendBtn.setAttribute('title', t(key));
+        extendBtn.setAttribute('aria-disabled', extendBtn.disabled ? 'true' : 'false');
+      }
+      if(extendNoteEl){
+        extendNoteEl.textContent = t(key);
+      }
+    }
+    function updateExtendAvailability(){
+      if(!extendBtn) return true;
+      const allowed = canUseExtend();
+      extendBtn.disabled = !allowed;
+      extendBtn.classList.toggle('opacity-50', !allowed);
+      extendBtn.classList.toggle('cursor-not-allowed', !allowed);
+      refreshExtendNote();
+      return allowed;
+    }
+
     let pInt=null, remaining=0, pollInt=null, demoTimeout=null;
 
     function showResultsWrapper(){ results.classList.remove('hidden'); }
@@ -1562,21 +1623,25 @@
     function startPickupTimer(sec){
       setResultsState('reserved');
       remaining=sec; pickupTimerEl.textContent=fmt(remaining);
-      const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
-      extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
+      updateExtendAvailability();
       if(pInt) clearInterval(pInt);
       pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
     }
-    extendBtn.onclick=async ()=>{
-      if(extendBtn.disabled) return;
-      remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
-      localStorage.setItem('pickup-extend-date', new Date().toISOString().slice(0,10));
-      extendBtn.disabled=true; extendBtn.classList.add('opacity-50');
-      if(hasSupabase() && window.currentRequest?.id){
-        const newUntil = new Date(Date.now()+remaining*1000).toISOString();
-        await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
-      }
-    };
+    if(extendBtn){
+      extendBtn.onclick=async ()=>{
+        if(!canUseExtend()){
+          updateExtendAvailability();
+          return;
+        }
+        remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
+        writeExtendTimestamp(Date.now());
+        updateExtendAvailability();
+        if(hasSupabase() && window.currentRequest?.id){
+          const newUntil = new Date(Date.now()+remaining*1000).toISOString();
+          await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
+        }
+      };
+    }
 
     statusEmptyBtn?.addEventListener('click', ()=>{
       hidePending();
