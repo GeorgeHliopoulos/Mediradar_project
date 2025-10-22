@@ -703,6 +703,7 @@
     const themeBtn = document.getElementById('theme-toggle');
     const iconSun = document.getElementById('icon-sun');
     const iconMoon = document.getElementById('icon-moon');
+    const pushToast = document.getElementById('push-toast');
     function setTheme(mode){
       const dark = mode==='dark';
       html.classList.toggle('dark', dark);
@@ -895,18 +896,51 @@
     const modalHow = document.getElementById('modal-how');
     document.getElementById('cta-how').onclick = ()=> {
       modalHow.classList.remove('hidden'); modalHow.classList.add('flex');
-      const body = state.lang==='el' ? `<ol class="list-decimal pl-5 space-y-2">
-          <li>Πληκτρολόγησε τι ψάχνεις (εμπορική ονομασία ή/και δραστική ουσία).</li>
-          <li>Η αίτηση στέλνεται στα κοντινά φαρμακεία.</li>
-          <li>Όποιο έχει <strong>διαθεσιμότητα</strong> απαντά θετικά· αν έχει μόνο γενόσημο, θα το δεις με ειδικό σήμα.</li>
-          <li>Επιλέγεις φαρμακείο και πας για <strong>self pick-up</strong>.</li>
-          <li>Δεν συλλέγουμε τιμές· μόνο διαθεσιμότητα.</li></ol>`
-        : `<ol class="list-decimal pl-5 space-y-2">
-          <li>Type what you need (brand / active).</li>
-          <li>Your request goes to nearby pharmacies.</li>
-          <li>Those with <strong>availability</strong> reply “Available”; if generic only, you’ll see a badge.</li>
-          <li>Pick a pharmacy and go for <strong>self pick-up</strong>.</li>
-          <li>No prices collected—availability only.</li></ol>`;
+      const body = state.lang==='el'
+        ? `<div class="space-y-4">
+            <div class="space-y-2">
+              <p class="text-base font-semibold">🚀 MediRadar – Το φάρμακό σου, χωρίς καθυστερήσεις!</p>
+              <p>Ψάχνεις φάρμακο και δεν θες να χάνεις χρόνο;</p>
+              <p>Με το MediRadar, βρίσκεις άμεσα ποιο φαρμακείο έχει διαθέσιμο το φαρμακό σου – χωρίς άσκοπες κλήσεις, χωρίς περιττές μετακινήσεις!</p>
+            </div>
+            <div class="space-y-2">
+              <p class="font-semibold">🧠 Πώς λειτουργεί;</p>
+              <p>Μπαίνεις στην πλατφόρμα, συμπληρώνεις τα στοιχεία του φαρμάκου και… τέλος! Τα συνεργαζόμενα φαρμακεία λαμβάνουν την αίτησή σου και σου απαντούν θετικά. Το φάρμακο σε περιμένει για παραλαβή σε μόλις 60 λεπτά!</p>
+            </div>
+            <div class="space-y-2">
+              <p class="font-semibold">💡 Γιατί να το χρησιμοποιήσεις;</p>
+              <ul class="list-disc pl-5 space-y-2">
+                <li>✅ Γρήγορη και εύκολη αναζήτηση φαρμάκου</li>
+                <li>✅ Χωρίς τηλεφωνήματα ή αναμονές</li>
+                <li>✅ Χωρίς άγχος για πληρωμές ή αποστολές</li>
+                <li>✅ Αν έχεις συνταγή, όλα γίνονται στο φαρμακείο</li>
+                <li>✅ Δεν συλλέγουμε τιμές ή ιατρικά δεδομένα</li>
+              </ul>
+            </div>
+            <p>🎯 Εσύ ασχολείσαι μόνο με την υγεία σου – εμείς με όλα τα υπόλοιπα!</p>
+          </div>`
+        : `<div class="space-y-4">
+            <div class="space-y-2">
+              <p class="text-base font-semibold">🚀 MediRadar – Your medicine, without delays!</p>
+              <p>Looking for medication and don’t want to waste time?</p>
+              <p>With MediRadar you instantly see which pharmacy has your medicine available—no unnecessary calls or trips.</p>
+            </div>
+            <div class="space-y-2">
+              <p class="font-semibold">🧠 How it works?</p>
+              <p>Visit the platform, fill in the medicine details and… done! Partner pharmacies receive your request and reply with availability. Your medicine is ready for pick-up within just 60 minutes.</p>
+            </div>
+            <div class="space-y-2">
+              <p class="font-semibold">💡 Why use it?</p>
+              <ul class="list-disc pl-5 space-y-2">
+                <li>✅ Fast and easy medicine search</li>
+                <li>✅ No phone calls or waiting lines</li>
+                <li>✅ No stress about payments or shipping</li>
+                <li>✅ If you have a prescription, everything happens at the pharmacy</li>
+                <li>✅ We do not collect pricing or medical data</li>
+              </ul>
+            </div>
+            <p>🎯 You focus on your health — we handle the rest!</p>
+          </div>`;
       document.getElementById('how-body').innerHTML = body;
     };
     document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
@@ -1332,16 +1366,32 @@
       if(pInt) clearInterval(pInt);
       pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
     }
-    extendBtn.onclick=async ()=>{
-      if(extendBtn.disabled) return;
-      remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
-      localStorage.setItem('pickup-extend-date', new Date().toISOString().slice(0,10));
-      extendBtn.disabled=true; extendBtn.classList.add('opacity-50');
-      if(hasSupabase() && window.currentRequest?.id){
-        const newUntil = new Date(Date.now()+remaining*1000).toISOString();
-        await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
-      }
-    };
+    if(extendBtn){
+      extendBtn.onclick=async ()=>{
+        if(!canUseExtend()){
+          updateExtendAvailability();
+          return;
+        }
+        remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
+        writeExtendTimestamp(Date.now());
+        updateExtendAvailability();
+        if(hasSupabase() && window.currentRequest?.id){
+          const newUntil = new Date(Date.now()+remaining*1000).toISOString();
+          await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
+        }
+      };
+    }
+
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
 
     statusEmptyBtn?.addEventListener('click', ()=>{
       hidePending();
@@ -1419,7 +1469,7 @@
       }));
     }
 
-    function renderResults(items){
+    async function renderResults(items){
       resultsList.innerHTML='';
       items.forEach(item=>{
         const ph=item.pharmacy || {};
@@ -1532,7 +1582,7 @@
               const items = await fetchResponses(inserted.id);
               if(items.length){
                 hidePending();
-                renderResults(items);
+                await renderResults(items);
                 clearInterval(pollInt); pollInt=null;
               }else if(Date.now()-startPoll > 120000){
                 hidePending();
@@ -1556,13 +1606,16 @@
         }
       } catch(err){
         console.error(err);
-        hidePending();
-        alert('Κάτι πήγε στραβά. Έλεγξε τα Supabase keys και τα tables.');
+        window.currentRequest = null;
+        localStorage.removeItem(LS_REQ);
+        scheduleDemoResults(allow_generic, barcode);
+        alert(state.lang==='el'
+          ? 'Δεν ήταν δυνατή η σύνδεση με τη βάση. Εμφανίζονται ενδεικτικά αποτελέσματα.'
+          : 'We could not connect to the database. Showing demo results instead.');
       }
     });
 
     /* ===================== Web Push (3c) ===================== */
-    const pushToast = document.getElementById('push-toast');
     const btnPushAllow = document.getElementById('push-allow');
     const btnPushDeny  = document.getElementById('push-deny');
 
