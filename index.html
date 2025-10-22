@@ -586,7 +586,7 @@
       </div>
       <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">OK</button>
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-gdprAccept">OK</span></button>
       </div>
     </div>
   </div>
@@ -748,16 +748,7 @@
         proRegisterHeading:'Στοιχεία φαρμακείου', proRegisterDesc:'Συμπλήρωσε τα στοιχεία του φαρμακείου για να ξεκινήσεις.',
         proFieldBusinessName:'Επωνυμία φαρμακείου', proFieldVat:'ΑΦΜ', proFieldContact:'Υπεύθυνος επικοινωνίας',
         proFieldEmail:'Email επικοινωνίας', proFieldPhone:'Τηλέφωνο', proFieldAddress:'Διεύθυνση', proFieldCity:'Πόλη',
-        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική',
-        statusHeading:'Κατάσταση αιτήματος', statusPendingTitle:'Αναζητούμε το φαρμακό σου…',
-        statusPendingDesc:'Θα ειδοποιηθείς μόλις απαντήσει κάποιο φαρμακείο.',
-        statusListTitle:'Φαρμακεία με διαθεσιμότητα', statusListDesc:'Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.',
-        statusAccept:'Επιβεβαίωση', statusReservedTitle:'Το φαρμακείο σε περιμένει', statusReservedHint:'Χρόνος κράτησης',
-        statusExtend:'+15 λεπτά', statusCall:'Κλήση', statusDirections:'Οδηγίες',
-        statusGenericBadge:'Διαθέσιμο γενόσημο', statusGenericShort:'Γενόσημο',
-        statusBackHome:'Επιστροφή στην αρχική', statusEmptyTitle:'Δεν βρέθηκαν φαρμακεία',
-        statusEmptyBody:'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
-        statusEmptyCta:'Δοκίμασε ξανά', statusNotify:'Ειδοποιήσεις'
+        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική'
       },
       en:{
         hero:'Instant availability check at nearby pharmacies.',
@@ -792,16 +783,7 @@
         proRegisterHeading:'Pharmacy details', proRegisterDesc:'Share your business information to get started.',
         proFieldBusinessName:'Pharmacy name', proFieldVat:'VAT number', proFieldContact:'Primary contact',
         proFieldEmail:'Contact email', proFieldPhone:'Phone', proFieldAddress:'Address', proFieldCity:'City',
-        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home',
-        statusHeading:'Request status', statusPendingTitle:'Searching for your medicine…',
-        statusPendingDesc:'We will notify you as soon as a pharmacy responds.',
-        statusListTitle:'Pharmacies with availability', statusListDesc:'Choose the pharmacy that suits you for self pick-up.',
-        statusAccept:'Accept', statusReservedTitle:'Your pick-up is ready', statusReservedHint:'Reservation timer',
-        statusExtend:'+15 minutes', statusCall:'Call', statusDirections:'Directions',
-        statusGenericBadge:'Generic option available', statusGenericShort:'Generic',
-        statusBackHome:'Back to home', statusEmptyTitle:'No pharmacies found',
-        statusEmptyBody:'We couldn’t find any pharmacies with availability right now. Please try again shortly or adjust your request.',
-        statusEmptyCta:'Try again', statusNotify:'Notifications'
+        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home'
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
@@ -853,22 +835,6 @@
       setText('t-proHaveAccount', t('proHaveAccount')); setText('t-proGoSignin', t('proGoSignin'));
       setText('t-proBackHome', t('proBackHome'));
       setText('t-optional', t('optional'));
-      setText('t-statusHeading', t('statusHeading'));
-      setText('t-statusPendingTitle', t('statusPendingTitle'));
-      setText('t-statusPendingDesc', t('statusPendingDesc'));
-      setText('t-statusListTitle', t('statusListTitle'));
-      setText('t-statusListDesc', t('statusListDesc'));
-      setText('t-statusReservedTitle', t('statusReservedTitle'));
-      setText('t-statusReservedHint', t('statusReservedHint'));
-      setText('t-statusGenericBadge', t('statusGenericBadge'));
-      setText('t-statusExtend', t('statusExtend'));
-      setText('t-statusCall', t('statusCall'));
-      setText('t-statusDirections', t('statusDirections'));
-      setText('t-statusBackHome', t('statusBackHome'));
-      setText('t-statusEmptyTitle', t('statusEmptyTitle'));
-      setText('t-statusEmptyBody', t('statusEmptyBody'));
-      setText('t-statusEmptyCta', t('statusEmptyCta'));
-      setText('t-statusHome', t('home'));
       document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
       document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
       document.getElementById('barcode-value').placeholder = t('barcodePlaceholder');
@@ -888,12 +854,6 @@
       document.getElementById('pro-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
       document.getElementById('barcode-start').setAttribute('aria-label', state.lang==='el'?'Σάρωση barcode':'Scan barcode');
       document.getElementById('barcode-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
-      statusCallLink?.setAttribute('aria-label', t('statusCall'));
-      statusDirectionsLink?.setAttribute('aria-label', t('statusDirections'));
-      const notifyBtn = document.getElementById('status-notify');
-      if(notifyBtn){ notifyBtn.setAttribute('aria-label', t('statusNotify')); notifyBtn.title = t('statusNotify'); }
-      document.querySelectorAll('.status-accept-label').forEach(el=> el.textContent = t('statusAccept'));
-      document.querySelectorAll('.status-generic-label').forEach(el=> el.textContent = t('statusGenericShort'));
       if(document.getElementById('barcode-modal').classList.contains('hidden')){
         document.getElementById('barcode-status').textContent = t('barcodeStatusInit');
       }
@@ -916,13 +876,8 @@
       app.classList.add('hidden');
       splash.classList.remove('hidden');
       hidePending();
-      const resultsSection = document.getElementById('results');
-      resultsSection?.classList.add('hidden');
-      document.getElementById('pickup-box')?.classList.add('hidden');
-      document.getElementById('results-pending')?.classList.remove('hidden');
-      document.getElementById('results-list')?.classList.add('hidden');
-      document.getElementById('results-empty')?.classList.add('hidden');
-      selectedPharmacy = null;
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('pickup-box').classList.add('hidden');
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
     document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
