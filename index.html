@@ -199,7 +199,7 @@
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          <button id="backHome" type="button" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
+          <button id="backHome" type="button" data-go-home class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
       </div>
@@ -498,7 +498,7 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <button id="pro-back-home" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
+          <button id="pro-back-home" type="button" data-go-home data-close-pro="true" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
             <span aria-hidden="true">←</span>
             <span id="t-proBackHome">Επιστροφή στην αρχική</span>
           </button>
@@ -825,7 +825,15 @@
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
     document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-    document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); goHome(); });
+    document.querySelectorAll('[data-go-home]').forEach(btn => {
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (btn.dataset.closePro === 'true') {
+          closeProModal();
+        }
+        goHome();
+      });
+    });
 
     /* ========== Modals (How/GDPR/Login) ========== */
     const modalHow = document.getElementById('modal-how');
@@ -987,7 +995,6 @@
     /* ========== Pro modal (pharmacies) ========== */
     const proModal = document.getElementById('pro-modal');
     const proClose = document.getElementById('pro-close');
-    const proBackHome = document.getElementById('pro-back-home');
     const proTabSignin = document.getElementById('pro-tab-signin');
     const proTabRegister = document.getElementById('pro-tab-register');
     const proSigninView = document.getElementById('pro-view-signin');
@@ -1046,7 +1053,6 @@
     proClose.addEventListener('click', closeProModal);
     proModal.addEventListener('click', (event)=>{ if(event.target === proModal){ closeProModal(); }});
     document.addEventListener('keydown', (event)=>{ if(event.key === 'Escape' && !proModal.classList.contains('hidden')) closeProModal(); });
-    proBackHome.addEventListener('click', ()=>{ closeProModal(); goHome(); });
 
     document.querySelectorAll('.pro-sso-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -1079,16 +1085,55 @@
 
     /* ========== Autocomplete (demo) ========== */
     const AC_MEDICINES = [
-      'Augmentin 875mg/125mg','Depon 500mg','Panadol 500mg','Nurofen 400mg','Algofren 400mg',
-      'Zylapour 300mg','Salospir 100mg','Plavix 75mg','Zyrtec 10mg','Vibramycin 100mg',
-      'Losec 20mg','Xanax 0.5mg','Amoxil 1000mg','Clavulin 875/125mg','Aspirin Protect 100mg',
-      'Voltaren 50mg','Neurofen Express 400mg','Prospan Sirup','Synagis 100mg','Otrivin 0.1% Spray',
-      'Betadine 10%','Fucidin 2%','Daktarin Gel','Gaviscon Double Action','Imodium 2mg'
+      'Algofren 400mg',
+      'Apotel 500mg',
+      'Augmentin 875mg/125mg',
+      'Bepanthene 5% Cream',
+      'Betadine 10%',
+      'Canesten 1% Cream',
+      'Clavulin 875/125mg',
+      'Daktarin Gel',
+      'Depon 500mg',
+      'Efferalgan 500mg',
+      'Fucidin 2%',
+      'Gaviscon Double Action',
+      'Humira 40mg Pen',
+      'Imodium 2mg',
+      'Losec 20mg',
+      'Nurofen Express 400mg',
+      'Otrivin 0.1% Spray',
+      'Panadol 500mg',
+      'Plavix 75mg',
+      'Prospan Syrup',
+      'Salospir 100mg',
+      'Synagis 100mg',
+      'Voltaren 50mg',
+      'Xanax 0.5mg',
+      'Zylapour 300mg',
+      'Zyrtec 10mg'
     ];
     const AC_SUBSTANCES = [
-      'Paracetamol 500mg','Ibuprofen 400mg','Amoxicillin 500mg','Amoxicillin/Clavulanate 875/125mg',
-      'Cetirizine 10mg','Acetylsalicylic acid 100mg','Doxycycline 100mg','Omeprazole 20mg',
-      'Loratadine 10mg','Metformin 1000mg','Atorvastatin 20mg','Levocetirizine 5mg'
+      'Acetylcysteine 600mg',
+      'Acetylsalicylic Acid 100mg',
+      'Acyclovir 400mg',
+      'Allopurinol 300mg',
+      'Amlodipine 5mg',
+      'Amoxicillin 500mg',
+      'Amoxicillin + Clavulanic Acid 875/125mg',
+      'Atorvastatin 20mg',
+      'Azithromycin 500mg',
+      'Cetirizine 10mg',
+      'Doxycycline 100mg',
+      'Ibuprofen 400mg',
+      'Levocetirizine 5mg',
+      'Metformin 1000mg',
+      'Metoprolol 50mg',
+      'Omeprazole 20mg',
+      'Paracetamol 500mg',
+      'Rivaroxaban 20mg',
+      'Rosuvastatin 10mg',
+      'Salbutamol 2mg/5ml',
+      'Valsartan 160mg'
     ];
     function attachAutocomplete(inputId, listId, data){
       const input = document.getElementById(inputId);
