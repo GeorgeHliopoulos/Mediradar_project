@@ -99,7 +99,9 @@
                   <rect y="10" width="28" height="2"></rect>
                   <rect y="14" width="28" height="2"></rect>
                   <rect y="18" width="28" height="2"></rect>
-                  <rect width="10" height="10"></rect>
+                </g>
+                <rect width="10" height="10" fill="#0d5eaf"></rect>
+                <g fill="#ffffff">
                   <rect x="4" width="2" height="10"></rect>
                   <rect y="4" width="10" height="2"></rect>
                 </g>
@@ -199,14 +201,50 @@
     <header class="sticky top-0 z-30 -mt-3 mb-4">
       <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
-          <button id="backHome" class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
+          <button id="backHome" type="button" data-go-home class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
         </div>
-        <a href="/pharmacy.html" class="text-sm underline underline-offset-4" id="t-pharmLogin2">Είσοδος φαρμακείου</a>
       </div>
     </header>
 
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
+      <!-- City -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="text-sm font-semibold flex items-center gap-2">
+          <span class="w-6 h-6 grid place-items-center">📍</span>
+          <span id="t-city">Πόλη</span>
+        </label>
+        <select id="city" required
+                class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+          <option value="">— Επιλογή —</option>
+          <!-- Μεγάλα αστικά κέντρα + extra -->
+          <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
+          <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
+          <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
+          <option>Καλαμάτα</option><option>Καβάλα</option><option>Ξάνθη</option>
+          <option>Κομοτηνή</option><option>Αλεξανδρούπολη</option><option>Σέρρες</option>
+          <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
+          <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
+          <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
+          <option>Αγρίνιο</option><option>Βέροια</option><option>Δράμα</option>
+          <option>Κατερίνη</option><option>Κοζάνη</option><option>Ναύπλιο</option>
+          <option>Πύργος</option><option>Γλυφάδα</option>
+          <!-- Αττική – δήμοι -->
+          <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
+          <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
+          <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
+          <option>Παλαιό Φάληρο</option><option>Άλιμος</option><option>Ιλίου</option>
+          <option>Ζωγράφου</option><option>Γαλάτσι</option><option>Βύρωνας</option>
+          <option>Δάφνη</option><option>Ηλιούπολη</option><option>Νίκαια</option>
+          <option>Κορυδαλλός</option><option>Πετρούπολη</option><option>Αργυρούπολη</option>
+          <option>Ηράκλειο Αττικής</option><option>Νέα Φιλαδέλφεια</option><option>Νέα Χαλκηδόνα</option>
+          <!-- Κρήτη extra -->
+          <option>Σητεία</option><option>Ιεράπετρα</option><option>Άγιος Νικόλαος</option>
+          <!-- Νησιά extra -->
+          <option>Κως</option><option>Σάμος</option><option>Σύρος</option><option>Πάρος</option><option>Νάξος</option>
+        </select>
+      </div>
+
       <!-- Medicine -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
@@ -220,23 +258,6 @@
           <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
         </div>
         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-formatTip">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
-        <div class="mt-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4">
-          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div class="space-y-1">
-              <div class="text-sm font-semibold flex items-center gap-2">
-                <span class="w-6 h-6 grid place-items-center">📷</span>
-                <span id="t-barcodeTitle">Σάρωση barcode συνταγής ή κουτιού</span>
-                <span id="t-barcodeOptional" class="text-xs font-normal text-slate-400">(προαιρετικά)</span>
-              </div>
-              <p id="t-barcodeHelp" class="text-xs text-slate-500 dark:text-slate-400">Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.</p>
-            </div>
-            <button id="barcode-start" type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-soft hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
-              <span aria-hidden="true">🎯</span>
-              <span id="t-barcodeStart">Άνοιγμα κάμερας</span>
-            </button>
-          </div>
-          <input id="barcode-value" type="text" inputmode="numeric" pattern="[0-9]*" class="mt-3 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/95 dark:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400" placeholder="Ο κωδικός θα εμφανιστεί εδώ" autocomplete="off" />
-        </div>
       </div>
 
       <!-- Substance -->
@@ -252,6 +273,25 @@
           <div id="ac-substance" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
         </div>
         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-doseEx">Παράδειγμα δοσολογίας: Paracetamol 500mg.</p>
+      </div>
+
+      <!-- Barcode capture -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div class="space-y-1">
+            <div class="text-sm font-semibold flex items-center gap-2">
+              <span class="w-6 h-6 grid place-items-center">📷</span>
+              <span id="t-barcodeTitle">Σάρωση barcode συνταγής ή κουτιού</span>
+              <span id="t-barcodeOptional" class="text-xs font-normal text-slate-400">(προαιρετικά)</span>
+            </div>
+            <p id="t-barcodeHelp" class="text-xs text-slate-500 dark:text-slate-400">Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.</p>
+          </div>
+          <button id="barcode-start" type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-soft hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+            <span aria-hidden="true">🎯</span>
+            <span id="t-barcodeStart">Άνοιγμα κάμερας</span>
+          </button>
+        </div>
+        <input id="barcode-value" type="text" inputmode="numeric" pattern="[0-9]*" class="mt-3 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/95 dark:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400" placeholder="Ο κωδικός θα εμφανιστεί εδώ" autocomplete="off" />
       </div>
 
       <!-- Type + Quantity -->
@@ -295,48 +335,11 @@
         </div>
       </div>
 
-      <!-- City -->
-      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="text-sm font-semibold flex items-center gap-2">
-          <span class="w-6 h-6 grid place-items-center">📍</span>
-          <span id="t-city">Πόλη</span>
-        </label>
-        <select id="city" required
-                class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-          <option value="">— Επιλογή —</option>
-          <!-- Μεγάλα αστικά κέντρα + extra -->
-          <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
-          <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
-          <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
-          <option>Καλαμάτα</option><option>Καβάλα</option><option>Ξάνθη</option>
-          <option>Κομοτηνή</option><option>Αλεξανδρούπολη</option><option>Σέρρες</option>
-          <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
-          <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
-          <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
-          <option>Αγρίνιο</option><option>Βέροια</option><option>Δράμα</option>
-          <option>Κατερίνη</option><option>Κοζάνη</option><option>Ναύπλιο</option>
-          <option>Πύργος</option><option>Γλυφάδα</option>
-          <!-- Αττική – δήμοι -->
-          <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
-          <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
-          <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
-          <option>Παλαιό Φάληρο</option><option>Άλιμος</option><option>Ιλίου</option>
-          <option>Ζωγράφου</option><option>Γαλάτσι</option><option>Βύρωνας</option>
-          <option>Δάφνη</option><option>Ηλιούπολη</option><option>Νίκαια</option>
-          <option>Κορυδαλλός</option><option>Πετρούπολη</option><option>Αργυρούπολη</option>
-          <option>Ηράκλειο Αττικής</option><option>Νέα Φιλαδέλφεια</option><option>Νέα Χαλκηδόνα</option>
-          <!-- Κρήτη extra -->
-          <option>Σητεία</option><option>Ιεράπετρα</option><option>Άγιος Νικόλαος</option>
-          <!-- Νησιά extra -->
-          <option>Κως</option><option>Σάμος</option><option>Σύρος</option><option>Πάρος</option><option>Νάξος</option>
-        </select>
-      </div>
-
       <!-- GDPR + Submit -->
       <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="inline-flex items-start gap-3">
           <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
-          <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700">Όρους Αναζήτησης & GDPR</button>.</span>
+          <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700"><span id="t-gdprLink">Όρους Αναζήτησης & GDPR</span></button>.</span>
         </label>
         <div class="mt-4 flex justify-end">
           <button id="submitBtn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
@@ -532,7 +535,7 @@
       </div>
       <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">OK</button>
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-gdprAccept">OK</span></button>
       </div>
     </div>
   </div>
@@ -668,7 +671,7 @@
         substance:'Δραστική Ουσία', optional:'(προαιρετικά)', doseEx:'Παράδειγμα δοσολογίας: Paracetamol 500mg.', type:'Τύπος Φαρμάκου',
         qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή', genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης', results:'Αποτελέσματα', newSearch:'Νέα αναζήτηση',
-        pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
+        pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…',
         langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
         barcodeTitle:'Σάρωση barcode συνταγής ή κουτιού', barcodeHelp:'Χρησιμοποίησε την κάμερα για να σαρώσεις τον γραμμωτό κωδικό της συνταγής ή του κουτιού.',
         barcodeStart:'Άνοιγμα κάμερας', barcodePlaceholder:'Ο κωδικός θα εμφανιστεί εδώ', barcodeModalTitle:'Σάρωση barcode',
@@ -676,6 +679,15 @@
         barcodeStatusSuccess:'Εντοπίστηκε κωδικός: %s', barcodeStatusNoApi:'Ο περιηγητής δεν υποστηρίζει αυτόματη ανάγνωση barcode. Συμπλήρωσε τον κωδικό χειροκίνητα.',
         barcodeStatusNoCamera:'Δεν εντοπίστηκε κάμερα στη συσκευή.', barcodeStatusDenied:'Η πρόσβαση στην κάμερα απορρίφθηκε. Έλεγξε τις άδειες.',
         barcodeStatusStopped:'Η σάρωση διακόπηκε. Μπορείς να κλείσεις το παράθυρο.', barcodeStop:'Διακοπή',
+        gdprLink:'Όρους Αναζήτησης & GDPR', gdprTitle:'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης', gdprConfirm:'Κατάλαβα',
+        gdprHtml:`<p><strong>Η MediRadar</strong> χρησιμοποιεί τα στοιχεία που δηλώνεις αποκλειστικά για την αποστολή του αιτήματος διαθεσιμότητας στα συνεργαζόμενα φαρμακεία.</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Καταγράφουμε το φάρμακο, την ποσότητα και την πόλη που επέλεξες.</li>
+          <li>Οι πληροφορίες κοινοποιούνται μόνο στα φαρμακεία που θα απαντήσουν στο αίτημα.</li>
+          <li>Τα δεδομένα αποθηκεύονται έως και 30 ημέρες για σκοπούς υποστήριξης και ασφάλειας.</li>
+        </ul>
+        <p>Διατηρείς δικαίωμα πρόσβασης, διόρθωσης ή διαγραφής των δεδομένων σου. Στείλε μήνυμα στο <a href="mailto:privacy@mediradar.gr" class="text-brand-600 hover:underline">privacy@mediradar.gr</a> για οποιοδήποτε αίτημα.</p>
+        <p>Χρησιμοποιώντας την εφαρμογή αποδέχεσαι ότι η επεξεργασία πραγματοποιείται σύμφωνα με τον Γενικό Κανονισμό Προστασίας Δεδομένων (GDPR).</p>`,
         proModalTitle:'Πρόσβαση φαρμακείων', proModalSubtitle:'Συνδέσου ή καταχώρησε το φαρμακείο σου για να απαντάς σε αιτήματα διαθεσιμότητας.',
         proSigninTab:'Σύνδεση', proRegisterTab:'Εγγραφή',
         proSigninEmailLabel:'Email φαρμακείου', proSigninPasswordLabel:'Κωδικός πρόσβασης', proSigninSubmit:'Σύνδεση',
@@ -693,7 +705,7 @@
         substance:'Active Substance', optional:'(optional)', doseEx:'Dosage example: Paracetamol 500mg.', type:'Medicine Type',
         qty:'Quantity (units/boxes)', select:'Select', genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?',
         yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search', results:'Results', newSearch:'New search',
-        pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
+        pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…',
         langGreek:'Greek', langEnglish:'English',
         barcodeTitle:'Scan prescription or box barcode', barcodeHelp:'Use your camera to capture the prescription or medicine box barcode.',
         barcodeStart:'Open camera', barcodePlaceholder:'The code will appear here', barcodeModalTitle:'Barcode scan',
@@ -701,6 +713,15 @@
         barcodeStatusSuccess:'Detected code: %s', barcodeStatusNoApi:'Your browser does not support automatic barcode reading. Enter the code manually.',
         barcodeStatusNoCamera:'No camera was found on this device.', barcodeStatusDenied:'Camera access was denied. Check your permission settings.',
         barcodeStatusStopped:'Scanning stopped. You can close this window.', barcodeStop:'Stop',
+        gdprLink:'Search Terms & GDPR', gdprTitle:'Privacy Policy & Search Terms', gdprConfirm:'Understood',
+        gdprHtml:`<p><strong>MediRadar</strong> processes the details you submit solely to forward your availability request to participating pharmacies.</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>We record the medicine, requested quantity, and preferred city.</li>
+          <li>Information is shared only with pharmacies that respond to your request.</li>
+          <li>Data is retained for up to 30 days to support troubleshooting and security.</li>
+        </ul>
+        <p>You can request access, correction, or deletion at any time. Email <a href="mailto:privacy@mediradar.gr" class="text-brand-600 hover:underline">privacy@mediradar.gr</a> to exercise your rights.</p>
+        <p>By using the service you agree that processing follows the EU General Data Protection Regulation (GDPR).</p>`,
         proModalTitle:'Pharmacy access', proModalSubtitle:'Sign in or register your pharmacy to respond to availability requests.',
         proSigninTab:'Sign in', proRegisterTab:'Register',
         proSigninEmailLabel:'Pharmacy email', proSigninPasswordLabel:'Password', proSigninSubmit:'Sign in',
@@ -722,8 +743,18 @@
       setText('t-searchBTN', t('searchBTN')); setText('t-howBTN', t('howBTN')); setText('t-signinBTN', t('signinBTN')); setText('t-installBTN', t('installBTN'));
       setText('t-searchTitle', t('searchTitle')); setText('t-home', t('home'));
       setText('t-medname', t('medname')); setText('t-formatTip', t('formatTip'));
+      setText('t-substance', t('substance'));
+      setText('t-doseEx', t('doseEx'));
+      setText('t-type', t('type'));
+      setText('t-qty', t('qty'));
+      setText('t-genericQ', t('genericQ'));
+      setText('t-yes', t('yes'));
+      setText('t-no', t('no'));
+      setText('t-city', t('city'));
+      setText('t-submit', t('submit'));
+      setText('t-accept', t('accept'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
-      setText('t-pro', t('pro')); setText('t-pro-m', t('pro')); setText('t-pharmLogin2', t('pharmLogin'));
+      setText('t-pro', t('pro')); setText('t-pro-m', t('pro'));
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
       setText('t-langElLabel', t('langGreek')); setText('t-langEnLabel', t('langEnglish'));
       setText('t-barcodeTitle', t('barcodeTitle'));
@@ -732,6 +763,10 @@
       setText('t-barcodeStart', t('barcodeStart'));
       setText('t-barcodeModalTitle', t('barcodeModalTitle'));
       setText('t-barcodeStop', t('barcodeStop'));
+      setText('t-gdprLink', t('gdprLink'));
+      setText('t-gdprTitle', t('gdprTitle'));
+      setText('t-gdprAccept', t('gdprConfirm'));
+      setHTML('gdpr-body', t('gdprHtml'));
       setText('t-proModalTitle', t('proModalTitle')); setText('t-proModalSubtitle', t('proModalSubtitle'));
       setText('t-proSigninTab', t('proSigninTab')); setText('t-proRegisterTab', t('proRegisterTab'));
       setText('t-proSigninEmailLabel', t('proSigninEmailLabel')); setText('t-proSigninPasswordLabel', t('proSigninPasswordLabel'));
@@ -793,7 +828,9 @@
       window.scrollTo({ top: 0, behavior:'smooth' });
     }
     document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
-    document.getElementById('backHome').addEventListener('click', (e)=>{ e.preventDefault(); goHome(); });
+    document.querySelectorAll('[data-go-home]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{ e.preventDefault(); goHome(); });
+    });
 
     /* ========== Modals (How/GDPR/Login) ========== */
     const modalHow = document.getElementById('modal-how');
