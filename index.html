@@ -84,7 +84,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
       <button id="pro-trigger" data-open-pro type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
         <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για επαγγελματίες</span>
+        <span id="t-pro">Για φαρμακεία</span>
       </button>
 
       <div class="flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
@@ -204,11 +204,7 @@
         📲 <span id="t-installBTN">Εγκατάσταση</span>
       </button>
 
-      <div class="sm:hidden mt-4">
-        <button id="pro-trigger-mobile" data-open-pro type="button" class="text-sm underline decoration-2">
-          <span id="t-pro-m">Για επαγγελματίες</span>
-        </button>
-      </div>
+      
     </div>
   </section>
 
@@ -285,7 +281,7 @@
               <p id="t-barcodeHelp" class="text-xs text-slate-500 dark:text-slate-400">Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.</p>
             </div>
             <button id="barcode-start" type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-soft hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
-              <span aria-hidden="true">🎯</span>
+              <span aria-hidden="true">📸</span>
               <span id="t-barcodeStart">Άνοιγμα κάμερας</span>
             </button>
           </div>
@@ -403,12 +399,10 @@
             </div>
             <div id="status-reserved-generic" class="hidden px-3 py-1 rounded-full bg-emerald-100/70 dark:bg-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-200">🧬 <span id="t-statusGenericBadge">Διαθέσιμο γενόσημο</span></div>
             <div class="flex flex-wrap justify-center gap-3">
-              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold">
-                <span id="t-statusExtend">+15 λεπτά</span>
+              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold flex flex-col items-center leading-tight">
+                <span id="t-statusExtendMain">+15 λεπτά</span>
+                <span id="t-statusExtendNote" class="text-xs font-normal text-emerald-600 dark:text-emerald-200/80">1 φορά/ημέρα</span>
               </button>
-              <a id="status-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 opacity-60 pointer-events-none" href="#">
-                📞 <span id="t-statusCall">Κλήση</span>
-              </a>
               <a id="status-directions" class="px-4 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 opacity-60 pointer-events-none" href="#" target="_blank" rel="noopener">
                 🧭 <span id="t-statusDirections">Οδηγίες</span>
               </a>
@@ -725,12 +719,10 @@
       </div>
       <div class="p-5 space-y-2 text-sm">
         <div id="pm-address">Διεύθυνση:</div>
-        <div id="pm-phone">Τηλέφωνο:</div>
       </div>
       <div id="pm-auth-message" class="px-5 pb-3 text-xs text-slate-500 dark:text-slate-400">Η δέσμευση απαιτεί ταυτοποίηση.</div>
       <div class="px-5 pb-5 flex gap-2 justify-between flex-wrap items-center">
         <div class="flex gap-2 flex-wrap">
-          <a id="pm-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500" aria-label="Κλήση φαρμακείου">Κλήση</a>
           <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500" aria-label="Προβολή σε χάρτη">Άνοιγμα σε Χάρτες</a>
         </div>
         <button id="pm-confirm" class="px-4 py-2 rounded-2xl bg-brand-600 text-white font-semibold hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Επιβεβαίωση & Έναρξη 60’</button>
@@ -806,7 +798,7 @@
         substance:'Δραστική Ουσία', optional:'(προαιρετικά)', doseEx:'Παράδειγμα δοσολογίας: Paracetamol 500mg.', type:'Τύπος Φαρμάκου',
         qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή', genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης', results:'Αποτελέσματα', newSearch:'Νέα αναζήτηση',
-        pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
+        pro:'Για φαρμακεία', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
         pendingOverlayHeadline:'Τα φαρμακεία ενημερώθηκαν!', pendingOverlayMessage:'Οι συνεργαζόμενοι φαρμακοποιοί ξεκινούν τώρα την αναζήτηση και θα απαντήσουν θετικά σύντομα.',
         pendingOverlayStatus:'Αναμονή απαντήσεων',
         langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
@@ -843,7 +835,8 @@
         resultsLocationUnsupported:'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.', resultsLocationUnknown:'Χωρίς τοποθεσία',
         availabilityExact:'Ακριβώς το ζητούμενο', availabilityGeneric:'Γενόσημο διαθέσιμο',
         distanceKm:'%s km', distanceUnknown:'Χωρίς τοποθεσία',
-        actionMap:'Προβολή στο χάρτη', actionCall:'Κλήση', actionReserve:'Δέσμευση 60’',
+        statusExtendMain:'+15 λεπτά', statusExtendNote:'Χρήση 1 φορά/ημέρα',
+        actionMap:'Προβολή στο χάρτη', actionReserve:'Δέσμευση 60’',
         authTitle:'Ταυτοποίηση για δέσμευση', authSubtitle:'Επίλεξε πώς θέλεις να προχωρήσεις.',
         authOptionLogin:'Σύνδεση', authOptionRegister:'Εγγραφή', authOptionGuest:'Επισκέπτης',
         authOptionHint:'Συνέχισε με τον λογαριασμό σου ή επίλεξε ταχεία επαλήθευση.',
@@ -875,7 +868,7 @@
         substance:'Active Substance', optional:'(optional)', doseEx:'Dosage example: Paracetamol 500mg.', type:'Medicine Type',
         qty:'Quantity (units/boxes)', select:'Select', genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?',
         yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search', results:'Results', newSearch:'New search',
-        pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
+        pro:'For pharmacies', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
         pendingOverlayHeadline:'Pharmacies notified!', pendingOverlayMessage:'Partner pharmacists are now looking for your medicine and will confirm availability shortly.',
         pendingOverlayStatus:'Awaiting confirmations',
         langGreek:'Greek', langEnglish:'English',
@@ -913,7 +906,8 @@
         resultsLocationUnsupported:'Geolocation is not supported on this device.', resultsLocationUnknown:'No location',
         availabilityExact:'Exact match', availabilityGeneric:'Generic available',
         distanceKm:'%s km', distanceUnknown:'No location',
-        actionMap:'View on map', actionCall:'Call', actionReserve:'Hold for 60 min',
+        statusExtendMain:'+15 minutes', statusExtendNote:'Use once per day',
+        actionMap:'View on map', actionReserve:'Hold for 60 min',
         authTitle:'Verification required', authSubtitle:'Choose how you want to continue.',
         authOptionLogin:'Sign in', authOptionRegister:'Register', authOptionGuest:'Guest',
         authOptionHint:'Continue with your account or choose a quick verification.',
@@ -963,6 +957,8 @@
       setText('t-gdprLink', t('gdprLink'));
       setText('t-submit', t('submit'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
+      setText('t-statusExtendMain', t('statusExtendMain'));
+      setText('t-statusExtendNote', t('statusExtendNote'));
       setText('pending-overlay-headline', t('pendingOverlayHeadline'));
       setText('pending-overlay-message', t('pendingOverlayMessage'));
       setText('pending-overlay-status-text', t('pendingOverlayStatus'));
@@ -1039,8 +1035,14 @@
       document.getElementById('auth-sms-phone').placeholder = state.lang==='el'?'69XXXXXXXX':'+30 69XXXXXXX';
       document.getElementById('auth-email-input').placeholder = state.lang==='el'?'όνομα@email.com':'name@email.com';
       themeBtn.setAttribute('aria-label', state.lang==='el'?'Αλλαγή θέματος':'Toggle theme');
-      document.getElementById('pro-trigger').setAttribute('aria-label', state.lang==='el'?'Πρόσβαση για επαγγελματίες':'Professionals area');
-      document.getElementById('pro-trigger-mobile').setAttribute('aria-label', state.lang==='el'?'Πρόσβαση για επαγγελματίες':'Professionals area');
+      const proTriggerEl = document.getElementById('pro-trigger');
+      if(proTriggerEl){
+        proTriggerEl.setAttribute('aria-label', state.lang==='el'?'Χώρος για φαρμακεία':'Pharmacies area');
+      }
+      const proTriggerMobile = document.getElementById('pro-trigger-mobile');
+      if(proTriggerMobile){
+        proTriggerMobile.setAttribute('aria-label', state.lang==='el'?'Χώρος για φαρμακεία':'Pharmacies area');
+      }
       document.getElementById('pro-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
       document.getElementById('barcode-start').setAttribute('aria-label', state.lang==='el'?'Σάρωση barcode':'Scan barcode');
       document.getElementById('barcode-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
@@ -1490,10 +1492,6 @@
       pickupBox?.classList.add('hidden');
       if(resultsList){ resultsList.innerHTML=''; }
       if(resultsModalList){ resultsModalList.innerHTML=''; }
-      if(statusCallLink){
-        statusCallLink.href = '#';
-        setLinkAvailability(statusCallLink, false);
-      }
       if(statusDirectionsLink){
         statusDirectionsLink.href = '#';
         setLinkAvailability(statusDirectionsLink, false);
@@ -1566,7 +1564,6 @@
     const statusReservedName = document.getElementById('status-reserved-name');
     const statusReservedAddress = document.getElementById('status-reserved-address');
     const statusReservedGeneric = document.getElementById('status-reserved-generic');
-    const statusCallLink = document.getElementById('status-call');
     const statusDirectionsLink = document.getElementById('status-directions');
     const statusEmptyBtn = document.getElementById('status-empty-btn');
     const resultsModalEl = document.getElementById('results-modal');
@@ -1621,12 +1618,10 @@
       pickupBox?.classList.toggle('hidden', state!=='reserved');
       if(state==='pending'){
         resultsList.innerHTML='';
-        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
         if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
         statusReservedGeneric?.classList.add('hidden');
       }
       if(state==='empty'){
-        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
         if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
         statusReservedGeneric?.classList.add('hidden');
       }
@@ -1746,7 +1741,6 @@
       if(context === 'inline'){ card.classList.add('w-full'); }
       card.dataset.name = ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy');
       card.dataset.addr = ph.address || '';
-      card.dataset.tel = ph.phone || '';
       card.dataset.lat = ph.lat !== null && ph.lat !== undefined ? String(ph.lat) : '';
       card.dataset.lng = ph.lng !== null && ph.lng !== undefined ? String(ph.lng) : '';
       card.dataset.generic = item.is_generic ? 'true' : 'false';
@@ -1807,21 +1801,6 @@
         mapLink.classList.add('opacity-50','pointer-events-none');
       }
       actionsRow.appendChild(mapLink);
-
-      const callLink = document.createElement('a');
-      callLink.className = 'px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500';
-      callLink.textContent = t('actionCall');
-      const phoneClean = (ph.phone || '').replace(/\s+/g,'');
-      if(phoneClean){
-        callLink.href = `tel:${phoneClean}`;
-        callLink.setAttribute('aria-label', t('actionCall'));
-      }else{
-        callLink.href = '#';
-        callLink.setAttribute('aria-disabled','true');
-        callLink.tabIndex = -1;
-        callLink.classList.add('opacity-50','pointer-events-none');
-      }
-      actionsRow.appendChild(callLink);
 
       const selectBtn = document.createElement('button');
       selectBtn.type = 'button';
@@ -2024,14 +2003,6 @@
       statusReservedName.textContent = pharmacy?.name || fallbackName;
       statusReservedAddress.textContent = pharmacy?.addr || fallbackAddress;
       statusReservedGeneric.classList.toggle('hidden', !pharmacy?.is_generic);
-      if(pharmacy?.tel){
-        const tel = pharmacy.tel.replace(/\s+/g,'');
-        statusCallLink.href = `tel:${tel}`;
-        setLinkAvailability(statusCallLink, true);
-      } else {
-        statusCallLink.href = '#';
-        setLinkAvailability(statusCallLink, false);
-      }
       const querySource = pharmacy?.addr || pharmacy?.name || '';
       if(querySource){
         const encoded = encodeURIComponent(querySource);
@@ -2106,8 +2077,6 @@
     const pm = document.getElementById('pharm-modal');
     const pmTitle = document.getElementById('pm-title');
     const pmAddr  = document.getElementById('pm-address');
-    const pmPhone = document.getElementById('pm-phone');
-    const pmCall  = document.getElementById('pm-call');
     const pmMaps  = document.getElementById('pm-maps');
     const pmConfirm = document.getElementById('pm-confirm');
     const pmAuthMessage = document.getElementById('pm-auth-message');
@@ -2369,23 +2338,12 @@
       selectedPharmacy = {
         name: card.dataset.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
         addr: card.dataset.addr || '',
-        tel: card.dataset.tel || '',
         lat: card.dataset.lat ? parseCoordinate(card.dataset.lat) : null,
         lng: card.dataset.lng ? parseCoordinate(card.dataset.lng) : null,
         is_generic: card.dataset.generic === 'true'
       };
       pmTitle.textContent = selectedPharmacy.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy');
       pmAddr.textContent  = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (selectedPharmacy.addr || '—');
-      pmPhone.textContent = (state.lang==='el'?'Τηλέφωνο: ':'Phone: ') + (selectedPharmacy.tel || '—');
-      if(selectedPharmacy.tel){
-        pmCall.href = `tel:${selectedPharmacy.tel.replace(/\s+/g,'')}`;
-        pmCall.classList.remove('opacity-50','pointer-events-none');
-        pmCall.removeAttribute('aria-disabled');
-      }else{
-        pmCall.href = '#';
-        pmCall.classList.add('opacity-50','pointer-events-none');
-        pmCall.setAttribute('aria-disabled','true');
-      }
       if(selectedPharmacy.addr || (selectedPharmacy.lat !== null && selectedPharmacy.lng !== null)){
         pmMaps.href = buildMapsHref({
           address: selectedPharmacy.addr,
