@@ -145,6 +145,27 @@
     </div>
   </div>
 
+  <!-- Pending full overlay -->
+  <div id="pending-overlay" class="fixed inset-0 hidden z-[70] items-center justify-center px-4">
+    <div class="w-full max-w-2xl">
+      <div class="relative overflow-hidden rounded-3xl border border-amber-400/70 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white shadow-soft">
+        <div class="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="absolute -left-16 bottom-[-60px] h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
+        <div class="relative flex flex-col items-center gap-6 px-8 py-10 text-center sm:px-10">
+          <div class="grid h-20 w-20 place-items-center rounded-full bg-white/15 text-4xl" aria-hidden="true">⏳</div>
+          <div class="space-y-3">
+            <h3 id="pending-overlay-headline" class="text-2xl font-bold leading-tight sm:text-3xl">Τα φαρμακεία ενημερώθηκαν!</h3>
+            <p id="pending-overlay-message" class="text-sm text-white/90 sm:text-base">Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.</p>
+          </div>
+          <div id="pending-overlay-status" class="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm" role="status" aria-live="polite">
+            <span id="pending-overlay-status-text">Αναμονή απαντήσεων</span>
+            <span id="pending-overlay-elapsed" class="text-white/80">0s</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- μικρό push toast -->
   <div id="push-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[min(680px,94vw)]">
     <div class="rounded-2xl p-4 border border-sky-300/70 bg-sky-50 text-sky-900 dark:bg-sky-900/30 dark:text-sky-100 dark:border-sky-800 shadow-soft flex items-center justify-between gap-3">
@@ -786,6 +807,8 @@
         qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή', genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
         yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης', results:'Αποτελέσματα', newSearch:'Νέα αναζήτηση',
         pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
+        pendingOverlayHeadline:'Τα φαρμακεία ενημερώθηκαν!', pendingOverlayMessage:'Οι συνεργαζόμενοι φαρμακοποιοί ξεκινούν τώρα την αναζήτηση και θα απαντήσουν θετικά σύντομα.',
+        pendingOverlayStatus:'Αναμονή απαντήσεων',
         langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
         gdprLink:'Όρους Αναζήτησης & GDPR',
         gdprTitle:'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης',
@@ -820,13 +843,13 @@
         resultsLocationUnsupported:'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.', resultsLocationUnknown:'Χωρίς τοποθεσία',
         availabilityExact:'Ακριβώς το ζητούμενο', availabilityGeneric:'Γενόσημο διαθέσιμο',
         distanceKm:'%s km', distanceUnknown:'Χωρίς τοποθεσία',
-        actionMap:'Προβολή στο χάρτη', actionCall:'Κλήση', actionReserve:'Επιλογή/Δέσμευση',
+        actionMap:'Προβολή στο χάρτη', actionCall:'Κλήση', actionReserve:'Δέσμευση 60’',
         authTitle:'Ταυτοποίηση για δέσμευση', authSubtitle:'Επίλεξε πώς θέλεις να προχωρήσεις.',
         authOptionLogin:'Σύνδεση', authOptionRegister:'Εγγραφή', authOptionGuest:'Επισκέπτης',
         authOptionHint:'Συνέχισε με τον λογαριασμό σου ή επίλεξε ταχεία επαλήθευση.',
-        authOptionLoginDesc:'Συνδέσου με email, magic link ή SSO.',
+        authOptionLoginDesc:'Συνδέσου ως υπάρχων πελάτης για να συνεχίσεις με το ιστορικό σου.',
         authOptionRegisterDesc:'Δημιούργησε νέο λογαριασμό με email ή SSO.',
-        authOptionGuestDesc:'Συνέχισε ως επισκέπτης με επαλήθευση SMS ή email.',
+        authOptionGuestDesc:'Συνέχισε ως επισκέπτης (χωρίς ιστορικό) με επαλήθευση SMS ή email.',
         authTabSms:'SMS', authTabEmail:'Email', authTabSso:'SSO',
         authSmsHint:'Επιβεβαίωσε τον αριθμό σου για να συνεχίσεις ως επισκέπτης.',
         authSmsPhoneLabel:'Αριθμός κινητού', authSmsSend:'Αποστολή κωδικού', authSmsResend:'Επαναποστολή',
@@ -841,9 +864,9 @@
         authEmailStatusMissing:'Συμπλήρωσε έγκυρο email.', authEmailStatusExpired:'Το link έληξε — ζήτησε νέο.',
         authEmailStatusPending:'Πρώτα επέλεξε σύνδεση ή εγγραφή.', authEmailStatusVerified:'Η επιβεβαίωση email ολοκληρώθηκε.',
         authSsoHint:'Συνδέσου με τον αγαπημένο σου πάροχο.', authSsoStatusSuccess:'Η σύνδεση με %s ολοκληρώθηκε (demo).',
-        authGlobalSuccess:'Ταυτοποίηση ολοκληρώθηκε. Μπορείς να συνεχίσεις.', authClose:'Κλείσιμο',
-        resultsModalClose:'Κλείσιμο', pmAuthRequired:'Η δέσμευση απαιτεί ταυτοποίηση.',
-        pmAuthReady:'Ταυτοποίηση ολοκληρώθηκε — μπορείς να συνεχίσεις.'
+        authGlobalSuccess:'Η ταυτοποίηση ολοκληρώθηκε — μπορείς να συνεχίσεις με τη δέσμευση.', authClose:'Κλείσιμο',
+        resultsModalClose:'Κλείσιμο', pmAuthRequired:'Η δέσμευση 60’ απαιτεί ταυτοποίηση.',
+        pmAuthReady:'Ταυτοποίηση ολοκληρώθηκε — είσαι έτοιμος για δέσμευση.'
       },
       en:{
         hero:'Instant availability check at nearby pharmacies.',
@@ -853,6 +876,8 @@
         qty:'Quantity (units/boxes)', select:'Select', genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?',
         yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search', results:'Results', newSearch:'New search',
         pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
+        pendingOverlayHeadline:'Pharmacies notified!', pendingOverlayMessage:'Partner pharmacists are now looking for your medicine and will confirm availability shortly.',
+        pendingOverlayStatus:'Awaiting confirmations',
         langGreek:'Greek', langEnglish:'English',
         gdprLink:'Search Terms & GDPR',
         gdprTitle:'Data Protection & Search Terms',
@@ -888,13 +913,13 @@
         resultsLocationUnsupported:'Geolocation is not supported on this device.', resultsLocationUnknown:'No location',
         availabilityExact:'Exact match', availabilityGeneric:'Generic available',
         distanceKm:'%s km', distanceUnknown:'No location',
-        actionMap:'View on map', actionCall:'Call', actionReserve:'Select & hold',
+        actionMap:'View on map', actionCall:'Call', actionReserve:'Hold for 60 min',
         authTitle:'Verification required', authSubtitle:'Choose how you want to continue.',
         authOptionLogin:'Sign in', authOptionRegister:'Register', authOptionGuest:'Guest',
         authOptionHint:'Continue with your account or choose a quick verification.',
-        authOptionLoginDesc:'Sign in with email, magic link, or SSO.',
+        authOptionLoginDesc:'Sign in as a returning user to access your history.',
         authOptionRegisterDesc:'Create a new account via email or SSO.',
-        authOptionGuestDesc:'Continue as a guest with SMS or email verification.',
+        authOptionGuestDesc:'Continue as a guest (no history saved) with SMS or email verification.',
         authTabSms:'SMS', authTabEmail:'Email', authTabSso:'SSO',
         authSmsHint:'Verify your phone number to continue as a guest.',
         authSmsPhoneLabel:'Mobile number', authSmsSend:'Send code', authSmsResend:'Resend',
@@ -909,9 +934,9 @@
         authEmailStatusMissing:'Enter a valid email.', authEmailStatusExpired:'The link expired — request a new one.',
         authEmailStatusPending:'Send yourself a link first.', authEmailStatusVerified:'Email verification complete.',
         authSsoHint:'Use your preferred provider to continue.', authSsoStatusSuccess:'Signed in with %s (demo).',
-        authGlobalSuccess:'Verification complete. You may continue.', authClose:'Close',
-        resultsModalClose:'Close', pmAuthRequired:'Verification is required before holding.',
-        pmAuthReady:'Verification complete — you can proceed.'
+        authGlobalSuccess:'Verification complete — you can proceed with the 60 min hold.', authClose:'Close',
+        resultsModalClose:'Close', pmAuthRequired:'A verified account is required before starting the 60 min hold.',
+        pmAuthReady:'Verification complete — you are ready to hold.'
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
@@ -938,6 +963,9 @@
       setText('t-gdprLink', t('gdprLink'));
       setText('t-submit', t('submit'));
       setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
+      setText('pending-overlay-headline', t('pendingOverlayHeadline'));
+      setText('pending-overlay-message', t('pendingOverlayMessage'));
+      setText('pending-overlay-status-text', t('pendingOverlayStatus'));
       setText('t-pro', t('pro')); setText('t-pro-m', t('pro'));
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
       setText('t-langElLabel', t('langGreek')); setText('t-langEnLabel', t('langEnglish'));
@@ -1349,6 +1377,48 @@
       'Salbutamol 2mg/5ml',
       'Valsartan 160mg'
     ];
+    const DEMO_PHARMACIES = [
+      {
+        pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.9841, lng:23.7356 },
+        is_generic:false
+      },
+      {
+        pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.9832, lng:23.7321 },
+        is_generic:false
+      },
+      {
+        pharmacy:{ name:'PharmaPlus Εξάρχεια', address:'Τζαβέλλα 15, Αθήνα', phone:'+30 210 5556677', lat:37.9817, lng:23.7339 },
+        is_generic:true
+      },
+      {
+        pharmacy:{ name:'CityCare Pharmacy', address:'Ακαδημίας 52, Αθήνα', phone:'+30 210 9988776', lat:37.9799, lng:23.7348 },
+        is_generic:false
+      },
+      {
+        pharmacy:{ name:'GreenCross Clinic', address:'Χαριλάου Τρικούπη 120, Αθήνα', phone:'+30 210 4433221', lat:37.9882, lng:23.735 },
+        is_generic:true
+      },
+      {
+        pharmacy:{ name:'HealthFirst Φαρμακείο', address:'Σκουφά 37, Αθήνα', phone:'+30 210 3344556', lat:37.9812, lng:23.7413 },
+        is_generic:false
+      }
+    ];
+    function sampleDemoPharmacies(allowGeneric=true){
+      const pool = DEMO_PHARMACIES.filter(item => allowGeneric || !item.is_generic);
+      const effectivePool = pool.length ? pool : DEMO_PHARMACIES.filter(item => !item.is_generic);
+      const shuffled = [...effectivePool];
+      for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+      const desired = Math.min(4, Math.max(3, shuffled.length));
+      const takeCount = Math.min(desired, shuffled.length);
+      const selection = shuffled.slice(0, takeCount);
+      if(allowGeneric && !selection.some(item => item.is_generic)){
+        const generics = DEMO_PHARMACIES.filter(item => item.is_generic);
+        if(generics.length){
+          selection[selection.length-1] = generics[Math.floor(Math.random()*generics.length)];
+        }
+      }
+      return selection;
+    }
     function attachAutocomplete(inputId, listId, data){
       const input = document.getElementById(inputId);
       const list = document.getElementById(listId);
@@ -1374,16 +1444,35 @@
 
     /* ========== Pending + Confetti ========== */
     const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
+    const pendingOverlay=document.getElementById('pending-overlay');
+    const pendingOverlayElapsed=document.getElementById('pending-overlay-elapsed');
     let waitT=null, waitStart=0;
     function showPending(){
       waitStart=Date.now();
-      pendingToast.classList.remove('hidden');
+      pendingToast?.classList.remove('hidden');
+      if(pendingOverlay){
+        pendingOverlay.classList.remove('hidden');
+        pendingOverlay.classList.add('flex');
+      }
+      if(pendingOverlayElapsed){ pendingOverlayElapsed.textContent='0s'; }
+      if(waitSpan){ waitSpan.textContent='0s'; }
       if(waitT) clearInterval(waitT);
-      waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500);
+      waitT=setInterval(()=>{
+        const secs=Math.floor((Date.now()-waitStart)/1000)+'s';
+        if(waitSpan) waitSpan.textContent=secs;
+        if(pendingOverlayElapsed) pendingOverlayElapsed.textContent=secs;
+      },500);
       setResultsState('pending');
       window.scrollTo({top:0,behavior:'smooth'});
     }
-    function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
+    function hidePending(){
+      pendingToast?.classList.add('hidden');
+      if(pendingOverlay){
+        pendingOverlay.classList.add('hidden');
+        pendingOverlay.classList.remove('flex');
+      }
+      if(waitT){clearInterval(waitT); waitT=null;}
+    }
     function fireConfetti(ms=3500){
       const c=document.getElementById('confetti'),ctx=c.getContext('2d');
       const W=c.width=innerWidth,H=c.height=innerHeight; c.style.display='block';
@@ -2457,23 +2546,7 @@
 
         setTimeout(()=>{
           hidePending();
-          const demoItems = [
-            {
-              pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 },
-              is_generic: false
-            },
-            {
-              pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 },
-              is_generic: false
-            }
-          ];
-          const genericFallback = {
-            pharmacy:{ name:'PharmaPlus Εξάρχεια', address:'Τζαβέλλα 15, Αθήνα', phone:'+30 210 5556677', lat:37.981, lng:23.733 },
-            is_generic: true
-          };
-          if(allow_generic){
-            demoItems.push(genericFallback);
-          }
+          const demoItems = sampleDemoPharmacies(allow_generic);
           if(barcode){
             console.info('Submitted barcode:', barcode);
           }

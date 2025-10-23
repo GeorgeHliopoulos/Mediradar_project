@@ -4,6 +4,11 @@
 1. Confirm that the “Αναζήτηση Φαρμάκου” button is stacked above “Πώς λειτουργεί” on all breakpoints, including desktop layouts.
 2. Compare button sizing (padding/scale). The search CTA should appear slightly larger/wider than the helper button.
 
+## Pending celebration flow
+1. Submit a valid search and confirm the confetti animation launches immediately.
+2. While the request is pending, the orange waiting overlay appears with the hourglass icon, “Τα φαρμακεία ενημερώθηκαν!” headline, supportive copy, and a live-updating timer badge.
+3. When demo pharmacies answer, the overlay closes on its own and the availability modal lists positive demo responses with Google Maps links and the “Δέσμευση 60’” action.
+
 ## Geolocation handling
 1. **Permission granted**: Approve the location request when the results drawer opens. Distances appear beside each pharmacy badge with one decimal place and the header notice confirms that distances use the current location.
 2. **Permission denied**: Deny the location prompt. The drawer shows the fallback message “Δεν δόθηκε άδεια—εμφάνιση χωρίς απόσταση” (or the English equivalent) and every pharmacy card displays the "Χωρίς τοποθεσία" badge with the 🚫 icon.
