@@ -1247,6 +1247,20 @@
     function hasSupabase(){ return !!(window.supabase && window.ENV && window.ENV.SUPABASE_URL); }
     const LS_REQ = 'mr:lastRequest';
 
+    async function apiFetch(path, { method = 'GET', body, headers } = {}) {
+      const url = `${API_BASE}/${path.replace(/^\//,'')}`;
+      const opts = { method, headers: { 'Content-Type': 'application/json', ...(headers || {}) } };
+      if (body !== undefined) {
+        opts.body = typeof body === 'string' ? body : JSON.stringify(body);
+      }
+      const res = await fetch(url, opts);
+      const txt = await res.text().catch(()=> '');
+      if (!res.ok) {
+        throw new Error(`API ${path} ${res.status}: ${txt}`);
+      }
+      return txt ? JSON.parse(txt) : {};
+    }
+
     /* ========== Results + Pharmacy modal + Pickup timer ========== */
     const results = document.getElementById('results');
     const resultsList = document.getElementById('resultsList');
@@ -1263,6 +1277,8 @@
     const statusDirectionsLink = document.getElementById('status-directions');
     const statusEmptyBtn = document.getElementById('status-empty-btn');
     const statusNotifyBtn = document.getElementById('status-notify');
+    const LS_PICKUP = 'mr:lastPickup';
+    const API_BASE = '/.netlify/functions';
     let pInt=null, remaining=0, pollInt=null;
 
     function showResultsWrapper(){ results.classList.remove('hidden'); }
@@ -1293,6 +1309,35 @@
       el.classList.toggle('opacity-60', !enabled);
       el.classList.toggle('pointer-events-none', !enabled);
     }
+
+    function toPickupPharmacy(raw){
+      if(!raw) return null;
+      if(typeof raw === 'string'){
+        return {
+          name: raw,
+          addr: '',
+          tel: '',
+          lat: '',
+          lng: '',
+          is_generic: false
+        };
+      }
+      if(raw.pharmacy){
+        return toPickupPharmacy({
+          ...raw.pharmacy,
+          is_generic: raw.is_generic ?? raw.pharmacy.is_generic
+        });
+      }
+      return {
+        name: raw.name || raw.pharmacy_name || raw.title || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
+        addr: raw.addr || raw.address || raw.pharmacy_address || '',
+        tel: raw.tel || raw.phone || raw.pharmacy_phone || '',
+        lat: raw.lat ?? raw.pharmacy_lat ?? '',
+        lng: raw.lng ?? raw.pharmacy_lng ?? '',
+        is_generic: !!(raw.is_generic ?? raw.generic ?? false)
+      };
+    }
+
     function populateReservedDetails(pharmacy){
       const fallbackName = state.lang==='el'?'Φαρμακείο':'Pharmacy';
       const fallbackAddress = state.lang==='el'?'Χωρίς διαθέσιμη διεύθυνση':'No address provided';
@@ -1334,13 +1379,35 @@
     }
     extendBtn.onclick=async ()=>{
       if(extendBtn.disabled) return;
-      remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
-      localStorage.setItem('pickup-extend-date', new Date().toISOString().slice(0,10));
-      extendBtn.disabled=true; extendBtn.classList.add('opacity-50');
-      if(hasSupabase() && window.currentRequest?.id){
-        const newUntil = new Date(Date.now()+remaining*1000).toISOString();
-        await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
+      extendBtn.disabled = true;
+      extendBtn.classList.add('opacity-50');
+      try{
+        if(window.currentRequest?.mode === 'functions' && window.currentRequest?.token){
+          const hold = await extendViaFunctions(window.currentRequest.token);
+          if(hold){
+            const diff = Math.max(0, Math.round((new Date(hold).getTime() - Date.now())/1000));
+            if(diff > 0){
+              remaining = diff;
+              pickupTimerEl.textContent = fmt(remaining);
+            }
+          } else {
+            remaining += 15*60;
+            pickupTimerEl.textContent = fmt(remaining);
+          }
+        } else {
+          remaining += 15*60;
+          pickupTimerEl.textContent = fmt(remaining);
+          if(hasSupabase() && window.currentRequest?.id){
+            const newUntil = new Date(Date.now()+remaining*1000).toISOString();
+            await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
+          }
+        }
+      }catch(err){
+        console.warn('extend error', err);
+        remaining += 15*60;
+        pickupTimerEl.textContent = fmt(remaining);
       }
+      localStorage.setItem('pickup-extend-date', new Date().toISOString().slice(0,10));
     };
 
     statusEmptyBtn?.addEventListener('click', ()=>{
@@ -1391,6 +1458,93 @@
       return insertRequestRow(baseRow);
     }
 
+    async function submitViaFunctions(payload){
+      try{
+        const res = await apiFetch('send-request', {
+          method:'POST',
+          body: {
+            lang: state.lang,
+            city: payload.city,
+            medicine_name: payload.med_name,
+            substance: payload.active_substance || '',
+            type: payload.med_type || '',
+            quantity: payload.quantity,
+            allow_generic: payload.allow_generic,
+            rx_number: payload.barcode || ''
+          }
+        });
+        if(res?.ok){
+          return { id: res.request_id, token: res.token };
+        }
+      }catch(err){
+        console.warn('send-request error', err);
+      }
+      return null;
+    }
+
+    function mapReplyToItem(reply){
+      if(!reply) return null;
+      const available = reply.available;
+      if(available === false) return null;
+      const pharmacy = reply.pharmacy || {};
+      return {
+        id: reply.id || reply.reply_id || pharmacy.id || Math.random().toString(36).slice(2),
+        is_generic: !!(reply.is_generic ?? reply.generic ?? false),
+        pharmacy: {
+          id: pharmacy.id || reply.pharmacy_id || null,
+          name: reply.pharmacy_name || pharmacy.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
+          address: reply.address || pharmacy.address || reply.pharmacy_address || '',
+          phone: reply.phone || pharmacy.phone || reply.pharmacy_phone || '',
+          lat: (reply.lat ?? pharmacy.lat ?? reply.pharmacy_lat ?? ''),
+          lng: (reply.lng ?? pharmacy.lng ?? reply.pharmacy_lng ?? '')
+        }
+      };
+    }
+
+    async function pollStatusFunctions(token){
+      if(!token) return null;
+      try{
+        const data = await apiFetch(`request-status?token=${encodeURIComponent(token)}`);
+        const replies = Array.isArray(data.replies) ? data.replies : [];
+        const items = replies
+          .map(mapReplyToItem)
+          .filter(Boolean);
+        const reservedPharmacy = data.reserved_pharmacy || data.pickup_pharmacy || null;
+        return {
+          status: data.status || 'pending',
+          items,
+          holdUntil: data.hold_until || null,
+          extendUsedAt: data.extend_used_at || null,
+          reservedPharmacy
+        };
+      }catch(err){
+        console.warn('request-status error', err);
+        throw err;
+      }
+    }
+
+    async function reserveViaFunctions(token){
+      if(!token) return null;
+      try{
+        const data = await apiFetch('reserve', { method:'POST', body:{ token } });
+        return data?.hold_until || null;
+      }catch(err){
+        console.warn('reserve error', err);
+        return null;
+      }
+    }
+
+    async function extendViaFunctions(token){
+      if(!token) return null;
+      try{
+        const data = await apiFetch('extend-hold', { method:'POST', body:{ token } });
+        return data?.hold_until || null;
+      }catch(err){
+        console.warn('extend-hold error', err);
+        return null;
+      }
+    }
+
     /* ========== POLLING RESPONSES ========== */
     async function fetchResponses(requestId){
       const { data: rows, error } = await sb()
@@ -1417,6 +1571,74 @@
         is_generic: !!r.is_generic,
         pharmacy: byId[r.pharmacy_id] || { id:r.pharmacy_id, name:'Φαρμακείο', address:'—', phone:'—' }
       }));
+    }
+
+    function startPolling({ mode, startTime=Date.now() }){
+      if(pollInt) clearInterval(pollInt);
+
+      async function handleFunctions(){
+        if(!window.currentRequest?.token) return;
+        const data = await pollStatusFunctions(window.currentRequest.token);
+        if(!data) return;
+        if(data.status === 'reserved'){
+          hidePending();
+          let reserved = selectedPharmacy || null;
+          if(!reserved){
+            try{
+              const stored = localStorage.getItem(LS_PICKUP);
+              if(stored) reserved = toPickupPharmacy(JSON.parse(stored));
+            }catch{}
+          }
+          if(!reserved && data.reservedPharmacy){
+            reserved = toPickupPharmacy(data.reservedPharmacy);
+          }
+          if(reserved){
+            populateReservedDetails(reserved);
+            localStorage.setItem(LS_PICKUP, JSON.stringify(reserved));
+            selectedPharmacy = reserved;
+          }
+          const holdSec = data.holdUntil ? Math.max(0, Math.round((new Date(data.holdUntil).getTime() - Date.now())/1000)) : 60*60;
+          if(holdSec > 0) startPickupTimer(Math.max(holdSec, 60));
+          else startPickupTimer(60*60);
+          clearInterval(pollInt); pollInt=null;
+          return;
+        }
+        if(data.items.length){
+          hidePending();
+          renderResults(data.items);
+        } else if(Date.now() - startTime > 120000){
+          hidePending();
+          setResultsState('empty');
+          clearInterval(pollInt); pollInt=null;
+        }
+      }
+
+      async function handleSupabase(){
+        if(!window.currentRequest?.id) return;
+        const items = await fetchResponses(window.currentRequest.id);
+        if(items.length){
+          hidePending();
+          renderResults(items);
+          clearInterval(pollInt); pollInt=null;
+        }else if(Date.now()-startTime > 120000){
+          hidePending();
+          setResultsState('empty');
+          clearInterval(pollInt); pollInt=null;
+        }
+      }
+
+      const pollOnce = async ()=>{
+        try{
+          if(mode === 'functions'){
+            await handleFunctions();
+          }else if(mode === 'supabase'){
+            await handleSupabase();
+          }
+        }catch(err){ console.warn('poll error', err); }
+      };
+
+      pollOnce();
+      pollInt = setInterval(pollOnce, 4000);
     }
 
     function renderResults(items){
@@ -1477,13 +1699,22 @@
     document.getElementById('pm-confirm').onclick = async ()=>{
       if(!selectedPharmacy) return;
       pm.classList.add('hidden');
-      const sec = 60*60;
       populateReservedDetails(selectedPharmacy);
+      let sec = 60*60;
+      try{
+        if(window.currentRequest?.mode === 'functions' && window.currentRequest?.token){
+          const hold = await reserveViaFunctions(window.currentRequest.token);
+          if(hold){
+            const diff = Math.max(0, Math.round((new Date(hold).getTime() - Date.now())/1000));
+            if(diff > 0) sec = diff;
+          }
+        } else if(hasSupabase() && window.currentRequest?.id){
+          const untilISO = new Date(Date.now()+sec*1000).toISOString();
+          await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
+        }
+      }catch(err){ console.warn('reserve confirm error', err); }
+      localStorage.setItem(LS_PICKUP, JSON.stringify(selectedPharmacy));
       startPickupTimer(sec);
-      if(hasSupabase() && window.currentRequest?.id){
-        const untilISO = new Date(Date.now()+sec*1000).toISOString();
-        await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
-      }
     };
 
     document.getElementById('newSearch').addEventListener('click', ()=>{
@@ -1517,33 +1748,30 @@
       showPending();
 
       try {
-        let inserted = null;
-        if(hasSupabase()){
-          inserted = await createRequest({ med_name, active_substance, med_type, quantity, allow_generic, city, barcode });
-          window.currentRequest = inserted;
-          localStorage.setItem(LS_REQ, JSON.stringify({ id: inserted.id, created_at: inserted.created_at }));
+        if(pollInt) { clearInterval(pollInt); pollInt=null; }
+        window.currentRequest = null;
+        selectedPharmacy = null;
+        localStorage.removeItem(LS_PICKUP);
+        localStorage.removeItem('pickup-extend-date');
+
+        const fnResult = await submitViaFunctions({ med_name, active_substance, med_type, quantity, allow_generic, city, barcode });
+        if(fnResult){
+          window.currentRequest = { ...fnResult, mode:'functions', city, created_at: Date.now() };
+          localStorage.setItem(LS_REQ, JSON.stringify(window.currentRequest));
+          startPolling({ mode:'functions' });
+          return;
         }
 
-        if(hasSupabase() && inserted?.id){
-          if(pollInt) clearInterval(pollInt);
-          const startPoll = Date.now();
-          pollInt = setInterval(async ()=>{
-            try{
-              const items = await fetchResponses(inserted.id);
-              if(items.length){
-                hidePending();
-                renderResults(items);
-                clearInterval(pollInt); pollInt=null;
-              }else if(Date.now()-startPoll > 120000){
-                hidePending();
-                setResultsState('empty');
-                clearInterval(pollInt); pollInt=null;
-              }
-            }catch(err){ console.warn('poll error', err); }
-          }, 3000);
-        } else {
-          setTimeout(()=>{
-            hidePending();
+        if(hasSupabase()){
+          const inserted = await createRequest({ med_name, active_substance, med_type, quantity, allow_generic, city, barcode });
+          window.currentRequest = { id: inserted.id, created_at: inserted.created_at, mode:'supabase' };
+          localStorage.setItem(LS_REQ, JSON.stringify(window.currentRequest));
+          startPolling({ mode:'supabase' });
+          return;
+        }
+
+        setTimeout(()=>{
+          hidePending();
           const items = [
             { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
             { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false }
@@ -1553,7 +1781,6 @@
           }
           renderResults(items);
         }, 4500);
-        }
       } catch(err){
         console.error(err);
         hidePending();
