@@ -9,6 +9,7 @@
 2. **Only generics**: Provide replies marked as `is_generic=true`. Each card shows the amber “Γενόσημο διαθέσιμο” badge and the list is sorted by distance.
 3. **Only exact matches**: Provide replies with `is_generic=false`. Cards show the green “Ακριβώς το ζητούμενο” badge and distance ordering is ascending.
 4. **Mixed exact + generic**: Return a blend of both. Exact matches appear first regardless of distance, followed by generics sorted by distance.
+5. **Demo fallback dataset**: Disable both the Functions and Supabase layers so the built-in demo responses appear. Verify that at least one pharmacy surfaces as an exact match (green badge) and, when generics are allowed, a secondary card shows the amber generic badge.
 
 ## Auth verification flows
 ### SMS OTP
