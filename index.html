@@ -1447,13 +1447,59 @@
     const pendingOverlay=document.getElementById('pending-overlay');
     const pendingOverlayElapsed=document.getElementById('pending-overlay-elapsed');
     let waitT=null, waitStart=0;
+    let demoFallbackTimer=null;
+    let demoFallbackAllowGeneric=true;
+    let demoFallbackBarcode='';
+    function clearDemoFallback(){
+      if(demoFallbackTimer){
+        clearTimeout(demoFallbackTimer);
+        demoFallbackTimer=null;
+      }
+      demoFallbackBarcode='';
+    }
+    function scheduleDemoFallback(allowGeneric=true, barcode=''){
+      clearDemoFallback();
+      demoFallbackAllowGeneric = allowGeneric;
+      demoFallbackBarcode = barcode || '';
+      demoFallbackTimer = setTimeout(()=>{
+        demoFallbackTimer=null;
+        const allowGen = demoFallbackAllowGeneric;
+        const barcodeValue = demoFallbackBarcode;
+        demoFallbackBarcode='';
+        hidePending();
+        if(barcodeValue){
+          console.info('Submitted barcode:', barcodeValue);
+        }
+        renderResults(sampleDemoPharmacies(allowGen));
+      }, 3500);
+    }
     function showPending(){
       waitStart=Date.now();
+      clearDemoFallback();
       pendingToast?.classList.remove('hidden');
       if(pendingOverlay){
         pendingOverlay.classList.remove('hidden');
         pendingOverlay.classList.add('flex');
       }
+      if(results){
+        results.classList.add('hidden');
+      }
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      if(resultsList){ resultsList.innerHTML=''; }
+      if(resultsModalList){ resultsModalList.innerHTML=''; }
+      if(statusCallLink){
+        statusCallLink.href = '#';
+        setLinkAvailability(statusCallLink, false);
+      }
+      if(statusDirectionsLink){
+        statusDirectionsLink.href = '#';
+        setLinkAvailability(statusDirectionsLink, false);
+      }
+      statusReservedGeneric?.classList.add('hidden');
+      selectedPharmacy = null;
       if(pendingOverlayElapsed){ pendingOverlayElapsed.textContent='0s'; }
       if(waitSpan){ waitSpan.textContent='0s'; }
       if(waitT) clearInterval(waitT);
@@ -1462,10 +1508,10 @@
         if(waitSpan) waitSpan.textContent=secs;
         if(pendingOverlayElapsed) pendingOverlayElapsed.textContent=secs;
       },500);
-      setResultsState('pending');
       window.scrollTo({top:0,behavior:'smooth'});
     }
     function hidePending(){
+      clearDemoFallback();
       pendingToast?.classList.add('hidden');
       if(pendingOverlay){
         pendingOverlay.classList.add('hidden');
@@ -2244,8 +2290,10 @@
           hidePending();
           renderResults(data.items);
         } else if(Date.now() - startTime > 120000){
-          hidePending();
-          setResultsState('empty');
+          if(!latestResults.length){
+            hidePending();
+            setResultsState('empty');
+          }
           clearInterval(pollInt); pollInt=null;
         }
       }
@@ -2258,8 +2306,10 @@
           renderResults(items);
           clearInterval(pollInt); pollInt=null;
         }else if(Date.now()-startTime > 120000){
-          hidePending();
-          setResultsState('empty');
+          if(!latestResults.length){
+            hidePending();
+            setResultsState('empty');
+          }
           clearInterval(pollInt); pollInt=null;
         }
       }
@@ -2520,6 +2570,7 @@
       resetAuthState({ preserveSelection:true });
       fireConfetti(3500);
       showPending();
+      scheduleDemoFallback(allow_generic, barcode);
 
       try {
         if(pollInt) { clearInterval(pollInt); pollInt=null; }
@@ -2544,14 +2595,7 @@
           return;
         }
 
-        setTimeout(()=>{
-          hidePending();
-          const demoItems = sampleDemoPharmacies(allow_generic);
-          if(barcode){
-            console.info('Submitted barcode:', barcode);
-          }
-          renderResults(demoItems);
-        }, 3500);
+        console.warn('Falling back to demo pharmacies.');
       } catch(err){
         console.error(err);
         hidePending();

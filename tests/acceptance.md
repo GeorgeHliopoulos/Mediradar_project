@@ -6,7 +6,7 @@
 
 ## Pending celebration flow
 1. Submit a valid search and confirm the confetti animation launches immediately.
-2. While the request is pending, the orange waiting overlay appears with the hourglass icon, “Τα φαρμακεία ενημερώθηκαν!” headline, supportive copy, and a live-updating timer badge.
+2. While the request is pending, the orange waiting overlay appears with the hourglass icon, “Τα φαρμακεία ενημερώθηκαν!” headline, supportive copy, and a live-updating timer badge—no secondary spinner or status card should be visible behind it.
 3. When demo pharmacies answer, the overlay closes on its own and the availability modal lists positive demo responses with Google Maps links and the “Δέσμευση 60’” action.
 
 ## Geolocation handling
@@ -18,7 +18,7 @@
 2. **Only generics**: Provide replies marked as `is_generic=true`. Each card shows the amber “Γενόσημο διαθέσιμο” badge and the list is sorted by distance.
 3. **Only exact matches**: Provide replies with `is_generic=false`. Cards show the green “Ακριβώς το ζητούμενο” badge and distance ordering is ascending.
 4. **Mixed exact + generic**: Return a blend of both. Exact matches appear first regardless of distance, followed by generics sorted by distance.
-5. **Demo fallback**: Disconnect the backend (or simulate a failed submission). After the short pending state the UI should surface the bundled demo pharmacies, including at least one exact-match response and a generic option when generics are allowed.
+5. **Demo fallback**: Disconnect the backend (or simulate a failed/empty submission). After the short pending state the UI should surface the bundled demo pharmacies—even if Supabase is configured but silent—including at least one exact-match response and a generic option when generics are allowed.
 
 ## Auth verification flows
 ### SMS OTP
