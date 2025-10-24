@@ -50,7 +50,6 @@
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
     .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
-    @keyframes spinHourglass { 0%{transform:rotate(0)} 50%{transform:rotate(180deg)} 100%{transform:rotate(360deg)} }
     /* μικρό, διακριτικό toast για ειδοποιήσεις */
     #push-toast { transition: transform .25s ease, opacity .25s ease; }
     #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
@@ -68,6 +67,15 @@
     .flag-icon svg { width:24px; height:16px; border-radius:2px; box-shadow:0 0 0 1px rgba(15,23,42,.15); }
     .dark .flag-icon svg { box-shadow:0 0 0 1px rgba(148,163,184,.4); }
     .barcode-highlight { box-shadow:0 0 0 3px rgba(16,185,129,.45); }
+    #celebration-overlay { transition: opacity .35s ease; opacity:0; }
+    #celebration-overlay.flex { opacity:1; }
+    #celebration-overlay.hiding { opacity:0; }
+    #celebration-overlay .success-mark { transform:scale(.85); opacity:0; }
+    #celebration-overlay .success-mark.animate-in { animation: successPop .6s ease forwards, successFade .5s ease forwards 2.4s; }
+    @keyframes successPop { to { transform:scale(1); opacity:1; } }
+    @keyframes successFade { to { transform:scale(.92); opacity:0; } }
+    .floating-emoji { position:absolute; bottom:-12%; font-size:2.5rem; opacity:0; animation: floatUp 3s ease-in forwards; }
+    @keyframes floatUp { 0%{ transform:translateY(40px) scale(.85); opacity:0; } 15%{ opacity:1; } 70%{ opacity:1; } 100%{ transform:translateY(-120%) scale(1.1); opacity:0; } }
   </style>
 
   <!-- PWA -->
@@ -76,8 +84,20 @@
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
 
-  <!-- Confetti -->
-  <canvas id="confetti" class="fixed inset-0 pointer-events-none z-[60]" style="display:none;"></canvas>
+  <!-- Success celebration overlay -->
+  <div id="celebration-overlay" class="fixed inset-0 hidden pointer-events-none z-[60] items-center justify-center">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-transparent dark:via-slate-900/60"></div>
+    <div data-emoji-container class="absolute inset-0 overflow-hidden"></div>
+    <div class="relative flex flex-col items-center gap-4 pointer-events-auto" role="status" aria-live="assertive">
+      <div class="success-mark w-28 h-28 rounded-full bg-white/95 dark:bg-slate-900/90 border-4 border-emerald-400/70 shadow-2xl flex items-center justify-center text-emerald-500">
+        <svg viewBox="0 0 48 48" class="w-16 h-16" aria-hidden="true">
+          <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="4" />
+          <path d="M16 24l6 6 12-12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" />
+        </svg>
+      </div>
+      <p id="celebration-message" class="text-lg font-semibold text-slate-700 dark:text-slate-100 drop-shadow">Η αίτηση στάλθηκε!</p>
+    </div>
+  </div>
 
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
@@ -132,14 +152,22 @@
     </div>
   </div>
 
-  <!-- Pending toast -->
-  <div id="pending-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[min(760px,92vw)] pointer-events-none">
-    <div class="pointer-events-auto rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 shadow-soft">
-      <div class="flex items-center gap-4">
-        <div class="text-4xl" style="animation:spinHourglass 1.2s linear infinite">⏳</div>
-        <div class="text-sm sm:text-base">
-          <div id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</div>
-          <div class="mt-1 font-semibold opacity-80"><span id="wait-elapsed">0s</span></div>
+  <!-- Pending full overlay -->
+  <div id="pending-overlay" class="fixed inset-0 hidden z-[70] items-center justify-center px-4">
+    <div class="w-full max-w-2xl">
+      <div class="relative overflow-hidden rounded-3xl border border-amber-400/70 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white shadow-soft">
+        <div class="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="absolute -left-16 bottom-[-60px] h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
+        <div class="relative flex flex-col items-center gap-6 px-8 py-10 text-center sm:px-10">
+          <div class="space-y-3">
+            <h3 id="pending-overlay-headline" class="text-2xl font-bold leading-tight sm:text-3xl">Τα φαρμακεία ενημερώθηκαν!</h3>
+            <p id="pending-overlay-message" class="text-sm text-white/90 sm:text-base">Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.</p>
+          </div>
+          <div id="loading-message" class="text-sm text-white/90 sm:text-base" aria-live="polite"></div>
+          <div id="pending-overlay-status" class="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm" role="status" aria-live="polite">
+            <span id="pending-overlay-status-text">Αναμονή απαντήσεων</span>
+            <span id="pending-overlay-elapsed" class="text-white/80">0s</span>
+          </div>
         </div>
       </div>
     </div>
@@ -226,35 +254,11 @@
           <span class="w-6 h-6 grid place-items-center">📍</span>
           <span id="t-city">Πόλη</span>
         </label>
-        <select id="city" required
-                class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-          <option value="">— Επιλογή —</option>
-          <!-- Μεγάλα αστικά κέντρα + extra -->
-          <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
-          <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
-          <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
-          <option>Καλαμάτα</option><option>Καβάλα</option><option>Ξάνθη</option>
-          <option>Κομοτηνή</option><option>Αλεξανδρούπολη</option><option>Σέρρες</option>
-          <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
-          <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
-          <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
-          <option>Αγρίνιο</option><option>Βέροια</option><option>Δράμα</option>
-          <option>Κατερίνη</option><option>Κοζάνη</option><option>Ναύπλιο</option>
-          <option>Πύργος</option><option>Γλυφάδα</option>
-          <!-- Αττική – δήμοι -->
-          <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
-          <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
-          <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
-          <option>Παλαιό Φάληρο</option><option>Άλιμος</option><option>Ιλίου</option>
-          <option>Ζωγράφου</option><option>Γαλάτσι</option><option>Βύρωνας</option>
-          <option>Δάφνη</option><option>Ηλιούπολη</option><option>Νίκαια</option>
-          <option>Κορυδαλλός</option><option>Πετρούπολη</option><option>Αργυρούπολη</option>
-          <option>Ηράκλειο Αττικής</option><option>Νέα Φιλαδέλφεια</option><option>Νέα Χαλκηδόνα</option>
-          <!-- Κρήτη extra -->
-          <option>Σητεία</option><option>Ιεράπετρα</option><option>Άγιος Νικόλαος</option>
-          <!-- Νησιά extra -->
-          <option>Κως</option><option>Σάμος</option><option>Σύρος</option><option>Πάρος</option><option>Νάξος</option>
-        </select>
+        <div class="mt-2 relative">
+          <input id="city" type="text" required autocomplete="off" placeholder="π.χ. Αθήνα"
+                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+          <div id="ac-city" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
+        </div>
       </div>
 
       <!-- Medicine -->
@@ -801,6 +805,19 @@
         pro:'Για φαρμακεία', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
         pendingOverlayHeadline:'Τα φαρμακεία ενημερώθηκαν!', pendingOverlayMessage:'Οι συνεργαζόμενοι φαρμακοποιοί ξεκινούν τώρα την αναζήτηση και θα απαντήσουν θετικά σύντομα.',
         pendingOverlayStatus:'Αναμονή απαντήσεων',
+        loadingMessages:[
+          'Τα φαρμακεία ενημερώθηκαν — το αίτημά σου βρίσκεται σε εξέλιξη.',
+          'Αναζητούμε το φαρμακό σου — ευχαριστούμε για την υπομονή.',
+          'Συντονιζόμαστε με τα φαρμακεία για την καλύτερη επιλογή για εσένα.',
+          'Το αίτημά σου έφτασε στους συνεργάτες μας — εργαζόμαστε πάνω σε αυτό.',
+          'Οι φαρμακοποιοί ελέγχουν τη διαθεσιμότητα — μείνε συντονισμένος.',
+          'Είμαστε κοντά σε απάντηση — λίγο ακόμη.',
+          'Το φαρμακό σου είναι καθ’ οδόν — σχεδόν έτοιμο.',
+          'Ετοιμάζουμε την ενημέρωσή σου — μείνε σε αναμονή.',
+          'Η υγεία σου είναι προτεραιότητα — το χειριζόμαστε.',
+          'Ελέγχουμε ενεργά τη διαθεσιμότητα — ευχαριστούμε που περιμένεις.'
+        ],
+        celebrationMessage:'Η αίτηση στάλθηκε!',
         langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
         gdprLink:'Όρους Αναζήτησης & GDPR',
         gdprTitle:'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης',
@@ -871,6 +888,19 @@
         pro:'For pharmacies', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
         pendingOverlayHeadline:'Pharmacies notified!', pendingOverlayMessage:'Partner pharmacists are now looking for your medicine and will confirm availability shortly.',
         pendingOverlayStatus:'Awaiting confirmations',
+        loadingMessages:[
+          'The pharmacies have been notified — your request is in motion.',
+          'Your medicine is being searched for — thank you for your patience.',
+          'We\'re coordinating with pharmacies to find the best option for you.',
+          'Your request has reached our partners — we\'re working on it.',
+          'Pharmacists are reviewing availability — please hold on.',
+          'We\'re close to an answer — just a little more time.',
+          'Your medicine is on its way — almost there.',
+          'We\'re preparing your response — stay tuned.',
+          'Your health request is a priority — we\'re on it.',
+          'We\'re actively checking for availability — thank you for waiting.'
+        ],
+        celebrationMessage:'Request sent successfully!',
         langGreek:'Greek', langEnglish:'English',
         gdprLink:'Search Terms & GDPR',
         gdprTitle:'Data Protection & Search Terms',
@@ -934,6 +964,281 @@
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
+    const citySuggestions = (() => {
+      const raw = `
+Άγιοι Θεόδωροι
+Άγιος Αθανάσιος
+Άγιος Νικόλαος
+Άγιος Νικόλαος Κρήτης
+Άγιος Στέφανος
+Άνδρος
+Άνοιξη
+Άρτα
+Αγία Βαρβάρα
+Αγία Μαρίνα Κορωπίου
+Αγία Μαρίνα Λέρου
+Αγία Μαρίνα Χανίων
+Αγία Παρασκευή
+Αγία Παρασκευή (Θεσσαλονίκης)
+Αγία Παρασκευή (Λέσβου)
+Αγία Τριάδα
+Αγιά
+Αγιάσος
+Αγιοι Ανάργυροι
+Αγρίνιο
+Αθήνα
+Αίγιο
+Αιγάλεω
+Αλεξανδρούπολη
+Αλμυρός
+Αμαλιάδα
+Αμπελώνας
+Αμύνταιο
+Αμφίκλεια
+Αντίκυρα
+Αρκαλοχώρι
+Αρμένοι
+Αρτέμιδα
+Αρχάνες
+Αχαΐα
+Αχαρνές
+Βάρη
+Βαρθολομιό
+Βασιλικά
+Βασιλικό Ευβοίας
+Βέλο
+Βέροια
+Βελβεντός
+Βόλος
+Βόρεια Κυνουρία
+Βούλα
+Βουλιαγμένη
+Βραχάτι
+Βραχνέικα
+Βριλήσσια
+Γαλάτσι
+Γαλατάς
+Γαργαλιάνοι
+Γαστούνη
+Γαύδος
+Γιαννιτσά
+Γλυφάδα
+Γούμενισσα
+Γρεβενά
+Δελβινάκι
+Δεσκάτη
+Διόνυσος
+Δομοκός
+Δράμα
+Δραπετσώνα
+Έδεσσα
+Εκάλη
+Ελασσόνα
+Ελευθερούπολη
+Ερυθρές
+Ζάκυνθος
+Ζάρακες
+Ζαρός
+Ζεφύρι
+Ζίτσα
+Ζωγράφου
+Ηγουμενίτσα
+Ηλιούπολη
+Ηράκλειο
+Ηράκλειο Αττικής
+Θάσος
+Θέρμη
+Θερμοπύλες
+Θεσσαλονίκη
+Θήβα
+Θήρα
+Ίλιον
+Ιεράπετρα
+Ιερισσός
+Ικαρία
+Ιστιαία
+Ιωάννινα
+Κάλυμνος
+Κάτω Αχαΐα
+Καβάλα
+Καλαβρύτα
+Καλαμάτα
+Καλαμπάκα
+Καλλιθέα
+Καμένα Βούρλα
+Καναλλάκι
+Καρδίτσα
+Καρλόβασι
+Καρπενήσι
+Καστέλλι
+Καστοριά
+Καστρί
+Κατερίνη
+Κέρκυρα
+Κεραμωτή
+Κερατέα
+Κερατσίνι
+Κηφισιά
+Κίσσαμος
+Κιλκίς
+Κόνιτσα
+Κόρινθος
+Κοζάνη
+Κοκκινιά
+Κομοτηνή
+Κορυδαλλός
+Κορωπί
+Κρανίδι
+Κρανιά
+Κρεμαστή
+Κρυονέρι
+Κρωπία
+Κύμη
+Κυπαρισσία
+Κως
+Λάρισα
+Λαγκαδάς
+Λαμία
+Λειβαθώ
+Λεπτοκαρυά
+Λευκάδα
+Λήμνος
+Λιβαδειά
+Λιτόχωρο
+Λουτρά Εδέσσης
+Λουτράκι
+Λυκόβρυση
+Μακρακώμη
+Μαλεβίζι
+Μαντούδι
+Μαραθώνας
+Μαρκόπουλο Μεσογαίας
+Μαρούσι
+Μεγαλόπολη
+Μεγανήσι
+Μεθώνη
+Μελίσσια
+Μενεμένη
+Μενίδι
+Μεσολόγγι
+Μεσσήνη
+Μεταμόρφωση
+Μήλος
+Μολάοι
+Μοσχάτο
+Μουζάκι
+Μύτικας
+Μυκόνος
+Μυρίνα
+Μυτιλήνη
+Νάξος
+Νάουσα
+Ναύπλιο
+Νέα Αγχίαλος
+Νέα Αρτάκη
+Νέα Ερυθραία
+Νέα Ιωνία
+Νέα Ιωνία Μαγνησίας
+Νέα Καλλικράτεια
+Νέα Μάκρη
+Νέα Μουδανιά
+Νέα Πέραμος
+Νέα Σμύρνη
+Νέα Φιλαδέλφεια
+Νέα Χαλκηδόνα
+Νεάπολη
+Νεάπολη Λακωνίας
+Νεοχώρι
+Νεράιδα
+Νεστόριο
+Νησί
+Νίκαια
+Νικήτη
+Νότια Κυνουρία
+Νυδρί
+Ξάνθη
+Ξυλόκαστρο
+Οινόφυτα
+Ορεστιάδα
+Πάργα
+Πάρος
+Πάτρα
+Παλαιό Φάληρο
+Παλαιόχωρα
+Παλλήνη
+Παναγιά
+Παπάγου
+Παραμυθιά
+Πειραιά
+Πειραιάς
+Πεντέλη
+Περιστέρι
+Πετρούπολη
+Πεύκη
+Πικέρμι
+Πλαταμώνας
+Πόρος
+Πόρτο Ράφτη
+Πολύγυρος
+Πολύκαστρο
+Πρέβεζα
+Πτολεμαΐδα
+Πύλος
+Πύργος
+Ραφήνα
+Ρέθυμνο
+Ρόδος
+Σάμος
+Σαλαμίνα
+Σαντορίνη
+Σέρβια
+Σέρρες
+Σητεία
+Σίνδος
+Σιάτιστα
+Σιδηρόκαστρο
+Σκιάθος
+Σκόπελος
+Σκύδρα
+Σούδα
+Σπάρτη
+Σπάτα
+Σταμάτα
+Στυλίδα
+Σύρος
+Ταύρος
+Τήνος
+Τρίκαλα
+Τρίπολη
+Τυμπάκι
+Φαιστός
+Φιλιατρά
+Φιλιππιάδα
+Φιλοθέη
+Φλώρινα
+Χαϊδάρι
+Χαλκίδα
+Χανιά
+Χερσόνησος
+Χίος
+Χολαργός
+Χώρα Μεσσηνίας
+Ψυχικό
+Ωραιόκαστρο`
+      return Array.from(new Set(raw.split('\n').map(v => v.trim()).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b, 'el', { sensitivity: 'base' }));
+    })();
+    const cityInputEl = document.getElementById('city');
+    if(cityInputEl){
+      const normalizeCity = () => {
+        const val = cityInputEl.value.trim();
+        if(!val) return;
+        const match = citySuggestions.find(name => name.toLowerCase() === val.toLowerCase());
+        if(match) cityInputEl.value = match;
+      };
+      cityInputEl.addEventListener('blur', normalizeCity);
+      cityInputEl.addEventListener('change', normalizeCity);
+    }
     let selectedPharmacy = null;
     let authState = { option:'login', activeTab:'email', verified:false, method:null, sms:null, email:null, payload:null };
     function t(k){ return strings[state.lang][k]; }
@@ -946,6 +1251,7 @@
       setText('t-searchTitle', t('searchTitle')); setText('t-home', t('home'));
       setText('t-medname', t('medname')); setText('t-formatTip', t('formatTip'));
       setText('t-city', t('city'));
+      if(cityInputEl){ cityInputEl.placeholder = state.lang==='el'?'π.χ. Αθήνα':'e.g. Athens'; }
       setText('t-qty', t('qty'));
       setText('t-type', t('type'));
       setText('t-substance', t('substance'));
@@ -962,6 +1268,8 @@
       setText('pending-overlay-headline', t('pendingOverlayHeadline'));
       setText('pending-overlay-message', t('pendingOverlayMessage'));
       setText('pending-overlay-status-text', t('pendingOverlayStatus'));
+      refreshLoadingMessageForLang();
+      setText('celebration-message', t('celebrationMessage'));
       setText('t-pro', t('pro')); setText('t-pro-m', t('pro'));
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
       setText('t-langElLabel', t('langGreek')); setText('t-langEnLabel', t('langEnglish'));
@@ -1441,17 +1749,73 @@
       list.addEventListener('click', (e)=>{ const item = e.target.closest('.ac-item'); if(!item) return; input.value = item.dataset.val; list.classList.add('hidden'); });
       document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
     }
+    attachAutocomplete('city','ac-city',citySuggestions);
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-    /* ========== Pending + Confetti ========== */
-    const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
+    /* ========== Pending + Celebration ========== */
     const pendingOverlay=document.getElementById('pending-overlay');
     const pendingOverlayElapsed=document.getElementById('pending-overlay-elapsed');
+    const loadingMessageEl=document.getElementById('loading-message');
     let waitT=null, waitStart=0;
+    let celebrationTimer=null;
     let demoFallbackTimer=null;
     let demoFallbackAllowGeneric=true;
     let demoFallbackBarcode='';
+    let loadingMessageTimer=null;
+    let loadingMessageIndex=0;
+    function getLoadingMessages(){
+      const messages = strings[state.lang]?.loadingMessages;
+      return Array.isArray(messages) ? messages : [];
+    }
+    function startLoadingMessageCycle(){
+      if(!loadingMessageEl) return;
+      const messages = getLoadingMessages();
+      if(loadingMessageTimer){ clearInterval(loadingMessageTimer); loadingMessageTimer=null; }
+      if(!messages.length){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
+        return;
+      }
+      loadingMessageEl.classList.remove('hidden');
+      loadingMessageIndex = 0;
+      loadingMessageEl.textContent = messages[loadingMessageIndex];
+      if(messages.length <= 1) return;
+      loadingMessageTimer = setInterval(()=>{
+        const pool = getLoadingMessages();
+        if(!pool.length){
+          loadingMessageEl.textContent='';
+          loadingMessageEl.classList.add('hidden');
+          clearInterval(loadingMessageTimer);
+          loadingMessageTimer=null;
+          return;
+        }
+        loadingMessageIndex = (loadingMessageIndex + 1) % pool.length;
+        loadingMessageEl.textContent = pool[loadingMessageIndex];
+      }, 3000);
+    }
+    function stopLoadingMessageCycle(clear=false){
+      if(loadingMessageTimer){
+        clearInterval(loadingMessageTimer);
+        loadingMessageTimer=null;
+      }
+      if(clear && loadingMessageEl){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
+      }
+    }
+    function refreshLoadingMessageForLang(){
+      if(!loadingMessageEl) return;
+      const messages = getLoadingMessages();
+      if(!messages.length){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
+        return;
+      }
+      loadingMessageEl.classList.remove('hidden');
+      if(loadingMessageIndex >= messages.length){ loadingMessageIndex = 0; }
+      loadingMessageEl.textContent = messages[loadingMessageIndex];
+    }
     function clearDemoFallback(){
       if(demoFallbackTimer){
         clearTimeout(demoFallbackTimer);
@@ -1473,12 +1837,11 @@
           console.info('Submitted barcode:', barcodeValue);
         }
         renderResults(sampleDemoPharmacies(allowGen));
-      }, 3500);
+      }, 12000);
     }
     function showPending(){
       waitStart=Date.now();
       clearDemoFallback();
-      pendingToast?.classList.remove('hidden');
       if(pendingOverlay){
         pendingOverlay.classList.remove('hidden');
         pendingOverlay.classList.add('flex');
@@ -1499,38 +1862,65 @@
       statusReservedGeneric?.classList.add('hidden');
       selectedPharmacy = null;
       if(pendingOverlayElapsed){ pendingOverlayElapsed.textContent='0s'; }
-      if(waitSpan){ waitSpan.textContent='0s'; }
+      stopLoadingMessageCycle();
+      startLoadingMessageCycle();
       if(waitT) clearInterval(waitT);
       waitT=setInterval(()=>{
         const secs=Math.floor((Date.now()-waitStart)/1000)+'s';
-        if(waitSpan) waitSpan.textContent=secs;
         if(pendingOverlayElapsed) pendingOverlayElapsed.textContent=secs;
       },500);
       window.scrollTo({top:0,behavior:'smooth'});
     }
     function hidePending(){
       clearDemoFallback();
-      pendingToast?.classList.add('hidden');
       if(pendingOverlay){
         pendingOverlay.classList.add('hidden');
         pendingOverlay.classList.remove('flex');
       }
+      stopLoadingMessageCycle(true);
       if(waitT){clearInterval(waitT); waitT=null;}
     }
-    function fireConfetti(ms=3500){
-      const c=document.getElementById('confetti'),ctx=c.getContext('2d');
-      const W=c.width=innerWidth,H=c.height=innerHeight; c.style.display='block';
-      const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));
-      let run=true; const end=performance.now()+ms;
-      (function loop(t){ if(t>end) run=false;
-        ctx.clearRect(0,0,W,H);
-        P.forEach(p=>{ if(run) p.vy+=.02; p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
-          if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}
-          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
-          ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); ctx.restore();
-        });
-        if(run) requestAnimationFrame(loop); else { c.style.display='none'; ctx.clearRect(0,0,W,H); }
-      })(performance.now());
+    function playCelebration(duration=3200){
+      const overlay = document.getElementById('celebration-overlay');
+      if(!overlay) return;
+      const emojiWrap = overlay.querySelector('[data-emoji-container]');
+      const successMark = overlay.querySelector('.success-mark');
+      overlay.classList.remove('hidden','hiding');
+      overlay.classList.add('flex');
+      overlay.style.opacity = '1';
+      if(emojiWrap){
+        emojiWrap.innerHTML = '';
+        const emojis = ['🎉','🎊','✨','💊','🧡'];
+        const total = 14;
+        for(let i=0;i<total;i++){
+          const span = document.createElement('span');
+          span.className = 'floating-emoji';
+          span.textContent = emojis[i % emojis.length];
+          span.style.left = `${Math.random()*80 + 10}%`;
+          span.style.animationDelay = `${Math.random()*0.8}s`;
+          span.style.animationDuration = `${2.2 + Math.random()*1.3}s`;
+          emojiWrap.appendChild(span);
+        }
+      }
+      if(successMark){
+        successMark.classList.remove('animate-in');
+        void successMark.offsetWidth;
+        successMark.classList.add('animate-in');
+      }
+      if(celebrationTimer){
+        clearTimeout(celebrationTimer);
+        celebrationTimer=null;
+      }
+      celebrationTimer = setTimeout(()=>{
+        overlay.classList.add('hiding');
+        overlay.style.opacity = '0';
+        setTimeout(()=>{
+          overlay.classList.add('hidden');
+          overlay.classList.remove('flex','hiding');
+          overlay.style.opacity = '';
+          if(emojiWrap){ emojiWrap.innerHTML=''; }
+        }, 360);
+      }, duration);
     }
 
     /* ========== Supabase helpers ========== */
@@ -2518,7 +2908,11 @@
       const med_type = document.getElementById('medicine-type').value || null;
       const quantity = parseInt(document.getElementById('quantity').value || '1',10);
       const allow_generic = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
-      const city = document.getElementById('city').value;
+      let city = cityInputEl ? cityInputEl.value.trim() : document.getElementById('city').value.trim();
+      if(city){
+        const match = citySuggestions.find(name => name.toLowerCase() === city.toLowerCase());
+        if(match) city = match;
+      }
 
       if(!med_name) return alert(state.lang==='el'?'Συμπλήρωσε το όνομα φαρμάκου':'Enter medicine name');
       if(!city) return alert(state.lang==='el'?'Επίλεξε πόλη':'Select city');
@@ -2526,7 +2920,7 @@
 
       closeResultsModal();
       resetAuthState({ preserveSelection:true });
-      fireConfetti(3500);
+      playCelebration(3200);
       showPending();
       scheduleDemoFallback(allow_generic, barcode);
 
