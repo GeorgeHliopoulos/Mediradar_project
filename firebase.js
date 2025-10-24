@@ -1,53 +1,67 @@
-
-// Import the functions you need from the SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/+esm";
 
-// Firebase configuration
+const ENV = window.ENV || {};
+
+let firebaseApp = null;
+let firebaseAuth = null;
+let firestore = null;
+let googleProvider = null;
+
 const firebaseConfig = {
-  "apiKey": "YOUR_API_KEY",
-  "authDomain": "YOUR_PROJECT_ID.firebaseapp.com",
-  "projectId": "YOUR_PROJECT_ID",
-  "storageBucket": "YOUR_PROJECT_ID.appspot.com",
-  "messagingSenderId": "YOUR_SENDER_ID",
-  "appId": "YOUR_APP_ID",
-  "measurementId": "YOUR_MEASUREMENT_ID"
+  apiKey: ENV.FIREBASE_API_KEY,
+  authDomain: ENV.FIREBASE_AUTH_DOMAIN,
+  projectId: ENV.FIREBASE_PROJECT_ID,
+  storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: ENV.FIREBASE_MESSAGING_SENDER_ID,
+  appId: ENV.FIREBASE_APP_ID,
+  measurementId: ENV.FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const hasFirebaseConfig = Object.values(firebaseConfig).every(value => typeof value === 'string' && value.length > 0 && !/demo/i.test(value));
 
-// Google Sign-In
-const googleProvider = new GoogleAuthProvider();
-document.getElementById("google-login").addEventListener("click", () => {
-  signInWithPopup(auth, googleProvider)
-    .then((result) => {
-      console.log("User signed in:", result.user.displayName);
-    })
-    .catch((error) => {
-      console.error("Error during sign-in:", error);
-    });
-});
+if (hasFirebaseConfig) {
+  firebaseApp = initializeApp(firebaseConfig);
+  firebaseAuth = getAuth(firebaseApp);
+  firestore = getFirestore(firebaseApp);
+  googleProvider = new GoogleAuthProvider();
+} else {
+  console.info('[firebase] Firebase config incomplete — skipping initialization.');
+}
 
-// Submit medicine request
-document.getElementById("medicine-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const formData = {
-    medicineName: document.getElementById("medicine-name").value,
-    activeSubstance: document.getElementById("active-substance").value,
-    medicineType: document.getElementById("medicine-type").value,
-    quantity: document.getElementById("quantity").value,
-    allowGeneric: document.querySelector('input[name="allow-generic"]:checked').value,
-    city: document.getElementById("city").value,
-    gdprAccepted: document.getElementById("gdpr-checkbox").checked
-  };
-  try {
-    const docRef = await addDoc(collection(db, "medicine_requests"), formData);
-    alert("Η αίτηση καταχωρήθηκε με επιτυχία!");
-  } catch (e) {
-    console.error("Σφάλμα κατά την αποθήκευση της αίτησης:", e);
-  }
-});
+let supabaseClient = null;
+
+if (ENV.SUPABASE_URL && ENV.SUPABASE_ANON_KEY) {
+  supabaseClient = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
+} else {
+  console.warn('[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY.');
+}
+
+export {
+  firebaseApp,
+  firebaseAuth,
+  firestore,
+  googleProvider,
+  supabaseClient,
+  signInWithPopup
+};
+
+export function isSupabaseReady() {
+  return !!supabaseClient;
+}
+
+export function isFirebaseReady() {
+  return !!firebaseApp;
+}

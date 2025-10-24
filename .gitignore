@@ -6,6 +6,7 @@ env.js
 env.local.js
 .env
 .env.*
+!.env.example
 
 # Build outputs
 netlify/functions/*.zip
