@@ -396,6 +396,7 @@
             <div class="space-y-2">
               <h4 id="status-reserved-name" class="text-2xl sm:text-3xl font-bold tracking-tight">City Pharmacy</h4>
               <p id="status-reserved-address" class="text-sm text-slate-600 dark:text-slate-300">Ιπποκράτους 12, Αθήνα</p>
+              <div id="status-reserved-hours" class="hidden text-xs text-slate-600 dark:text-slate-300 space-y-0.5"></div>
             </div>
             <div class="flex items-baseline gap-3">
               <span id="pickup-timer" class="text-5xl font-extrabold tracking-tight">60:00</span>
@@ -726,8 +727,12 @@
         <h3 class="text-lg font-bold" id="pm-title">Φαρμακείο</h3>
         <button id="pm-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
       </div>
-      <div class="p-5 space-y-2 text-sm">
+      <div class="p-5 space-y-4 text-sm">
         <div id="pm-address">Διεύθυνση:</div>
+        <div id="pm-hours-section" class="hidden">
+          <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ωράριο</div>
+          <div id="pm-hours" class="mt-1 grid gap-1 text-xs text-slate-600 dark:text-slate-300"></div>
+        </div>
       </div>
       <div id="pm-auth-message" class="px-5 pb-3 text-xs text-slate-500 dark:text-slate-400">Η δέσμευση απαιτεί ταυτοποίηση.</div>
       <div class="px-5 pb-5 flex gap-2 justify-between flex-wrap items-center">
@@ -767,6 +772,7 @@
   <script type="module">
     import { supabaseClient, isSupabaseReady } from './firebase.js';
     import { initAuthFlows, initProAuthFlows, bookingAuthContext } from './script.js';
+    import { deserializeSchedule, formatScheduleForDisplay, cloneSchedule } from './pharmacy/schedule.js';
     /* ========== Theme ========== */
     const html = document.documentElement;
     const bodyEl = document.body;
@@ -2020,6 +2026,7 @@
     const statusReservedName = document.getElementById('status-reserved-name');
     const statusReservedAddress = document.getElementById('status-reserved-address');
     const statusReservedGeneric = document.getElementById('status-reserved-generic');
+    const statusReservedHours = document.getElementById('status-reserved-hours');
     const statusDirectionsLink = document.getElementById('status-directions');
     const statusEmptyBtn = document.getElementById('status-empty-btn');
     const resultsModalEl = document.getElementById('results-modal');
@@ -2155,6 +2162,27 @@
       return `https://www.google.com/maps?q=${base}`;
     }
 
+    function renderScheduleList(container, schedule, locale='el', { limit=null, fallback='' } = {}){
+      if(!container) return false;
+      container.innerHTML = '';
+      const lines = formatScheduleForDisplay(schedule, locale) || [];
+      const toRender = typeof limit === 'number' && limit > 0 ? lines.slice(0, limit) : lines;
+      if(!toRender.length){
+        if(fallback){
+          const item = document.createElement('div');
+          item.textContent = fallback;
+          container.appendChild(item);
+        }
+        return false;
+      }
+      toRender.forEach(line => {
+        const row = document.createElement('div');
+        row.textContent = `${line.daysLabel}: ${line.hoursLabel}`;
+        container.appendChild(row);
+      });
+      return true;
+    }
+
     function formatDistanceLabel(distanceKm){
       if(distanceKm === null || Number.isNaN(distanceKm)){
         return t('distanceUnknown');
@@ -2233,6 +2261,12 @@
       distanceBadge.append(distanceIcon, distanceLabel);
       meta.append(avail, distanceBadge);
       info.appendChild(meta);
+
+      const schedulePreview = document.createElement('div');
+      schedulePreview.className = 'mt-3 space-y-0.5 text-xs text-slate-500 dark:text-slate-400';
+      if(renderScheduleList(schedulePreview, ph.schedule, state.lang === 'en' ? 'en' : 'el', { limit:2 })){
+        info.appendChild(schedulePreview);
+      }
       topRow.appendChild(info);
       card.appendChild(topRow);
 
@@ -2265,6 +2299,7 @@
 
       actionsWrap.append(actionsRow, selectBtn);
       card.appendChild(actionsWrap);
+      card._payload = item;
       return card;
     }
 
@@ -2276,10 +2311,20 @@
       const phone = phRaw.phone || raw.phone || raw.pharmacy_phone || '';
       const lat = parseCoordinate(phRaw.lat ?? raw.lat ?? raw.pharmacy_lat);
       const lng = parseCoordinate(phRaw.lng ?? raw.lng ?? raw.pharmacy_lng);
+      let schedule = null;
+      let scheduleMeta = phRaw.scheduleMeta || raw.scheduleMeta || null;
+      const scheduleSource = phRaw.schedule || raw.schedule || null;
+      if(scheduleSource){
+        schedule = cloneSchedule(scheduleSource);
+      }else if(phRaw.hours_json || raw.hours_json){
+        const parsed = deserializeSchedule(phRaw.hours_json || raw.hours_json || {});
+        schedule = parsed.schedule;
+        scheduleMeta = parsed.meta;
+      }
       return {
         id: raw.id || phRaw.id || Math.random().toString(36).slice(2),
         is_generic: !!(raw.is_generic ?? phRaw.is_generic ?? false),
-        pharmacy: { name, address, phone, lat, lng }
+        pharmacy: { name, address, phone, lat, lng, schedule, scheduleMeta }
       };
     }
 
@@ -2463,8 +2508,19 @@
       if(raw.pharmacy){
         return toPickupPharmacy({
           ...raw.pharmacy,
-          is_generic: raw.is_generic ?? raw.pharmacy.is_generic
+          is_generic: raw.is_generic ?? raw.pharmacy.is_generic,
+          schedule: raw.pharmacy.schedule || raw.schedule,
+          scheduleMeta: raw.pharmacy.scheduleMeta || raw.scheduleMeta
         });
+      }
+      let schedule = null;
+      let scheduleMeta = raw.scheduleMeta || null;
+      if(raw.schedule){
+        schedule = cloneSchedule(raw.schedule);
+      }else if(raw.hours_json){
+        const parsed = deserializeSchedule(raw.hours_json);
+        schedule = parsed.schedule;
+        scheduleMeta = parsed.meta;
       }
       return {
         name: raw.name || raw.pharmacy_name || raw.title || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
@@ -2472,7 +2528,9 @@
         tel: raw.tel || raw.phone || raw.pharmacy_phone || '',
         lat: raw.lat ?? raw.pharmacy_lat ?? '',
         lng: raw.lng ?? raw.pharmacy_lng ?? '',
-        is_generic: !!(raw.is_generic ?? raw.generic ?? false)
+        is_generic: !!(raw.is_generic ?? raw.generic ?? false),
+        schedule,
+        scheduleMeta
       };
     }
 
@@ -2482,6 +2540,10 @@
       statusReservedName.textContent = pharmacy?.name || fallbackName;
       statusReservedAddress.textContent = pharmacy?.addr || fallbackAddress;
       statusReservedGeneric.classList.toggle('hidden', !pharmacy?.is_generic);
+      if(statusReservedHours){
+        const hasSchedule = renderScheduleList(statusReservedHours, pharmacy?.schedule, state.lang==='en'?'en':'el');
+        statusReservedHours.classList.toggle('hidden', !hasSchedule);
+      }
       const querySource = pharmacy?.addr || pharmacy?.name || '';
       if(querySource){
         const encoded = encodeURIComponent(querySource);
@@ -2556,6 +2618,8 @@
     const pm = document.getElementById('pharm-modal');
     const pmTitle = document.getElementById('pm-title');
     const pmAddr  = document.getElementById('pm-address');
+    const pmHoursSection = document.getElementById('pm-hours-section');
+    const pmHours = document.getElementById('pm-hours');
     const pmMaps  = document.getElementById('pm-maps');
     const pmConfirm = document.getElementById('pm-confirm');
     const pmAuthMessage = document.getElementById('pm-auth-message');
@@ -2694,13 +2758,20 @@
           .from('pharmacies')
           .select('id,name,address,phone,hours_json,lat,lng')
           .in('id', pharmacyIds);
-        pharmacies = phs || [];
+        pharmacies = (phs || []).map(p => {
+          const parsed = deserializeSchedule(p.hours_json || {});
+          return {
+            ...p,
+            schedule: parsed.schedule,
+            scheduleMeta: parsed.meta
+          };
+        });
       }
       const byId = Object.fromEntries(pharmacies.map(p=>[p.id, p]));
       return rows.map(r=>({
         id: r.id,
         is_generic: !!r.is_generic,
-        pharmacy: byId[r.pharmacy_id] || { id:r.pharmacy_id, name:'Φαρμακείο', address:'—', phone:'—' }
+        pharmacy: byId[r.pharmacy_id] || { id:r.pharmacy_id, name:'Φαρμακείο', address:'—', phone:'—', schedule:null, scheduleMeta:null }
       }));
     }
 
@@ -2814,15 +2885,23 @@
 
     function handlePharmacySelection(card){
       if(!card) return;
+      const payload = card._payload || null;
+      const phData = payload?.pharmacy || {};
       selectedPharmacy = {
-        name: card.dataset.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
-        addr: card.dataset.addr || '',
-        lat: card.dataset.lat ? parseCoordinate(card.dataset.lat) : null,
-        lng: card.dataset.lng ? parseCoordinate(card.dataset.lng) : null,
-        is_generic: card.dataset.generic === 'true'
+        name: phData.name || card.dataset.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy'),
+        addr: phData.address || card.dataset.addr || '',
+        lat: typeof phData.lat === 'number' ? phData.lat : (card.dataset.lat ? parseCoordinate(card.dataset.lat) : null),
+        lng: typeof phData.lng === 'number' ? phData.lng : (card.dataset.lng ? parseCoordinate(card.dataset.lng) : null),
+        is_generic: payload?.is_generic ?? (card.dataset.generic === 'true'),
+        schedule: phData.schedule ? cloneSchedule(phData.schedule) : null,
+        scheduleMeta: phData.scheduleMeta || null
       };
       pmTitle.textContent = selectedPharmacy.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy');
       pmAddr.textContent  = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (selectedPharmacy.addr || '—');
+      const hasSchedule = renderScheduleList(pmHours, selectedPharmacy.schedule, state.lang==='en'?'en':'el');
+      if(pmHoursSection){
+        pmHoursSection.classList.toggle('hidden', !hasSchedule);
+      }
       if(selectedPharmacy.addr || (selectedPharmacy.lat !== null && selectedPharmacy.lng !== null)){
         pmMaps.href = buildMapsHref({
           address: selectedPharmacy.addr,
