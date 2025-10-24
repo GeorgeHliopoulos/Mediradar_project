@@ -163,7 +163,7 @@
             <h3 id="pending-overlay-headline" class="text-2xl font-bold leading-tight sm:text-3xl">Τα φαρμακεία ενημερώθηκαν!</h3>
             <p id="pending-overlay-message" class="text-sm text-white/90 sm:text-base">Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.</p>
           </div>
-          <div id="pending-overlay-phrase" class="text-sm text-white/90 sm:text-base"></div>
+          <div id="loading-message" class="text-sm text-white/90 sm:text-base" aria-live="polite"></div>
           <div id="pending-overlay-status" class="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm" role="status" aria-live="polite">
             <span id="pending-overlay-status-text">Αναμονή απαντήσεων</span>
             <span id="pending-overlay-elapsed" class="text-white/80">0s</span>
@@ -784,11 +784,17 @@
         pro:'Για φαρμακεία', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
         pendingOverlayHeadline:'Τα φαρμακεία ενημερώθηκαν!', pendingOverlayMessage:'Οι συνεργαζόμενοι φαρμακοποιοί ξεκινούν τώρα την αναζήτηση και θα απαντήσουν θετικά σύντομα.',
         pendingOverlayStatus:'Αναμονή απαντήσεων',
-        pendingOverlayPhrases:[
-          'Τα φαρμακεία ψάχνουν τα ράφια τους…',
-          'Οι φαρμακοποιοί ελέγχουν την αποθήκη…',
-          'Τα φαρμακεία αναζητούν το κατάλληλο προϊόν…',
-          'Γίνεται διπλός έλεγχος διαθεσιμότητας…'
+        loadingMessages:[
+          'Τα φαρμακεία ενημερώθηκαν — το αίτημά σου βρίσκεται σε εξέλιξη.',
+          'Αναζητούμε το φαρμακό σου — ευχαριστούμε για την υπομονή.',
+          'Συντονιζόμαστε με τα φαρμακεία για την καλύτερη επιλογή για εσένα.',
+          'Το αίτημά σου έφτασε στους συνεργάτες μας — εργαζόμαστε πάνω σε αυτό.',
+          'Οι φαρμακοποιοί ελέγχουν τη διαθεσιμότητα — μείνε συντονισμένος.',
+          'Είμαστε κοντά σε απάντηση — λίγο ακόμη.',
+          'Το φαρμακό σου είναι καθ’ οδόν — σχεδόν έτοιμο.',
+          'Ετοιμάζουμε την ενημέρωσή σου — μείνε σε αναμονή.',
+          'Η υγεία σου είναι προτεραιότητα — το χειριζόμαστε.',
+          'Ελέγχουμε ενεργά τη διαθεσιμότητα — ευχαριστούμε που περιμένεις.'
         ],
         celebrationMessage:'Η αίτηση στάλθηκε!',
         langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
@@ -861,11 +867,17 @@
         pro:'For pharmacies', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
         pendingOverlayHeadline:'Pharmacies notified!', pendingOverlayMessage:'Partner pharmacists are now looking for your medicine and will confirm availability shortly.',
         pendingOverlayStatus:'Awaiting confirmations',
-        pendingOverlayPhrases:[
-          'Pharmacies are checking their shelves…',
-          'Teams are looking through backroom stock…',
-          'Pharmacists are searching for the right item…',
-          'Confirming availability with a double check…'
+        loadingMessages:[
+          'The pharmacies have been notified — your request is in motion.',
+          'Your medicine is being searched for — thank you for your patience.',
+          'We\'re coordinating with pharmacies to find the best option for you.',
+          'Your request has reached our partners — we\'re working on it.',
+          'Pharmacists are reviewing availability — please hold on.',
+          'We\'re close to an answer — just a little more time.',
+          'Your medicine is on its way — almost there.',
+          'We\'re preparing your response — stay tuned.',
+          'Your health request is a priority — we\'re on it.',
+          'We\'re actively checking for availability — thank you for waiting.'
         ],
         celebrationMessage:'Request sent successfully!',
         langGreek:'Greek', langEnglish:'English',
@@ -1235,7 +1247,7 @@
       setText('pending-overlay-headline', t('pendingOverlayHeadline'));
       setText('pending-overlay-message', t('pendingOverlayMessage'));
       setText('pending-overlay-status-text', t('pendingOverlayStatus'));
-      refreshPendingPhraseForLang();
+      refreshLoadingMessageForLang();
       setText('celebration-message', t('celebrationMessage'));
       setText('t-pro', t('pro')); setText('t-pro-m', t('pro'));
       setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
@@ -1723,65 +1735,65 @@
     /* ========== Pending + Celebration ========== */
     const pendingOverlay=document.getElementById('pending-overlay');
     const pendingOverlayElapsed=document.getElementById('pending-overlay-elapsed');
-    const pendingOverlayPhraseEl=document.getElementById('pending-overlay-phrase');
+    const loadingMessageEl=document.getElementById('loading-message');
     let waitT=null, waitStart=0;
     let celebrationTimer=null;
     let demoFallbackTimer=null;
     let demoFallbackAllowGeneric=true;
     let demoFallbackBarcode='';
-    let pendingPhraseTimer=null;
-    let pendingPhraseIndex=0;
-    function getPendingPhrases(){
-      const phrases = strings[state.lang]?.pendingOverlayPhrases;
-      return Array.isArray(phrases) ? phrases : [];
+    let loadingMessageTimer=null;
+    let loadingMessageIndex=0;
+    function getLoadingMessages(){
+      const messages = strings[state.lang]?.loadingMessages;
+      return Array.isArray(messages) ? messages : [];
     }
-    function startPendingPhraseCycle(){
-      if(!pendingOverlayPhraseEl) return;
-      const phrases = getPendingPhrases();
-      if(pendingPhraseTimer){ clearInterval(pendingPhraseTimer); pendingPhraseTimer=null; }
-      if(!phrases.length){
-        pendingOverlayPhraseEl.textContent='';
-        pendingOverlayPhraseEl.classList.add('hidden');
+    function startLoadingMessageCycle(){
+      if(!loadingMessageEl) return;
+      const messages = getLoadingMessages();
+      if(loadingMessageTimer){ clearInterval(loadingMessageTimer); loadingMessageTimer=null; }
+      if(!messages.length){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
         return;
       }
-      pendingOverlayPhraseEl.classList.remove('hidden');
-      pendingPhraseIndex = Math.floor(Math.random()*phrases.length);
-      pendingOverlayPhraseEl.textContent = phrases[pendingPhraseIndex];
-      if(phrases.length <= 1) return;
-      pendingPhraseTimer = setInterval(()=>{
-        const pool = getPendingPhrases();
+      loadingMessageEl.classList.remove('hidden');
+      loadingMessageIndex = 0;
+      loadingMessageEl.textContent = messages[loadingMessageIndex];
+      if(messages.length <= 1) return;
+      loadingMessageTimer = setInterval(()=>{
+        const pool = getLoadingMessages();
         if(!pool.length){
-          pendingOverlayPhraseEl.textContent='';
-          pendingOverlayPhraseEl.classList.add('hidden');
-          clearInterval(pendingPhraseTimer);
-          pendingPhraseTimer=null;
+          loadingMessageEl.textContent='';
+          loadingMessageEl.classList.add('hidden');
+          clearInterval(loadingMessageTimer);
+          loadingMessageTimer=null;
           return;
         }
-        pendingPhraseIndex = (pendingPhraseIndex + 1) % pool.length;
-        pendingOverlayPhraseEl.textContent = pool[pendingPhraseIndex];
-      }, 2600);
+        loadingMessageIndex = (loadingMessageIndex + 1) % pool.length;
+        loadingMessageEl.textContent = pool[loadingMessageIndex];
+      }, 3000);
     }
-    function stopPendingPhraseCycle(clear=false){
-      if(pendingPhraseTimer){
-        clearInterval(pendingPhraseTimer);
-        pendingPhraseTimer=null;
+    function stopLoadingMessageCycle(clear=false){
+      if(loadingMessageTimer){
+        clearInterval(loadingMessageTimer);
+        loadingMessageTimer=null;
       }
-      if(clear && pendingOverlayPhraseEl){
-        pendingOverlayPhraseEl.textContent='';
-        pendingOverlayPhraseEl.classList.add('hidden');
+      if(clear && loadingMessageEl){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
       }
     }
-    function refreshPendingPhraseForLang(){
-      if(!pendingOverlayPhraseEl) return;
-      const phrases = getPendingPhrases();
-      if(!phrases.length){
-        pendingOverlayPhraseEl.textContent='';
-        pendingOverlayPhraseEl.classList.add('hidden');
+    function refreshLoadingMessageForLang(){
+      if(!loadingMessageEl) return;
+      const messages = getLoadingMessages();
+      if(!messages.length){
+        loadingMessageEl.textContent='';
+        loadingMessageEl.classList.add('hidden');
         return;
       }
-      pendingOverlayPhraseEl.classList.remove('hidden');
-      if(pendingPhraseIndex >= phrases.length){ pendingPhraseIndex = 0; }
-      pendingOverlayPhraseEl.textContent = phrases[pendingPhraseIndex];
+      loadingMessageEl.classList.remove('hidden');
+      if(loadingMessageIndex >= messages.length){ loadingMessageIndex = 0; }
+      loadingMessageEl.textContent = messages[loadingMessageIndex];
     }
     function clearDemoFallback(){
       if(demoFallbackTimer){
@@ -1804,7 +1816,7 @@
           console.info('Submitted barcode:', barcodeValue);
         }
         renderResults(sampleDemoPharmacies(allowGen));
-      }, 3500);
+      }, 12000);
     }
     function showPending(){
       waitStart=Date.now();
@@ -1829,8 +1841,8 @@
       statusReservedGeneric?.classList.add('hidden');
       selectedPharmacy = null;
       if(pendingOverlayElapsed){ pendingOverlayElapsed.textContent='0s'; }
-      stopPendingPhraseCycle();
-      startPendingPhraseCycle();
+      stopLoadingMessageCycle();
+      startLoadingMessageCycle();
       if(waitT) clearInterval(waitT);
       waitT=setInterval(()=>{
         const secs=Math.floor((Date.now()-waitStart)/1000)+'s';
@@ -1844,7 +1856,7 @@
         pendingOverlay.classList.add('hidden');
         pendingOverlay.classList.remove('flex');
       }
-      stopPendingPhraseCycle(true);
+      stopLoadingMessageCycle(true);
       if(waitT){clearInterval(waitT); waitT=null;}
     }
     function playCelebration(duration=3200){
