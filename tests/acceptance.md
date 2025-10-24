@@ -10,7 +10,7 @@
 
 ## Pending celebration flow
 1. Submit a valid search and confirm the success overlay appears with the floating emoji burst and animated check mark immediately.
-2. While the request is pending, the orange waiting overlay appears with the hourglass icon, “Τα φαρμακεία ενημερώθηκαν!” headline, supportive copy, and a live-updating timer badge—no secondary spinner or status card should be visible behind it.
+2. While the request is pending, only the orange waiting overlay is visible with the “Τα φαρμακεία ενημερώθηκαν!” headline, supportive copy, rotating status phrases (π.χ. «Τα φαρμακεία ψάχνουν τα ράφια τους…»), and the live-updating timer badge—no additional banners or spinners should appear elsewhere.
 3. When demo pharmacies answer, the overlay closes on its own and the availability modal lists positive demo responses with Google Maps links and the “Δέσμευση 60’” action.
 
 ## Geolocation handling
