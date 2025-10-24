@@ -1,36 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 180" role="img" aria-labelledby="title desc">
-  <title id="title">MediRadar logo</title>
-  <desc id="desc">Butterfly mark with radar wing and MediRadar wordmark</desc>
-  <defs>
-    <linearGradient id="wingLeftFull" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4fc2ff"/>
-      <stop offset="100%" stop-color="#1d82ff"/>
-    </linearGradient>
-    <linearGradient id="wingRightFull" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8af279"/>
-      <stop offset="100%" stop-color="#2fbd73"/>
-    </linearGradient>
-  </defs>
-  <g transform="translate(20 20)">
-    <g>
-      <path d="M40 24c-14.359 14.359-22 33.545-22 53.6C18 125.805 43.195 151 73.4 151c20.055 0 39.242-7.64 53.6-22L40 24Z" fill="url(#wingLeftFull)"/>
-      <path d="M171 24c14.359 14.359 22 33.545 22 53.6 0 48.205-25.195 73.4-55.4 73.4-20.055 0-39.242-7.64-53.6-22L171 24Z" fill="url(#wingRightFull)"/>
-      <path d="M74 12h63c13.255 0 24 10.745 24 24v17c0 30.376-24.624 55-55 55s-55-24.624-55-55V36c0-13.255 10.745-24 24-24Z" fill="#f4f8fb"/>
-      <circle cx="94" cy="73" r="8" fill="#1b2d3f"/>
-      <circle cx="122" cy="73" r="8" fill="#1b2d3f"/>
-      <path d="M102 95c4 5.333 12 5.333 16 0" stroke="#1b2d3f" stroke-width="6" stroke-linecap="round"/>
-      <path d="M74 0h63c9.941 0 18 8.059 18 18v4c0 9.941-8.059 18-18 18H74c-9.941 0-18-8.059-18-18v-4C56 8.059 64.059 0 74 0Z" fill="#ffffff" opacity=".9"/>
-      <g transform="translate(118 46)" fill="#1b2d3f" opacity=".3">
-        <circle cx="68" cy="68" r="40" fill="none" stroke="#1b2d3f" stroke-width="6"/>
-        <circle cx="68" cy="68" r="24" fill="none" stroke="#1b2d3f" stroke-width="6"/>
-        <circle cx="68" cy="68" r="10" fill="#1b2d3f"/>
-        <path d="M68 30v76" stroke="#1b2d3f" stroke-width="6" stroke-linecap="round"/>
-        <path d="M30 68h76" stroke="#1b2d3f" stroke-width="6" stroke-linecap="round"/>
-      </g>
-    </g>
-    <g transform="translate(210 74)" fill="#183447" font-family="'Nunito', 'Segoe UI', sans-serif" font-size="56" font-weight="700">
-      <text>Med</text>
-      <text x="140">iRadar</text>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" role="img" aria-labelledby="logo-title logo-desc">
+  <title id="logo-title">Λογότυπο MediRadar</title>
+  <desc id="logo-desc">Αριστερή φτερούγα σε μορφή χαπιού και δεξιά φτερούγα με ραντάρ που σχηματίζουν πεταλούδα με την επιγραφή MediRadar</desc>
+  <style>
+    .wing {
+      transition: transform 0.4s ease;
+      transform-origin: center;
+    }
+    svg:hover .left-wing,
+    svg:active .left-wing {
+      transform: rotate(-5deg);
+    }
+    svg:hover .right-wing,
+    svg:active .right-wing {
+      transform: rotate(5deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .wing {
+        transition: none;
+        transform: none !important;
+      }
+    }
+  </style>
+
+  <g class="wing left-wing">
+    <path d="M80 100 C60 60, 60 140, 80 100" fill="#4A90E2" stroke="#1A2A4F" stroke-width="4"/>
+    <path d="M80 100 C100 140, 100 60, 80 100" fill="#C0C0C0" stroke="#1A2A4F" stroke-width="4"/>
+    <circle cx="75" cy="85" r="4" fill="#1A2A4F"/>
+    <circle cx="85" cy="85" r="4" fill="#1A2A4F"/>
+    <path d="M75 95 Q80 100, 85 95" stroke="#1A2A4F" stroke-width="2" fill="none"/>
   </g>
+
+  <g class="wing right-wing">
+    <path d="M220 100 C240 60, 240 140, 220 100" fill="#A0E57A" stroke="#1A2A4F" stroke-width="4"/>
+    <path d="M220 100 C200 140, 200 60, 220 100" fill="#FFFFFF" stroke="#1A2A4F" stroke-width="4"/>
+    <circle cx="220" cy="100" r="8" stroke="#1A2A4F" stroke-width="2" fill="none"/>
+    <circle cx="220" cy="100" r="16" stroke="#1A2A4F" stroke-width="2" fill="none"/>
+    <circle cx="220" cy="100" r="24" stroke="#1A2A4F" stroke-width="2" fill="none"/>
+    <circle cx="220" cy="76" r="4" fill="#1A2A4F"/>
+    <circle cx="240" cy="100" r="4" fill="#1A2A4F"/>
+    <circle cx="220" cy="124" r="4" fill="#1A2A4F"/>
+  </g>
+
+  <text x="90" y="180" font-family="Arial, sans-serif" font-size="24" fill="#1A2A4F">MediRadar</text>
 </svg>
