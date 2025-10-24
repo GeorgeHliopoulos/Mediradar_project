@@ -166,6 +166,53 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus{
 /* αφαίρεση σκιάς από συγκεκριμένα SVG (π.χ. το εικονίδιο “γενόσημο”) */
 .no-shadow{ filter:none !important; }
 
+/* Footer links & share buttons */
+.footer-link{
+  background:none;
+  border:none;
+  padding:0;
+  font:inherit;
+  color:inherit;
+  cursor:pointer;
+}
+
+.share-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.share-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 16px;
+  border-radius:999px;
+  background:rgba(15,23,42,.05);
+  border:1px solid rgba(15,23,42,.08);
+  color:#0f172a;
+  font-weight:600;
+  text-decoration:none;
+  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.share-btn:hover{
+  background:rgba(41,163,163,.10);
+  box-shadow:0 8px 18px rgba(15,23,42,.12);
+  transform:translateY(-1px);
+}
+
+.dark .share-btn{
+  background:rgba(15,23,42,.45);
+  border-color:rgba(148,163,184,.25);
+  color:#e7eef5;
+}
+
+.dark .share-btn:hover{
+  background:rgba(63,185,185,.22);
+  box-shadow:0 10px 22px rgba(0,0,0,.35);
+}
+
 /* Animations */
 @keyframes fadeIn{
   from{ opacity:0; transform: translateY(10px);}
