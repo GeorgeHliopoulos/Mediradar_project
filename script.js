@@ -309,4 +309,78 @@ export function initProAuthFlows({
   };
 }
 
+function toRoleSet(value) {
+  const roles = new Set();
+  if (!value) return roles;
+  const push = role => {
+    if (typeof role === 'string' && role.trim()) {
+      roles.add(role.trim().toLowerCase());
+    }
+  };
+  if (Array.isArray(value)) {
+    value.forEach(push);
+  } else if (typeof value === 'string') {
+    value.split(',').forEach(push);
+  } else if (typeof value === 'object') {
+    Object.values(value).forEach(push);
+  }
+  return roles;
+}
+
+function extractRolesFromSession(session) {
+  const roles = new Set();
+  if (!session?.user) return roles;
+  const { user } = session;
+  [
+    user.app_metadata?.role,
+    user.app_metadata?.roles,
+    user.user_metadata?.role,
+    user.user_metadata?.roles
+  ].forEach(source => {
+    toRoleSet(source).forEach(role => roles.add(role));
+  });
+  if (typeof user.role === 'string') {
+    roles.add(user.role.trim().toLowerCase());
+  }
+  return roles;
+}
+
+export function getSessionRoles(session = bookingAuthContext.getSession()) {
+  return extractRolesFromSession(session);
+}
+
+export async function guardRoute({
+  roles = [],
+  redirectTo = '/',
+  onAuthorized,
+  onUnauthorized
+} = {}) {
+  const required = Array.isArray(roles)
+    ? roles.filter(Boolean).map(role => role.toString().toLowerCase())
+    : [roles].filter(Boolean).map(role => role.toString().toLowerCase());
+
+  let session = bookingAuthContext.getSession();
+  if (!session) {
+    try {
+      session = await refreshSession();
+    } catch (error) {
+      console.warn('[guardRoute] refresh failed', error);
+    }
+  }
+
+  const roleSet = extractRolesFromSession(session);
+  const allowed = !required.length || required.some(role => roleSet.has(role));
+
+  if (!allowed) {
+    try { onUnauthorized?.({ session, roles: roleSet }); } catch { /* noop */ }
+    if (redirectTo) {
+      window.location.replace(redirectTo);
+    }
+    return { allowed: false, session: session || null, roles: roleSet };
+  }
+
+  try { onAuthorized?.({ session, roles: roleSet }); } catch { /* noop */ }
+  return { allowed: true, session: session || null, roles: roleSet };
+}
+
 export { bookingAuthContext };
