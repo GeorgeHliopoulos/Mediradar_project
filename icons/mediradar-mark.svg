@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="wingLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#40b4ff"/>
+      <stop offset="100%" stop-color="#1c78ff"/>
+    </linearGradient>
+    <linearGradient id="wingRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7ce66b"/>
+      <stop offset="100%" stop-color="#2bb673"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <path d="M28 28c-7.732 7.732-12 18.036-12 28.8C16 83.09 32.91 100 51.2 100c10.765 0 21.068-4.268 28.8-12L28 28Z" fill="url(#wingLeft)"/>
+    <path d="M100 28c7.732 7.732 12 18.036 12 28.8 0 26.29-16.91 43.2-35.2 43.2-10.765 0-21.068-4.268-28.8-12L100 28Z" fill="url(#wingRight)"/>
+    <path d="M52 24h24c6.627 0 12 5.373 12 12v8a28 28 0 0 1-56 0v-8c0-6.627 5.373-12 12-12Z" fill="#f0f5f9"/>
+    <circle cx="58" cy="52" r="4" fill="#1c2b3a"/>
+    <circle cx="70" cy="52" r="4" fill="#1c2b3a"/>
+    <path d="M60 66c2 2.667 6 2.667 8 0" stroke="#1c2b3a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M52 14h24a8 8 0 0 1 8 8v2a8 8 0 0 1-8 8H52a8 8 0 0 1-8-8v-2a8 8 0 0 1 8-8Z" fill="#f6f8fb"/>
+  </g>
+</svg>
