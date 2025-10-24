@@ -579,6 +579,7 @@
           <button id="pro-signin-submit" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700" type="button">
             <span id="t-proSigninSubmit">Σύνδεση</span>
           </button>
+          <p id="pro-auth-status" class="hidden text-sm text-slate-600 dark:text-slate-300" role="status" aria-live="polite"></p>
           <button id="pro-forgot" type="button" class="text-sm underline text-slate-600 dark:text-slate-300 hover:opacity-80 w-fit">
             <span id="t-proForgot">Ξέχασες τον κωδικό;</span>
           </button>
@@ -632,35 +633,39 @@
           <form id="pro-register-form" class="grid gap-4 sm:grid-cols-2">
             <label class="text-sm font-semibold flex flex-col gap-2 sm:col-span-2">
               <span id="t-proFieldBusinessName">Επωνυμία φαρμακείου</span>
-              <input id="pro-field-business" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Φαρμακείο Κεντρικής Πλατείας">
+              <input id="pro-field-business" name="pro-field-business" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Φαρμακείο Κεντρικής Πλατείας">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldVat">ΑΦΜ</span>
-              <input id="pro-field-vat" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="123456789">
+              <input id="pro-field-vat" name="pro-field-vat" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="123456789">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldRegistrationNumber">Αριθμός άδειας</span>
-              <input id="pro-field-license" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="12345">
+              <input id="pro-field-license" name="pro-field-license" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="12345">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldContact">Υπεύθυνος επικοινωνίας</span>
-              <input id="pro-field-contact" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Μαρία Παπαδοπούλου">
+              <input id="pro-field-contact" name="pro-field-contact" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Μαρία Παπαδοπούλου">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldEmail">Email επικοινωνίας</span>
-              <input id="pro-field-email" type="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+              <input id="pro-field-email" name="pro-field-email" type="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldPassword">Κωδικός πρόσβασης</span>
+              <input id="pro-field-password" name="pro-field-password" type="password" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Δημιούργησε κωδικό">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldPhone">Τηλέφωνο</span>
-              <input id="pro-field-phone" type="tel" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="2101234567">
+              <input id="pro-field-phone" name="pro-field-phone" type="tel" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="2101234567">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2 sm:col-span-2">
               <span id="t-proFieldAddress">Διεύθυνση</span>
-              <input id="pro-field-address" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Ιπποκράτους 12">
+              <input id="pro-field-address" name="pro-field-address" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Ιπποκράτους 12">
             </label>
             <label class="text-sm font-semibold flex flex-col gap-2">
               <span id="t-proFieldCity">Πόλη</span>
-              <input id="pro-field-city" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Αθήνα">
+              <input id="pro-field-city" name="pro-field-city" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Αθήνα">
             </label>
             <div class="sm:col-span-2">
               <button id="pro-register-submit" type="submit" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700">
@@ -755,28 +760,13 @@
     </div>
   </div>
 
-  <!-- ===== ENV (INLINE — χωρίς /env.js) ===== -->
-  <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
-      VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
-    };
-  </script>
-
-  <!-- Supabase client -->
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
-    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
-      console.error('Missing Supabase ENV');
-    }
-    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('Supabase ready:', !!window.supabase);
-  </script>
+  <!-- Shared environment configuration -->
+  <script src="./env.js"></script>
 
   <!-- App JS -->
-  <script>
+  <script type="module">
+    import { supabaseClient, isSupabaseReady } from './firebase.js';
+    import { initAuthFlows, initProAuthFlows, bookingAuthContext } from './script.js';
     /* ========== Theme ========== */
     const html = document.documentElement;
     const bodyEl = document.body;
@@ -842,8 +832,12 @@
         proHaveAccount:'Έχεις ήδη λογαριασμό;', proGoSignin:'Σύνδεση',
         proRegisterHeading:'Στοιχεία φαρμακείου', proRegisterDesc:'Συμπλήρωσε τα στοιχεία του φαρμακείου για να ξεκινήσεις.',
         proFieldBusinessName:'Επωνυμία φαρμακείου', proFieldVat:'ΑΦΜ', proFieldContact:'Υπεύθυνος επικοινωνίας',
-        proFieldEmail:'Email επικοινωνίας', proFieldPhone:'Τηλέφωνο', proFieldAddress:'Διεύθυνση', proFieldCity:'Πόλη',
-        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική',
+        proFieldEmail:'Email επικοινωνίας', proFieldPassword:'Κωδικός πρόσβασης', proFieldPhone:'Τηλέφωνο', proFieldAddress:'Διεύθυνση', proFieldCity:'Πόλη',
+        proFieldRegistrationNumber:'Αριθμός άδειας',
+        proAuthSuccess:'Η σύνδεση ολοκληρώθηκε.',
+        proAuthMissingFields:'Συμπλήρωσε όλα τα υποχρεωτικά πεδία.',
+        proAuthRegisterSuccess:'Η εγγραφή καταχωρήθηκε — έλεγξε το email σου.',
+        proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική',
         resultsDrawerTitle:'Διαθέσιμα φαρμακεία', resultsDrawerSubtitle:'Επίλεξε φαρμακείο για παραλαβή.',
         resultsLoading:'Φόρτωση διαθέσιμων φαρμακείων…', resultsEmpty:'Δεν υπάρχουν διαθέσιμα φαρμακεία αυτή τη στιγμή.',
         resultsError:'Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.', resultsLocationPending:'Υπολογίζουμε αποστάσεις με βάση τη θέση σου…',
@@ -874,7 +868,8 @@
         authEmailStatusMissing:'Συμπλήρωσε έγκυρο email.', authEmailStatusExpired:'Το link έληξε — ζήτησε νέο.',
         authEmailStatusPending:'Πρώτα επέλεξε σύνδεση ή εγγραφή.', authEmailStatusVerified:'Η επιβεβαίωση email ολοκληρώθηκε.',
         authSsoHint:'Συνδέσου με τον αγαπημένο σου πάροχο.', authSsoStatusSuccess:'Η σύνδεση με %s ολοκληρώθηκε (demo).',
-        authGlobalSuccess:'Η ταυτοποίηση ολοκληρώθηκε — μπορείς να συνεχίσεις με τη δέσμευση.', authClose:'Κλείσιμο',
+        authGlobalSuccess:'Η ταυτοποίηση ολοκληρώθηκε — μπορείς να συνεχίσεις με τη δέσμευση.',
+        authErrorGeneric:'Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.', authClose:'Κλείσιμο',
         resultsModalClose:'Κλείσιμο', pmAuthRequired:'Η δέσμευση 60’ απαιτεί ταυτοποίηση.',
         pmAuthReady:'Ταυτοποίηση ολοκληρώθηκε — είσαι έτοιμος για δέσμευση.'
       },
@@ -925,8 +920,13 @@
         proHaveAccount:'Already have an account?', proGoSignin:'Sign in',
         proRegisterHeading:'Pharmacy details', proRegisterDesc:'Share your business information to get started.',
         proFieldBusinessName:'Pharmacy name', proFieldVat:'VAT number', proFieldContact:'Primary contact',
-        proFieldEmail:'Contact email', proFieldPhone:'Phone', proFieldAddress:'Address', proFieldCity:'City',
-        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home',
+        proFieldEmail:'Contact email', proFieldPassword:'Password', proFieldPhone:'Phone', proFieldAddress:'Address', proFieldCity:'City',
+        proFieldRegistrationNumber:'License number',
+        proAuthSuccess:'Pharmacy sign-in complete.',
+        proAuthMissingFields:'Please fill in all required fields.',
+        proAuthRegisterSuccess:'Registration submitted — check your email.',
+        authErrorGeneric:'Something went wrong. Please try again.',
+        proRegisterSubmit:'Submit registration', proBackHome:'Back to home',
         resultsDrawerTitle:'Available pharmacies', resultsDrawerSubtitle:'Choose a pharmacy for pickup.',
         resultsLoading:'Loading nearby pharmacies…', resultsEmpty:'No pharmacies are available right now.',
         resultsError:'Something went wrong. Please try again.',
@@ -1240,7 +1240,16 @@
       cityInputEl.addEventListener('change', normalizeCity);
     }
     let selectedPharmacy = null;
-    let authState = { option:'login', activeTab:'email', verified:false, method:null, sms:null, email:null, payload:null };
+    const existingSession = bookingAuthContext.getSession();
+    let authState = {
+      option:'login',
+      activeTab:'email',
+      verified: !!existingSession,
+      method: existingSession?.provider || null,
+      sms:null,
+      email:null,
+      payload:null
+    };
     function t(k){ return strings[state.lang][k]; }
     function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
     function setHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
@@ -1290,6 +1299,7 @@
       setText('t-proFieldBusinessName', t('proFieldBusinessName')); setText('t-proFieldVat', t('proFieldVat'));
       setText('t-proFieldRegistrationNumber', t('proFieldRegistrationNumber'));
       setText('t-proFieldContact', t('proFieldContact')); setText('t-proFieldEmail', t('proFieldEmail'));
+      setText('t-proFieldPassword', t('proFieldPassword'));
       setText('t-proFieldPhone', t('proFieldPhone')); setText('t-proFieldAddress', t('proFieldAddress'));
       setText('t-proFieldCity', t('proFieldCity'));
       setText('t-proRegisterSubmit', t('proRegisterSubmit'));
@@ -1337,6 +1347,7 @@
       document.getElementById('pro-field-license').placeholder = state.lang==='el'?'π.χ. 12345':'e.g. 12345';
       document.getElementById('pro-field-contact').placeholder = state.lang==='el'?'π.χ. Μαρία Παπαδοπούλου':'e.g. Maria Papadopoulou';
       document.getElementById('pro-field-email').placeholder = state.lang==='el'?'π.χ. pharmacy@domain.gr':'e.g. pharmacy@domain.com';
+      document.getElementById('pro-field-password').placeholder = state.lang==='el'?'Δημιούργησε κωδικό':'Create a password';
       document.getElementById('pro-field-phone').placeholder = state.lang==='el'?'π.χ. 2101234567':'e.g. +30 2101234567';
       document.getElementById('pro-field-address').placeholder = state.lang==='el'?'π.χ. Ιπποκράτους 12':'e.g. 12 Ippokratous St';
       document.getElementById('pro-field-city').placeholder = state.lang==='el'?'π.χ. Αθήνα':'e.g. Athens';
@@ -1554,8 +1565,14 @@
     const proOpeners = document.querySelectorAll('[data-open-pro]');
     const proSwitchers = document.querySelectorAll('[data-pro-switch]');
     const proSigninBtn = document.getElementById('pro-signin-submit');
+    const proSigninEmailInput = document.getElementById('pro-signin-email');
+    const proSigninPasswordInput = document.getElementById('pro-signin-password');
     const proForgotBtn = document.getElementById('pro-forgot');
     const proRegisterForm = document.getElementById('pro-register-form');
+    const proRegisterSubmitBtn = document.getElementById('pro-register-submit');
+    const proRegisterPasswordInput = document.getElementById('pro-field-password');
+    const proStatusEl = document.getElementById('pro-auth-status');
+    const proSsoButtons = document.querySelectorAll('.pro-sso-btn');
 
     function setProMode(mode='signin'){
       const isSignin = mode==='signin';
@@ -1606,33 +1623,31 @@
     proModal.addEventListener('click', (event)=>{ if(event.target === proModal){ closeProModal(); }});
     document.addEventListener('keydown', (event)=>{ if(event.key === 'Escape' && !proModal.classList.contains('hidden')) closeProModal(); });
 
-    document.querySelectorAll('.pro-sso-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const provider = btn.dataset.provider;
-        alert(state.lang==='el'
-          ? `Η σύνδεση με ${provider} θα είναι σύντομα διαθέσιμη.`
-          : `${provider} sign-in is coming soon.`);
-      });
-    });
-
-    proSigninBtn.addEventListener('click', ()=>{
-      alert(state.lang==='el'
-        ? 'Η σύνδεση φαρμακείου θα είναι σύντομα διαθέσιμη.'
-        : 'Pharmacy sign-in will be available soon.');
-    });
-
     proForgotBtn.addEventListener('click', ()=>{
       alert(state.lang==='el'
         ? 'Θα προσθέσουμε ροή ανάκτησης κωδικού σύντομα.'
         : 'Password recovery will be added soon.');
     });
 
-    proRegisterForm.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      alert(state.lang==='el'
-        ? 'Ευχαριστούμε! Η ομάδα MediRadar θα επικοινωνήσει μαζί σου για την ολοκλήρωση της εγγραφής.'
-        : 'Thanks! The MediRadar team will reach out to finish your registration.');
-      closeProModal();
+    initProAuthFlows({
+      elements: {
+        signinBtn: proSigninBtn,
+        signinEmailInput: proSigninEmailInput,
+        signinPasswordInput: proSigninPasswordInput,
+        statusEl: proStatusEl,
+        registerForm: proRegisterForm,
+        registerSubmitBtn: proRegisterSubmitBtn,
+        registerPasswordInput: proRegisterPasswordInput,
+        ssoButtons: Array.from(proSsoButtons || [])
+      },
+      t,
+      setStatus,
+      onAuthenticated: ({ session }) => {
+        if(session){
+          bookingAuthContext.setSession(session);
+        }
+        setTimeout(()=> closeProModal(), 480);
+      }
     });
 
     /* ========== Autocomplete (demo) ========== */
@@ -1924,8 +1939,8 @@
     }
 
     /* ========== Supabase helpers ========== */
-    function sb(){ return window.supabase; }
-    function hasSupabase(){ return !!(window.supabase && window.ENV && window.ENV.SUPABASE_URL); }
+    function sb(){ return supabaseClient; }
+    function hasSupabase(){ return isSupabaseReady(); }
     const LS_REQ = 'mr:lastRequest';
 
     async function apiFetch(path, { method = 'GET', body, headers } = {}) {
@@ -1940,6 +1955,57 @@
         throw new Error(`API ${path} ${res.status}: ${txt}`);
       }
       return txt ? JSON.parse(txt) : {};
+    }
+
+    async function notifyPush(payload){
+      try{
+        await apiFetch('notify-push', { method:'POST', body: payload });
+      }catch(err){
+        console.warn('notify-push error', err);
+      }
+    }
+
+    async function notifySms(payload){
+      try{
+        await apiFetch('notify-sms', { method:'POST', body: payload });
+      }catch(err){
+        console.warn('notify-sms error', err);
+      }
+    }
+
+    function buildAuthSnapshot(session){
+      if(!session) return null;
+      const user = session.user || {};
+      return {
+        provider: session.provider || session.type || null,
+        access_token: session.access_token || session.id_token || null,
+        refresh_token: session.refresh_token || null,
+        user: {
+          id: user.id || user.uid || null,
+          email: user.email || null,
+          phone: user.phone || user.phone_number || user.phoneNumber || null
+        }
+      };
+    }
+
+    async function triggerBookingNotifications({ holdUntil }){
+      const session = bookingAuthContext.getSession();
+      const payload = {
+        requestId: window.currentRequest?.id || null,
+        requestToken: window.currentRequest?.token || null,
+        holdUntil,
+        pharmacy: selectedPharmacy ? {
+          name: selectedPharmacy.pharmacy?.name || '',
+          address: selectedPharmacy.pharmacy?.address || '',
+          phone: selectedPharmacy.pharmacy?.phone || '',
+          generic: !!selectedPharmacy.is_generic
+        } : null,
+        auth: buildAuthSnapshot(session)
+      };
+      await Promise.allSettled([
+        notifyPush(payload),
+        notifySms(payload)
+      ]);
     }
 
     /* ========== Results + Pharmacy modal + Pickup timer ========== */
@@ -2310,7 +2376,16 @@
     function resetAuthState({ preserveSelection=false } = {}){
       const option = preserveSelection ? (authState.option || 'login') : 'login';
       const tab = preserveSelection ? (authState.activeTab || (option==='guest'?'sms':'email')) : (option==='guest'?'sms':'email');
-      authState = { option, activeTab: tab, verified:false, method:null, sms:null, email:null, payload:null };
+      const session = bookingAuthContext.getSession();
+      authState = {
+        option,
+        activeTab: tab,
+        verified: !!session,
+        method: session?.provider || null,
+        sms:null,
+        email:null,
+        payload:null
+      };
       setAuthOption(option, true);
       setAuthTab(tab);
       setStatus(authSmsStatus, '');
@@ -2323,6 +2398,19 @@
       authGlobalStatus?.classList.add('hidden');
       refreshAuthMessage();
     }
+
+    bookingAuthContext.subscribe(session => {
+      authState = { ...authState, verified: !!session, method: session?.provider || authState.method };
+      refreshAuthMessage();
+      if(authGlobalStatus){
+        if(session){
+          authGlobalStatus.classList.remove('hidden');
+          authGlobalStatusText.textContent = t('authGlobalSuccess');
+        } else {
+          authGlobalStatus.classList.add('hidden');
+        }
+      }
+    });
 
     function openAuthModal(tab){
       setAuthOption(authState.option || 'login', true);
@@ -2344,10 +2432,11 @@
       }
     }
 
-    function markAuthVerified(method, payload){
-      authState.verified = true;
-      authState.method = method;
-      authState.payload = payload;
+    function markAuthVerified(method, payload, session){
+      if(session){
+        bookingAuthContext.setSession(session);
+      }
+      authState = { ...authState, verified:true, method, payload };
       authGlobalStatus?.classList.remove('hidden');
       authGlobalStatusText.textContent = t('authGlobalSuccess');
       refreshAuthMessage();
@@ -2772,20 +2861,23 @@
       pm.classList.add('hidden');
       populateReservedDetails(selectedPharmacy);
       let sec = 60*60;
+      let holdUntilISO = new Date(Date.now()+sec*1000).toISOString();
       try{
         if(window.currentRequest?.mode === 'functions' && window.currentRequest?.token){
           const hold = await reserveViaFunctions(window.currentRequest.token);
           if(hold){
             const diff = Math.max(0, Math.round((new Date(hold).getTime() - Date.now())/1000));
             if(diff > 0) sec = diff;
+            holdUntilISO = hold;
           }
         } else if(hasSupabase() && window.currentRequest?.id){
-          const untilISO = new Date(Date.now()+sec*1000).toISOString();
-          await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
+          holdUntilISO = new Date(Date.now()+sec*1000).toISOString();
+          await sb().from('requests').update({ status:'reserved', pickup_until: holdUntilISO }).eq('id', window.currentRequest.id);
         }
       }catch(err){ console.warn('reserve confirm error', err); }
       localStorage.setItem(LS_PICKUP, JSON.stringify(selectedPharmacy));
       startPickupTimer(sec);
+      triggerBookingNotifications({ holdUntil: holdUntilISO }).catch(err => console.warn('notify booking error', err));
     }
 
     pmConfirm.onclick = ()=>{
@@ -2799,73 +2891,27 @@
       openAuthModal(defaultTab);
     };
 
-    function sendSmsCode(){
-      const phone = (authSmsPhoneInput?.value || '').trim();
-      const digits = phone.replace(/\D/g,'');
-      if(!phone || digits.length < 8){
-        setStatus(authSmsStatus, t('authSmsStatusMissing'), 'error');
-        return;
-      }
-      const code = String(Math.floor(100000 + Math.random() * 900000));
-      authState.sms = { phone, code, expiresAt: Date.now() + 2 * 60 * 1000 };
-      if(authSmsCodeInput) authSmsCodeInput.value = '';
-      authSmsResendBtn?.classList.remove('hidden');
-      setStatus(authSmsStatus, t('authSmsStatusSent').replace('%s', phone).replace('%s', code), 'success');
-    }
-
-    function sendMagicLink(mode){
-      const email = (authEmailInput?.value || '').trim();
-      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if(!valid){
-        setStatus(authEmailStatus, t('authEmailStatusMissing'), 'error');
-        return;
-      }
-      authState.email = { email, mode, expiresAt: Date.now() + 10 * 60 * 1000 };
-      const key = mode === 'register' ? 'authEmailStatusSentRegister' : 'authEmailStatusSentLogin';
-      setStatus(authEmailStatus, t(key).replace('%s', email), 'success');
-    }
-
-    authSmsSendBtn?.addEventListener('click', sendSmsCode);
-    authSmsResendBtn?.addEventListener('click', sendSmsCode);
-    authSmsVerifyBtn?.addEventListener('click', ()=>{
-      if(!authState.sms){
-        setStatus(authSmsStatus, t('authSmsStatusMissing'), 'error');
-        return;
-      }
-      if(authState.sms.expiresAt < Date.now()){
-        setStatus(authSmsStatus, t('authSmsStatusExpired'), 'error');
-        return;
-      }
-      const code = (authSmsCodeInput?.value || '').trim();
-      if(code !== authState.sms.code){
-        setStatus(authSmsStatus, t('authSmsStatusMismatch'), 'error');
-        return;
-      }
-      setStatus(authSmsStatus, t('authSmsStatusVerified'), 'success');
-      markAuthVerified('sms', { phone: authState.sms.phone });
-    });
-
-    authEmailLoginBtn?.addEventListener('click', ()=> sendMagicLink('login'));
-    authEmailRegisterBtn?.addEventListener('click', ()=> sendMagicLink('register'));
-    authEmailConfirmBtn?.addEventListener('click', ()=>{
-      if(!authState.email){
-        setStatus(authEmailStatus, t('authEmailStatusPending'), 'error');
-        return;
-      }
-      if(authState.email.expiresAt < Date.now()){
-        setStatus(authEmailStatus, t('authEmailStatusExpired'), 'error');
-        return;
-      }
-      setStatus(authEmailStatus, t('authEmailStatusVerified'), 'success');
-      markAuthVerified('email', { email: authState.email.email, mode: authState.email.mode });
-    });
-
-    authSsoButtons.forEach(btn => {
-      btn.addEventListener('click', ()=>{
-        const provider = btn.dataset.provider || 'SSO';
-        setStatus(authSsoStatus, t('authSsoStatusSuccess').replace('%s', provider), 'success');
-        markAuthVerified('sso', { provider });
-      });
+    initAuthFlows({
+      elements: {
+        smsSendBtn: authSmsSendBtn,
+        smsResendBtn: authSmsResendBtn,
+        smsVerifyBtn: authSmsVerifyBtn,
+        smsPhoneInput: authSmsPhoneInput,
+        smsCodeInput: authSmsCodeInput,
+        smsStatusEl: authSmsStatus,
+        emailInput: authEmailInput,
+        emailStatusEl: authEmailStatus,
+        emailLoginBtn: authEmailLoginBtn,
+        emailRegisterBtn: authEmailRegisterBtn,
+        emailConfirmBtn: authEmailConfirmBtn,
+        ssoButtons: Array.from(authSsoButtons || []),
+        ssoStatusEl: authSsoStatus
+      },
+      t,
+      setStatus,
+      markVerified: markAuthVerified,
+      getAuthState: () => authState,
+      updateAuthState: patch => { authState = { ...authState, ...patch }; }
     });
 
     resultsModalClose?.addEventListener('click', closeResultsModal);
