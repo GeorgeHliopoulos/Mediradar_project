@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 220" role="img" aria-labelledby="mediradarLogoTitle mediradarLogoDesc">
+  <title id="mediradarLogoTitle">MediRadar logo</title>
+  <desc id="mediradarLogoDesc">Rounded radar emblem with capsule pointer alongside the MediRadar wordmark.</desc>
+  <defs>
+    <linearGradient id="radarGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#36d0c6" />
+      <stop offset="100%" stop-color="#1da6a3" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#0f253c" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(40 30)">
+    <circle cx="110" cy="80" r="80" fill="#effefd" />
+    <circle cx="110" cy="80" r="74" fill="url(#radarGradient)" />
+    <circle cx="110" cy="80" r="54" fill="rgba(255,255,255,0.15)" />
+    <circle cx="110" cy="80" r="34" fill="rgba(255,255,255,0.35)" />
+    <path d="M110 14a66 66 0 0 1 66 66" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="8" stroke-linecap="round" />
+    <path d="M110 28a52 52 0 0 1 52 52" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="8" stroke-linecap="round" />
+    <path d="M110 46a34 34 0 0 1 34 34" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="8" stroke-linecap="round" />
+    <line x1="110" y1="10" x2="110" y2="150" stroke="rgba(255,255,255,0.45)" stroke-width="4" />
+    <line x1="40" y1="80" x2="180" y2="80" stroke="rgba(255,255,255,0.45)" stroke-width="4" />
+    <path d="M110 80 L168 122" fill="none" stroke="#0f172a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M168 122c18 12 24 34 12 52s-36 24-54 12z" fill="#0f172a" />
+    <path d="M156 140c10 7 13 20 7 30s-18 13-28 7z" fill="#f8fafc" opacity="0.6" />
+    <circle cx="110" cy="80" r="14" fill="#0f172a" />
+    <circle cx="110" cy="80" r="8" fill="#f8fafc" />
+  </g>
+  <g transform="translate(260 0)" fill="url(#textGradient)" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-weight="700">
+    <text x="0" y="128" font-size="106" letter-spacing="-2">Medi</text>
+    <text x="272" y="128" font-size="106" letter-spacing="-2" fill="#1fb7b0">Radar</text>
+    <text x="0" y="186" font-size="32" font-weight="500" fill="#4c5a78" letter-spacing="4">PHARMACY&nbsp;AVAILABILITY&nbsp;NETWORK</text>
+  </g>
+</svg>
