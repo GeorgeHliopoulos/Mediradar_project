@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Λογότυπο MediRadar</title>
+  <desc id="desc">Ένα κάψουλα που εκπέμπει κυματισμούς και την επωνυμία MediRadar σε μοντέρνα γραμματοσειρά.</desc>
+  <defs>
+    <linearGradient id="wifiGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#48d1c5" />
+      <stop offset="100%" stop-color="#1697a6" />
+    </linearGradient>
+    <linearGradient id="pillGradient" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f2a3b" />
+      <stop offset="100%" stop-color="#15465d" />
+    </linearGradient>
+    <linearGradient id="pillTip" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#33d1c1" />
+      <stop offset="100%" stop-color="#1aa9af" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 112a72 72 0 0 1 144 0" stroke="url(#wifiGradient)" stroke-width="20" />
+    <path d="M72 112a48 48 0 0 1 96 0" stroke="url(#wifiGradient)" stroke-width="18" opacity="0.8" />
+    <path d="M96 112a24 24 0 0 1 48 0" stroke="url(#wifiGradient)" stroke-width="16" opacity="0.65" />
+  </g>
+  <g transform="translate(100 122)">
+    <rect x="0" y="0" width="40" height="76" rx="18" fill="url(#pillGradient)" />
+    <rect x="0" y="0" width="40" height="38" rx="18" fill="url(#pillTip)" />
+    <rect x="10" y="46" width="20" height="14" rx="7" fill="#e8f7f5" opacity="0.65" />
+  </g>
+  <g font-family="'Nunito', 'Inter', 'Segoe UI', sans-serif" font-weight="700" font-size="44">
+    <text x="36" y="210" fill="#1d2730">Medi</text>
+    <text x="135" y="210" fill="#18b1ad">Radar</text>
+  </g>
+</svg>

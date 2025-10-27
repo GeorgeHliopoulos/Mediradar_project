@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MediRadar</title>
 
-  <!-- Favicon (inline για να μην έχεις 404) -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%2329a3a3'/%3E%3Cpath d='M30 8h4v7a15 15 0 0 1 15 15h7v4h-7a15 15 0 0 1-15 15v7h-4v-7a15 15 0 0 1-15-15h-7v-4h7a15 15 0 0 1 15-15z' fill='white'/%3E%3Ccircle cx='32' cy='30' r='8' fill='white'/%3E%3C/svg%3E">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/icons/mediradar-logo.svg">
 
   <!-- Android/Chrome PWA -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -210,11 +210,9 @@
   <!-- SPLASH -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <div class="w-full max-w-4xl text-center">
-      <div class="mx-auto w-24 h-24 rounded-3xl bg-brand-600 text-white grid place-items-center shadow-soft">
-        <svg viewBox="0 0 24 24" class="w-10 h-10" aria-hidden="true">
-          <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/>
-        </svg>
-      </div>
+      <figure class="mx-auto w-32 h-32 sm:w-40 sm:h-40 rounded-[30px] bg-white/80 backdrop-blur shadow-soft border border-white/60 dark:border-slate-800/40 flex items-center justify-center">
+        <img src="/icons/mediradar-logo.svg" alt="Λογότυπο MediRadar" class="w-[88%] h-[88%] object-contain" loading="eager">
+      </figure>
 
       <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">MediRadar</h1>
       <p id="t-hero" class="mt-2 text-lg text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
