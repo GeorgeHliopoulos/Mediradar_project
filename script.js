@@ -41,7 +41,8 @@ export function initAuthFlows({
   setStatus,
   markVerified,
   getAuthState,
-  updateAuthState
+  updateAuthState,
+  availableProviders = []
 }) {
   const {
     smsSendBtn,
@@ -58,6 +59,14 @@ export function initAuthFlows({
     ssoButtons,
     ssoStatusEl
   } = elements;
+
+  const providerSet = new Set(
+    (Array.isArray(availableProviders) ? availableProviders : [])
+      .map((provider) =>
+        typeof provider === 'string' ? provider.trim().toLowerCase() : ''
+      )
+      .filter(Boolean)
+  );
 
   const genericErrorEl = resolveMessage(t, 'authErrorGeneric', 'Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.');
 
@@ -158,6 +167,10 @@ export function initAuthFlows({
 
   function bindSsoButton(btn) {
     if (!btn) return;
+    const providerKey = (btn.dataset.provider || '').toLowerCase();
+    if (providerSet.size && !providerSet.has(providerKey)) {
+      return;
+    }
     btn.addEventListener('click', async () => {
       const provider = btn.dataset.provider || 'SSO';
       setButtonLoading(btn, true);
@@ -195,7 +208,8 @@ export function initProAuthFlows({
   elements,
   t,
   setStatus,
-  onAuthenticated
+  onAuthenticated,
+  availableProviders = []
 }) {
   const {
     signinBtn,
@@ -207,6 +221,14 @@ export function initProAuthFlows({
     registerPasswordInput,
     ssoButtons
   } = elements;
+
+  const providerSet = new Set(
+    (Array.isArray(availableProviders) ? availableProviders : [])
+      .map((provider) =>
+        typeof provider === 'string' ? provider.trim().toLowerCase() : ''
+      )
+      .filter(Boolean)
+  );
 
   function updateStatus(message, tone = 'muted') {
     if (!statusEl) return;
@@ -284,6 +306,10 @@ export function initProAuthFlows({
 
   function bindProSso(btn) {
     if (!btn) return;
+    const providerKey = (btn.dataset.provider || '').toLowerCase();
+    if (providerSet.size && !providerSet.has(providerKey)) {
+      return;
+    }
     btn.addEventListener('click', async () => {
       const provider = btn.dataset.provider || 'SSO';
       setButtonLoading(btn, true);

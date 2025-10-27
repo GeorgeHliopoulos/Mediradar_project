@@ -102,10 +102,26 @@
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-      <button id="pro-trigger" data-open-pro type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
-        <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για φαρμακεία</span>
-      </button>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="/" class="flex items-center gap-2 rounded-2xl bg-white/90 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-3 py-1.5 text-sm font-semibold text-slate-900 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+          <img src="/icons/logo.svg" alt="MediRadar" class="h-6 w-6 rounded-xl" />
+          <span class="tracking-tight">MediRadar</span>
+        </a>
+        <button id="pro-trigger" data-open-pro type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
+          <span aria-hidden="true">💼</span>
+          <span id="t-pro">Για φαρμακεία</span>
+        </button>
+        <div id="integration-status" class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-slate-200">
+          <span id="status-sso" data-state="pending" class="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-white/10 px-2.5 py-1 shadow-sm">
+            <span data-dot class="h-2 w-2 rounded-full bg-amber-400"></span>
+            <span data-status-text>Έλεγχος SSO</span>
+          </span>
+          <span id="status-push" data-state="pending" class="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-white/10 px-2.5 py-1 shadow-sm">
+            <span data-dot class="h-2 w-2 rounded-full bg-amber-400"></span>
+            <span data-status-text>Έλεγχος Push</span>
+          </span>
+        </div>
+      </div>
 
       <div class="flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
         <div class="flex items-center gap-1">
@@ -624,7 +640,7 @@
         </div>
 
         <div id="auth-view-sso" class="hidden space-y-4" role="tabpanel" aria-labelledby="auth-tab-sso">
-          <p id="auth-sso-hint" class="text-sm text-slate-600 dark:text-slate-300">Συνδέσου με τον αγαπημένο σου πάροχο.</p>
+          <p id="auth-sso-hint" data-sso-hint="primary" class="text-sm text-slate-600 dark:text-slate-300">Συνδέσου με τον αγαπημένο σου πάροχο.</p>
           <div class="grid gap-2 sm:grid-cols-3">
             <button class="auth-sso-btn px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500" data-provider="Google">🟢 Google</button>
             <button class="auth-sso-btn px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500" data-provider="Apple">🍎 Apple</button>
@@ -698,6 +714,7 @@
                 <span aria-hidden="true">🍎</span> Apple
               </button>
             </div>
+            <p data-pro-sso-hint class="hidden text-xs text-slate-500 dark:text-slate-400">Η σύνδεση μέσω SSO χρειάζεται ρύθμιση.</p>
           </div>
 
         </div>
@@ -720,6 +737,7 @@
                 <span aria-hidden="true">🍎</span> Apple
               </button>
             </div>
+            <p data-pro-sso-hint class="hidden text-xs text-slate-500 dark:text-slate-400">Η σύνδεση μέσω SSO χρειάζεται ρύθμιση.</p>
           </div>
 
           <div>
@@ -866,7 +884,7 @@
 
   <!-- App JS -->
   <script type="module">
-    import { supabaseClient, isSupabaseReady } from './firebase.js';
+    import { supabaseClient, isSupabaseReady, isFirebaseReady } from './firebase.js';
     import { initAuthFlows, initProAuthFlows, bookingAuthContext } from './script.js';
     import { deserializeSchedule, formatScheduleForDisplay, cloneSchedule } from './pharmacy/schedule.js';
     /* ========== Theme ========== */
@@ -884,6 +902,33 @@
     }
     setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
     themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
+
+    function normalizeProviderName(name){
+      return typeof name === 'string' ? name.trim().toLowerCase() : '';
+    }
+
+    const availableSsoProviders = (() => {
+      const providers = new Set();
+      if (isSupabaseReady()) {
+        ['google', 'apple', 'microsoft'].forEach(provider => providers.add(provider));
+      }
+      if (isFirebaseReady()) {
+        providers.add('google');
+      }
+      const extraProviders = window.ENV?.SSO_PROVIDERS;
+      if (typeof extraProviders === 'string' && extraProviders.trim()) {
+        extraProviders.split(',').map(normalizeProviderName).forEach(p => { if (p) providers.add(p); });
+      } else if (Array.isArray(extraProviders)) {
+        extraProviders.map(normalizeProviderName).forEach(p => { if (p) providers.add(p); });
+      }
+      return Array.from(providers);
+    })();
+
+    const availableSsoSet = new Set(availableSsoProviders.map(normalizeProviderName));
+    const pushIntegration = {
+      configured: typeof window.ENV?.VAPID_PUBLIC_KEY === 'string' && window.ENV.VAPID_PUBLIC_KEY.trim().length > 0,
+      supported: typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+    };
 
     /* ========== i18n ========== */
     const strings = {
@@ -996,11 +1041,14 @@
         authEmailStatusSentRegister:'Στάλθηκε magic link για εγγραφή στο %s.',
         authEmailStatusMissing:'Συμπλήρωσε έγκυρο email.', authEmailStatusExpired:'Το link έληξε — ζήτησε νέο.',
         authEmailStatusPending:'Πρώτα επέλεξε σύνδεση ή εγγραφή.', authEmailStatusVerified:'Η επιβεβαίωση email ολοκληρώθηκε.',
-        authSsoHint:'Συνδέσου με τον αγαπημένο σου πάροχο.', authSsoStatusSuccess:'Η σύνδεση με %s ολοκληρώθηκε (demo).',
+        authSsoHint:'Συνδέσου με τον αγαπημένο σου πάροχο.', authSsoUnavailable:'Οι πάροχοι SSO χρειάζονται ρύθμιση πριν συνεχίσεις.', authSsoStatusSuccess:'Η σύνδεση με %s ολοκληρώθηκε (demo).',
         authGlobalSuccess:'Η ταυτοποίηση ολοκληρώθηκε — μπορείς να συνεχίσεις με τη δέσμευση.',
         authErrorGeneric:'Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.', authClose:'Κλείσιμο',
         resultsModalClose:'Κλείσιμο', pmAuthRequired:'Η δέσμευση 60’ απαιτεί ταυτοποίηση.',
-        pmAuthReady:'Ταυτοποίηση ολοκληρώθηκε — είσαι έτοιμος για δέσμευση.'
+        pmAuthReady:'Ταυτοποίηση ολοκληρώθηκε — είσαι έτοιμος για δέσμευση.',
+        proSsoUnavailable:'Η σύνδεση μέσω SSO χρειάζεται ρύθμιση από τον διαχειριστή.',
+        statusSsoReady:'SSO έτοιμο', statusSsoMissing:'SSO μη διαθέσιμο',
+        statusPushReady:'Push ενεργό', statusPushMissing:'Push μη διαθέσιμο'
       },
       en:{
         hero:'Instant availability check at nearby pharmacies.',
@@ -1113,10 +1161,13 @@
         authEmailStatusSentRegister:'Magic link sent to %s for registration.',
         authEmailStatusMissing:'Enter a valid email.', authEmailStatusExpired:'The link expired — request a new one.',
         authEmailStatusPending:'Send yourself a link first.', authEmailStatusVerified:'Email verification complete.',
-        authSsoHint:'Use your preferred provider to continue.', authSsoStatusSuccess:'Signed in with %s (demo).',
+        authSsoHint:'Use your preferred provider to continue.', authSsoUnavailable:'SSO providers need to be configured before you continue.', authSsoStatusSuccess:'Signed in with %s (demo).',
         authGlobalSuccess:'Verification complete — you can proceed with the 60 min hold.', authClose:'Close',
         resultsModalClose:'Close', pmAuthRequired:'A verified account is required before starting the 60 min hold.',
-        pmAuthReady:'Verification complete — you are ready to hold.'
+        pmAuthReady:'Verification complete — you are ready to hold.',
+        proSsoUnavailable:'SSO sign-in needs to be configured by your administrator.',
+        statusSsoReady:'SSO ready', statusSsoMissing:'SSO unavailable',
+        statusPushReady:'Push enabled', statusPushMissing:'Push unavailable'
       }
     };
     const state = { lang: localStorage.getItem('mediradar-lang') || 'el' };
@@ -1409,6 +1460,57 @@
     function t(k){ return strings[state.lang][k]; }
     function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
     function setHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
+
+    function updateSsoHints(){
+      const hasProviders = availableSsoSet.size > 0;
+      if(primarySsoHint){
+        primarySsoHint.textContent = hasProviders ? t('authSsoHint') : t('authSsoUnavailable');
+      }
+      proSsoHints.forEach(el => {
+        el.textContent = t('proSsoUnavailable');
+        el.classList.toggle('hidden', hasProviders);
+      });
+    }
+
+    function updateIntegrationBadges(){
+      const hasSso = availableSsoSet.size > 0;
+      if(ssoStatusBadge){
+        const dot = ssoStatusBadge.querySelector('[data-dot]');
+        const textEl = ssoStatusBadge.querySelector('[data-status-text]');
+        ssoStatusBadge.dataset.state = hasSso ? 'ready' : 'missing';
+        ssoStatusBadge.classList.toggle('opacity-60', !hasSso);
+        if(dot){
+          dot.classList.toggle('bg-emerald-500', hasSso);
+          dot.classList.toggle('bg-amber-400', !hasSso);
+        }
+        if(textEl){
+          textEl.textContent = hasSso ? t('statusSsoReady') : t('statusSsoMissing');
+        }
+      }
+      const pushReady = pushIntegration.configured && pushIntegration.supported;
+      if(pushStatusBadge){
+        const dot = pushStatusBadge.querySelector('[data-dot]');
+        const textEl = pushStatusBadge.querySelector('[data-status-text]');
+        pushStatusBadge.dataset.state = pushReady ? 'ready' : 'missing';
+        pushStatusBadge.classList.toggle('opacity-60', !pushReady);
+        if(dot){
+          dot.classList.toggle('bg-emerald-500', pushReady);
+          dot.classList.toggle('bg-amber-400', !pushReady);
+        }
+        if(textEl){
+          textEl.textContent = pushReady ? t('statusPushReady') : t('statusPushMissing');
+        }
+      }
+      if(integrationStatusEl){
+        integrationStatusEl.classList.remove('hidden');
+      }
+    }
+
+    function updateIntegrationUi(){
+      updateSsoHints();
+      updateIntegrationBadges();
+    }
+
     function applyLang(){
       document.documentElement.lang = state.lang;
       setText('t-hero', t('hero'));
@@ -1562,6 +1664,7 @@
       langElBtn.setAttribute('aria-pressed', state.lang==='el');
       langEnBtn.setAttribute('aria-pressed', state.lang==='en');
       localStorage.setItem('mediradar-lang', state.lang);
+      updateIntegrationUi();
     }
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
     document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
@@ -1831,7 +1934,8 @@
           bookingAuthContext.setSession(session);
         }
         setTimeout(()=> closeProModal(), 480);
-      }
+      },
+      availableProviders: availableSsoProviders
     });
 
     /* ========== Autocomplete (demo) ========== */
@@ -2240,6 +2344,11 @@
     const authEmailConfirmBtn = document.getElementById('auth-email-confirm');
     const authSsoStatus = document.getElementById('auth-sso-status');
     const authSsoButtons = document.querySelectorAll('.auth-sso-btn');
+    const primarySsoHint = document.querySelector('[data-sso-hint="primary"]');
+    const proSsoHints = document.querySelectorAll('[data-pro-sso-hint]');
+    const integrationStatusEl = document.getElementById('integration-status');
+    const ssoStatusBadge = document.getElementById('status-sso');
+    const pushStatusBadge = document.getElementById('status-push');
     const authGlobalStatus = document.getElementById('auth-global-status');
     const authGlobalStatusText = document.getElementById('auth-global-status-text');
     const LS_PICKUP = 'mr:lastPickup';
@@ -2249,6 +2358,26 @@
     let userLocation = { status:'idle', coords:null };
     let locationPromise = null;
     let afterAuthCallback = null;
+
+    function applySsoAvailability(buttons){
+      (buttons || []).forEach(btn => {
+        if (!btn) return;
+        const providerKey = normalizeProviderName(btn.dataset?.provider || '');
+        const supported = availableSsoSet.size > 0 && availableSsoSet.has(providerKey);
+        if (supported) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-40','cursor-not-allowed','pointer-events-none');
+          btn.removeAttribute('aria-disabled');
+        } else {
+          btn.disabled = true;
+          btn.classList.add('opacity-40','cursor-not-allowed','pointer-events-none');
+          btn.setAttribute('aria-disabled','true');
+        }
+      });
+    }
+
+    applySsoAvailability(authSsoButtons);
+    applySsoAvailability(proSsoButtons);
 
     function showResultsWrapper(){ results.classList.remove('hidden'); }
     function setResultsState(state){
@@ -3168,7 +3297,8 @@
       setStatus,
       markVerified: markAuthVerified,
       getAuthState: () => authState,
-      updateAuthState: patch => { authState = { ...authState, ...patch }; }
+      updateAuthState: patch => { authState = { ...authState, ...patch }; },
+      availableProviders: availableSsoProviders
     });
 
     resultsModalClose?.addEventListener('click', closeResultsModal);
