@@ -3,621 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>MediRadar • Pharmacy</title>
-
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>MediRadar • Είσοδος Φαρμακείων</title>
+  <link rel="icon" href="/icons/icon-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#29a3a3" />
-
+  <meta name="theme-color" content="#00c6ff" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
-          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
-          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
+          colors: {
+            brand: {
+              500: '#00c6ff',
+              600: '#0098ff',
+              700: '#0072ff'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            glass: '0 35px 120px rgba(0, 114, 255, 0.35)'
+          }
         }
       }
-    }
+    };
   </script>
-
   <style>
-    .card { @apply rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow; }
-    .btn  { @apply px-3 py-2 rounded-xl border font-semibold; }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 32px, 0);
+      }
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+    .fade-in-card {
+      animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
   </style>
 </head>
-<body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
-  <div class="max-w-5xl mx-auto p-4">
-    <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div class="flex items-center gap-3">
-        <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Αρχική</a>
-        <h1 class="text-2xl font-extrabold">MediRadar • Φαρμακείο</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <div id="auth-session" class="text-xs text-slate-500 dark:text-slate-400"></div>
-        <button id="signout-btn" class="btn hidden hover:bg-slate-100 dark:hover:bg-slate-800">Έξοδος</button>
-        <button id="theme-toggle" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">🌙/🌞</button>
-      </div>
-    </header>
+<body class="min-h-full bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex items-center justify-center px-4 py-10 text-slate-900 font-sans">
+  <div data-auth-root class="w-full max-w-xl">
+    <div class="fade-in-card relative overflow-hidden rounded-3xl border border-white/40 bg-white/70 backdrop-blur-2xl shadow-glass">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-transparent"></div>
+      <div class="relative p-8 sm:p-10 space-y-8">
+        <div class="flex flex-col items-center text-center space-y-4">
+          <div class="h-16 w-16 rounded-2xl bg-white/90 shadow-lg flex items-center justify-center">
+            <img src="/icons/icon-192.png" alt="MediRadar" class="h-12 w-12" />
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">MediRadar</p>
+            <h1 class="text-2xl sm:text-3xl font-semibold text-slate-900">Σύνδεση στην πλατφόρμα MediRadar</h1>
+          </div>
+        </div>
 
-    <!-- PHARMACY PICK/CREATE -->
-    <section class="grid md:grid-cols-2 gap-4">
-      <div class="card">
-        <h2 class="text-lg font-bold mb-2">Επιλογή Φαρμακείου</h2>
-        <div class="flex gap-2">
-          <select id="pharmacy-select" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800"></select>
-          <button id="reload-pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">↻</button>
-        </div>
-        <p class="text-xs text-slate-500 mt-2">Αν δεν υπάρχει, δημιούργησέ το δίπλα.</p>
-        <div id="pharmacy-picked" class="mt-3 hidden">
-          <div class="text-sm"><span class="font-semibold">Επιλεγμένο:</span> <span id="pharm-name"></span> • <span id="pharm-city"></span></div>
-          <div class="text-xs text-slate-500"><span id="pharm-addr"></span> • <span id="pharm-phone"></span></div>
-        </div>
-      </div>
+        <div class="space-y-6">
+          <div class="grid grid-cols-2 gap-2 rounded-full bg-white/40 p-1">
+            <button type="button" data-auth-tab="users" aria-pressed="true" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-900 shadow-lg transition">
+              Για Χρήστες
+            </button>
+            <button type="button" data-auth-tab="pharmacies" aria-pressed="false" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition">
+              Για Φαρμακεία
+            </button>
+          </div>
 
-      <div class="card">
-        <h2 class="text-lg font-bold mb-2">Νέο Φαρμακείο</h2>
-        <div class="grid grid-cols-1 gap-2">
-          <input id="new-name"  class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Όνομα">
-          <input id="new-addr"  class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Διεύθυνση">
-          <input id="new-phone" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Τηλέφωνο">
-          <select id="new-city" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800">
-            <option value="">— Πόλη —</option>
-            <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option>
-            <option>Ηράκλειο</option><option>Λάρισα</option><option>Βόλος</option>
-            <option>Χανιά</option><option>Γλυφάδα</option><option>Ρόδος</option>
-          </select>
-          <button id="create-pharmacy" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Δημιουργία</button>
-        </div>
-      </div>
-    </section>
+          <div data-auth-views class="space-y-6">
+            <form data-auth-form="users" class="space-y-4">
+              <div class="space-y-2">
+                <label for="auth-email-users" class="text-sm font-medium text-slate-700">Email</label>
+                <input id="auth-email-users" type="email" required placeholder="name@example.com" class="w-full rounded-2xl border border-white/60 bg-white/90 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
+              </div>
+              <button type="submit" data-auth-email-button class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-brand-500/40">
+                Σύνδεση / Εγγραφή με Email
+              </button>
+              <button type="button" data-auth-google class="w-full rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30 flex items-center justify-center gap-3">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                <span>Σύνδεση με Google</span>
+              </button>
+              <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
+            </form>
 
-    <!-- HOURS JSON -->
-    <section id="hours-box" class="card mt-4 hidden">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 class="text-lg font-bold">Πρόγραμμα λειτουργίας</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Επίλεξε ημέρες και ώρες με την παρακάτω πρόταση.</p>
-        </div>
-        <div id="hours-meta" class="text-[11px] text-slate-400"></div>
-      </div>
-      <div id="hours-auth-alert" class="mt-3 text-xs text-amber-600 bg-amber-100/80 dark:bg-amber-900/30 dark:text-amber-200 rounded-xl px-3 py-2 hidden">Χρειάζεται είσοδος για επεξεργασία ωραρίου.</div>
-      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="hours-grid"></div>
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div id="hours-status" class="text-sm text-slate-500"></div>
-        <div class="flex gap-2">
-          <button id="cancel-hours" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold" disabled>Ακύρωση</button>
-          <button id="save-hours" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:pointer-events-none">Αποθήκευση</button>
-        </div>
-      </div>
-    </section>
+            <form data-auth-form="pharmacies" class="space-y-4 hidden">
+              <div class="space-y-2">
+                <label for="auth-email-pharmacies" class="text-sm font-medium text-slate-700">Email Φαρμακείου</label>
+                <input id="auth-email-pharmacies" type="email" required placeholder="pharmacy@example.com" class="w-full rounded-2xl border border-white/60 bg-white/90 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
+              </div>
+              <button type="submit" data-auth-email-button class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-brand-500/40">
+                Σύνδεση / Εγγραφή με Email
+              </button>
+              <button type="button" data-auth-google class="w-full rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30 flex items-center justify-center gap-3">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                <span>Σύνδεση με Google</span>
+              </button>
+              <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
+            </form>
 
-    <!-- REQUESTS LIST -->
-    <section id="req-box" class="card mt-4 hidden">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold">Αιτήματα στην πόλη σου</h2>
-        <div class="flex items-center gap-2 text-sm">
-          <span>Πόλη:</span><span id="city-pill" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800"></span>
-          <button id="reload-requests" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">↻</button>
+            <p data-auth-status-global class="hidden text-center text-sm font-semibold text-rose-600" role="status" aria-live="polite"></p>
+          </div>
+
+          <div data-auth-session class="hidden rounded-2xl border border-white/60 bg-white/90 px-4 py-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span data-auth-avatar class="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-lg font-semibold"></span>
+              <div class="space-y-0.5">
+                <p class="text-sm font-semibold text-slate-700">Καλωσήρθες!</p>
+                <p data-auth-user-email class="text-sm text-slate-500"></p>
+              </div>
+            </div>
+            <button type="button" data-auth-logout class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+              Αποσύνδεση
+            </button>
+          </div>
+
+          <p class="text-center text-xs text-slate-600">
+            Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.
+          </p>
         </div>
       </div>
-      <div id="req-list" class="mt-3 grid gap-3"></div>
-      <div id="empty-state" class="hidden p-3 rounded-xl border text-sm">Δεν υπάρχουν εκκρεμή αιτήματα αυτή τη στιγμή.</div>
-    </section>
+    </div>
   </div>
 
-  <!-- ENV -->
   <script src="/env.js"></script>
-  <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
-    };
-  </script>
-
-  <!-- Supabase + App -->
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    import { supabaseClient } from "./firebase.js";
-    import {
-      WEEK_DAYS,
-      createEmptySchedule,
-      cloneSchedule,
-      validateSchedule,
-      loadSchedule,
-      saveSchedule
-    } from "./pharmacy/schedule.js";
-
-    /* ---------- setup ---------- */
-    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
-    const supabase = supabaseClient || (SUPABASE_URL && SUPABASE_ANON_KEY
-      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null);
-    if(!supabase){
-      console.warn('Supabase configuration is missing.');
-    }
-    const qs = (s, r=document)=>r.querySelector(s);
-    const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
-    const store = {
-      pharmacy: null
-    };
-
-    const scheduleState = {
-      draft: createEmptySchedule(),
-      saved: createEmptySchedule(),
-      meta: null,
-      loading: false,
-      dirty: false,
-      errors: []
-    };
-
-    /* ---------- theme ---------- */
-    const html = document.documentElement;
-    const themeBtn = qs('#theme-toggle');
-    function setTheme(mode){ const dark = mode==='dark'; html.classList.toggle('dark', dark); localStorage.setItem('mr-pharm-theme', dark?'dark':'light');}
-    setTheme(localStorage.getItem('mr-pharm-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
-
-    /* ---------- ui refs ---------- */
-    const selPh = qs('#pharmacy-select');
-    const reloadPh = qs('#reload-pharmacies');
-    const pickedBox = qs('#pharmacy-picked');
-    const pName = qs('#pharm-name');
-    const pCity = qs('#pharm-city');
-    const pAddr = qs('#pharm-addr');
-    const pPhone = qs('#pharm-phone');
-
-    const authSessionEl = qs('#auth-session');
-    const signOutBtn = qs('#signout-btn');
-
-    const hoursBox = qs('#hours-box');
-    const hoursGrid = qs('#hours-grid');
-    const saveHoursBtn = qs('#save-hours');
-    const cancelHoursBtn = qs('#cancel-hours');
-    const hoursStatusEl = qs('#hours-status');
-    const hoursMetaEl = qs('#hours-meta');
-    const hoursAuthAlert = qs('#hours-auth-alert');
-
-    const dayControls = new Map();
-
-    let authSession = null;
-
-    if(supabase){
-      supabase.auth.getSession().then(({ data })=>{
-        authSession = data?.session || null;
-        updateAuthSessionUI();
-      }).catch(()=>undefined);
-      supabase.auth.onAuthStateChange((_event, session)=>{
-        authSession = session;
-        updateAuthSessionUI();
-      });
-    }
-
-    signOutBtn?.addEventListener('click', async ()=>{
-      if(!supabase) return;
-      try{
-        await supabase.auth.signOut();
-      }catch(err){
-        console.warn('signout error', err);
-      }
-    });
-
-    function updateAuthSessionUI(){
-      if(!authSessionEl) return;
-      const loggedIn = !!authSession?.user;
-      const identifier = authSession?.user?.email || authSession?.user?.phone || authSession?.user?.user_metadata?.name || authSession?.user?.id || '';
-      authSessionEl.textContent = loggedIn
-        ? `Συνδεδεμένος ως ${identifier || 'λογαριασμός'}`
-        : 'Δεν έχεις συνδεθεί';
-      signOutBtn?.classList.toggle('hidden', !loggedIn);
-      hoursAuthAlert?.classList.toggle('hidden', loggedIn);
-      updateScheduleButtons();
-    }
-    updateAuthSessionUI();
-
-    const reqBox = qs('#req-box');
-    const cityPill = qs('#city-pill');
-    const reqList = qs('#req-list');
-    const emptyState = qs('#empty-state');
-    const reloadReq = qs('#reload-requests');
-
-    /* ---------- pharmacy CRUD ---------- */
-    async function loadPharmacies(){
-      const { data, error } = await supabase.from('pharmacies').select('id,name,city,address,phone').order('name');
-      if(error){ console.warn(error); return; }
-      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + (data||[]).map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name} — ${p.city||'—'}</option>`).join('');
-    }
-
-    async function createPharmacy(){
-      const name = qs('#new-name').value.trim();
-      const address = qs('#new-addr').value.trim();
-      const phone = qs('#new-phone').value.trim();
-      const city = qs('#new-city').value;
-      if(!name || !city){ alert('Όνομα και Πόλη είναι υποχρεωτικά'); return; }
-      const { data, error } = await supabase.from('pharmacies').insert({ name, address, phone, city }).select('id,name,city,address,phone').single();
-      if(error){ alert('Σφάλμα δημιουργίας φαρμακείου'); console.warn(error); return; }
-      await loadPharmacies();
-      selPh.value = data.id;
-      applyPickedFromSelect();
-      qs('#new-name').value=''; qs('#new-addr').value=''; qs('#new-phone').value=''; qs('#new-city').value='';
-    }
-
-    async function applyPickedFromSelect(){
-      const id = selPh.value;
-      if(!id){
-        pickedBox.classList.add('hidden');
-        hoursBox.classList.add('hidden');
-        reqBox.classList.add('hidden');
-        store.pharmacy=null;
-        scheduleState.draft = createEmptySchedule();
-        scheduleState.saved = createEmptySchedule();
-        scheduleState.meta = null;
-        refreshScheduleUI({ silent:true });
-        setHoursMeta(null);
-        setHoursStatus('', 'muted');
-        return;
-      }
-      const opt = selPh.selectedOptions[0];
-      store.pharmacy = { id, name: opt.textContent.split(' — ')[0], city: opt.dataset.city, address: opt.dataset.addr, phone: opt.dataset.phone };
-      pName.textContent = store.pharmacy.name;
-      pCity.textContent = store.pharmacy.city || '—';
-      pAddr.textContent = store.pharmacy.address || '—';
-      pPhone.textContent = store.pharmacy.phone || '—';
-      pickedBox.classList.remove('hidden');
-      hoursBox.classList.remove('hidden');
-      reqBox.classList.remove('hidden');
-      cityPill.textContent = store.pharmacy.city || '—';
-      if(store.pharmacy?.id && supabase){
-        scheduleState.loading = true;
-        updateScheduleButtons();
-        setHoursStatus('Φόρτωση ωραρίου…', 'muted');
-        await loadScheduleForCurrentPharmacy();
-      }
-      loadRequests();
-    }
-
-    /* ---------- hours ---------- */
-    function normalizeSchedule(list = []){
-      return list.map(item => ({
-        dayIndex: item.dayIndex,
-        open: !!item.open,
-        start: item.start || '',
-        end: item.end || ''
-      }));
-    }
-
-    function setupScheduleEditor(){
-      if(!hoursGrid) return;
-      hoursGrid.innerHTML = '';
-      dayControls.clear();
-      WEEK_DAYS.forEach(day => {
-        const card = document.createElement('div');
-        card.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4 flex flex-col gap-3 transition-colors';
-        card.dataset.dayIndex = String(day.index);
-
-        const header = document.createElement('div');
-        header.className = 'flex items-start justify-between gap-2';
-
-        const labelWrap = document.createElement('div');
-        const title = document.createElement('div');
-        title.className = 'text-sm font-semibold text-slate-900 dark:text-slate-100';
-        title.textContent = day.labels?.el || day.labels?.en || day.name || '';
-        const status = document.createElement('div');
-        status.className = 'text-[11px] text-slate-500 dark:text-slate-400';
-        status.textContent = 'Κλειστό';
-        labelWrap.append(title, status);
-
-        const toggleWrap = document.createElement('label');
-        toggleWrap.className = 'inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300';
-        const toggle = document.createElement('input');
-        toggle.type = 'checkbox';
-        toggle.className = 'size-4 accent-emerald-600 rounded';
-        toggleWrap.append(toggle, document.createTextNode('Ανοιχτό'));
-
-        header.append(labelWrap, toggleWrap);
-
-        const timesWrap = document.createElement('div');
-        timesWrap.className = 'grid grid-cols-2 gap-2 transition-opacity';
-        const startInput = document.createElement('input');
-        startInput.type = 'time';
-        startInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
-        const endInput = document.createElement('input');
-        endInput.type = 'time';
-        endInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
-
-        timesWrap.append(startInput, endInput);
-        card.append(header, timesWrap);
-        hoursGrid.appendChild(card);
-
-        dayControls.set(day.index, {
-          card,
-          toggle,
-          statusEl: status,
-          timesWrap,
-          startInput,
-          endInput
-        });
-
-        toggle.addEventListener('change', ()=> handleToggleChange(day.index, toggle.checked));
-        startInput.addEventListener('input', ()=> handleTimeChange(day.index, 'start', startInput.value));
-        endInput.addEventListener('input', ()=> handleTimeChange(day.index, 'end', endInput.value));
-      });
-
-      refreshScheduleUI({ silent:true });
-    }
-
-    function getScheduleEntry(dayIndex){
-      return scheduleState.draft.find(item => item.dayIndex === dayIndex);
-    }
-
-    function handleToggleChange(dayIndex, checked){
-      const entry = getScheduleEntry(dayIndex);
-      if(!entry) return;
-      entry.open = !!checked;
-      if(!entry.open){
-        entry.start = '';
-        entry.end = '';
-      }
-      refreshScheduleUI({ silent:true });
-      setDirtyStatusMessage();
-    }
-
-    function handleTimeChange(dayIndex, role, value){
-      const entry = getScheduleEntry(dayIndex);
-      if(!entry) return;
-      if(role === 'start'){ entry.start = value; }
-      else { entry.end = value; }
-      refreshScheduleUI({ silent:true });
-      setDirtyStatusMessage();
-    }
-
-    function refreshScheduleUI({ silent=false } = {}){
-      scheduleState.draft.forEach(entry => {
-        const controls = dayControls.get(entry.dayIndex);
-        if(!controls) return;
-        controls.toggle.checked = !!entry.open;
-        controls.startInput.value = entry.start || '';
-        controls.endInput.value = entry.end || '';
-        const isOpen = !!entry.open;
-        controls.timesWrap.classList.toggle('opacity-40', !isOpen);
-        controls.timesWrap.classList.toggle('pointer-events-none', !isOpen);
-        controls.statusEl.textContent = isOpen && entry.start && entry.end
-          ? `${entry.start} – ${entry.end}`
-          : 'Κλειστό';
-        controls.card.classList.remove('ring-2','ring-rose-400','border-rose-300','dark:border-rose-500/50');
-        controls.statusEl.classList.remove('text-rose-500');
-      });
-      applyValidationToUI();
-      updateScheduleButtons();
-      if(!silent){
-        setDirtyStatusMessage();
-      }
-    }
-
-    function applyValidationToUI(){
-      const errors = validateSchedule(scheduleState.draft);
-      scheduleState.errors = errors;
-      const invalidDays = new Set(errors.map(err => err.dayIndex));
-      dayControls.forEach((controls, dayIndex)=>{
-        const invalid = invalidDays.has(dayIndex);
-        controls.card.classList.toggle('ring-2', invalid);
-        controls.card.classList.toggle('ring-rose-400', invalid);
-        controls.card.classList.toggle('border-rose-300', invalid);
-        controls.card.classList.toggle('dark:border-rose-500/50', invalid);
-        controls.statusEl.classList.toggle('text-rose-500', invalid);
-      });
-    }
-
-    function isScheduleDirty(){
-      return JSON.stringify(normalizeSchedule(scheduleState.draft)) !== JSON.stringify(normalizeSchedule(scheduleState.saved));
-    }
-
-    function updateScheduleButtons(){
-      scheduleState.dirty = isScheduleDirty();
-      const saveDisabled = !authSession?.user || scheduleState.loading || !scheduleState.dirty || (scheduleState.errors?.length ?? 0) > 0;
-      if(saveHoursBtn) saveHoursBtn.disabled = !!saveDisabled;
-      if(cancelHoursBtn) cancelHoursBtn.disabled = scheduleState.loading || !scheduleState.dirty;
-    }
-
-    function setHoursStatus(message='', tone='muted'){
-      if(!hoursStatusEl) return;
-      let cls = 'text-sm ';
-      if(tone === 'error'){ cls += 'text-rose-500 dark:text-rose-300'; }
-      else if(tone === 'success'){ cls += 'text-emerald-600 dark:text-emerald-300'; }
-      else if(tone === 'warning'){ cls += 'text-amber-600 dark:text-amber-300'; }
-      else { cls += 'text-slate-500 dark:text-slate-400'; }
-      hoursStatusEl.className = cls;
-      hoursStatusEl.textContent = message;
-    }
-
-    function setHoursMeta(meta){
-      if(!hoursMetaEl) return;
-      if(meta?.updatedAt){
-        try{
-          const dt = new Date(meta.updatedAt);
-          const formatted = dt.toLocaleString('el-GR', { hour12:false });
-          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${formatted}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
-        }catch(err){
-          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${meta.updatedAt}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
-        }
-      }else{
-        hoursMetaEl.textContent = '';
-      }
-    }
-
-    function setDirtyStatusMessage(){
-      if(scheduleState.errors.length){
-        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
-      }else if(scheduleState.dirty){
-        setHoursStatus('Υπάρχουν μη αποθηκευμένες αλλαγές.', 'muted');
-      }else if(scheduleState.meta?.updatedAt){
-        try{
-          const dt = new Date(scheduleState.meta.updatedAt);
-          setHoursStatus(`Τελευταία ενημέρωση ${dt.toLocaleString('el-GR', { hour12:false })}.`, 'muted');
-        }catch{
-          setHoursStatus('', 'muted');
-        }
-      }else{
-        setHoursStatus('', 'muted');
-      }
-    }
-
-    async function loadScheduleForCurrentPharmacy(){
-      if(!store.pharmacy?.id || !supabase){ return; }
-      try{
-        const { schedule, meta } = await loadSchedule(store.pharmacy.id, { client: supabase });
-        scheduleState.saved = cloneSchedule(schedule);
-        scheduleState.draft = cloneSchedule(schedule);
-        scheduleState.meta = meta || null;
-        refreshScheduleUI({ silent:true });
-        setHoursMeta(meta || null);
-        setHoursStatus('Το ωράριο φορτώθηκε.', 'success');
-      }catch(err){
-        console.warn('load schedule error', err);
-        scheduleState.saved = createEmptySchedule();
-        scheduleState.draft = createEmptySchedule();
-        scheduleState.meta = null;
-        refreshScheduleUI({ silent:true });
-        setHoursMeta(null);
-        setHoursStatus('Αποτυχία φόρτωσης ωραρίου.', 'error');
-      }finally{
-        scheduleState.loading = false;
-        updateScheduleButtons();
-      }
-    }
-
-    async function handleSaveSchedule(){
-      if(!store.pharmacy?.id || !supabase) return;
-      scheduleState.errors = validateSchedule(scheduleState.draft);
-      if(scheduleState.errors.length){
-        applyValidationToUI();
-        updateScheduleButtons();
-        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
-        return;
-      }
-      if(!authSession?.user){
-        hoursAuthAlert?.classList.remove('hidden');
-        setHoursStatus('Πρέπει να συνδεθείς για να αποθηκεύσεις.', 'error');
-        updateScheduleButtons();
-        return;
-      }
-      scheduleState.loading = true;
-      updateScheduleButtons();
-      setHoursStatus('Αποθήκευση…', 'muted');
-      try{
-        const { schedule, meta } = await saveSchedule(store.pharmacy.id, scheduleState.draft, { client: supabase, session: authSession });
-        scheduleState.saved = cloneSchedule(schedule);
-        scheduleState.draft = cloneSchedule(schedule);
-        scheduleState.meta = meta || null;
-        refreshScheduleUI({ silent:true });
-        setHoursMeta(meta || null);
-        setHoursStatus('Το ωράριο αποθηκεύτηκε.', 'success');
-      }catch(err){
-        console.warn('save schedule error', err);
-        setHoursStatus(err?.message || 'Αποτυχία αποθήκευσης ωραρίου.', 'error');
-      }finally{
-        scheduleState.loading = false;
-        updateScheduleButtons();
-      }
-    }
-
-    function handleCancelSchedule(){
-      scheduleState.draft = cloneSchedule(scheduleState.saved);
-      refreshScheduleUI({ silent:true });
-      setDirtyStatusMessage();
-    }
-
-    setupScheduleEditor();
-    setHoursMeta(scheduleState.meta);
-    setHoursStatus('', 'muted');
-
-    /* ---------- requests feed ---------- */
-    async function loadRequests(){
-      reqList.innerHTML = '';
-      emptyState.classList.add('hidden');
-      if(!store.pharmacy?.city) return;
-
-      const { data, error } = await supabase
-        .from('requests')
-        .select('id, created_at, med_name, active_substance, med_type, quantity, allow_generic, city, status')
-        .eq('city', store.pharmacy.city)
-        .in('status', ['pending','has_responses'])
-        .order('created_at', { ascending:false })
-        .limit(50);
-
-      if(error){ console.warn(error); return; }
-      if(!data || !data.length){ emptyState.classList.remove('hidden'); return; }
-
-      data.forEach(row=>{
-        const card = document.createElement('div');
-        card.className = 'rounded-xl border p-3 bg-white/80 dark:bg-slate-900/60';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-semibold">${row.med_name}</div>
-            <div class="text-xs text-slate-500">${new Date(row.created_at).toLocaleString()}</div>
-          </div>
-          <div class="text-xs text-slate-600 dark:text-slate-400">
-            ${row.active_substance ? `Ουσία: ${row.active_substance} • ` : ''}Τύπος: ${row.med_type||'—'} • Ποσ: ${row.quantity}
-          </div>
-          <div class="mt-2 flex items-center gap-3">
-            <label class="inline-flex items-center gap-2 text-sm">
-              <input type="checkbox" class="gen-chk size-4 accent-brand-600"> Γενόσημο
-            </label>
-            <button class="avail btn bg-emerald-600 text-white border-emerald-700 hover:opacity-95">Διαθέσιμο</button>
-            <button class="unavail btn hover:bg-slate-100 dark:hover:bg-slate-800">Μη διαθέσιμο</button>
-          </div>
-        `;
-        card.dataset.id = row.id;
-        reqList.appendChild(card);
-      });
-    }
-
-    async function sendResponse(reqId, available, isGeneric){
-      if(!store.pharmacy?.id){ alert('Διάλεξε φαρμακείο πρώτα.'); return; }
-      const payload = { request_id: reqId, pharmacy_id: store.pharmacy.id, available: !!available, is_generic: !!isGeneric };
-      const { error } = await supabase.from('responses').insert(payload);
-      if(error){ alert('Σφάλμα καταχώρησης απάντησης'); console.warn(error); return; }
-      // Προαιρετικά, ενημέρωσε το request σε has_responses
-      await supabase.from('requests').update({ status:'has_responses' }).eq('id', reqId).neq('status','reserved');
-    }
-
-    /* ---------- events ---------- */
-    qs('#create-pharmacy').addEventListener('click', createPharmacy);
-    selPh.addEventListener('change', applyPickedFromSelect);
-    reloadPh.addEventListener('click', loadPharmacies);
-    saveHoursBtn.addEventListener('click', handleSaveSchedule);
-    cancelHoursBtn.addEventListener('click', handleCancelSchedule);
-    reloadReq.addEventListener('click', loadRequests);
-
-    reqList.addEventListener('click', async (e)=>{
-      const card = e.target.closest('[data-id]'); if(!card) return;
-      const reqId = card.dataset.id;
-      if(e.target.closest('.avail')){
-        const isGen = card.querySelector('.gen-chk')?.checked || false;
-        await sendResponse(reqId, true, isGen);
-        card.classList.add('opacity-60');
-      }
-      if(e.target.closest('.unavail')){
-        await sendResponse(reqId, false, false);
-        card.classList.add('opacity-60');
-      }
-    });
-
-    /* ---------- realtime (optional) ---------- */
-    try{
-      supabase
-        .channel('requests-feed')
-        .on('postgres_changes', { event: 'INSERT', schema:'public', table:'requests', filter:`city=eq.${encodeURIComponent(store.pharmacy?.city||'')}` }, (payload)=>{
-          loadRequests();
-        })
-        .subscribe();
-    }catch{}
-
-    /* ---------- init ---------- */
-    await loadPharmacies();
-  </script>
+  <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>
