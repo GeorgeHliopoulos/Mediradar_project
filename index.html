@@ -30,96 +30,353 @@
     };
   </script>
   <style>
-    @keyframes fadeInUp {
-      from {
+    :root {
+      color-scheme: light;
+    }
+
+    @keyframes cardEnter {
+      0% {
         opacity: 0;
-        transform: translate3d(0, 32px, 0);
+        transform: translate3d(0, 48px, 0) scale(0.94);
       }
-      to {
+      60% {
         opacity: 1;
-        transform: translate3d(0, 0, 0);
+        transform: translate3d(0, -6px, 0) scale(1.02);
+      }
+      100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
       }
     }
-    .fade-in-card {
-      animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    @keyframes glowPulse {
+      0%,
+      100% {
+        opacity: 0.65;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes floatSlow {
+      0% {
+        transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(var(--scale, 1));
+      }
+      50% {
+        transform: translate3d(calc(var(--tx, 0) * -1), calc(var(--ty, 0) * -1), 0) scale(calc(var(--scale, 1) * 1.05));
+      }
+      100% {
+        transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(var(--scale, 1));
+      }
+    }
+
+    @keyframes successCelebrate {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      20% {
+        opacity: 1;
+        transform: scale(1.03);
+      }
+      60% {
+        opacity: 1;
+        transform: scale(1.01);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.06);
+      }
+    }
+
+    @keyframes sessionReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes cardSuccessGlow {
+      0% {
+        box-shadow: 0 25px 80px rgba(16, 185, 129, 0.25);
+      }
+      100% {
+        box-shadow: 0 35px 120px rgba(16, 185, 129, 0.35);
+      }
+    }
+
+    @keyframes cardShake {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      20%,
+      60% {
+        transform: translateX(-10px);
+      }
+      40%,
+      80% {
+        transform: translateX(10px);
+      }
+    }
+
+    @keyframes avatarPulse {
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.35);
+      }
+      50% {
+        box-shadow: 0 0 0 18px rgba(0, 198, 255, 0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .auth-portal-card {
+      animation: cardEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-portal-card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: calc(theme('borderRadius.3xl') + 8px);
+      background: linear-gradient(135deg, rgba(0, 198, 255, 0.75), rgba(0, 114, 255, 0.75));
+      opacity: 0;
+      z-index: 0;
+      filter: blur(0);
+      transition: opacity 0.6s ease, filter 0.6s ease;
+      pointer-events: none;
+    }
+
+    .auth-portal-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-portal-card:hover::before {
+      opacity: 0.55;
+      filter: blur(12px);
+    }
+
+    .auth-portal-background span {
+      position: absolute;
+      font-size: clamp(2.75rem, 8vw, 4.5rem);
+      opacity: 0.12;
+      filter: blur(0.4px);
+      animation: floatSlow var(--duration, 18s) ease-in-out infinite;
+    }
+
+    .auth-portal-background span:nth-child(odd) {
+      opacity: 0.09;
+    }
+
+    .auth-portal-background span::after {
+      content: '';
+      position: absolute;
+      inset: -16px;
+      border-radius: 9999px;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.35), transparent 65%);
+      z-index: -1;
+    }
+
+    .auth-success-state {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+
+    .auth-portal:has([data-auth-status].text-brand-700:not(:empty)) .auth-portal-card::before {
+      opacity: 0.85;
+      filter: blur(18px);
+    }
+
+    .auth-portal:has([data-auth-status].text-brand-700:not(:empty)) .auth-portal-card {
+      box-shadow: 0 35px 140px rgba(0, 198, 255, 0.38);
+    }
+
+    .auth-portal:has([data-auth-status].text-rose-600:not(:empty)) .auth-portal-card {
+      animation: cardShake 0.4s ease-in-out;
+    }
+
+    .auth-portal:has([data-auth-status].text-rose-600:not(:empty)) .auth-portal-card::before {
+      opacity: 0.8;
+      filter: blur(18px);
+      background: linear-gradient(135deg, rgba(248, 113, 113, 0.85), rgba(239, 68, 68, 0.65));
+    }
+
+    .auth-portal [data-auth-session] {
+      opacity: 0;
+      transform: translateY(18px) scale(0.97);
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-success-state {
+      animation: successCelebrate 2.4s ease forwards;
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-session] {
+      animation: sessionReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: 2s;
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-portal-card::before {
+      opacity: 0.9;
+      filter: blur(20px);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(5, 150, 105, 0.75));
+      animation: cardSuccessGlow 2.4s ease forwards;
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-portal-card {
+      box-shadow: 0 35px 140px rgba(16, 185, 129, 0.4);
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-avatar] {
+      animation: avatarPulse 3.2s ease-in-out infinite;
+    }
+
+    .auth-portal [data-auth-avatar] {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-portal [data-auth-avatar]::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.6) 45%, transparent 90%);
+      transform: translateX(-100%);
+      animation: shimmer 3.6s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-avatar]::after {
+      opacity: 0.65;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .auth-portal-card,
+      .auth-portal-card::before,
+      .auth-portal-background span,
+      .auth-success-state,
+      .auth-portal [data-auth-session],
+      .auth-portal [data-auth-avatar]::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
   </style>
 </head>
-<body class="min-h-full bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex items-center justify-center px-4 py-10 text-slate-900 font-sans">
-  <div data-auth-root class="w-full max-w-xl">
-    <div class="fade-in-card relative overflow-hidden rounded-3xl border border-white/40 bg-white/70 backdrop-blur-2xl shadow-glass">
-      <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-white/20 to-transparent"></div>
-      <div class="relative p-8 sm:p-10 space-y-8">
-        <div class="flex flex-col items-center text-center space-y-4">
-          <div class="h-16 w-16 rounded-2xl bg-white/90 shadow-lg flex items-center justify-center">
-            <img src="/icons/icon-192.png" alt="MediRadar" class="h-12 w-12" />
-          </div>
-          <div class="space-y-1">
-            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">MediRadar</p>
-            <h1 class="text-2xl sm:text-3xl font-semibold text-slate-900">Σύνδεση στην πλατφόρμα MediRadar</h1>
-          </div>
-        </div>
+<body class="min-h-full bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex items-center justify-center px-4 py-10 text-slate-900 font-sans relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="auth-portal-background h-full w-full">
+      <span style="top:10%;left:15%;--tx:40px;--ty:30px;--scale:1.05;--duration:22s">💊</span>
+      <span style="top:20%;right:10%;--tx:30px;--ty:45px;--scale:0.95;--duration:18s">🩹</span>
+      <span style="bottom:18%;left:20%;--tx:55px;--ty:35px;--scale:1.1;--duration:24s">💉</span>
+      <span style="bottom:12%;right:18%;--tx:48px;--ty:28px;--scale:1.02;--duration:20s">🧴</span>
+      <span style="top:45%;left:5%;--tx:36px;--ty:40px;--scale:0.9;--duration:26s">💊</span>
+      <span style="top:60%;right:8%;--tx:44px;--ty:38px;--scale:1.08;--duration:21s">🩹</span>
+    </div>
+  </div>
 
-        <div class="space-y-6">
-          <div class="grid grid-cols-2 gap-2 rounded-full bg-white/40 p-1">
-            <button type="button" data-auth-tab="users" aria-pressed="true" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-900 shadow-lg transition">
-              Για Χρήστες
-            </button>
-            <button type="button" data-auth-tab="pharmacies" aria-pressed="false" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition">
-              Για Φαρμακεία
-            </button>
+  <div data-auth-root class="auth-portal relative w-full max-w-3xl">
+    <div class="auth-portal-card rounded-3xl border border-white/40 bg-white/70 backdrop-blur-3xl shadow-glass">
+      <div class="auth-portal-inner p-6 sm:p-10">
+        <div class="flex flex-col items-center text-center gap-6">
+          <div class="relative flex flex-col items-center gap-3">
+            <div class="h-16 w-16 rounded-2xl bg-white/80 shadow-lg flex items-center justify-center ring-1 ring-white/50">
+              <img src="/icons/icon-192.png" alt="MediRadar" class="h-12 w-12" />
+            </div>
+            <div class="space-y-2">
+              <p class="text-xs uppercase tracking-[0.4em] text-white/80">MediRadar</p>
+              <h1 class="text-2xl sm:text-3xl font-semibold text-white drop-shadow-sm">Σύνδεση στην πλατφόρμα MediRadar</h1>
+            </div>
           </div>
 
-          <div data-auth-views class="space-y-6">
-            <form data-auth-form="users" class="space-y-4">
-              <div class="space-y-2">
-                <label for="auth-email-users" class="text-sm font-medium text-slate-700">Email</label>
-                <input id="auth-email-users" type="email" required placeholder="name@example.com" class="w-full rounded-2xl border border-white/60 bg-white/90 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
+          <div class="flex w-full flex-col gap-6">
+            <div class="mx-auto grid w-full max-w-sm grid-cols-2 gap-2 rounded-full bg-white/40 p-1 shadow-inner shadow-white/30">
+              <button type="button" data-auth-tab="users" aria-pressed="true" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-900 shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/30 focus-visible:ring-brand-500">
+                Για Χρήστες
+              </button>
+              <button type="button" data-auth-tab="pharmacies" aria-pressed="false" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-slate-100/80 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/20 focus-visible:ring-brand-500">
+                Για Φαρμακεία
+              </button>
+            </div>
+
+            <div class="relative">
+              <div class="auth-success-state pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+                <div class="rounded-3xl bg-emerald-500/85 px-6 py-4 text-lg font-semibold text-white shadow-2xl backdrop-blur-xl">
+                  ✅ Επιτυχής Σύνδεση
+                </div>
               </div>
-              <button type="submit" data-auth-email-button class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-brand-500/40">
-                Σύνδεση / Εγγραφή με Email
-              </button>
-              <button type="button" data-auth-google class="w-full rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30 flex items-center justify-center gap-3">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
-                <span>Σύνδεση με Google</span>
-              </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
-            </form>
 
-            <form data-auth-form="pharmacies" class="space-y-4 hidden">
-              <div class="space-y-2">
-                <label for="auth-email-pharmacies" class="text-sm font-medium text-slate-700">Email Φαρμακείου</label>
-                <input id="auth-email-pharmacies" type="email" required placeholder="pharmacy@example.com" class="w-full rounded-2xl border border-white/60 bg-white/90 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
-              </div>
-              <button type="submit" data-auth-email-button class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-brand-500/40">
-                Σύνδεση / Εγγραφή με Email
-              </button>
-              <button type="button" data-auth-google class="w-full rounded-2xl border border-white/70 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30 flex items-center justify-center gap-3">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
-                <span>Σύνδεση με Google</span>
-              </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
-            </form>
+              <div data-auth-views class="relative z-10 space-y-6 rounded-[28px] bg-white/60 p-6 shadow-inner shadow-white/30 backdrop-blur-2xl ring-1 ring-white/50">
+                <form data-auth-form="users" class="space-y-4" novalidate>
+                  <div class="space-y-2 text-left">
+                    <label for="auth-email-users" class="text-sm font-medium text-slate-700">Email</label>
+                    <input id="auth-email-users" type="email" required placeholder="name@example.com" class="w-full rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
+                  </div>
+                  <button type="submit" data-auth-email-button class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-brand-500/40">
+                    <span class="relative z-10">Σύνδεση / Εγγραφή με Email</span>
+                    <span class="absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-40"></span>
+                  </button>
+                  <button type="button" data-auth-google class="group flex w-full items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                    <span class="relative">Σύνδεση με Google</span>
+                  </button>
+                  <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
+                </form>
 
-            <p data-auth-status-global class="hidden text-center text-sm font-semibold text-rose-600" role="status" aria-live="polite"></p>
-          </div>
+                <form data-auth-form="pharmacies" class="hidden space-y-4" novalidate>
+                  <div class="space-y-2 text-left">
+                    <label for="auth-email-pharmacies" class="text-sm font-medium text-slate-700">Email Φαρμακείου</label>
+                    <input id="auth-email-pharmacies" type="email" required placeholder="pharmacy@example.com" class="w-full rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
+                  </div>
+                  <button type="submit" data-auth-email-button class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-brand-500/40">
+                    <span class="relative z-10">Σύνδεση / Εγγραφή με Email</span>
+                    <span class="absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-40"></span>
+                  </button>
+                  <button type="button" data-auth-google class="group flex w-full items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                    <span class="relative">Σύνδεση με Google</span>
+                  </button>
+                  <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
+                </form>
 
-          <div data-auth-session class="hidden rounded-2xl border border-white/60 bg-white/90 px-4 py-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <span data-auth-avatar class="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-lg font-semibold"></span>
-              <div class="space-y-0.5">
-                <p class="text-sm font-semibold text-slate-700">Καλωσήρθες!</p>
-                <p data-auth-user-email class="text-sm text-slate-500"></p>
+                <p data-auth-status-global class="hidden text-center text-sm font-semibold text-rose-600" role="status" aria-live="polite"></p>
               </div>
             </div>
-            <button type="button" data-auth-logout class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-              Αποσύνδεση
-            </button>
-          </div>
 
-          <p class="text-center text-xs text-slate-600">
-            Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.
-          </p>
+            <div data-auth-session class="hidden relative z-10 flex flex-col gap-4 rounded-2xl border border-white/60 bg-white/85 px-5 py-4 shadow-lg backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-3">
+                <span data-auth-avatar class="relative grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-lg font-semibold"></span>
+                <div class="space-y-0.5">
+                  <p class="text-sm font-semibold text-slate-700">Καλωσήρθες!</p>
+                  <p data-auth-user-email class="text-sm text-slate-500"></p>
+                </div>
+              </div>
+              <button type="button" data-auth-logout class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+                Αποσύνδεση
+              </button>
+            </div>
+
+            <p class="text-center text-xs text-white/80 drop-shadow-sm">
+              Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.
+            </p>
+          </div>
         </div>
       </div>
     </div>
