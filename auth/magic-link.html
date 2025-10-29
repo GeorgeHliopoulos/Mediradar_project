@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediRadar Magic Link Login</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body class="magic-link-body">
+    <main class="magic-link-page">
+      <section class="magic-link-card" data-magic-link-root></section>
+    </main>
+
+    <script src="../env.js"></script>
+    <script type="module">
+      import { initMagicLinkWidget } from './magic-link-widget.js';
+
+      initMagicLinkWidget('[data-magic-link-root]');
+    </script>
+  </body>
+</html>
