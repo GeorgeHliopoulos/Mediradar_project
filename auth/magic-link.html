@@ -1,21 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el" class="h-full">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediRadar Magic Link Login</title>
-    <link rel="stylesheet" href="../styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MediRadar – Σύνδεση</title>
+    <link rel="icon" href="../icons/icon-192.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#ecfbff',
+                100: '#d2f5ff',
+                200: '#a3ebff',
+                300: '#7cdfff',
+                400: '#4bd1ff',
+                500: '#1fc0ff',
+                600: '#00a0f0',
+                700: '#007ed1',
+                800: '#0463a6',
+                900: '#084f85'
+              }
+            },
+            boxShadow: {
+              glass: '0 32px 80px -32px rgba(2, 12, 32, 0.55)'
+            }
+          }
+        }
+      };
+    </script>
   </head>
-  <body class="magic-link-body">
-    <main class="magic-link-page">
-      <section class="magic-link-card" data-magic-link-root></section>
-    </main>
+  <body class="min-h-screen bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex items-center justify-center p-6">
+    <div class="relative w-full max-w-4xl">
+      <div class="absolute inset-0 rounded-3xl bg-white/20 blur-3xl opacity-60"></div>
+      <div class="relative overflow-hidden rounded-3xl border border-white/30 bg-white/75 backdrop-blur-2xl shadow-glass">
+        <div class="grid gap-0 md:grid-cols-2">
+          <section class="flex flex-col justify-between bg-white/80 px-8 py-10 text-slate-800 md:px-10">
+            <div class="space-y-6">
+              <div class="flex flex-col items-center text-center md:items-start md:text-left">
+                <img src="../icons/icon-192.png" alt="MediRadar" class="h-16 w-16 rounded-2xl bg-white/80 shadow-lg" />
+                <h1 class="mt-6 text-3xl font-semibold tracking-tight text-slate-900">
+                  Σύνδεση στην πλατφόρμα MediRadar
+                </h1>
+                <p class="mt-4 text-base text-slate-600">
+                  Επιλέξτε εάν είστε χρήστης ή φαρμακείο και συνδεθείτε με email ή Google.
+                </p>
+              </div>
+              <div class="rounded-2xl bg-gradient-to-br from-white/60 to-white/20 p-6 shadow-inner backdrop-blur">
+                <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                  Ασφαλής πρόσβαση
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                  Χρησιμοποιούμε μαγικό σύνδεσμο στο email σας ή Google SSO για
+                  άμεση και ασφαλή σύνδεση χωρίς κωδικούς.
+                </p>
+              </div>
+            </div>
+            <p class="mt-8 hidden text-xs text-slate-500 md:block">
+              © <span class="font-semibold">MediRadar</span> — Υποστηρίζουμε τον ελληνικό φαρμακευτικό κλάδο με τεχνολογία.
+            </p>
+          </section>
+          <section class="bg-white/60 px-8 py-10 backdrop-blur-xl md:px-12" data-auth-root>
+            <div class="flex items-center justify-between">
+              <div class="inline-flex rounded-full bg-white/80 p-1 shadow-inner">
+                <button
+                  type="button"
+                  data-auth-tab="users"
+                  class="tab-btn rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-all duration-200"
+                >
+                  Για Χρήστες
+                </button>
+                <button
+                  type="button"
+                  data-auth-tab="pharmacies"
+                  class="tab-btn rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-all duration-200"
+                >
+                  Για Φαρμακεία
+                </button>
+              </div>
+              <span
+                data-auth-status-global
+                class="hidden text-xs font-medium text-rose-600"
+              ></span>
+            </div>
+
+            <div class="mt-8 space-y-10" data-auth-views>
+              <form data-auth-form="users" class="space-y-6">
+                <div class="space-y-2">
+                  <label for="users-email" class="text-sm font-medium text-slate-700">Email</label>
+                  <input
+                    id="users-email"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    class="w-full rounded-2xl border border-white/60 bg-white/70 px-4 py-3 text-base text-slate-800 shadow-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-400"
+                  />
+                </div>
+                <div class="space-y-3">
+                  <button
+                    type="submit"
+                    class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-brand-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-brand-500"
+                    data-auth-email-button
+                  >
+                    Σύνδεση / Εγγραφή με Email
+                  </button>
+                  <button
+                    type="button"
+                    data-auth-google
+                    class="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-400"
+                  >
+                    <span class="flex h-5 w-5 items-center justify-center">
+                      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                    </span>
+                    Σύνδεση με Google
+                  </button>
+                </div>
+                <p data-auth-status class="min-h-[1.5rem] text-sm font-medium text-slate-600"></p>
+              </form>
+
+              <form data-auth-form="pharmacies" class="space-y-6 hidden">
+                <div class="space-y-2">
+                  <label for="pharmacies-email" class="text-sm font-medium text-slate-700">Email</label>
+                  <input
+                    id="pharmacies-email"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="pharmacy@example.com"
+                    class="w-full rounded-2xl border border-white/60 bg-white/70 px-4 py-3 text-base text-slate-800 shadow-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-400"
+                  />
+                </div>
+                <div class="space-y-3">
+                  <button
+                    type="submit"
+                    class="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:shadow-brand-500/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-brand-500"
+                    data-auth-email-button
+                  >
+                    Σύνδεση / Εγγραφή με Email
+                  </button>
+                  <button
+                    type="button"
+                    data-auth-google
+                    class="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-400"
+                  >
+                    <span class="flex h-5 w-5 items-center justify-center">
+                      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
+                    </span>
+                    Σύνδεση με Google
+                  </button>
+                </div>
+                <p data-auth-status class="min-h-[1.5rem] text-sm font-medium text-slate-600"></p>
+              </form>
+
+              <div
+                data-auth-session
+                class="hidden rounded-2xl border border-white/50 bg-white/80 p-6 shadow-lg"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    data-auth-avatar
+                    class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-semibold text-white"
+                  ></div>
+                  <div>
+                    <p class="text-sm text-slate-500">Καλωσήρθες,</p>
+                    <p data-auth-user-email class="text-lg font-semibold text-slate-800"></p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  data-auth-logout
+                  class="mt-6 inline-flex items-center justify-center rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-white"
+                >
+                  Αποσύνδεση
+                </button>
+              </div>
+            </div>
+
+            <p class="mt-10 text-center text-xs text-slate-600">
+              Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
 
     <script src="../env.js"></script>
-    <script type="module">
-      import { initMagicLinkWidget } from './magic-link-widget.js';
-
-      initMagicLinkWidget('[data-magic-link-root]');
-    </script>
+    <script type="module" src="./magic-link-widget.js"></script>
   </body>
 </html>
