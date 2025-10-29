@@ -212,7 +212,7 @@ export async function sendMagicLink({ email, mode = 'login' }) {
   const { data, error } = await supabaseClient.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: window.location.origin,
+      emailRedirectTo: 'https://mediradar.gr/',
       shouldCreateUser,
       data: { flow: mode }
     }
