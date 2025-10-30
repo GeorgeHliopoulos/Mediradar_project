@@ -28,7 +28,49 @@
     .card { @apply rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow; }
     .btn  { @apply px-3 py-2 rounded-xl border font-semibold; }
     .auth-portal-card { animation: authPortalIn .45s ease forwards; opacity:0; transform: translateY(16px) scale(.96); }
+    .auth-portal-card::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      padding:1px;
+      background:linear-gradient(135deg,#00c6ff,#0072ff);
+      pointer-events:none;
+      opacity:.9;
+      transition:opacity .3s ease;
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+    }
+    .auth-portal-card:hover::before {
+      opacity:1;
+    }
     @keyframes authPortalIn { to { opacity:1; transform: translateY(0) scale(1); } }
+    .auth-emoji-layer { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .auth-emoji-layer span { position:absolute; font-size:2.75rem; opacity:.15; animation-iteration-count:infinite; animation-timing-function:linear; }
+    .auth-emoji-layer span:nth-child(1) { top:14%; left:16%; animation-name:emojiDriftA; animation-duration:18s; }
+    .auth-emoji-layer span:nth-child(2) { top:10%; right:10%; animation-name:emojiDriftB; animation-duration:22s; }
+    .auth-emoji-layer span:nth-child(3) { bottom:12%; left:22%; animation-name:emojiDriftC; animation-duration:20s; }
+    .auth-emoji-layer span:nth-child(4) { bottom:8%; right:16%; animation-name:emojiDriftD; animation-duration:24s; }
+    .auth-emoji-layer span:nth-child(5) { top:42%; left:48%; animation-name:emojiDriftE; animation-duration:26s; opacity:.12; }
+    @keyframes emojiDriftA { 0% { transform:translate3d(0,0,0) scale(.95); opacity:.05; } 40% { transform:translate3d(14px,-8px,0) scale(1.05); opacity:.16; } 100% { transform:translate3d(0,0,0) scale(.95); opacity:.05; } }
+    @keyframes emojiDriftB { 0% { transform:translate3d(0,0,0) scale(1); opacity:.04; } 50% { transform:translate3d(-16px,12px,0) scale(1.08); opacity:.18; } 100% { transform:translate3d(0,0,0) scale(1); opacity:.04; } }
+    @keyframes emojiDriftC { 0% { transform:translate3d(0,0,0) scale(.96); opacity:.06; } 60% { transform:translate3d(18px,-6px,0) scale(1.06); opacity:.16; } 100% { transform:translate3d(0,0,0) scale(.96); opacity:.06; } }
+    @keyframes emojiDriftD { 0% { transform:translate3d(0,0,0) scale(1.02); opacity:.05; } 50% { transform:translate3d(-12px,-14px,0) scale(.94); opacity:.14; } 100% { transform:translate3d(0,0,0) scale(1.02); opacity:.05; } }
+    @keyframes emojiDriftE { 0% { transform:translate3d(0,0,0) scale(.9); opacity:.03; } 55% { transform:translate3d(10px,8px,0) scale(1.08); opacity:.13; } 100% { transform:translate3d(0,0,0) scale(.9); opacity:.03; } }
+    .auth-card--pulse-success { animation: authSuccessGlow 1.2s ease-out; }
+    .auth-card--login-success { animation: authLoginSuccess 2s ease-out; }
+    .auth-card--shake-error { animation: authErrorShake .55s ease; }
+    @keyframes authSuccessGlow { 0% { box-shadow:0 0 0 0 rgba(16,185,129,0); border-color:rgba(16,185,129,0); } 50% { box-shadow:0 0 0 12px rgba(16,185,129,.12), 0 30px 60px rgba(15,23,42,.22); border-color:rgba(16,185,129,.35); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } }
+    @keyframes authLoginSuccess { 0% { box-shadow:0 0 0 0 rgba(34,197,94,0); border-color:rgba(34,197,94,0); transform:translateY(0) scale(1); } 25% { box-shadow:0 0 0 14px rgba(34,197,94,.14), 0 32px 70px rgba(15,23,42,.22); border-color:rgba(34,197,94,.4); transform:translateY(-4px) scale(1.01); } 70% { box-shadow:0 0 0 10px rgba(34,197,94,.08), 0 26px 60px rgba(15,23,42,.2); border-color:rgba(34,197,94,.22); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); transform:translateY(0) scale(1); } }
+    @keyframes authErrorShake { 0%, 100% { transform:translateX(0); box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } 20% { transform:translateX(-8px); box-shadow:0 0 0 10px rgba(248,113,113,.15), 0 30px 60px rgba(15,23,42,.2); border-color:rgba(248,113,113,.45); } 40% { transform:translateX(8px); } 60% { transform:translateX(-5px); } 80% { transform:translateX(5px); } }
+    .auth-success-active { animation: authSuccessSequence 2s ease forwards; }
+    @keyframes authSuccessSequence { 0% { opacity:0; transform:translateY(12px) scale(.95); } 20% { opacity:1; transform:translateY(0) scale(1); } 70% { opacity:1; transform:translateY(0) scale(1.02); } 100% { opacity:0; transform:translateY(-6px) scale(1.02); } }
   </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
@@ -40,7 +82,7 @@
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2" data-auth-header>
-          <button id="signin-btn" type="button" data-auth-open data-auth-tab="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
+          <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
           <div data-auth-header-session class="hidden items-center gap-2">
             <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
             <span data-auth-header-email class="text-sm font-semibold"></span>
@@ -118,17 +160,24 @@
     </section>
   </div>
 
-  <!-- AUTH PORTAL MODAL -->
-  <div id="auth-modal" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+  <!-- USER AUTH MODAL -->
+  <div data-auth-modal="users" id="auth-modal-users" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-user-title">
     <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
     <div class="relative w-full max-w-xl mx-auto">
-      <div class="relative overflow-hidden rounded-3xl border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card">
+      <div class="relative overflow-hidden rounded-3xl border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
         <div class="absolute inset-0 pointer-events-none">
           <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
           <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
         </div>
+        <div class="auth-emoji-layer" aria-hidden="true">
+          <span>💊</span>
+          <span>💉</span>
+          <span>🩹</span>
+          <span>🧴</span>
+          <span>💚</span>
+        </div>
         <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
-        <div class="relative p-6 sm:p-8" data-auth-root>
+        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="users">
           <div class="flex flex-col items-center text-center gap-4">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
               <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
@@ -136,47 +185,34 @@
               </svg>
             </div>
             <div class="space-y-2">
-              <h2 id="auth-modal-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Σύνδεση στην πλατφόρμα MediRadar</h2>
-              <p id="auth-portal-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Επίλεξε ρόλο και συνέχισε με magic link ή Google.</p>
+              <h2 id="auth-user-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Σύνδεση στην πλατφόρμα MediRadar</h2>
+              <p id="auth-user-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνέχισε με magic link ή Google για να προχωρήσεις στη δέσμευση.</p>
             </div>
           </div>
 
-          <div class="mt-6 flex items-center justify-center gap-2 rounded-full bg-white/70 dark:bg-slate-800/60 p-1 shadow-inner">
-            <button type="button" id="auth-tab-users" data-auth-tab="users" class="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-all">Για Χρήστες</button>
-            <button type="button" id="auth-tab-pharmacies" data-auth-tab="pharmacies" class="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-all">Για Φαρμακεία</button>
-          </div>
+          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
 
-          <p data-auth-status-global class="hidden mt-4 text-sm text-center text-rose-600"></p>
-
-          <div class="mt-6 space-y-6" data-auth-views>
+          <div data-auth-forms class="space-y-5">
             <form data-auth-form="users" class="space-y-4" novalidate>
               <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <span id="auth-users-email-label">Email</span>
                 <input id="auth-users-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
               </label>
-              <button type="submit" id="auth-users-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
+              <button type="submit" id="auth-users-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
               <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
                 <span id="auth-users-google-cta">Σύνδεση με Google</span>
               </button>
               <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
             </form>
-
-            <form data-auth-form="pharmacies" class="hidden space-y-4" novalidate>
-              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <span id="auth-pharm-email-label">Email φαρμακείου</span>
-                <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
-              </label>
-              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
-              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
-                <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
-              </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
-            </form>
           </div>
 
-          <div data-auth-session class="hidden mt-8">
+          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
+            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
+            <p id="auth-user-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
+          </div>
+
+          <div data-auth-session class="hidden">
             <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
               <div class="flex items-center gap-3">
                 <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
@@ -189,7 +225,80 @@
             </div>
           </div>
 
-          <p id="auth-portal-footer" class="mt-6 text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
+          <p id="auth-user-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHARMACY AUTH MODAL -->
+  <div data-auth-modal="pharmacies" id="auth-modal-pharmacies" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-pharm-title">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
+    <div class="relative w-full max-w-xl mx-auto">
+      <div class="relative overflow-hidden rounded-3xl border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
+        <div class="absolute inset-0 pointer-events-none">
+          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
+          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
+        </div>
+        <div class="auth-emoji-layer" aria-hidden="true">
+          <span>💊</span>
+          <span>💉</span>
+          <span>🩹</span>
+          <span>🧴</span>
+          <span>💚</span>
+        </div>
+        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
+        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="pharmacies">
+          <div class="flex flex-col items-center text-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
+              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
+                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
+              </svg>
+            </div>
+            <div class="space-y-2">
+              <h2 id="auth-pharm-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Πρόσβαση Φαρμακείων</h2>
+              <p id="auth-pharm-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνδέσου ή εγγράψου στο MediRadar Pro για να απαντάς σε αιτήματα διαθεσιμότητας.</p>
+            </div>
+          </div>
+
+          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
+
+          <div data-auth-forms class="space-y-5">
+            <form data-auth-form="pharmacies" class="space-y-4" novalidate>
+              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <span id="auth-pharm-email-label">Email φαρμακείου</span>
+                <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+              </label>
+              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
+              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
+                <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
+              </button>
+              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
+            </form>
+          </div>
+
+          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
+            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
+            <p id="auth-pharm-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
+          </div>
+
+          <div data-auth-session class="hidden">
+            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
+              <div class="flex items-center gap-3">
+                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
+                <div class="text-left">
+                  <p class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
+                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
+                </div>
+              </div>
+              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
+            </div>
+          </div>
+
+          <p id="auth-pharm-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
+
+          <button type="button" id="auth-pro-info-link" data-open-pro class="mx-auto block text-xs font-semibold text-brand-700 underline decoration-dotted underline-offset-4 hover:text-brand-600 dark:text-brand-200 dark:hover:text-brand-100">Μάθετε περισσότερα για το MediRadar Pro</button>
         </div>
       </div>
     </div>
@@ -258,9 +367,12 @@
 
     const authSessionEl = qs('#auth-session');
     const signOutBtn = qs('#signout-btn');
-    const authModalEl = qs('#auth-modal');
-    const authRoot = authModalEl?.querySelector('[data-auth-root]');
-    const authCloseEls = authModalEl ? authModalEl.querySelectorAll('[data-auth-close]') : [];
+    const authModals = {
+      users: qs('[data-auth-modal="users"]'),
+      pharmacies: qs('[data-auth-modal="pharmacies"]')
+    };
+    let activeAuthModal = null;
+    const authCloseEls = qsa('[data-auth-close]');
     const authOpenButtons = qsa('[data-auth-open]');
     const authHeaderSession = qs('[data-auth-header-session]');
     const authHeaderAvatar = qs('[data-auth-header-avatar]');
@@ -282,23 +394,34 @@
       return authSession?.user || null;
     }
 
-    function setAuthTabForModal(tab='pharmacies'){
-      const buttons = authRoot ? authRoot.querySelectorAll('[data-auth-tab]') : [];
-      const target = Array.from(buttons).find(btn => btn.dataset.authTab === tab);
-      target?.click();
+    function getOpenAuthModal(){
+      return Object.values(authModals).find(modal => modal && !modal.classList.contains('hidden')) || null;
     }
 
-    function openAuthModal(tab='pharmacies'){
-      setAuthTabForModal(tab);
-      authModalEl?.classList.remove('hidden');
-      authModalEl?.classList.add('flex');
+    function openAuthModal(target='pharmacies'){
+      const modal = authModals[target] || authModals.pharmacies || authModals.users;
+      if(!modal) return;
+      activeAuthModal = modal;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
       document.body.classList.add('overflow-hidden');
+      const statusEl = modal.querySelector('[data-auth-status-global]');
+      if(statusEl){
+        statusEl.classList.add('hidden');
+        statusEl.textContent = '';
+      }
     }
 
-    function closeAuthModal(){
-      authModalEl?.classList.add('hidden');
-      authModalEl?.classList.remove('flex');
-      document.body.classList.remove('overflow-hidden');
+    function closeAuthModal(modal = activeAuthModal){
+      if(!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if(modal === activeAuthModal){
+        activeAuthModal = null;
+      }
+      if(!getOpenAuthModal()){
+        document.body.classList.remove('overflow-hidden');
+      }
     }
 
     function updateAuthHeaderUI(userOverride){
@@ -330,14 +453,17 @@
     authOpenButtons.forEach(btn => {
       btn.addEventListener('click', event => {
         event.preventDefault();
-        openAuthModal(btn.dataset.authTab || 'pharmacies');
+        openAuthModal(btn.dataset.authTarget || 'pharmacies');
       });
     });
 
-    authCloseEls.forEach(btn => btn.addEventListener('click', closeAuthModal));
+    authCloseEls.forEach(btn => btn.addEventListener('click', () => {
+      const modal = btn.closest('[data-auth-modal]');
+      closeAuthModal(modal || undefined);
+    }));
 
     document.addEventListener('keydown', event => {
-      if(event.key === 'Escape' && authModalEl && !authModalEl.classList.contains('hidden')){
+      if(event.key === 'Escape' && getOpenAuthModal()){
         closeAuthModal();
       }
     });
@@ -356,7 +482,7 @@
             })
             .catch(()=>undefined);
         }
-        setTimeout(()=> closeAuthModal(), 200);
+        setTimeout(()=> closeAuthModal(), 2200);
       } else {
         authSession = null;
         updateAuthHeaderUI(null);

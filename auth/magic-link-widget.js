@@ -8,6 +8,8 @@ const STATUS_MESSAGES = {
   genericError: 'Κάτι πήγε στραβά. Προσπαθήστε ξανά.'
 };
 
+const successTimers = new WeakMap();
+
 function qs(root, selector) {
   return root.querySelector(selector);
 }
@@ -17,12 +19,13 @@ function qsa(root, selector) {
 }
 
 function setActiveTab(root, tab) {
+  if (!tab) return;
   const forms = qsa(root, '[data-auth-form]');
   const tabs = qsa(root, '[data-auth-tab]');
 
   tabs.forEach(btn => {
     const isActive = btn.dataset.authTab === tab;
-    btn.classList.toggle('bg-white');
+    btn.classList.toggle('bg-white', isActive);
     btn.classList.toggle('text-slate-900', isActive);
     btn.classList.toggle('shadow-lg', isActive);
     btn.classList.toggle('text-slate-600', !isActive);
@@ -31,8 +34,49 @@ function setActiveTab(root, tab) {
 
   forms.forEach(form => {
     const isActive = form.dataset.authForm === tab;
-    form.classList.toggle('hidden', !isActive);
+    if (isActive) {
+      form.classList.remove('hidden');
+    } else {
+      form.classList.add('hidden');
+    }
   });
+}
+
+function getCardFromElement(el) {
+  const root = el?.closest('[data-auth-root]') || null;
+  if (!root) return null;
+  return root.closest('[data-auth-card]') || root;
+}
+
+function runCardEffect(card, className, duration = 1000) {
+  if (!card || !className) return;
+  card.classList.remove(className);
+  // Force reflow so animation can replay
+  // eslint-disable-next-line no-unused-expressions
+  card.offsetHeight;
+  card.classList.add(className);
+  window.setTimeout(() => {
+    card.classList.remove(className);
+  }, duration);
+}
+
+function triggerCardFeedback(statusEl, type) {
+  if (!statusEl || !type) return;
+  const card = getCardFromElement(statusEl);
+  if (!card) return;
+  if (type === 'success') {
+    runCardEffect(card, 'auth-card--pulse-success', 1400);
+  } else if (type === 'error') {
+    runCardEffect(card, 'auth-card--shake-error', 600);
+  }
+}
+
+function clearSuccessTimer(root) {
+  const timer = successTimers.get(root);
+  if (timer) {
+    window.clearTimeout(timer);
+    successTimers.delete(root);
+  }
 }
 
 function setStatus(el, type, message) {
@@ -45,6 +89,7 @@ function setStatus(el, type, message) {
   } else if (type === 'error') {
     el.classList.add('text-rose-600');
   }
+  triggerCardFeedback(el, type);
 }
 
 function setLoading(form, isLoading) {
@@ -133,22 +178,53 @@ function notifyAuthChange(user) {
 }
 
 function updateSessionUI(root, user) {
+  if (!root) return;
   const sessionCard = qs(root, '[data-auth-session]');
-  const viewsContainer = qs(root, '[data-auth-views]');
+  const formsContainer = qs(root, '[data-auth-forms]') || qs(root, '[data-auth-views]') || root;
+  const successView = qs(root, '[data-auth-success]');
   const emailEl = qs(root, '[data-auth-user-email]');
   const avatar = qs(root, '[data-auth-avatar]');
+  const card = getCardFromElement(root);
+
+  clearSuccessTimer(root);
+
+  const previousUserId = root.dataset.authUserId || '';
+  const initialized = root.dataset.authInitialized === 'true';
+  const newUserId = user?.id || '';
+  const isNewLogin = Boolean(user && initialized && previousUserId !== newUserId);
 
   if (user) {
     const email = user.email || '';
     const initial = email ? email.trim().charAt(0).toUpperCase() : '?';
     if (avatar) avatar.textContent = initial;
     if (emailEl) emailEl.textContent = email;
-    sessionCard?.classList.remove('hidden');
-    viewsContainer?.classList.add('hidden');
+    if (successView && sessionCard && isNewLogin) {
+      successView.classList.remove('hidden');
+      successView.classList.add('auth-success-active');
+      runCardEffect(card, 'auth-card--login-success', 2000);
+      successTimers.set(
+        root,
+        window.setTimeout(() => {
+          successView.classList.remove('auth-success-active');
+          successView.classList.add('hidden');
+          sessionCard.classList.remove('hidden');
+        }, 2000)
+      );
+    } else {
+      successView?.classList.remove('auth-success-active');
+      successView?.classList.add('hidden');
+      sessionCard?.classList.remove('hidden');
+    }
+    formsContainer?.classList.add('hidden');
   } else {
     sessionCard?.classList.add('hidden');
-    viewsContainer?.classList.remove('hidden');
+    successView?.classList.remove('auth-success-active');
+    successView?.classList.add('hidden');
+    formsContainer?.classList.remove('hidden');
   }
+
+  root.dataset.authUserId = newUserId;
+  root.dataset.authInitialized = 'true';
 
   notifyAuthChange(user);
 }
@@ -189,15 +265,18 @@ function showSupabaseError(root) {
   });
 }
 
-function initAuthPortal() {
-  const root = document.querySelector('[data-auth-root]');
+function initAuthPortal(root) {
   if (!root) return;
 
   const supabase = supabaseClient;
   const forms = qsa(root, '[data-auth-form]');
   const logoutButton = qs(root, '[data-auth-logout]');
+  const tabs = qsa(root, '[data-auth-tab]');
 
-  setActiveTab(root, 'users');
+  const defaultTab = root.dataset.authDefaultTab || tabs[0]?.dataset.authTab || forms[0]?.dataset.authForm;
+  if (tabs.length > 0 && defaultTab) {
+    setActiveTab(root, defaultTab);
+  }
 
   forms.forEach(form => {
     form.addEventListener('submit', event => handleEmailSubmit(event, supabase));
@@ -205,7 +284,7 @@ function initAuthPortal() {
     googleButton?.addEventListener('click', () => handleGoogleClick(form, supabase));
   });
 
-  qsa(root, '[data-auth-tab]').forEach(btn => {
+  tabs.forEach(btn => {
     btn.addEventListener('click', () => setActiveTab(root, btn.dataset.authTab));
   });
 
@@ -238,4 +317,10 @@ function initAuthPortal() {
   });
 }
 
-initAuthPortal();
+function bootstrapAuthPortals() {
+  const roots = document.querySelectorAll('[data-auth-root]');
+  if (!roots.length) return;
+  roots.forEach(root => initAuthPortal(root));
+}
+
+bootstrapAuthPortals();
