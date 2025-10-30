@@ -123,6 +123,15 @@ async function handleGoogleClick(form, supabase) {
   }
 }
 
+function notifyAuthChange(user) {
+  try {
+    const event = new CustomEvent('mediradar-auth-change', { detail: { user } });
+    document.dispatchEvent(event);
+  } catch (error) {
+    console.warn('[auth] Failed to dispatch auth change event', error);
+  }
+}
+
 function updateSessionUI(root, user) {
   const sessionCard = qs(root, '[data-auth-session]');
   const viewsContainer = qs(root, '[data-auth-views]');
@@ -140,6 +149,8 @@ function updateSessionUI(root, user) {
     sessionCard?.classList.add('hidden');
     viewsContainer?.classList.remove('hidden');
   }
+
+  notifyAuthChange(user);
 }
 
 async function refreshUser(root, supabase) {

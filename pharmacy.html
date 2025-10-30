@@ -3,386 +3,790 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>MediRadar • Σύνδεση</title>
-  <link rel="icon" href="/icons/icon-192.png" />
+  <title>MediRadar • Pharmacy</title>
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#00c6ff" />
+  <meta name="theme-color" content="#29a3a3" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
-          colors: {
-            brand: {
-              500: '#00c6ff',
-              600: '#0098ff',
-              700: '#0072ff'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          },
-          boxShadow: {
-            glass: '0 35px 120px rgba(0, 114, 255, 0.35)'
-          }
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
+          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
         }
       }
-    };
+    }
   </script>
+
   <style>
-    :root {
-      color-scheme: light;
-    }
-
-    @keyframes cardEnter {
-      0% {
-        opacity: 0;
-        transform: translate3d(0, 48px, 0) scale(0.94);
-      }
-      60% {
-        opacity: 1;
-        transform: translate3d(0, -6px, 0) scale(1.02);
-      }
-      100% {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-      }
-    }
-
-    @keyframes glowPulse {
-      0%,
-      100% {
-        opacity: 0.65;
-      }
-      50% {
-        opacity: 1;
-      }
-    }
-
-    @keyframes floatSlow {
-      0% {
-        transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(var(--scale, 1));
-      }
-      50% {
-        transform: translate3d(calc(var(--tx, 0) * -1), calc(var(--ty, 0) * -1), 0) scale(calc(var(--scale, 1) * 1.05));
-      }
-      100% {
-        transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(var(--scale, 1));
-      }
-    }
-
-    @keyframes successCelebrate {
-      0% {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      20% {
-        opacity: 1;
-        transform: scale(1.03);
-      }
-      60% {
-        opacity: 1;
-        transform: scale(1.01);
-      }
-      100% {
-        opacity: 0;
-        transform: scale(1.06);
-      }
-    }
-
-    @keyframes sessionReveal {
-      0% {
-        opacity: 0;
-        transform: translateY(16px) scale(0.98);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes cardSuccessGlow {
-      0% {
-        box-shadow: 0 25px 80px rgba(16, 185, 129, 0.25);
-      }
-      100% {
-        box-shadow: 0 35px 120px rgba(16, 185, 129, 0.35);
-      }
-    }
-
-    @keyframes cardShake {
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-      20%,
-      60% {
-        transform: translateX(-10px);
-      }
-      40%,
-      80% {
-        transform: translateX(10px);
-      }
-    }
-
-    @keyframes avatarPulse {
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.35);
-      }
-      50% {
-        box-shadow: 0 0 0 18px rgba(0, 198, 255, 0);
-      }
-    }
-
-    @keyframes shimmer {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-
-    .auth-portal-card {
-      animation: cardEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .auth-portal-card::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: calc(theme('borderRadius.3xl') + 8px);
-      background: linear-gradient(135deg, rgba(0, 198, 255, 0.75), rgba(0, 114, 255, 0.75));
-      opacity: 0;
-      z-index: 0;
-      filter: blur(0);
-      transition: opacity 0.6s ease, filter 0.6s ease;
-      pointer-events: none;
-    }
-
-    .auth-portal-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .auth-portal-card:hover::before {
-      opacity: 0.55;
-      filter: blur(12px);
-    }
-
-    .auth-portal-background span {
-      position: absolute;
-      font-size: clamp(2.75rem, 8vw, 4.5rem);
-      opacity: 0.12;
-      filter: blur(0.4px);
-      animation: floatSlow var(--duration, 18s) ease-in-out infinite;
-    }
-
-    .auth-portal-background span:nth-child(odd) {
-      opacity: 0.09;
-    }
-
-    .auth-portal-background span::after {
-      content: '';
-      position: absolute;
-      inset: -16px;
-      border-radius: 9999px;
-      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.35), transparent 65%);
-      z-index: -1;
-    }
-
-    .auth-success-state {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-
-    .auth-portal:has([data-auth-status].text-brand-700:not(:empty)) .auth-portal-card::before {
-      opacity: 0.85;
-      filter: blur(18px);
-    }
-
-    .auth-portal:has([data-auth-status].text-brand-700:not(:empty)) .auth-portal-card {
-      box-shadow: 0 35px 140px rgba(0, 198, 255, 0.38);
-    }
-
-    .auth-portal:has([data-auth-status].text-rose-600:not(:empty)) .auth-portal-card {
-      animation: cardShake 0.4s ease-in-out;
-    }
-
-    .auth-portal:has([data-auth-status].text-rose-600:not(:empty)) .auth-portal-card::before {
-      opacity: 0.8;
-      filter: blur(18px);
-      background: linear-gradient(135deg, rgba(248, 113, 113, 0.85), rgba(239, 68, 68, 0.65));
-    }
-
-    .auth-portal [data-auth-session] {
-      opacity: 0;
-      transform: translateY(18px) scale(0.97);
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-success-state {
-      animation: successCelebrate 2.4s ease forwards;
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-session] {
-      animation: sessionReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      animation-delay: 2s;
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-portal-card::before {
-      opacity: 0.9;
-      filter: blur(20px);
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(5, 150, 105, 0.75));
-      animation: cardSuccessGlow 2.4s ease forwards;
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) .auth-portal-card {
-      box-shadow: 0 35px 140px rgba(16, 185, 129, 0.4);
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-avatar] {
-      animation: avatarPulse 3.2s ease-in-out infinite;
-    }
-
-    .auth-portal [data-auth-avatar] {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .auth-portal [data-auth-avatar]::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.6) 45%, transparent 90%);
-      transform: translateX(-100%);
-      animation: shimmer 3.6s ease-in-out infinite;
-      opacity: 0;
-    }
-
-    .auth-portal:has([data-auth-session]:not(.hidden)) [data-auth-avatar]::after {
-      opacity: 0.65;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .auth-portal-card,
-      .auth-portal-card::before,
-      .auth-portal-background span,
-      .auth-success-state,
-      .auth-portal [data-auth-session],
-      .auth-portal [data-auth-avatar]::after {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-      }
-    }
+    .card { @apply rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow; }
+    .btn  { @apply px-3 py-2 rounded-xl border font-semibold; }
+    .auth-portal-card { animation: authPortalIn .45s ease forwards; opacity:0; transform: translateY(16px) scale(.96); }
+    @keyframes authPortalIn { to { opacity:1; transform: translateY(0) scale(1); } }
   </style>
 </head>
-<body class="min-h-full bg-gradient-to-br from-[#00c6ff] to-[#0072ff] flex items-center justify-center px-4 py-10 text-slate-900 font-sans relative overflow-hidden">
-  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-    <div class="auth-portal-background h-full w-full">
-      <span style="top:12%;left:12%;--tx:42px;--ty:28px;--scale:1.05;--duration:22s">💊</span>
-      <span style="top:25%;right:12%;--tx:34px;--ty:46px;--scale:0.95;--duration:18s">🩹</span>
-      <span style="bottom:20%;left:18%;--tx:58px;--ty:32px;--scale:1.08;--duration:24s">💉</span>
-      <span style="bottom:14%;right:20%;--tx:46px;--ty:30px;--scale:1.02;--duration:21s">🧴</span>
-      <span style="top:48%;left:6%;--tx:38px;--ty:42px;--scale:0.92;--duration:26s">💊</span>
-      <span style="top:62%;right:10%;--tx:40px;--ty:36px;--scale:1.06;--duration:20s">🩹</span>
-    </div>
+<body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
+  <div class="max-w-5xl mx-auto p-4">
+    <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Αρχική</a>
+        <h1 class="text-2xl font-extrabold">MediRadar • Φαρμακείο</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2" data-auth-header>
+          <button id="signin-btn" type="button" data-auth-open data-auth-tab="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
+          <div data-auth-header-session class="hidden items-center gap-2">
+            <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
+            <span data-auth-header-email class="text-sm font-semibold"></span>
+          </div>
+        </div>
+        <div id="auth-session" class="text-xs text-slate-500 dark:text-slate-400"></div>
+        <button id="signout-btn" data-auth-header-logout class="btn hidden hover:bg-slate-100 dark:hover:bg-slate-800">Έξοδος</button>
+        <button id="theme-toggle" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">🌙/🌞</button>
+      </div>
+    </header>
+
+    <!-- PHARMACY PICK/CREATE -->
+    <section class="grid md:grid-cols-2 gap-4">
+      <div class="card">
+        <h2 class="text-lg font-bold mb-2">Επιλογή Φαρμακείου</h2>
+        <div class="flex gap-2">
+          <select id="pharmacy-select" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800"></select>
+          <button id="reload-pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">↻</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-2">Αν δεν υπάρχει, δημιούργησέ το δίπλα.</p>
+        <div id="pharmacy-picked" class="mt-3 hidden">
+          <div class="text-sm"><span class="font-semibold">Επιλεγμένο:</span> <span id="pharm-name"></span> • <span id="pharm-city"></span></div>
+          <div class="text-xs text-slate-500"><span id="pharm-addr"></span> • <span id="pharm-phone"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-lg font-bold mb-2">Νέο Φαρμακείο</h2>
+        <div class="grid grid-cols-1 gap-2">
+          <input id="new-name"  class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Όνομα">
+          <input id="new-addr"  class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Διεύθυνση">
+          <input id="new-phone" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="Τηλέφωνο">
+          <select id="new-city" class="px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800">
+            <option value="">— Πόλη —</option>
+            <option>Αθήνα</option><option>Θεσσαλονίκη</option><option>Πάτρα</option>
+            <option>Ηράκλειο</option><option>Λάρισα</option><option>Βόλος</option>
+            <option>Χανιά</option><option>Γλυφάδα</option><option>Ρόδος</option>
+          </select>
+          <button id="create-pharmacy" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">Δημιουργία</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOURS JSON -->
+    <section id="hours-box" class="card mt-4 hidden">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold">Πρόγραμμα λειτουργίας</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Επίλεξε ημέρες και ώρες με την παρακάτω πρόταση.</p>
+        </div>
+        <div id="hours-meta" class="text-[11px] text-slate-400"></div>
+      </div>
+      <div id="hours-auth-alert" class="mt-3 text-xs text-amber-600 bg-amber-100/80 dark:bg-amber-900/30 dark:text-amber-200 rounded-xl px-3 py-2 hidden">Χρειάζεται είσοδος για επεξεργασία ωραρίου.</div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="hours-grid"></div>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div id="hours-status" class="text-sm text-slate-500"></div>
+        <div class="flex gap-2">
+          <button id="cancel-hours" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold" disabled>Ακύρωση</button>
+          <button id="save-hours" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:pointer-events-none">Αποθήκευση</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REQUESTS LIST -->
+    <section id="req-box" class="card mt-4 hidden">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold">Αιτήματα στην πόλη σου</h2>
+        <div class="flex items-center gap-2 text-sm">
+          <span>Πόλη:</span><span id="city-pill" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800"></span>
+          <button id="reload-requests" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">↻</button>
+        </div>
+      </div>
+      <div id="req-list" class="mt-3 grid gap-3"></div>
+      <div id="empty-state" class="hidden p-3 rounded-xl border text-sm">Δεν υπάρχουν εκκρεμή αιτήματα αυτή τη στιγμή.</div>
+    </section>
   </div>
 
-  <div data-auth-root class="auth-portal relative w-full max-w-3xl">
-    <div class="auth-portal-card rounded-3xl border border-white/40 bg-white/70 backdrop-blur-3xl shadow-glass">
-      <div class="auth-portal-inner p-6 sm:p-10">
-        <div class="flex flex-col items-center text-center gap-6">
-          <div class="relative flex flex-col items-center gap-3">
-            <div class="h-16 w-16 rounded-2xl bg-white/80 shadow-lg flex items-center justify-center ring-1 ring-white/50">
-              <img src="/icons/icon-192.png" alt="MediRadar" class="h-12 w-12" />
+  <!-- AUTH PORTAL MODAL -->
+  <div id="auth-modal" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
+    <div class="relative w-full max-w-xl mx-auto">
+      <div class="relative overflow-hidden rounded-3xl border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card">
+        <div class="absolute inset-0 pointer-events-none">
+          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
+          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
+        </div>
+        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
+        <div class="relative p-6 sm:p-8" data-auth-root>
+          <div class="flex flex-col items-center text-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
+              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
+                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
+              </svg>
             </div>
             <div class="space-y-2">
-              <p class="text-xs uppercase tracking-[0.4em] text-white/80">MediRadar</p>
-              <h1 class="text-2xl sm:text-3xl font-semibold text-white drop-shadow-sm">Σύνδεση στην πλατφόρμα MediRadar</h1>
+              <h2 id="auth-modal-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Σύνδεση στην πλατφόρμα MediRadar</h2>
+              <p id="auth-portal-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Επίλεξε ρόλο και συνέχισε με magic link ή Google.</p>
             </div>
           </div>
 
-          <div class="flex w-full flex-col gap-6">
-            <div class="mx-auto grid w-full max-w-sm grid-cols-2 gap-2 rounded-full bg-white/40 p-1 shadow-inner shadow-white/30">
-              <button type="button" data-auth-tab="users" aria-pressed="true" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold bg-white text-slate-900 shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/30 focus-visible:ring-brand-500">
-                Για Χρήστες
+          <div class="mt-6 flex items-center justify-center gap-2 rounded-full bg-white/70 dark:bg-slate-800/60 p-1 shadow-inner">
+            <button type="button" id="auth-tab-users" data-auth-tab="users" class="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-all">Για Χρήστες</button>
+            <button type="button" id="auth-tab-pharmacies" data-auth-tab="pharmacies" class="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 transition-all">Για Φαρμακεία</button>
+          </div>
+
+          <p data-auth-status-global class="hidden mt-4 text-sm text-center text-rose-600"></p>
+
+          <div class="mt-6 space-y-6" data-auth-views>
+            <form data-auth-form="users" class="space-y-4" novalidate>
+              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <span id="auth-users-email-label">Email</span>
+                <input id="auth-users-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
+              </label>
+              <button type="submit" id="auth-users-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
+              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
+                <span id="auth-users-google-cta">Σύνδεση με Google</span>
               </button>
-              <button type="button" data-auth-tab="pharmacies" aria-pressed="false" class="flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-slate-100/80 hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white/20 focus-visible:ring-brand-500">
-                Για Φαρμακεία
+              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
+            </form>
+
+            <form data-auth-form="pharmacies" class="hidden space-y-4" novalidate>
+              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <span id="auth-pharm-email-label">Email φαρμακείου</span>
+                <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+              </label>
+              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
+              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
+                <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
               </button>
-            </div>
+              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
+            </form>
+          </div>
 
-            <div class="relative">
-              <div class="auth-success-state pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-                <div class="rounded-3xl bg-emerald-500/85 px-6 py-4 text-lg font-semibold text-white shadow-2xl backdrop-blur-xl">
-                  ✅ Επιτυχής Σύνδεση
-                </div>
-              </div>
-
-              <div data-auth-views class="relative z-10 space-y-6 rounded-[28px] bg-white/60 p-6 shadow-inner shadow-white/30 backdrop-blur-2xl ring-1 ring-white/50">
-                <form data-auth-form="users" class="space-y-4" novalidate>
-                  <div class="space-y-2 text-left">
-                    <label for="auth-email-users" class="text-sm font-medium text-slate-700">Email</label>
-                    <input id="auth-email-users" type="email" required placeholder="name@example.com" class="w-full rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
-                  </div>
-                  <button type="submit" data-auth-email-button class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-brand-500/40">
-                    <span class="relative z-10">Σύνδεση / Εγγραφή με Email</span>
-                    <span class="absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-40"></span>
-                  </button>
-                  <button type="button" data-auth-google class="group flex w-full items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
-                    <span class="relative">Σύνδεση με Google</span>
-                  </button>
-                  <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
-                </form>
-
-                <form data-auth-form="pharmacies" class="hidden space-y-4" novalidate>
-                  <div class="space-y-2 text-left">
-                    <label for="auth-email-pharmacies" class="text-sm font-medium text-slate-700">Email Φαρμακείου</label>
-                    <input id="auth-email-pharmacies" type="email" required placeholder="pharmacy@example.com" class="w-full rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-brand-500/40" />
-                  </div>
-                  <button type="submit" data-auth-email-button class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-brand-500/40">
-                    <span class="relative z-10">Σύνδεση / Εγγραφή με Email</span>
-                    <span class="absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-40"></span>
-                  </button>
-                  <button type="button" data-auth-google class="group flex w-full items-center justify-center gap-3 rounded-2xl border border-white/70 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="h-5 w-5" />
-                    <span class="relative">Σύνδεση με Google</span>
-                  </button>
-                  <p data-auth-status class="min-h-[1.25rem] text-center text-sm font-medium" role="status" aria-live="polite"></p>
-                </form>
-
-                <p data-auth-status-global class="hidden text-center text-sm font-semibold text-rose-600" role="status" aria-live="polite"></p>
-              </div>
-            </div>
-
-            <div data-auth-session class="hidden relative z-10 flex flex-col gap-4 rounded-2xl border border-white/60 bg-white/85 px-5 py-4 shadow-lg backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between">
+          <div data-auth-session class="hidden mt-8">
+            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
               <div class="flex items-center gap-3">
-                <span data-auth-avatar class="relative grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-lg font-semibold"></span>
-                <div class="space-y-0.5">
-                  <p class="text-sm font-semibold text-slate-700">Καλωσήρθες!</p>
-                  <p data-auth-user-email class="text-sm text-slate-500"></p>
+                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
+                <div class="text-left">
+                  <p id="auth-session-welcome" class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
+                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
                 </div>
               </div>
-              <button type="button" data-auth-logout class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-                Αποσύνδεση
-              </button>
+              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
             </div>
-
-            <p class="text-center text-xs text-white/80 drop-shadow-sm">
-              Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.
-            </p>
           </div>
+
+          <p id="auth-portal-footer" class="mt-6 text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ENV -->
   <script src="/env.js"></script>
+  <script>
+    window.ENV = window.ENV || {
+      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
+    };
+  </script>
+
+  <!-- Supabase + App -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { supabaseClient } from "./firebase.js";
+    import {
+      WEEK_DAYS,
+      createEmptySchedule,
+      cloneSchedule,
+      validateSchedule,
+      loadSchedule,
+      saveSchedule
+    } from "./pharmacy/schedule.js";
+
+    /* ---------- setup ---------- */
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+    const supabase = supabaseClient || (SUPABASE_URL && SUPABASE_ANON_KEY
+      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null);
+    if(!supabase){
+      console.warn('Supabase configuration is missing.');
+    }
+    const qs = (s, r=document)=>r.querySelector(s);
+    const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
+    const store = {
+      pharmacy: null
+    };
+
+    const scheduleState = {
+      draft: createEmptySchedule(),
+      saved: createEmptySchedule(),
+      meta: null,
+      loading: false,
+      dirty: false,
+      errors: []
+    };
+
+    /* ---------- theme ---------- */
+    const html = document.documentElement;
+    const themeBtn = qs('#theme-toggle');
+    function setTheme(mode){ const dark = mode==='dark'; html.classList.toggle('dark', dark); localStorage.setItem('mr-pharm-theme', dark?'dark':'light');}
+    setTheme(localStorage.getItem('mr-pharm-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
+
+    /* ---------- ui refs ---------- */
+    const selPh = qs('#pharmacy-select');
+    const reloadPh = qs('#reload-pharmacies');
+    const pickedBox = qs('#pharmacy-picked');
+    const pName = qs('#pharm-name');
+    const pCity = qs('#pharm-city');
+    const pAddr = qs('#pharm-addr');
+    const pPhone = qs('#pharm-phone');
+
+    const authSessionEl = qs('#auth-session');
+    const signOutBtn = qs('#signout-btn');
+    const authModalEl = qs('#auth-modal');
+    const authRoot = authModalEl?.querySelector('[data-auth-root]');
+    const authCloseEls = authModalEl ? authModalEl.querySelectorAll('[data-auth-close]') : [];
+    const authOpenButtons = qsa('[data-auth-open]');
+    const authHeaderSession = qs('[data-auth-header-session]');
+    const authHeaderAvatar = qs('[data-auth-header-avatar]');
+    const authHeaderEmail = qs('[data-auth-header-email]');
+
+    const hoursBox = qs('#hours-box');
+    const hoursGrid = qs('#hours-grid');
+    const saveHoursBtn = qs('#save-hours');
+    const cancelHoursBtn = qs('#cancel-hours');
+    const hoursStatusEl = qs('#hours-status');
+    const hoursMetaEl = qs('#hours-meta');
+    const hoursAuthAlert = qs('#hours-auth-alert');
+
+    const dayControls = new Map();
+
+    let authSession = null;
+
+    function getSessionUser(){
+      return authSession?.user || null;
+    }
+
+    function setAuthTabForModal(tab='pharmacies'){
+      const buttons = authRoot ? authRoot.querySelectorAll('[data-auth-tab]') : [];
+      const target = Array.from(buttons).find(btn => btn.dataset.authTab === tab);
+      target?.click();
+    }
+
+    function openAuthModal(tab='pharmacies'){
+      setAuthTabForModal(tab);
+      authModalEl?.classList.remove('hidden');
+      authModalEl?.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeAuthModal(){
+      authModalEl?.classList.add('hidden');
+      authModalEl?.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    function updateAuthHeaderUI(userOverride){
+      const user = userOverride || getSessionUser();
+      const email = user?.email || user?.user_metadata?.name || user?.phone || '';
+      authOpenButtons.forEach(btn => btn.classList.toggle('hidden', !!user));
+      if(authHeaderSession){ authHeaderSession.classList.toggle('hidden', !user); }
+      if(authHeaderAvatar){
+        const initial = (email || 'Μ').trim().charAt(0).toUpperCase();
+        authHeaderAvatar.textContent = initial || 'Μ';
+      }
+      if(authHeaderEmail){ authHeaderEmail.textContent = email; }
+      signOutBtn?.classList.toggle('hidden', !user);
+    }
+
+    updateAuthHeaderUI();
+
+    if(supabase){
+      supabase.auth.getSession().then(({ data })=>{
+        authSession = data?.session || null;
+        updateAuthSessionUI();
+      }).catch(()=>undefined);
+      supabase.auth.onAuthStateChange((_event, session)=>{
+        authSession = session;
+        updateAuthSessionUI();
+      });
+    }
+
+    authOpenButtons.forEach(btn => {
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        openAuthModal(btn.dataset.authTab || 'pharmacies');
+      });
+    });
+
+    authCloseEls.forEach(btn => btn.addEventListener('click', closeAuthModal));
+
+    document.addEventListener('keydown', event => {
+      if(event.key === 'Escape' && authModalEl && !authModalEl.classList.contains('hidden')){
+        closeAuthModal();
+      }
+    });
+
+    document.addEventListener('mediradar-auth-change', event => {
+      const user = event?.detail?.user || null;
+      if(user){
+        updateAuthHeaderUI(user);
+        if(supabase){
+          supabase.auth.getSession()
+            .then(({ data }) => {
+              if(data?.session){
+                authSession = data.session;
+                updateAuthSessionUI();
+              }
+            })
+            .catch(()=>undefined);
+        }
+        setTimeout(()=> closeAuthModal(), 200);
+      } else {
+        authSession = null;
+        updateAuthHeaderUI(null);
+        updateAuthSessionUI();
+      }
+    });
+
+    signOutBtn?.addEventListener('click', async ()=>{
+      if(!supabase) return;
+      try{
+        await supabase.auth.signOut();
+      }catch(err){
+        console.warn('signout error', err);
+      }
+    });
+
+    function updateAuthSessionUI(){
+      if(!authSessionEl) return;
+      const loggedIn = !!authSession?.user;
+      const identifier = authSession?.user?.email || authSession?.user?.phone || authSession?.user?.user_metadata?.name || authSession?.user?.id || '';
+      authSessionEl.textContent = loggedIn
+        ? `Συνδεδεμένος ως ${identifier || 'λογαριασμός'}`
+        : 'Δεν έχεις συνδεθεί';
+      updateAuthHeaderUI();
+      hoursAuthAlert?.classList.toggle('hidden', loggedIn);
+      updateScheduleButtons();
+    }
+    updateAuthSessionUI();
+
+    const reqBox = qs('#req-box');
+    const cityPill = qs('#city-pill');
+    const reqList = qs('#req-list');
+    const emptyState = qs('#empty-state');
+    const reloadReq = qs('#reload-requests');
+
+    /* ---------- pharmacy CRUD ---------- */
+    async function loadPharmacies(){
+      const { data, error } = await supabase.from('pharmacies').select('id,name,city,address,phone').order('name');
+      if(error){ console.warn(error); return; }
+      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + (data||[]).map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name} — ${p.city||'—'}</option>`).join('');
+    }
+
+    async function createPharmacy(){
+      const name = qs('#new-name').value.trim();
+      const address = qs('#new-addr').value.trim();
+      const phone = qs('#new-phone').value.trim();
+      const city = qs('#new-city').value;
+      if(!name || !city){ alert('Όνομα και Πόλη είναι υποχρεωτικά'); return; }
+      const { data, error } = await supabase.from('pharmacies').insert({ name, address, phone, city }).select('id,name,city,address,phone').single();
+      if(error){ alert('Σφάλμα δημιουργίας φαρμακείου'); console.warn(error); return; }
+      await loadPharmacies();
+      selPh.value = data.id;
+      applyPickedFromSelect();
+      qs('#new-name').value=''; qs('#new-addr').value=''; qs('#new-phone').value=''; qs('#new-city').value='';
+    }
+
+    async function applyPickedFromSelect(){
+      const id = selPh.value;
+      if(!id){
+        pickedBox.classList.add('hidden');
+        hoursBox.classList.add('hidden');
+        reqBox.classList.add('hidden');
+        store.pharmacy=null;
+        scheduleState.draft = createEmptySchedule();
+        scheduleState.saved = createEmptySchedule();
+        scheduleState.meta = null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(null);
+        setHoursStatus('', 'muted');
+        return;
+      }
+      const opt = selPh.selectedOptions[0];
+      store.pharmacy = { id, name: opt.textContent.split(' — ')[0], city: opt.dataset.city, address: opt.dataset.addr, phone: opt.dataset.phone };
+      pName.textContent = store.pharmacy.name;
+      pCity.textContent = store.pharmacy.city || '—';
+      pAddr.textContent = store.pharmacy.address || '—';
+      pPhone.textContent = store.pharmacy.phone || '—';
+      pickedBox.classList.remove('hidden');
+      hoursBox.classList.remove('hidden');
+      reqBox.classList.remove('hidden');
+      cityPill.textContent = store.pharmacy.city || '—';
+      if(store.pharmacy?.id && supabase){
+        scheduleState.loading = true;
+        updateScheduleButtons();
+        setHoursStatus('Φόρτωση ωραρίου…', 'muted');
+        await loadScheduleForCurrentPharmacy();
+      }
+      loadRequests();
+    }
+
+    /* ---------- hours ---------- */
+    function normalizeSchedule(list = []){
+      return list.map(item => ({
+        dayIndex: item.dayIndex,
+        open: !!item.open,
+        start: item.start || '',
+        end: item.end || ''
+      }));
+    }
+
+    function setupScheduleEditor(){
+      if(!hoursGrid) return;
+      hoursGrid.innerHTML = '';
+      dayControls.clear();
+      WEEK_DAYS.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4 flex flex-col gap-3 transition-colors';
+        card.dataset.dayIndex = String(day.index);
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-2';
+
+        const labelWrap = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'text-sm font-semibold text-slate-900 dark:text-slate-100';
+        title.textContent = day.labels?.el || day.labels?.en || day.name || '';
+        const status = document.createElement('div');
+        status.className = 'text-[11px] text-slate-500 dark:text-slate-400';
+        status.textContent = 'Κλειστό';
+        labelWrap.append(title, status);
+
+        const toggleWrap = document.createElement('label');
+        toggleWrap.className = 'inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300';
+        const toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'size-4 accent-emerald-600 rounded';
+        toggleWrap.append(toggle, document.createTextNode('Ανοιχτό'));
+
+        header.append(labelWrap, toggleWrap);
+
+        const timesWrap = document.createElement('div');
+        timesWrap.className = 'grid grid-cols-2 gap-2 transition-opacity';
+        const startInput = document.createElement('input');
+        startInput.type = 'time';
+        startInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
+        const endInput = document.createElement('input');
+        endInput.type = 'time';
+        endInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
+
+        timesWrap.append(startInput, endInput);
+        card.append(header, timesWrap);
+        hoursGrid.appendChild(card);
+
+        dayControls.set(day.index, {
+          card,
+          toggle,
+          statusEl: status,
+          timesWrap,
+          startInput,
+          endInput
+        });
+
+        toggle.addEventListener('change', ()=> handleToggleChange(day.index, toggle.checked));
+        startInput.addEventListener('input', ()=> handleTimeChange(day.index, 'start', startInput.value));
+        endInput.addEventListener('input', ()=> handleTimeChange(day.index, 'end', endInput.value));
+      });
+
+      refreshScheduleUI({ silent:true });
+    }
+
+    function getScheduleEntry(dayIndex){
+      return scheduleState.draft.find(item => item.dayIndex === dayIndex);
+    }
+
+    function handleToggleChange(dayIndex, checked){
+      const entry = getScheduleEntry(dayIndex);
+      if(!entry) return;
+      entry.open = !!checked;
+      if(!entry.open){
+        entry.start = '';
+        entry.end = '';
+      }
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    function handleTimeChange(dayIndex, role, value){
+      const entry = getScheduleEntry(dayIndex);
+      if(!entry) return;
+      if(role === 'start'){ entry.start = value; }
+      else { entry.end = value; }
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    function refreshScheduleUI({ silent=false } = {}){
+      scheduleState.draft.forEach(entry => {
+        const controls = dayControls.get(entry.dayIndex);
+        if(!controls) return;
+        controls.toggle.checked = !!entry.open;
+        controls.startInput.value = entry.start || '';
+        controls.endInput.value = entry.end || '';
+        const isOpen = !!entry.open;
+        controls.timesWrap.classList.toggle('opacity-40', !isOpen);
+        controls.timesWrap.classList.toggle('pointer-events-none', !isOpen);
+        controls.statusEl.textContent = isOpen && entry.start && entry.end
+          ? `${entry.start} – ${entry.end}`
+          : 'Κλειστό';
+        controls.card.classList.remove('ring-2','ring-rose-400','border-rose-300','dark:border-rose-500/50');
+        controls.statusEl.classList.remove('text-rose-500');
+      });
+      applyValidationToUI();
+      updateScheduleButtons();
+      if(!silent){
+        setDirtyStatusMessage();
+      }
+    }
+
+    function applyValidationToUI(){
+      const errors = validateSchedule(scheduleState.draft);
+      scheduleState.errors = errors;
+      const invalidDays = new Set(errors.map(err => err.dayIndex));
+      dayControls.forEach((controls, dayIndex)=>{
+        const invalid = invalidDays.has(dayIndex);
+        controls.card.classList.toggle('ring-2', invalid);
+        controls.card.classList.toggle('ring-rose-400', invalid);
+        controls.card.classList.toggle('border-rose-300', invalid);
+        controls.card.classList.toggle('dark:border-rose-500/50', invalid);
+        controls.statusEl.classList.toggle('text-rose-500', invalid);
+      });
+    }
+
+    function isScheduleDirty(){
+      return JSON.stringify(normalizeSchedule(scheduleState.draft)) !== JSON.stringify(normalizeSchedule(scheduleState.saved));
+    }
+
+    function updateScheduleButtons(){
+      scheduleState.dirty = isScheduleDirty();
+      const saveDisabled = !authSession?.user || scheduleState.loading || !scheduleState.dirty || (scheduleState.errors?.length ?? 0) > 0;
+      if(saveHoursBtn) saveHoursBtn.disabled = !!saveDisabled;
+      if(cancelHoursBtn) cancelHoursBtn.disabled = scheduleState.loading || !scheduleState.dirty;
+    }
+
+    function setHoursStatus(message='', tone='muted'){
+      if(!hoursStatusEl) return;
+      let cls = 'text-sm ';
+      if(tone === 'error'){ cls += 'text-rose-500 dark:text-rose-300'; }
+      else if(tone === 'success'){ cls += 'text-emerald-600 dark:text-emerald-300'; }
+      else if(tone === 'warning'){ cls += 'text-amber-600 dark:text-amber-300'; }
+      else { cls += 'text-slate-500 dark:text-slate-400'; }
+      hoursStatusEl.className = cls;
+      hoursStatusEl.textContent = message;
+    }
+
+    function setHoursMeta(meta){
+      if(!hoursMetaEl) return;
+      if(meta?.updatedAt){
+        try{
+          const dt = new Date(meta.updatedAt);
+          const formatted = dt.toLocaleString('el-GR', { hour12:false });
+          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${formatted}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
+        }catch(err){
+          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${meta.updatedAt}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
+        }
+      }else{
+        hoursMetaEl.textContent = '';
+      }
+    }
+
+    function setDirtyStatusMessage(){
+      if(scheduleState.errors.length){
+        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
+      }else if(scheduleState.dirty){
+        setHoursStatus('Υπάρχουν μη αποθηκευμένες αλλαγές.', 'muted');
+      }else if(scheduleState.meta?.updatedAt){
+        try{
+          const dt = new Date(scheduleState.meta.updatedAt);
+          setHoursStatus(`Τελευταία ενημέρωση ${dt.toLocaleString('el-GR', { hour12:false })}.`, 'muted');
+        }catch{
+          setHoursStatus('', 'muted');
+        }
+      }else{
+        setHoursStatus('', 'muted');
+      }
+    }
+
+    async function loadScheduleForCurrentPharmacy(){
+      if(!store.pharmacy?.id || !supabase){ return; }
+      try{
+        const { schedule, meta } = await loadSchedule(store.pharmacy.id, { client: supabase });
+        scheduleState.saved = cloneSchedule(schedule);
+        scheduleState.draft = cloneSchedule(schedule);
+        scheduleState.meta = meta || null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(meta || null);
+        setHoursStatus('Το ωράριο φορτώθηκε.', 'success');
+      }catch(err){
+        console.warn('load schedule error', err);
+        scheduleState.saved = createEmptySchedule();
+        scheduleState.draft = createEmptySchedule();
+        scheduleState.meta = null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(null);
+        setHoursStatus('Αποτυχία φόρτωσης ωραρίου.', 'error');
+      }finally{
+        scheduleState.loading = false;
+        updateScheduleButtons();
+      }
+    }
+
+    async function handleSaveSchedule(){
+      if(!store.pharmacy?.id || !supabase) return;
+      scheduleState.errors = validateSchedule(scheduleState.draft);
+      if(scheduleState.errors.length){
+        applyValidationToUI();
+        updateScheduleButtons();
+        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
+        return;
+      }
+      if(!authSession?.user){
+        hoursAuthAlert?.classList.remove('hidden');
+        setHoursStatus('Πρέπει να συνδεθείς για να αποθηκεύσεις.', 'error');
+        updateScheduleButtons();
+        return;
+      }
+      scheduleState.loading = true;
+      updateScheduleButtons();
+      setHoursStatus('Αποθήκευση…', 'muted');
+      try{
+        const { schedule, meta } = await saveSchedule(store.pharmacy.id, scheduleState.draft, { client: supabase, session: authSession });
+        scheduleState.saved = cloneSchedule(schedule);
+        scheduleState.draft = cloneSchedule(schedule);
+        scheduleState.meta = meta || null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(meta || null);
+        setHoursStatus('Το ωράριο αποθηκεύτηκε.', 'success');
+      }catch(err){
+        console.warn('save schedule error', err);
+        setHoursStatus(err?.message || 'Αποτυχία αποθήκευσης ωραρίου.', 'error');
+      }finally{
+        scheduleState.loading = false;
+        updateScheduleButtons();
+      }
+    }
+
+    function handleCancelSchedule(){
+      scheduleState.draft = cloneSchedule(scheduleState.saved);
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    setupScheduleEditor();
+    setHoursMeta(scheduleState.meta);
+    setHoursStatus('', 'muted');
+
+    /* ---------- requests feed ---------- */
+    async function loadRequests(){
+      reqList.innerHTML = '';
+      emptyState.classList.add('hidden');
+      if(!store.pharmacy?.city) return;
+
+      const { data, error } = await supabase
+        .from('requests')
+        .select('id, created_at, med_name, active_substance, med_type, quantity, allow_generic, city, status')
+        .eq('city', store.pharmacy.city)
+        .in('status', ['pending','has_responses'])
+        .order('created_at', { ascending:false })
+        .limit(50);
+
+      if(error){ console.warn(error); return; }
+      if(!data || !data.length){ emptyState.classList.remove('hidden'); return; }
+
+      data.forEach(row=>{
+        const card = document.createElement('div');
+        card.className = 'rounded-xl border p-3 bg-white/80 dark:bg-slate-900/60';
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">${row.med_name}</div>
+            <div class="text-xs text-slate-500">${new Date(row.created_at).toLocaleString()}</div>
+          </div>
+          <div class="text-xs text-slate-600 dark:text-slate-400">
+            ${row.active_substance ? `Ουσία: ${row.active_substance} • ` : ''}Τύπος: ${row.med_type||'—'} • Ποσ: ${row.quantity}
+          </div>
+          <div class="mt-2 flex items-center gap-3">
+            <label class="inline-flex items-center gap-2 text-sm">
+              <input type="checkbox" class="gen-chk size-4 accent-brand-600"> Γενόσημο
+            </label>
+            <button class="avail btn bg-emerald-600 text-white border-emerald-700 hover:opacity-95">Διαθέσιμο</button>
+            <button class="unavail btn hover:bg-slate-100 dark:hover:bg-slate-800">Μη διαθέσιμο</button>
+          </div>
+        `;
+        card.dataset.id = row.id;
+        reqList.appendChild(card);
+      });
+    }
+
+    async function sendResponse(reqId, available, isGeneric){
+      if(!store.pharmacy?.id){ alert('Διάλεξε φαρμακείο πρώτα.'); return; }
+      const payload = { request_id: reqId, pharmacy_id: store.pharmacy.id, available: !!available, is_generic: !!isGeneric };
+      const { error } = await supabase.from('responses').insert(payload);
+      if(error){ alert('Σφάλμα καταχώρησης απάντησης'); console.warn(error); return; }
+      // Προαιρετικά, ενημέρωσε το request σε has_responses
+      await supabase.from('requests').update({ status:'has_responses' }).eq('id', reqId).neq('status','reserved');
+    }
+
+    /* ---------- events ---------- */
+    qs('#create-pharmacy').addEventListener('click', createPharmacy);
+    selPh.addEventListener('change', applyPickedFromSelect);
+    reloadPh.addEventListener('click', loadPharmacies);
+    saveHoursBtn.addEventListener('click', handleSaveSchedule);
+    cancelHoursBtn.addEventListener('click', handleCancelSchedule);
+    reloadReq.addEventListener('click', loadRequests);
+
+    reqList.addEventListener('click', async (e)=>{
+      const card = e.target.closest('[data-id]'); if(!card) return;
+      const reqId = card.dataset.id;
+      if(e.target.closest('.avail')){
+        const isGen = card.querySelector('.gen-chk')?.checked || false;
+        await sendResponse(reqId, true, isGen);
+        card.classList.add('opacity-60');
+      }
+      if(e.target.closest('.unavail')){
+        await sendResponse(reqId, false, false);
+        card.classList.add('opacity-60');
+      }
+    });
+
+    /* ---------- realtime (optional) ---------- */
+    try{
+      supabase
+        .channel('requests-feed')
+        .on('postgres_changes', { event: 'INSERT', schema:'public', table:'requests', filter:`city=eq.${encodeURIComponent(store.pharmacy?.city||'')}` }, (payload)=>{
+          loadRequests();
+        })
+        .subscribe();
+    }catch{}
+
+    /* ---------- init ---------- */
+    await loadPharmacies();
+  </script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>
