@@ -1,6 +1,56 @@
 import { supabaseClient } from '../firebase.js';
 
-const REDIRECT_URL = 'https://mediradar.gr/';
+const ENV = window.ENV || {};
+const SITE_URL = typeof ENV.SUPABASE_SITE_URL === 'string' && ENV.SUPABASE_SITE_URL.length
+  ? ENV.SUPABASE_SITE_URL
+  : 'https://mediradar.gr';
+const NORMALIZED_SITE_URL = SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
+const EMAIL_REDIRECT_URL = typeof ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && ENV.SUPABASE_EMAIL_REDIRECT_URL.length
+  ? ENV.SUPABASE_EMAIL_REDIRECT_URL
+  : `${NORMALIZED_SITE_URL}/`;
+const OAUTH_REDIRECT_URL = typeof ENV.SUPABASE_REDIRECT_URL === 'string' && ENV.SUPABASE_REDIRECT_URL.length
+  ? ENV.SUPABASE_REDIRECT_URL
+  : `${NORMALIZED_SITE_URL}/auth/v1/callback`;
+const APP_NAME = typeof ENV.SUPABASE_APP_NAME === 'string' && ENV.SUPABASE_APP_NAME.length
+  ? ENV.SUPABASE_APP_NAME
+  : 'MediRadar';
+const APP_DESCRIPTION = typeof ENV.SUPABASE_APP_DESCRIPTION === 'string' && ENV.SUPABASE_APP_DESCRIPTION.length
+  ? ENV.SUPABASE_APP_DESCRIPTION
+  : 'Σύνδεση μέσω Google για την πλατφόρμα MediRadar';
+const APP_LOGO = typeof ENV.SUPABASE_APP_LOGO === 'string' && ENV.SUPABASE_APP_LOGO.length
+  ? ENV.SUPABASE_APP_LOGO
+  : `${NORMALIZED_SITE_URL}/icons/icon-512.png`;
+
+function ensureMetaTag({ selector, name, property, content }) {
+  if (!content || !document?.head) return;
+  let tag = selector ? document.head.querySelector(selector) : null;
+  if (!tag) {
+    tag = document.createElement('meta');
+    if (name) tag.setAttribute('name', name);
+    if (property) tag.setAttribute('property', property);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function applyBrandingMetadata() {
+  ensureMetaTag({ selector: 'meta[name="application-name"]', name: 'application-name', content: APP_NAME });
+  ensureMetaTag({ selector: 'meta[name="apple-mobile-web-app-title"]', name: 'apple-mobile-web-app-title', content: APP_NAME });
+  ensureMetaTag({ selector: 'meta[name="description"]', name: 'description', content: APP_DESCRIPTION });
+  ensureMetaTag({ selector: 'meta[property="og:site_name"]', property: 'og:site_name', content: APP_NAME });
+  ensureMetaTag({ selector: 'meta[property="og:description"]', property: 'og:description', content: APP_DESCRIPTION });
+  ensureMetaTag({ selector: 'meta[property="twitter:description"]', property: 'twitter:description', content: APP_DESCRIPTION });
+
+  const iconSelectors = ['link[rel="icon"]', 'link[rel="shortcut icon"]'];
+  iconSelectors.forEach(selector => {
+    const link = document.head.querySelector(selector);
+    if (link && APP_LOGO) {
+      link.setAttribute('href', APP_LOGO);
+    }
+  });
+}
+
+applyBrandingMetadata();
 
 const STATUS_MESSAGES = {
   success: '✅ Magic link στάλθηκε στο email σας!',
@@ -129,7 +179,7 @@ async function handleEmailSubmit(event, supabase) {
     setStatus(statusEl, null, '');
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: REDIRECT_URL }
+      options: { emailRedirectTo: EMAIL_REDIRECT_URL }
     });
     if (error) throw error;
     setStatus(statusEl, 'success', STATUS_MESSAGES.success);
@@ -154,7 +204,7 @@ async function handleGoogleClick(form, supabase) {
     setStatus(statusEl, null, '');
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: REDIRECT_URL }
+      options: { redirectTo: OAUTH_REDIRECT_URL }
     });
     if (error) throw error;
     if (!data?.url) {
