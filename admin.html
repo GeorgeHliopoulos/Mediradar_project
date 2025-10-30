@@ -4,6 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MediRadar — Διαχείριση</title>
+  <meta name="application-name" content="MediRadar" />
+  <meta name="apple-mobile-web-app-title" content="MediRadar" />
+  <meta name="description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="og:site_name" content="MediRadar" />
+  <meta property="og:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="twitter:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <link rel="icon" href="/icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -18,25 +25,113 @@
   </script>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    body { font-family: 'Inter', ui-sans-serif, system-ui; }
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .app-bg {
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
+        linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
+    }
+    .dark .app-bg {
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
+        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      border-radius: 1rem;
+    }
+    .dark .glass-surface {
+      background: rgba(15, 23, 42, 0.62);
+      border-color: rgba(148, 163, 184, 0.32);
+      box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
+    }
+    .glass-header {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    }
+    .dark .glass-header {
+      background: rgba(15, 23, 42, 0.72);
+      border-bottom-color: rgba(148, 163, 184, 0.35);
+      box-shadow: 0 12px 32px rgba(2, 6, 23, 0.55);
+    }
     .card {
       border-radius: 1rem;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
-      backdrop-filter: blur(16px);
     }
-    .dark .card {
-      border-color: rgba(71, 85, 105, 0.6);
-      background: rgba(15, 23, 42, 0.7);
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.45);
+    .global-emoji-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .global-emoji-layer span {
+      position: absolute;
+      font-size: clamp(2.75rem, 6vw, 4rem);
+      opacity: 0.18;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+    .global-emoji-layer span:nth-child(1) { top: 8%; left: 12%; animation: adminEmojiFloatA 34s linear infinite; }
+    .global-emoji-layer span:nth-child(2) { top: 22%; right: 18%; animation: adminEmojiFloatB 38s linear infinite; }
+    .global-emoji-layer span:nth-child(3) { bottom: 14%; left: 20%; animation: adminEmojiFloatC 42s linear infinite; }
+    .global-emoji-layer span:nth-child(4) { bottom: 8%; right: 16%; animation: adminEmojiFloatD 36s linear infinite; }
+    .global-emoji-layer span:nth-child(5) { top: 46%; left: 46%; opacity: 0.14; animation: adminEmojiFloatE 44s linear infinite; }
+    .dark .global-emoji-layer span { opacity: 0.22; }
+    @keyframes adminEmojiFloatA {
+      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
+      45% { transform: translate3d(22px, -18px, 0) scale(1.04); opacity: 0.18; }
+      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
+    }
+    @keyframes adminEmojiFloatB {
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
+      50% { transform: translate3d(-26px, 20px, 0) scale(1.06); opacity: 0.19; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
+    }
+    @keyframes adminEmojiFloatC {
+      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+      55% { transform: translate3d(18px, -14px, 0) scale(1.05); opacity: 0.2; }
+      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+    }
+    @keyframes adminEmojiFloatD {
+      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
+      45% { transform: translate3d(-18px, -16px, 0) scale(0.95); opacity: 0.18; }
+      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
+    }
+    @keyframes adminEmojiFloatE {
+      0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
+      50% { transform: translate3d(14px, 22px, 0) scale(1.08); opacity: 0.16; }
+      100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="env.js" defer></script>
 </head>
-<body class="min-h-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur sticky top-0 z-20">
+<body class="min-h-full app-bg text-slate-900 dark:text-slate-100 font-sans">
+
+  <div class="global-emoji-layer" aria-hidden="true">
+    <span>💊</span>
+    <span>💉</span>
+    <span>🩹</span>
+    <span>🧴</span>
+    <span>💚</span>
+  </div>
+
+  <header class="glass-header border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
       <div class="flex items-center gap-3">
         <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-white font-semibold">MR</span>
@@ -52,42 +147,42 @@
     </div>
   </header>
 
-  <main class="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10" id="admin-root">
+  <main class="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 relative z-10" id="admin-root">
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4" id="metric-cards">
-      <article class="card p-5">
+      <article class="card glass-surface p-5">
         <p class="text-sm text-slate-500">Σύνολο αιτήσεων</p>
         <p class="mt-2 text-3xl font-semibold" id="metric-total-requests">—</p>
       </article>
-      <article class="card p-5">
+      <article class="card glass-surface p-5">
         <p class="text-sm text-slate-500">Αιτήσεις σε εξέλιξη</p>
         <p class="mt-2 text-3xl font-semibold" id="metric-pending">—</p>
       </article>
-      <article class="card p-5">
+      <article class="card glass-surface p-5">
         <p class="text-sm text-slate-500">Ενεργά φαρμακεία</p>
         <p class="mt-2 text-3xl font-semibold" id="metric-pharmacies">—</p>
         <p class="text-xs text-slate-500" id="metric-pharmacies-breakdown"></p>
       </article>
-      <article class="card p-5">
+      <article class="card glass-surface p-5">
         <p class="text-sm text-slate-500">Εγγεγραμμένοι χρήστες</p>
         <p class="mt-2 text-3xl font-semibold" id="metric-users">—</p>
       </article>
     </section>
 
     <section class="grid gap-6 lg:grid-cols-2" aria-labelledby="charts-title">
-      <div class="card p-6">
+      <div class="card glass-surface p-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold" id="charts-title">Ροή αιτήσεων (30 ημέρες)</h2>
           <span class="text-xs text-slate-500" id="chart-updated-at"></span>
         </div>
         <canvas id="chart-requests" class="mt-4 h-64"></canvas>
       </div>
-      <div class="card p-6">
+      <div class="card glass-surface p-6">
         <h2 class="text-lg font-semibold">Κατανομή κατάστασης</h2>
         <canvas id="chart-status" class="mt-6 h-64"></canvas>
       </div>
     </section>
 
-    <section class="card p-6" aria-labelledby="requests-table-title">
+    <section class="card glass-surface p-6" aria-labelledby="requests-table-title">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 class="text-lg font-semibold" id="requests-table-title">Πίνακας αιτήσεων</h2>
@@ -139,7 +234,7 @@
       </div>
     </section>
 
-    <section class="card p-6" aria-labelledby="moderation-title">
+    <section class="card glass-surface p-6" aria-labelledby="moderation-title">
       <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 class="text-lg font-semibold" id="moderation-title">Moderation Φαρμακείων</h2>
@@ -179,7 +274,7 @@
       </div>
     </section>
 
-    <section class="card p-6" aria-labelledby="audit-title">
+    <section class="card glass-surface p-6" aria-labelledby="audit-title">
       <h2 class="text-lg font-semibold" id="audit-title">Audit log</h2>
       <p class="text-sm text-slate-500">Καταγράφονται όλες οι ενέργειες moderation.</p>
       <ul id="audit-log" class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
@@ -627,7 +722,7 @@
     (async () => {
       const { allowed } = await guardRoute({ roles: ['admin'], redirectTo: '/' });
       if (!allowed) {
-        document.getElementById('admin-root').innerHTML = '<div class="card p-10 text-center text-lg font-semibold">Δεν έχεις πρόσβαση στη σελίδα διαχείρισης.</div>';
+        document.getElementById('admin-root').innerHTML = '<div class="card glass-surface p-10 text-center text-lg font-semibold">Δεν έχεις πρόσβαση στη σελίδα διαχείρισης.</div>';
         return;
       }
       try {
