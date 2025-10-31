@@ -1,25 +1,33 @@
 import { supabaseClient } from '../firebase.js';
 
 const ENV = window.ENV || {};
-const SITE_URL = typeof ENV.SUPABASE_SITE_URL === 'string' && ENV.SUPABASE_SITE_URL.length
-  ? ENV.SUPABASE_SITE_URL
-  : 'https://mediradar.gr';
+const SITE_URL =
+  typeof ENV.SUPABASE_SITE_URL === 'string' && ENV.SUPABASE_SITE_URL.length
+    ? ENV.SUPABASE_SITE_URL
+    : 'https://mediradar.gr';
 const NORMALIZED_SITE_URL = SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
-const EMAIL_REDIRECT_URL = typeof ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && ENV.SUPABASE_EMAIL_REDIRECT_URL.length
-  ? ENV.SUPABASE_EMAIL_REDIRECT_URL
-  : `${NORMALIZED_SITE_URL}/`;
-const OAUTH_REDIRECT_URL = typeof ENV.SUPABASE_REDIRECT_URL === 'string' && ENV.SUPABASE_REDIRECT_URL.length
-  ? ENV.SUPABASE_REDIRECT_URL
-  : `${NORMALIZED_SITE_URL}/auth/v1/callback`;
-const APP_NAME = typeof ENV.SUPABASE_APP_NAME === 'string' && ENV.SUPABASE_APP_NAME.length
-  ? ENV.SUPABASE_APP_NAME
-  : 'MediRadar';
-const APP_DESCRIPTION = typeof ENV.SUPABASE_APP_DESCRIPTION === 'string' && ENV.SUPABASE_APP_DESCRIPTION.length
-  ? ENV.SUPABASE_APP_DESCRIPTION
-  : 'Σύνδεση μέσω Google για την πλατφόρμα MediRadar';
-const APP_LOGO = typeof ENV.SUPABASE_APP_LOGO === 'string' && ENV.SUPABASE_APP_LOGO.length
-  ? ENV.SUPABASE_APP_LOGO
-  : `${NORMALIZED_SITE_URL}/icons/icon-512.png`;
+const EMAIL_REDIRECT_URL =
+  typeof ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && ENV.SUPABASE_EMAIL_REDIRECT_URL.length
+    ? ENV.SUPABASE_EMAIL_REDIRECT_URL
+    : `${NORMALIZED_SITE_URL}/`;
+const OAUTH_REDIRECT_URL =
+  typeof ENV.SUPABASE_REDIRECT_URL === 'string' && ENV.SUPABASE_REDIRECT_URL.length
+    ? ENV.SUPABASE_REDIRECT_URL
+    : `${NORMALIZED_SITE_URL}/auth/v1/callback`;
+const APP_NAME =
+  typeof ENV.SUPABASE_APP_NAME === 'string' && ENV.SUPABASE_APP_NAME.length
+    ? ENV.SUPABASE_APP_NAME
+    : 'MediRadar';
+const APP_DESCRIPTION =
+  typeof ENV.SUPABASE_APP_DESCRIPTION === 'string' && ENV.SUPABASE_APP_DESCRIPTION.length
+    ? ENV.SUPABASE_APP_DESCRIPTION
+    : 'Σύνδεση μέσω Google για την πλατφόρμα MediRadar';
+const APP_LOGO =
+  typeof ENV.SUPABASE_APP_LOGO === 'string' && ENV.SUPABASE_APP_LOGO.length
+    ? ENV.SUPABASE_APP_LOGO
+    : `${NORMALIZED_SITE_URL}/icons/icon-512.png`;
+
+const DEFAULT_DEMO_EMAIL = 'demo@mediradar.gr';
 
 function ensureMetaTag({ selector, name, property, content }) {
   if (!content || !document?.head) return;
@@ -34,12 +42,36 @@ function ensureMetaTag({ selector, name, property, content }) {
 }
 
 function applyBrandingMetadata() {
-  ensureMetaTag({ selector: 'meta[name="application-name"]', name: 'application-name', content: APP_NAME });
-  ensureMetaTag({ selector: 'meta[name="apple-mobile-web-app-title"]', name: 'apple-mobile-web-app-title', content: APP_NAME });
-  ensureMetaTag({ selector: 'meta[name="description"]', name: 'description', content: APP_DESCRIPTION });
-  ensureMetaTag({ selector: 'meta[property="og:site_name"]', property: 'og:site_name', content: APP_NAME });
-  ensureMetaTag({ selector: 'meta[property="og:description"]', property: 'og:description', content: APP_DESCRIPTION });
-  ensureMetaTag({ selector: 'meta[property="twitter:description"]', property: 'twitter:description', content: APP_DESCRIPTION });
+  ensureMetaTag({
+    selector: 'meta[name="application-name"]',
+    name: 'application-name',
+    content: APP_NAME
+  });
+  ensureMetaTag({
+    selector: 'meta[name="apple-mobile-web-app-title"]',
+    name: 'apple-mobile-web-app-title',
+    content: APP_NAME
+  });
+  ensureMetaTag({
+    selector: 'meta[name="description"]',
+    name: 'description',
+    content: APP_DESCRIPTION
+  });
+  ensureMetaTag({
+    selector: 'meta[property="og:site_name"]',
+    property: 'og:site_name',
+    content: APP_NAME
+  });
+  ensureMetaTag({
+    selector: 'meta[property="og:description"]',
+    property: 'og:description',
+    content: APP_DESCRIPTION
+  });
+  ensureMetaTag({
+    selector: 'meta[property="twitter:description"]',
+    property: 'twitter:description',
+    content: APP_DESCRIPTION
+  });
 
   const iconSelectors = ['link[rel="icon"]', 'link[rel="shortcut icon"]'];
   iconSelectors.forEach(selector => {
@@ -55,7 +87,10 @@ applyBrandingMetadata();
 const STATUS_MESSAGES = {
   success: '✅ Magic link στάλθηκε στο email σας!',
   missingEmail: 'Παρακαλούμε συμπληρώστε το email σας.',
-  genericError: 'Κάτι πήγε στραβά. Προσπαθήστε ξανά.'
+  genericError: 'Κάτι πήγε στραβά. Προσπαθήστε ξανά.',
+  crossDeviceTip: 'Αν ανοίξετε το magic link από άλλη συσκευή, η σύνδεση θα ενεργοποιηθεί μόνο εκεί για λόγους ασφαλείας.',
+  demoSuccess: '🧪 Demo σύνδεση ενεργοποιήθηκε. Θα δείτε δοκιμαστικά αιτήματα.',
+  demoError: 'Δεν ήταν δυνατή η είσοδος demo αυτή τη στιγμή.'
 };
 
 const successTimers = new WeakMap();
@@ -84,11 +119,7 @@ function setActiveTab(root, tab) {
 
   forms.forEach(form => {
     const isActive = form.dataset.authForm === tab;
-    if (isActive) {
-      form.classList.remove('hidden');
-    } else {
-      form.classList.add('hidden');
-    }
+    form.classList.toggle('hidden', !isActive);
   });
 }
 
@@ -101,7 +132,7 @@ function getCardFromElement(el) {
 function runCardEffect(card, className, duration = 1000) {
   if (!card || !className) return;
   card.classList.remove(className);
-  // Force reflow so animation can replay
+  // force reflow
   // eslint-disable-next-line no-unused-expressions
   card.offsetHeight;
   card.classList.add(className);
@@ -234,6 +265,7 @@ function updateSessionUI(root, user) {
   const successView = qs(root, '[data-auth-success]');
   const emailEl = qs(root, '[data-auth-user-email]');
   const avatar = qs(root, '[data-auth-avatar]');
+  const demoBanner = qs(root, '[data-demo-banner]');
   const card = getCardFromElement(root);
 
   clearSuccessTimer(root);
@@ -248,6 +280,16 @@ function updateSessionUI(root, user) {
     const initial = email ? email.trim().charAt(0).toUpperCase() : '?';
     if (avatar) avatar.textContent = initial;
     if (emailEl) emailEl.textContent = email;
+
+    // show demo banner if demo email
+    if (demoBanner) {
+      if (email === DEFAULT_DEMO_EMAIL) {
+        demoBanner.classList.remove('hidden');
+      } else {
+        demoBanner.classList.add('hidden');
+      }
+    }
+
     if (successView && sessionCard && isNewLogin) {
       successView.classList.remove('hidden');
       successView.classList.add('auth-success-active');
@@ -271,6 +313,7 @@ function updateSessionUI(root, user) {
     successView?.classList.remove('auth-success-active');
     successView?.classList.add('hidden');
     formsContainer?.classList.remove('hidden');
+    if (demoBanner) demoBanner.classList.add('hidden');
   }
 
   root.dataset.authUserId = newUserId;
@@ -322,6 +365,12 @@ function initAuthPortal(root) {
   const forms = qsa(root, '[data-auth-form]');
   const logoutButton = qs(root, '[data-auth-logout]');
   const tabs = qsa(root, '[data-auth-tab]');
+  const crossDeviceTips = qsa(root, '[data-auth-cross-device-tip]');
+
+  // set cross-device tip text
+  crossDeviceTips.forEach(tip => {
+    tip.textContent = `💡 ${STATUS_MESSAGES.crossDeviceTip}`;
+  });
 
   const defaultTab = root.dataset.authDefaultTab || tabs[0]?.dataset.authTab || forms[0]?.dataset.authForm;
   if (tabs.length > 0 && defaultTab) {
@@ -332,6 +381,30 @@ function initAuthPortal(root) {
     form.addEventListener('submit', event => handleEmailSubmit(event, supabase));
     const googleButton = form.querySelector('[data-auth-google]');
     googleButton?.addEventListener('click', () => handleGoogleClick(form, supabase));
+    const demoButton = form.querySelector('[data-demo-login]');
+    if (demoButton) {
+      demoButton.addEventListener('click', async () => {
+        const statusEl = form.querySelector('[data-auth-status]');
+        if (!supabase) {
+          setStatus(statusEl, 'error', 'Η υπηρεσία σύνδεσης δεν είναι διαθέσιμη.');
+          return;
+        }
+        try {
+          setLoading(form, true);
+          setStatus(statusEl, null, '');
+          const { error } = await supabase.auth.signInWithOtp({
+            email: DEFAULT_DEMO_EMAIL,
+            options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+          });
+          if (error) throw error;
+          setStatus(statusEl, 'success', STATUS_MESSAGES.demoSuccess);
+        } catch (error) {
+          setStatus(statusEl, 'error', STATUS_MESSAGES.demoError);
+        } finally {
+          setLoading(form, false);
+        }
+      });
+    }
   });
 
   tabs.forEach(btn => {
@@ -374,3 +447,4 @@ function bootstrapAuthPortals() {
 }
 
 bootstrapAuthPortals();
+
