@@ -45,6 +45,7 @@
       border-color: rgba(148, 163, 184, 0.3);
       box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
     }
+    /* 💊 Ενισχυμένη κίνηση emoji για πιο ζωηρό demo περιβάλλον */
     .global-emoji-layer {
       position: fixed;
       inset: 0;
@@ -54,41 +55,60 @@
     }
     .global-emoji-layer span {
       position: absolute;
-      font-size: clamp(2.75rem, 6vw, 4rem);
-      opacity: 0.18;
+      font-size: clamp(3rem, 7vw, 4.5rem);
+      opacity: 0.3;
       animation-iteration-count: infinite;
       animation-timing-function: linear;
+      filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.28));
     }
-    .global-emoji-layer span:nth-child(1) { top: 10%; left: 14%; animation: pharmEmojiFloatA 34s linear infinite; }
-    .global-emoji-layer span:nth-child(2) { top: 22%; right: 16%; animation: pharmEmojiFloatB 40s linear infinite; }
-    .global-emoji-layer span:nth-child(3) { bottom: 14%; left: 18%; animation: pharmEmojiFloatC 44s linear infinite; }
-    .global-emoji-layer span:nth-child(4) { bottom: 8%; right: 12%; animation: pharmEmojiFloatD 36s linear infinite; }
-    .global-emoji-layer span:nth-child(5) { top: 46%; left: 46%; animation: pharmEmojiFloatE 48s linear infinite; opacity: 0.14; }
-    .dark .global-emoji-layer span { opacity: 0.22; }
+    .global-emoji-layer span:nth-child(1) { top: 8%; left: 12%; animation: pharmEmojiFloatA 22s linear infinite; }
+    .global-emoji-layer span:nth-child(2) { top: 20%; right: 14%; animation: pharmEmojiFloatB 24s linear infinite; }
+    .global-emoji-layer span:nth-child(3) { top: 40%; left: 40%; animation: pharmEmojiFloatC 26s linear infinite; opacity: 0.26; }
+    .global-emoji-layer span:nth-child(4) { bottom: 18%; left: 18%; animation: pharmEmojiFloatD 23s linear infinite; }
+    .global-emoji-layer span:nth-child(5) { bottom: 10%; right: 14%; animation: pharmEmojiFloatE 25s linear infinite; }
+    .global-emoji-layer span:nth-child(6) { top: 62%; left: 10%; animation: pharmEmojiFloatF 21s linear infinite; }
+    .global-emoji-layer span:nth-child(7) { top: 14%; right: 32%; animation: pharmEmojiFloatG 22s linear infinite; }
+    .global-emoji-layer span:nth-child(8) { bottom: 30%; right: 30%; animation: pharmEmojiFloatH 24s linear infinite; }
+    .dark .global-emoji-layer span { opacity: 0.34; }
     @keyframes pharmEmojiFloatA {
-      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
-      45% { transform: translate3d(20px, -18px, 0) scale(1.04); opacity: 0.18; }
-      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
+      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; }
+      45% { transform: translate3d(28px, -20px, 0) scale(1.1); opacity: 0.34; }
+      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; }
     }
     @keyframes pharmEmojiFloatB {
-      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
-      50% { transform: translate3d(-24px, 20px, 0) scale(1.05); opacity: 0.18; }
-      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
+      50% { transform: translate3d(-30px, 22px, 0) scale(1.12); opacity: 0.36; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
     }
     @keyframes pharmEmojiFloatC {
-      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
-      55% { transform: translate3d(18px, -14px, 0) scale(1.05); opacity: 0.2; }
-      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
+      55% { transform: translate3d(32px, 20px, 0) scale(1.14); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
     }
     @keyframes pharmEmojiFloatD {
-      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
-      45% { transform: translate3d(-16px, -18px, 0) scale(0.95); opacity: 0.18; }
-      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
+      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.12; }
+      45% { transform: translate3d(28px, -20px, 0) scale(1.08); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.12; }
     }
     @keyframes pharmEmojiFloatE {
-      0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
-      50% { transform: translate3d(16px, 18px, 0) scale(1.07); opacity: 0.16; }
-      100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
+      0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; }
+      50% { transform: translate3d(-28px, -18px, 0) scale(1.08); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; }
+    }
+    @keyframes pharmEmojiFloatF {
+      0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; }
+      58% { transform: translate3d(30px, -16px, 0) scale(1.08); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; }
+    }
+    @keyframes pharmEmojiFloatG {
+      0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; }
+      50% { transform: translate3d(-22px, 28px, 0) scale(1.12); opacity: 0.34; }
+      100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; }
+    }
+    @keyframes pharmEmojiFloatH {
+      0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.1; }
+      56% { transform: translate3d(24px, -28px, 0) scale(1.1); opacity: 0.32; }
+      100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.1; }
     }
     .pro-info-panel {
       padding: 1.5rem;
@@ -229,18 +249,28 @@
       opacity:1;
     }
     @keyframes authPortalIn { to { opacity:1; transform: translateY(0) scale(1); } }
+    /* 🌟 Πιο πυκνά emoji και ταχύτερη κίνηση στο modal σύνδεσης */
     .auth-emoji-layer { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-    .auth-emoji-layer span { position:absolute; font-size:2.75rem; opacity:.15; animation-iteration-count:infinite; animation-timing-function:linear; }
-    .auth-emoji-layer span:nth-child(1) { top:14%; left:16%; animation-name:emojiDriftA; animation-duration:18s; }
-    .auth-emoji-layer span:nth-child(2) { top:10%; right:10%; animation-name:emojiDriftB; animation-duration:22s; }
-    .auth-emoji-layer span:nth-child(3) { bottom:12%; left:22%; animation-name:emojiDriftC; animation-duration:20s; }
-    .auth-emoji-layer span:nth-child(4) { bottom:8%; right:16%; animation-name:emojiDriftD; animation-duration:24s; }
-    .auth-emoji-layer span:nth-child(5) { top:42%; left:48%; animation-name:emojiDriftE; animation-duration:26s; opacity:.12; }
-    @keyframes emojiDriftA { 0% { transform:translate3d(0,0,0) scale(.95); opacity:.05; } 40% { transform:translate3d(14px,-8px,0) scale(1.05); opacity:.16; } 100% { transform:translate3d(0,0,0) scale(.95); opacity:.05; } }
-    @keyframes emojiDriftB { 0% { transform:translate3d(0,0,0) scale(1); opacity:.04; } 50% { transform:translate3d(-16px,12px,0) scale(1.08); opacity:.18; } 100% { transform:translate3d(0,0,0) scale(1); opacity:.04; } }
-    @keyframes emojiDriftC { 0% { transform:translate3d(0,0,0) scale(.96); opacity:.06; } 60% { transform:translate3d(18px,-6px,0) scale(1.06); opacity:.16; } 100% { transform:translate3d(0,0,0) scale(.96); opacity:.06; } }
-    @keyframes emojiDriftD { 0% { transform:translate3d(0,0,0) scale(1.02); opacity:.05; } 50% { transform:translate3d(-12px,-14px,0) scale(.94); opacity:.14; } 100% { transform:translate3d(0,0,0) scale(1.02); opacity:.05; } }
-    @keyframes emojiDriftE { 0% { transform:translate3d(0,0,0) scale(.9); opacity:.03; } 55% { transform:translate3d(10px,8px,0) scale(1.08); opacity:.13; } 100% { transform:translate3d(0,0,0) scale(.9); opacity:.03; } }
+    .auth-emoji-layer span {
+      position:absolute;
+      font-size:3rem;
+      opacity:.28;
+      animation-iteration-count:infinite;
+      animation-timing-function:linear;
+      filter: drop-shadow(0 12px 24px rgba(14, 116, 144, 0.32));
+    }
+    .auth-emoji-layer span:nth-child(1) { top:12%; left:18%; animation-name:emojiDriftA; animation-duration:14s; }
+    .auth-emoji-layer span:nth-child(2) { top:8%; right:12%; animation-name:emojiDriftB; animation-duration:16s; }
+    .auth-emoji-layer span:nth-child(3) { bottom:16%; left:24%; animation-name:emojiDriftC; animation-duration:15s; }
+    .auth-emoji-layer span:nth-child(4) { bottom:10%; right:18%; animation-name:emojiDriftD; animation-duration:17s; }
+    .auth-emoji-layer span:nth-child(5) { top:44%; left:46%; animation-name:emojiDriftE; animation-duration:18s; opacity:.24; }
+    .auth-emoji-layer span:nth-child(6) { top:30%; right:32%; animation-name:emojiDriftF; animation-duration:15s; }
+    @keyframes emojiDriftA { 0% { transform:translate3d(0,0,0) scale(.95); opacity:.12; } 45% { transform:translate3d(18px,-14px,0) scale(1.12); opacity:.34; } 100% { transform:translate3d(0,0,0) scale(.95); opacity:.12; } }
+    @keyframes emojiDriftB { 0% { transform:translate3d(0,0,0) scale(1); opacity:.1; } 50% { transform:translate3d(-18px,16px,0) scale(1.12); opacity:.34; } 100% { transform:translate3d(0,0,0) scale(1); opacity:.1; } }
+    @keyframes emojiDriftC { 0% { transform:translate3d(0,0,0) scale(.96); opacity:.12; } 55% { transform:translate3d(20px,-10px,0) scale(1.1); opacity:.3; } 100% { transform:translate3d(0,0,0) scale(.96); opacity:.12; } }
+    @keyframes emojiDriftD { 0% { transform:translate3d(0,0,0) scale(1.02); opacity:.12; } 50% { transform:translate3d(-16px,-16px,0) scale(.96); opacity:.28; } 100% { transform:translate3d(0,0,0) scale(1.02); opacity:.12; } }
+    @keyframes emojiDriftE { 0% { transform:translate3d(0,0,0) scale(.94); opacity:.1; } 52% { transform:translate3d(18px,18px,0) scale(1.08); opacity:.28; } 100% { transform:translate3d(0,0,0) scale(.94); opacity:.1; } }
+    @keyframes emojiDriftF { 0% { transform:translate3d(0,0,0) scale(1.04); opacity:.1; } 48% { transform:translate3d(-14px,14px,0) scale(1.1); opacity:.3; } 100% { transform:translate3d(0,0,0) scale(1.04); opacity:.1; } }
     .auth-card--pulse-success { animation: authSuccessGlow 1.2s ease-out; }
     .auth-card--login-success { animation: authLoginSuccess 2s ease-out; }
     .auth-card--shake-error { animation: authErrorShake .55s ease; }
@@ -255,9 +285,12 @@
   <div class="global-emoji-layer" aria-hidden="true">
     <span>💊</span>
     <span>💉</span>
+    <span>🩺</span>
     <span>🩹</span>
     <span>🧴</span>
     <span>💚</span>
+    <span>⚕️</span>
+    <span>💠</span>
   </div>
 
   <!-- ✨ Νέος πίνακας ελέγχου φαρμακείου με DEMO λειτουργία -->
@@ -326,6 +359,12 @@
         <button id="theme-toggle" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">🌙/🌞</button>
       </div>
     </header>
+    <!-- ℹ️ Μικρή ενημέρωση για το πώς λειτουργεί η DEMO είσοδος -->
+    <div class="mb-5 rounded-2xl border border-emerald-300/50 bg-emerald-100/70 dark:bg-emerald-900/40 dark:border-emerald-700/60 p-4 text-sm text-emerald-900 dark:text-emerald-100 shadow-soft">
+      <p class="font-semibold">Οδηγίες DEMO:</p>
+      <p class="mt-1">Πάτησε «Σύνδεση DEMO Φαρμακείου» για να μπεις άμεσα με τα στοιχεία <code class="font-mono">demo@pharmacy.gr</code> / <code class="font-mono">Demo123!</code>.</p>
+      <p class="mt-1">Θα εμφανιστεί το ταμπλό του demo φαρμακείου με αιτήματα πελατών και μπορείς να αποθηκεύσεις δοκιμαστικό ωράριο.</p>
+    </div>
 
     <!-- PHARMACY PICK/CREATE -->
     <section class="grid md:grid-cols-2 gap-4">
@@ -405,9 +444,11 @@
         <div class="auth-emoji-layer" aria-hidden="true">
           <span>💊</span>
           <span>💉</span>
+          <span>🩺</span>
           <span>🩹</span>
           <span>🧴</span>
           <span>💚</span>
+          <span>⚕️</span>
         </div>
         <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
         <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="users">
@@ -1064,7 +1105,11 @@
         dashboardUserPill.textContent = `${dashboardState.pharmacy.name || 'Φαρμακείο'}${cityText}`;
       }
       if(dashboardSubtitle){
-        dashboardSubtitle.textContent = `Παρακολούθηση αιτημάτων για την πόλη: ${dashboardState.pharmacy.city || '—'}`;
+        // 🏷️ Ενημερώνουμε τη λεζάντα για να φαίνεται άμεσα όταν είμαστε σε DEMO λειτουργία
+        const cityLabel = dashboardState.pharmacy.city || '—';
+        dashboardSubtitle.textContent = isDemo
+          ? `DEMO προβολή αιτημάτων για την πόλη: ${cityLabel}`
+          : `Παρακολούθηση αιτημάτων για την πόλη: ${cityLabel}`;
       }
       await loadDashboardRequests();
       await loadOpeningHoursForPharmacy();
@@ -1111,7 +1156,7 @@
       try{
         if(!supabase){
           enterDashboard({ user: null, isDemo: true, pharmacy: fallbackPharmacy });
-          showToast('Ενεργοποιήθηκε η DEMO λειτουργία χωρίς Supabase.', 'info');
+          showToast('Demo λειτουργία χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
           return;
         }
         const credentials = { email: 'demo@pharmacy.gr', password: 'Demo123!' };
@@ -1128,11 +1173,11 @@
           const retry = await supabase.auth.signInWithPassword(credentials);
           if(retry.error){ throw retry.error; }
         }
-        showToast('Επιτυχής DEMO σύνδεση μέσω Supabase.', 'success');
+        showToast('Συνδέθηκες ως demo@pharmacy.gr (κωδικός Demo123!).', 'success');
       }catch(err){
         console.warn('handleDemoLogin fallback', err);
         enterDashboard({ user: null, isDemo: true, pharmacy: fallbackPharmacy });
-        showToast('Ενεργοποιήθηκε το DEMO φαρμακείο χωρίς Supabase.', 'info');
+        showToast('Fallback DEMO χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
       }finally{
         setButtonLoading(demoLoginBtn, false, 'Σύνδεση…');
       }
