@@ -4,6 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MediRadar • Pharmacy</title>
+  <meta name="application-name" content="MediRadar" />
+  <meta name="apple-mobile-web-app-title" content="MediRadar" />
+  <meta name="description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="og:site_name" content="MediRadar" />
+  <meta property="og:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="twitter:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <link rel="icon" href="/icons/icon-192.png" />
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,7 +38,7 @@
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
   <div class="max-w-5xl mx-auto p-4">
-    <header class="flex items-center justify-between mb-4">
+    <header class="flex flex-wrap items-center justify-between gap-3 mb-4 glass-surface bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-4 py-3 shadow-soft">
       <div class="flex items-center gap-3">
         <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Αρχική</a>
         <h1 class="text-2xl font-extrabold">MediRadar • Φαρμακείο</h1>
@@ -75,11 +82,21 @@
 
     <!-- HOURS JSON -->
     <section id="hours-box" class="card mt-4 hidden">
-      <h2 class="text-lg font-bold mb-2">Ωράριο</h2>
-      <p class="text-xs text-slate-500 mb-2">Μορφή ανά ημέρα: π.χ. 08:00-17:00 (αφήσε κενό για κλειστό)</p>
-      <div class="grid sm:grid-cols-4 md:grid-cols-7 gap-2" id="hours-grid"></div>
-      <div class="mt-3 flex justify-end">
-        <button id="save-hours" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:opacity-95">Αποθήκευση Ωραρίου</button>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-bold">Πρόγραμμα λειτουργίας</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Επίλεξε ημέρες και ώρες με την παρακάτω πρόταση.</p>
+        </div>
+        <div id="hours-meta" class="text-[11px] text-slate-400"></div>
+      </div>
+      <div id="hours-auth-alert" class="mt-3 text-xs text-amber-600 bg-amber-100/80 dark:bg-amber-900/30 dark:text-amber-200 rounded-xl px-3 py-2 hidden">Χρειάζεται είσοδος για επεξεργασία ωραρίου.</div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="hours-grid"></div>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div id="hours-status" class="text-sm text-slate-500"></div>
+        <div class="flex gap-2">
+          <button id="cancel-hours" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold" disabled>Ακύρωση</button>
+          <button id="save-hours" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:pointer-events-none">Αποθήκευση</button>
+        </div>
       </div>
     </section>
 
@@ -109,6 +126,15 @@
   <!-- Supabase + App -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { supabaseClient } from "./firebase.js";
+    import {
+      WEEK_DAYS,
+      createEmptySchedule,
+      cloneSchedule,
+      validateSchedule,
+      loadSchedule,
+      saveSchedule
+    } from "./pharmacy/schedule.js";
 
     /* ---------- setup ---------- */
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
@@ -116,8 +142,16 @@
     const qs = (s, r=document)=>r.querySelector(s);
     const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
     const store = {
-      pharmacy: null,
-      hoursInputs: ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'].map(d=>({day:d, val:''}))
+      pharmacy: null
+    };
+
+    const scheduleState = {
+      draft: createEmptySchedule(),
+      saved: createEmptySchedule(),
+      meta: null,
+      loading: false,
+      dirty: false,
+      errors: []
     };
 
     /* ---------- theme ---------- */
@@ -136,9 +170,189 @@
     const pAddr = qs('#pharm-addr');
     const pPhone = qs('#pharm-phone');
 
+    const authSessionEl = qs('#auth-session');
+    const signOutBtn = qs('#signout-btn');
+    const authModals = {
+      users: qs('[data-auth-modal="users"]'),
+      pharmacies: qs('[data-auth-modal="pharmacies"]')
+    };
+    let activeAuthModal = null;
+    const authCloseEls = qsa('[data-auth-close]');
+    const authOpenButtons = qsa('[data-auth-open]');
+    const authHeaderSession = qs('[data-auth-header-session]');
+    const authHeaderAvatar = qs('[data-auth-header-avatar]');
+    const authHeaderEmail = qs('[data-auth-header-email]');
+    const proInfoToggles = qsa('[data-pro-info-toggle]');
+
     const hoursBox = qs('#hours-box');
     const hoursGrid = qs('#hours-grid');
     const saveHoursBtn = qs('#save-hours');
+    const cancelHoursBtn = qs('#cancel-hours');
+    const hoursStatusEl = qs('#hours-status');
+    const hoursMetaEl = qs('#hours-meta');
+    const hoursAuthAlert = qs('#hours-auth-alert');
+
+    const dayControls = new Map();
+
+    let authSession = null;
+
+    function getSessionUser(){
+      return authSession?.user || null;
+    }
+
+    function getOpenAuthModal(){
+      return Object.values(authModals).find(modal => modal && !modal.classList.contains('hidden')) || null;
+    }
+
+    function openAuthModal(target='pharmacies'){
+      const modal = authModals[target] || authModals.pharmacies || authModals.users;
+      if(!modal) return;
+      activeAuthModal = modal;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      const statusEl = modal.querySelector('[data-auth-status-global]');
+      if(statusEl){
+        statusEl.classList.add('hidden');
+        statusEl.textContent = '';
+      }
+    }
+
+    function hideProInfoPanel(panel, toggle){
+      if(!panel) return;
+      const finalize = () => {
+        panel.classList.add('hidden');
+        panel.removeEventListener('transitionend', finalize);
+      };
+      panel.classList.remove('is-visible');
+      if(!panel.classList.contains('hidden')){
+        panel.addEventListener('transitionend', finalize, { once: true });
+      } else {
+        panel.classList.add('hidden');
+      }
+      if(toggle){
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    proInfoToggles.forEach(toggle => {
+      const root = toggle.closest('[data-auth-root]');
+      const panel = root?.querySelector('[data-pro-info-panel]');
+      if(!panel) return;
+      toggle.addEventListener('click', () => {
+        const isOpen = panel.classList.contains('is-visible') && !panel.classList.contains('hidden');
+        if(isOpen){
+          hideProInfoPanel(panel, toggle);
+        } else {
+          panel.classList.remove('hidden');
+          requestAnimationFrame(() => panel.classList.add('is-visible'));
+          toggle.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    function closeAuthModal(modal = activeAuthModal){
+      if(!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if(modal === activeAuthModal){
+        activeAuthModal = null;
+      }
+      const panel = modal.querySelector('[data-pro-info-panel]');
+      const toggle = modal.querySelector('[data-pro-info-toggle]');
+      hideProInfoPanel(panel, toggle);
+      if(!getOpenAuthModal()){
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function updateAuthHeaderUI(userOverride){
+      const user = userOverride || getSessionUser();
+      const email = user?.email || user?.user_metadata?.name || user?.phone || '';
+      authOpenButtons.forEach(btn => btn.classList.toggle('hidden', !!user));
+      if(authHeaderSession){ authHeaderSession.classList.toggle('hidden', !user); }
+      if(authHeaderAvatar){
+        const initial = (email || 'Μ').trim().charAt(0).toUpperCase();
+        authHeaderAvatar.textContent = initial || 'Μ';
+      }
+      if(authHeaderEmail){ authHeaderEmail.textContent = email; }
+      signOutBtn?.classList.toggle('hidden', !user);
+    }
+
+    updateAuthHeaderUI();
+
+    if(supabase){
+      supabase.auth.getSession().then(({ data })=>{
+        authSession = data?.session || null;
+        updateAuthSessionUI();
+      }).catch(()=>undefined);
+      supabase.auth.onAuthStateChange((_event, session)=>{
+        authSession = session;
+        updateAuthSessionUI();
+      });
+    }
+
+    authOpenButtons.forEach(btn => {
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        openAuthModal(btn.dataset.authTarget || 'pharmacies');
+      });
+    });
+
+    authCloseEls.forEach(btn => btn.addEventListener('click', () => {
+      const modal = btn.closest('[data-auth-modal]');
+      closeAuthModal(modal || undefined);
+    }));
+
+    document.addEventListener('keydown', event => {
+      if(event.key === 'Escape' && getOpenAuthModal()){
+        closeAuthModal();
+      }
+    });
+
+    document.addEventListener('mediradar-auth-change', event => {
+      const user = event?.detail?.user || null;
+      if(user){
+        updateAuthHeaderUI(user);
+        if(supabase){
+          supabase.auth.getSession()
+            .then(({ data }) => {
+              if(data?.session){
+                authSession = data.session;
+                updateAuthSessionUI();
+              }
+            })
+            .catch(()=>undefined);
+        }
+        setTimeout(()=> closeAuthModal(), 2200);
+      } else {
+        authSession = null;
+        updateAuthHeaderUI(null);
+        updateAuthSessionUI();
+      }
+    });
+
+    signOutBtn?.addEventListener('click', async ()=>{
+      if(!supabase) return;
+      try{
+        await supabase.auth.signOut();
+      }catch(err){
+        console.warn('signout error', err);
+      }
+    });
+
+    function updateAuthSessionUI(){
+      if(!authSessionEl) return;
+      const loggedIn = !!authSession?.user;
+      const identifier = authSession?.user?.email || authSession?.user?.phone || authSession?.user?.user_metadata?.name || authSession?.user?.id || '';
+      authSessionEl.textContent = loggedIn
+        ? `Συνδεδεμένος ως ${identifier || 'λογαριασμός'}`
+        : 'Δεν έχεις συνδεθεί';
+      updateAuthHeaderUI();
+      hoursAuthAlert?.classList.toggle('hidden', loggedIn);
+      updateScheduleButtons();
+    }
+    updateAuthSessionUI();
 
     const reqBox = qs('#req-box');
     const cityPill = qs('#city-pill');
@@ -167,9 +381,21 @@
       qs('#new-name').value=''; qs('#new-addr').value=''; qs('#new-phone').value=''; qs('#new-city').value='';
     }
 
-    function applyPickedFromSelect(){
+    async function applyPickedFromSelect(){
       const id = selPh.value;
-      if(!id){ pickedBox.classList.add('hidden'); hoursBox.classList.add('hidden'); reqBox.classList.add('hidden'); store.pharmacy=null; return; }
+      if(!id){
+        pickedBox.classList.add('hidden');
+        hoursBox.classList.add('hidden');
+        reqBox.classList.add('hidden');
+        store.pharmacy=null;
+        scheduleState.draft = createEmptySchedule();
+        scheduleState.saved = createEmptySchedule();
+        scheduleState.meta = null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(null);
+        setHoursStatus('', 'muted');
+        return;
+      }
       const opt = selPh.selectedOptions[0];
       store.pharmacy = { id, name: opt.textContent.split(' — ')[0], city: opt.dataset.city, address: opt.dataset.addr, phone: opt.dataset.phone };
       pName.textContent = store.pharmacy.name;
@@ -180,38 +406,269 @@
       hoursBox.classList.remove('hidden');
       reqBox.classList.remove('hidden');
       cityPill.textContent = store.pharmacy.city || '—';
-      renderHoursInputs();
+      if(store.pharmacy?.id && supabase){
+        scheduleState.loading = true;
+        updateScheduleButtons();
+        setHoursStatus('Φόρτωση ωραρίου…', 'muted');
+        await loadScheduleForCurrentPharmacy();
+      }
       loadRequests();
     }
 
     /* ---------- hours ---------- */
-    function renderHoursInputs(){
-      const days = ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'];
-      hoursGrid.innerHTML = days.map((d,i)=>`
-        <label class="text-sm">
-          <div class="font-semibold mb-1">${d}</div>
-          <input data-day="${i}" class="w-full px-3 py-2 rounded-xl border dark:border-slate-700 bg-white dark:bg-slate-800" placeholder="π.χ. 08:00-17:00">
-        </label>
-      `).join('');
-      // load existing hours_json
-      if(store.pharmacy?.id){
-        supabase.from('pharmacies').select('hours_json').eq('id', store.pharmacy.id).single().then(({data})=>{
-          const h = data?.hours_json || {};
-          qsa('input[data-day]').forEach(inp=>{
-            const di = Number(inp.dataset.day); inp.value = h[di]?.range || '';
-          });
+    function normalizeSchedule(list = []){
+      return list.map(item => ({
+        dayIndex: item.dayIndex,
+        open: !!item.open,
+        start: item.start || '',
+        end: item.end || ''
+      }));
+    }
+
+    function setupScheduleEditor(){
+      if(!hoursGrid) return;
+      hoursGrid.innerHTML = '';
+      dayControls.clear();
+      WEEK_DAYS.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4 flex flex-col gap-3 transition-colors';
+        card.dataset.dayIndex = String(day.index);
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-2';
+
+        const labelWrap = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'text-sm font-semibold text-slate-900 dark:text-slate-100';
+        title.textContent = day.labels?.el || day.labels?.en || day.name || '';
+        const status = document.createElement('div');
+        status.className = 'text-[11px] text-slate-500 dark:text-slate-400';
+        status.textContent = 'Κλειστό';
+        labelWrap.append(title, status);
+
+        const toggleWrap = document.createElement('label');
+        toggleWrap.className = 'inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300';
+        const toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'size-4 accent-emerald-600 rounded';
+        toggleWrap.append(toggle, document.createTextNode('Ανοιχτό'));
+
+        header.append(labelWrap, toggleWrap);
+
+        const timesWrap = document.createElement('div');
+        timesWrap.className = 'grid grid-cols-2 gap-2 transition-opacity';
+        const startInput = document.createElement('input');
+        startInput.type = 'time';
+        startInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
+        const endInput = document.createElement('input');
+        endInput.type = 'time';
+        endInput.className = 'px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40';
+
+        timesWrap.append(startInput, endInput);
+        card.append(header, timesWrap);
+        hoursGrid.appendChild(card);
+
+        dayControls.set(day.index, {
+          card,
+          toggle,
+          statusEl: status,
+          timesWrap,
+          startInput,
+          endInput
         });
+
+        toggle.addEventListener('change', ()=> handleToggleChange(day.index, toggle.checked));
+        startInput.addEventListener('input', ()=> handleTimeChange(day.index, 'start', startInput.value));
+        endInput.addEventListener('input', ()=> handleTimeChange(day.index, 'end', endInput.value));
+      });
+
+      refreshScheduleUI({ silent:true });
+    }
+
+    function getScheduleEntry(dayIndex){
+      return scheduleState.draft.find(item => item.dayIndex === dayIndex);
+    }
+
+    function handleToggleChange(dayIndex, checked){
+      const entry = getScheduleEntry(dayIndex);
+      if(!entry) return;
+      entry.open = !!checked;
+      if(!entry.open){
+        entry.start = '';
+        entry.end = '';
+      }
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    function handleTimeChange(dayIndex, role, value){
+      const entry = getScheduleEntry(dayIndex);
+      if(!entry) return;
+      if(role === 'start'){ entry.start = value; }
+      else { entry.end = value; }
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    function refreshScheduleUI({ silent=false } = {}){
+      scheduleState.draft.forEach(entry => {
+        const controls = dayControls.get(entry.dayIndex);
+        if(!controls) return;
+        controls.toggle.checked = !!entry.open;
+        controls.startInput.value = entry.start || '';
+        controls.endInput.value = entry.end || '';
+        const isOpen = !!entry.open;
+        controls.timesWrap.classList.toggle('opacity-40', !isOpen);
+        controls.timesWrap.classList.toggle('pointer-events-none', !isOpen);
+        controls.statusEl.textContent = isOpen && entry.start && entry.end
+          ? `${entry.start} – ${entry.end}`
+          : 'Κλειστό';
+        controls.card.classList.remove('ring-2','ring-rose-400','border-rose-300','dark:border-rose-500/50');
+        controls.statusEl.classList.remove('text-rose-500');
+      });
+      applyValidationToUI();
+      updateScheduleButtons();
+      if(!silent){
+        setDirtyStatusMessage();
       }
     }
-    async function saveHours(){
-      const obj = {};
-      qsa('input[data-day]').forEach(inp=>{
-        const di = Number(inp.dataset.day); const range = inp.value.trim();
-        if(range) obj[di] = { range };
+
+    function applyValidationToUI(){
+      const errors = validateSchedule(scheduleState.draft);
+      scheduleState.errors = errors;
+      const invalidDays = new Set(errors.map(err => err.dayIndex));
+      dayControls.forEach((controls, dayIndex)=>{
+        const invalid = invalidDays.has(dayIndex);
+        controls.card.classList.toggle('ring-2', invalid);
+        controls.card.classList.toggle('ring-rose-400', invalid);
+        controls.card.classList.toggle('border-rose-300', invalid);
+        controls.card.classList.toggle('dark:border-rose-500/50', invalid);
+        controls.statusEl.classList.toggle('text-rose-500', invalid);
       });
-      await supabase.from('pharmacies').update({ hours_json: obj }).eq('id', store.pharmacy.id);
-      alert('Αποθηκεύτηκε το ωράριο.');
     }
+
+    function isScheduleDirty(){
+      return JSON.stringify(normalizeSchedule(scheduleState.draft)) !== JSON.stringify(normalizeSchedule(scheduleState.saved));
+    }
+
+    function updateScheduleButtons(){
+      scheduleState.dirty = isScheduleDirty();
+      const saveDisabled = !authSession?.user || scheduleState.loading || !scheduleState.dirty || (scheduleState.errors?.length ?? 0) > 0;
+      if(saveHoursBtn) saveHoursBtn.disabled = !!saveDisabled;
+      if(cancelHoursBtn) cancelHoursBtn.disabled = scheduleState.loading || !scheduleState.dirty;
+    }
+
+    function setHoursStatus(message='', tone='muted'){
+      if(!hoursStatusEl) return;
+      let cls = 'text-sm ';
+      if(tone === 'error'){ cls += 'text-rose-500 dark:text-rose-300'; }
+      else if(tone === 'success'){ cls += 'text-emerald-600 dark:text-emerald-300'; }
+      else if(tone === 'warning'){ cls += 'text-amber-600 dark:text-amber-300'; }
+      else { cls += 'text-slate-500 dark:text-slate-400'; }
+      hoursStatusEl.className = cls;
+      hoursStatusEl.textContent = message;
+    }
+
+    function setHoursMeta(meta){
+      if(!hoursMetaEl) return;
+      if(meta?.updatedAt){
+        try{
+          const dt = new Date(meta.updatedAt);
+          const formatted = dt.toLocaleString('el-GR', { hour12:false });
+          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${formatted}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
+        }catch(err){
+          hoursMetaEl.textContent = `Τελευταία ενημέρωση: ${meta.updatedAt}${meta.updatedBy ? ` • ${meta.updatedBy}` : ''}`;
+        }
+      }else{
+        hoursMetaEl.textContent = '';
+      }
+    }
+
+    function setDirtyStatusMessage(){
+      if(scheduleState.errors.length){
+        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
+      }else if(scheduleState.dirty){
+        setHoursStatus('Υπάρχουν μη αποθηκευμένες αλλαγές.', 'muted');
+      }else if(scheduleState.meta?.updatedAt){
+        try{
+          const dt = new Date(scheduleState.meta.updatedAt);
+          setHoursStatus(`Τελευταία ενημέρωση ${dt.toLocaleString('el-GR', { hour12:false })}.`, 'muted');
+        }catch{
+          setHoursStatus('', 'muted');
+        }
+      }else{
+        setHoursStatus('', 'muted');
+      }
+    }
+
+    async function loadScheduleForCurrentPharmacy(){
+      if(!store.pharmacy?.id || !supabase){ return; }
+      try{
+        const { schedule, meta } = await loadSchedule(store.pharmacy.id, { client: supabase });
+        scheduleState.saved = cloneSchedule(schedule);
+        scheduleState.draft = cloneSchedule(schedule);
+        scheduleState.meta = meta || null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(meta || null);
+        setHoursStatus('Το ωράριο φορτώθηκε.', 'success');
+      }catch(err){
+        console.warn('load schedule error', err);
+        scheduleState.saved = createEmptySchedule();
+        scheduleState.draft = createEmptySchedule();
+        scheduleState.meta = null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(null);
+        setHoursStatus('Αποτυχία φόρτωσης ωραρίου.', 'error');
+      }finally{
+        scheduleState.loading = false;
+        updateScheduleButtons();
+      }
+    }
+
+    async function handleSaveSchedule(){
+      if(!store.pharmacy?.id || !supabase) return;
+      scheduleState.errors = validateSchedule(scheduleState.draft);
+      if(scheduleState.errors.length){
+        applyValidationToUI();
+        updateScheduleButtons();
+        setHoursStatus('Διόρθωσε τις επισημάνσεις πριν την αποθήκευση.', 'error');
+        return;
+      }
+      if(!authSession?.user){
+        hoursAuthAlert?.classList.remove('hidden');
+        setHoursStatus('Πρέπει να συνδεθείς για να αποθηκεύσεις.', 'error');
+        updateScheduleButtons();
+        return;
+      }
+      scheduleState.loading = true;
+      updateScheduleButtons();
+      setHoursStatus('Αποθήκευση…', 'muted');
+      try{
+        const { schedule, meta } = await saveSchedule(store.pharmacy.id, scheduleState.draft, { client: supabase, session: authSession });
+        scheduleState.saved = cloneSchedule(schedule);
+        scheduleState.draft = cloneSchedule(schedule);
+        scheduleState.meta = meta || null;
+        refreshScheduleUI({ silent:true });
+        setHoursMeta(meta || null);
+        setHoursStatus('Το ωράριο αποθηκεύτηκε.', 'success');
+      }catch(err){
+        console.warn('save schedule error', err);
+        setHoursStatus(err?.message || 'Αποτυχία αποθήκευσης ωραρίου.', 'error');
+      }finally{
+        scheduleState.loading = false;
+        updateScheduleButtons();
+      }
+    }
+
+    function handleCancelSchedule(){
+      scheduleState.draft = cloneSchedule(scheduleState.saved);
+      refreshScheduleUI({ silent:true });
+      setDirtyStatusMessage();
+    }
+
+    setupScheduleEditor();
+    setHoursMeta(scheduleState.meta);
+    setHoursStatus('', 'muted');
 
     /* ---------- requests feed ---------- */
     async function loadRequests(){
@@ -267,7 +724,8 @@
     qs('#create-pharmacy').addEventListener('click', createPharmacy);
     selPh.addEventListener('change', applyPickedFromSelect);
     reloadPh.addEventListener('click', loadPharmacies);
-    saveHoursBtn.addEventListener('click', saveHours);
+    saveHoursBtn.addEventListener('click', handleSaveSchedule);
+    cancelHoursBtn.addEventListener('click', handleCancelSchedule);
     reloadReq.addEventListener('click', loadRequests);
 
     reqList.addEventListener('click', async (e)=>{
@@ -297,5 +755,6 @@
     /* ---------- init ---------- */
     await loadPharmacies();
   </script>
+  <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>

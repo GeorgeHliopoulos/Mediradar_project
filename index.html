@@ -4,16 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MediRadar</title>
-
-  <!-- Favicon (inline για να μην έχεις 404) -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%2329a3a3'/%3E%3Cpath d='M30 8h4v7a15 15 0 0 1 15 15h7v4h-7a15 15 0 0 1-15 15v7h-4v-7a15 15 0 0 1-15-15h-7v-4h7a15 15 0 0 1 15-15z' fill='white'/%3E%3Ccircle cx='32' cy='30' r='8' fill='white'/%3E%3C/svg%3E">
-
-  <!-- Android/Chrome PWA -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <!-- iOS PWA -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="application-name" content="MediRadar" />
+  <meta name="apple-mobile-web-app-title" content="MediRadar" />
+  <meta name="description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
+  <meta property="og:site_name" content="MediRadar" />
+  <meta property="og:description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
+  <meta name="theme-color" content="#29a3a3" />
+  <link rel="icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -30,8 +29,39 @@
     }
   </script>
 
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    .app-bg{
+    body { position: relative; overflow-x: hidden; }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      border-radius: 1rem;
+    }
+    .dark .glass-surface {
+      background: rgba(15, 23, 42, 0.62);
+      border-color: rgba(148, 163, 184, 0.32);
+      box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
+    }
+    .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .global-emoji-layer span {
+      position: absolute; font-size: clamp(2.75rem, 6vw, 4rem); opacity: 0.18; animation-iteration-count: infinite; animation-timing-function: linear;
+    }
+    .global-emoji-layer span:nth-child(1) { top: 8%; left: 12%; animation-name: globalEmojiFloatA; animation-duration: 32s; }
+    .global-emoji-layer span:nth-child(2) { top: 18%; right: 18%; animation-name: globalEmojiFloatB; animation-duration: 38s; }
+    .global-emoji-layer span:nth-child(3) { bottom: 16%; left: 18%; animation-name: globalEmojiFloatC; animation-duration: 42s; }
+    .global-emoji-layer span:nth-child(4) { bottom: 8%; right: 14%; animation-name: globalEmojiFloatD; animation-duration: 36s; }
+    .global-emoji-layer span:nth-child(5) { top: 42%; left: 45%; animation-name: globalEmojiFloatE; animation-duration: 44s; opacity: 0.14; }
+    .dark .global-emoji-layer span { opacity: 0.22; }
+    @keyframes globalEmojiFloatA { 0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.06; } 40% { transform: translate3d(24px, -16px, 0) scale(1.04); opacity: 0.18; } 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.06; } }
+    @keyframes globalEmojiFloatB { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; } 50% { transform: translate3d(-26px, 18px, 0) scale(1.06); opacity: 0.19; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; } }
+    @keyframes globalEmojiFloatC { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.07; } 55% { transform: translate3d(22px, -12px, 0) scale(1.05); opacity: 0.2; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.07; } }
+    @keyframes globalEmojiFloatD { 0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; } 45% { transform: translate3d(-18px, -20px, 0) scale(0.95); opacity: 0.18; } 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; } }
+    @keyframes globalEmojiFloatE { 0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; } 50% { transform: translate3d(14px, 22px, 0) scale(1.07); opacity: 0.16; } 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; } }
+    .app-bg {
       background:
         radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
         radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
@@ -81,12 +111,15 @@
     .dark .flag-icon svg { box-shadow:0 0 0 1px rgba(148,163,184,.4); }
     .barcode-highlight { box-shadow:0 0 0 3px rgba(16,185,129,.45); }
   </style>
-
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#29a3a3" />
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
+  <div class="global-emoji-layer" aria-hidden="true">
+    <span>💊</span>
+    <span>💉</span>
+    <span>🩹</span>
+    <span>🧴</span>
+    <span>💚</span>
+  </div>
 
   <!-- Confetti -->
   <canvas id="confetti" class="fixed inset-0 pointer-events-none z-[60]" style="display:none;"></canvas>
@@ -158,20 +191,20 @@
     </div>
   </div>
 
-  <!-- μικρό push toast -->
+  <!-- Push toast -->
   <div id="push-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[min(680px,94vw)]">
     <div class="rounded-2xl p-4 border border-sky-300/70 bg-sky-50 text-sky-900 dark:bg-sky-900/30 dark:text-sky-100 dark:border-sky-800 shadow-soft flex items-center justify-between gap-3">
-      <div class="text-sm">
+      <div class="text-sm" id="t-pushText">
         🔔 Θες να λαμβάνεις ειδοποίηση όταν απαντά ένα φαρμακείο;
       </div>
       <div class="flex gap-2">
-        <button id="push-deny" class="px-3 py-1.5 rounded-xl border hover:bg-white/70 dark:hover:bg-white/10 text-sm">Όχι τώρα</button>
-        <button id="push-allow" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white font-semibold text-sm">Ενεργοποίηση</button>
+        <button id="push-deny" class="px-3 py-1.5 rounded-xl border hover:bg-white/70 dark:hover:bg-white/10 text-sm"><span id="t-pushNo">Όχι τώρα</span></button>
+        <button id="push-allow" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white font-semibold text-sm"><span id="t-pushYes">Ενεργοποίηση</span></button>
       </div>
     </div>
   </div>
 
-  <!-- SPLASH -->
+  <!-- Splash -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <div class="w-full max-w-4xl text-center">
       <div class="mx-auto w-24 h-24 rounded-3xl bg-brand-600 text-white grid place-items-center shadow-soft">
@@ -179,22 +212,16 @@
           <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z"/>
         </svg>
       </div>
-
       <h1 class="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight">MediRadar</h1>
       <p id="t-hero" class="mt-2 text-lg text-slate-600 dark:text-slate-400">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
-
-      <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-        <button id="cta-search" class="px-6 py-4 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
+      <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
+        <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
           <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
         </button>
-        <button id="cta-how" class="px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
+        <button id="cta-how" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
           <span id="t-howBTN">Πώς λειτουργεί</span>
         </button>
-        <button id="cta-signin" class="px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold">
-          <span id="t-signinBTN">Σύνδεση</span>
-        </button>
       </div>
-
       <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
         📲 <span id="t-installBTN">Εγκατάσταση</span>
       </button>
@@ -240,7 +267,7 @@
   <!-- APP -->
   <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
     <header class="sticky top-0 z-30 -mt-3 mb-4">
-      <div class="flex items-center justify-between px-2 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-between px-2 py-3 rounded-2xl glass-surface bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-2">
           <button id="backHome" type="button" data-go-home class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
           <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
@@ -287,7 +314,7 @@
       </div>
 
       <!-- Medicine -->
-      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">🔎</span>
           <span id="t-medname">Όνομα Φαρμάκου</span>
@@ -320,7 +347,16 @@
 
       <!-- Quantity + Type -->
       <div class="grid sm:grid-cols-2 gap-4">
-        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+          <label class="text-sm font-semibold flex items-center gap-2">
+            <span class="w-6 h-6 grid place-items-center">📦</span>
+            <span id="t-qty">Ποσότητα (τεμάχια/κουτιά)</span>
+          </label>
+          <input id="quantity" type="number" min="1" value="1" required
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+        </div>
+
+        <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
           <label class="text-sm font-semibold flex items-center gap-2">
             <span class="w-6 h-6 grid place-items-center">📦</span>
             <span id="t-qty">Ποσότητα (τεμάχια/κουτιά)</span>
@@ -337,12 +373,23 @@
           <select id="medicine-type"
                   class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
             <option value="">— Επιλογή —</option>
-            <option>Χάπι</option><option>Κάψουλα</option><option>Σκόνη</option>
-            <option>Υγρό</option><option>Σιρόπι</option><option>Σταγόνες</option>
-            <option>Εισπνεόμενο</option><option>Σπρέι</option><option>Ρινικό σπρέι</option>
-            <option>Οφθαλμικές σταγόνες</option><option>Αλοιφή</option><option>Δερματική Κρέμα</option>
-            <option>Ζελέ</option><option>Επίθεμα</option><option>Υπόθετο</option>
-            <option>Πένα (προγεμισμένη)</option><option>Διάλυμα έγχυσης</option>
+            <option>Χάπι</option>
+            <option>Κάψουλα</option>
+            <option>Σκόνη</option>
+            <option>Υγρό</option>
+            <option>Σιρόπι</option>
+            <option>Σταγόνες</option>
+            <option>Εισπνεόμενο</option>
+            <option>Σπρέι</option>
+            <option>Ρινικό σπρέι</option>
+            <option>Οφθαλμικές σταγόνες</option>
+            <option>Αλοιφή</option>
+            <option>Δερματική Κρέμα</option>
+            <option>Ζελέ</option>
+            <option>Επίθεμα</option>
+            <option>Υπόθετο</option>
+            <option>Πένα (προγεμισμένη)</option>
+            <option>Διάλυμα έγχυσης</option>
           </select>
         </div>
       </div>
@@ -363,7 +410,7 @@
       </div>
 
       <!-- Generic -->
-      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <p class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">✅</span>
           <span id="t-genericQ">Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);</span>
@@ -375,7 +422,7 @@
       </div>
 
       <!-- GDPR + Submit -->
-      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="inline-flex items-start gap-3">
           <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
           <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700"><span id="t-gdprLink">Όρους Αναζήτησης & GDPR</span></button>.</span>
@@ -622,7 +669,7 @@
     </div>
   </div>
 
-  <!-- GDPR -->
+  <!-- GDPR MODAL -->
   <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b">
@@ -631,7 +678,7 @@
       </div>
       <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
       <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95">OK</button>
+        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-gdprAccept">OK</span></button>
       </div>
     </div>
   </div>
@@ -643,58 +690,40 @@
         <h3 class="text-lg font-bold" id="pm-title">Φαρμακείο</h3>
         <button id="pm-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
       </div>
-      <div class="p-5 space-y-2 text-sm">
+      <div class="p-5 space-y-4 text-sm">
         <div id="pm-address">Διεύθυνση:</div>
-        <div id="pm-phone">Τηλέφωνο:</div>
-      </div>
-      <div class="px-5 pb-5 flex gap-2 justify-between">
-        <div class="flex gap-2">
-          <a id="pm-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">Κλήση</a>
-          <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700">Άνοιγμα σε Χάρτες</a>
+        <div id="pm-hours-section" class="hidden">
+          <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ωράριο</div>
+          <div id="pm-hours" class="mt-1 grid gap-1 text-xs text-slate-600 dark:text-slate-300"></div>
         </div>
-        <button id="pm-confirm" class="px-4 py-2 rounded-2xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Επιβεβαίωση & Έναρξη 60’</button>
+      </div>
+      <div id="pm-auth-message" class="px-5 pb-3 text-xs text-slate-500 dark:text-slate-400">Η δέσμευση απαιτεί ταυτοποίηση.</div>
+      <div class="px-5 pb-5 flex gap-2 justify-between flex-wrap items-center">
+        <div class="flex gap-2 flex-wrap">
+          <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500" aria-label="Προβολή σε χάρτη">Άνοιγμα σε Χάρτες</a>
+        </div>
+        <button id="pm-confirm" class="px-4 py-2 rounded-2xl bg-brand-600 text-white font-semibold hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Επιβεβαίωση & Έναρξη 60’</button>
       </div>
     </div>
   </div>
 
-  <!-- LOGIN MODAL (πελάτης) -->
-  <div id="login-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4 z-[70]">
-    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
+  <!-- BARCODE MODAL -->
+  <div id="barcode-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-6 z-[70]">
+    <div class="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-lg font-bold">Σύνδεση</h3>
-        <button id="login-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
+        <h3 id="t-barcodeModalTitle" class="text-lg font-bold">Σάρωση barcode</h3>
+        <button id="barcode-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Κλείσιμο">✕</button>
       </div>
-      <div class="p-5 space-y-3">
-        <label class="block text-sm">
-          Email
-          <input id="login-email" type="email" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
-        </label>
-        <label class="block text-sm">
-          Κωδικός
-          <input id="login-pass" type="password" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="••••••••">
-        </label>
-
-        <div class="flex items-center justify-between pt-1">
-          <button id="login-email-btn" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Σύνδεση</button>
-          <button id="login-guest" class="text-sm underline hover:opacity-80">Συνέχεια ως επισκέπτης</button>
+      <div class="p-5 space-y-4">
+        <div id="barcode-status" class="text-sm text-slate-600 dark:text-slate-300">Στόχευσε τον γραμμωτό κωδικό μέσα στο πλαίσιο.</div>
+        <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black">
+          <video id="barcode-video" class="w-full aspect-video" autoplay muted playsinline></video>
         </div>
-
-        <div class="flex items-center gap-2 pt-3">
-          <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
-          <span class="text-xs text-slate-500">ή</span>
-          <div class="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <button id="login-google" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2">
-            <span>🟢</span> Google
-          </button>
-          <button id="login-apple" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-2">
-            <span>🍎</span> Apple
+        <div class="flex justify-end">
+          <button id="barcode-stop" type="button" class="hidden px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span id="t-barcodeStop">Διακοπή</span>
           </button>
         </div>
-
-        <button id="login-forgot" class="block text-sm underline hover:opacity-80">Ξέχασα τον κωδικό</button>
       </div>
     </div>
   </div>
@@ -756,8 +785,6 @@
       iconMoon.classList.toggle('hidden', dark);
       localStorage.setItem('mediradar-theme', dark?'dark':'light');
     }
-    setTheme(localStorage.getItem('mediradar-theme') || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
-    themeBtn.addEventListener('click',()=> setTheme(html.classList.contains('dark')?'light':'dark'));
 
     /* ========== i18n ========== */
     const strings = {
@@ -997,7 +1024,20 @@
     document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
     document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
 
-    /* ========== Navigation ========== */
+    // city dropdown
+    const citySelect = document.getElementById('city');
+    const frag = document.createDocumentFragment();
+    citySuggestions.forEach(name=>{
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      frag.appendChild(opt);
+    });
+    citySelect.appendChild(frag);
+    state.cities = citySuggestions;
+
+    // CTA
+    const ctaSearch = document.getElementById('cta-search');
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
     function goHome(){
@@ -1368,17 +1408,90 @@
         list.innerHTML = items.map((x,i)=>`<div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">${x}</div>`).join('');
         list.classList.toggle('hidden', items.length===0);
       }
-      function filter(q){ if(!q){ render([]); return; } render(data.filter(s=>s.toLowerCase().includes(q.toLowerCase())).slice(0,10)); }
-      input.addEventListener('input', ()=>{ idx=-1; filter(input.value.trim()); });
-      input.addEventListener('keydown', (e)=>{
-        const items = [...list.querySelectorAll('.ac-item')]; if(!items.length) return;
-        if(e.key==='ArrowDown'){ idx=(idx+1)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
-        else if(e.key==='ArrowUp'){ idx=(idx-1+items.length)%items.length; render(items.map(n=>n.dataset.val)); e.preventDefault(); }
-        else if(e.key==='Enter'){ if(idx>=0){ input.value = items[idx].dataset.val; render([]); } }
-        else if(e.key==='Escape'){ render([]); }
+    });
+
+    // barcode modal
+    initBarcode();
+
+    // Supabase
+    if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
+      state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
+
+    // Submit
+    document.getElementById('submitBtn').addEventListener('click', onSubmitRequest);
+
+    // Results actions
+    document.getElementById('newSearch').addEventListener('click', resetToSearch);
+    document.getElementById('status-empty-btn').addEventListener('click', ()=> {
+      document.getElementById('results-empty').classList.add('hidden');
+      document.getElementById('results-pending').classList.remove('hidden');
+      if (state.currentRequestId) startPolling(state.currentRequestId);
+    });
+    document.getElementById('pm-confirm').addEventListener('click', confirmReservationFromModal);
+
+    // Install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      state.deferredPrompt = e;
+      const btn = document.getElementById('cta-install');
+      btn.classList.remove('hidden');
+      btn.addEventListener('click', async () => {
+        state.deferredPrompt.prompt();
+        const { outcome } = await state.deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          btn.classList.add('hidden');
+          state.deferredPrompt = null;
+        }
       });
-      list.addEventListener('click', (e)=>{ const item = e.target.closest('.ac-item'); if(!item) return; input.value = item.dataset.val; list.classList.add('hidden'); });
-      document.addEventListener('click', (e)=>{ if(!list.contains(e.target) && e.target!==input){ list.classList.add('hidden'); }});
+    });
+
+    // Extend button
+    document.getElementById('extend-btn').addEventListener('click', extendReservation);
+
+    // Close results modal
+    document.getElementById('results-modal-close').addEventListener('click', closeResultsModal);
+    document.querySelectorAll('[data-results-close]').forEach(e=>e.addEventListener('click', closeResultsModal));
+
+    // pharmacy modal close
+    document.getElementById('pm-close').addEventListener('click', ()=>{
+      document.getElementById('pharm-modal').classList.add('hidden');
+      document.getElementById('pharm-modal').classList.remove('flex');
+    });
+
+    // Fake auth buttons
+    document.querySelectorAll('[data-auth-open]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const target = btn.getAttribute('data-auth-target');
+        openAuthModal(target);
+      });
+    });
+    document.querySelectorAll('[data-auth-close]').forEach(btn=>{
+      btn.addEventListener('click', closeAuthModals);
+    });
+  });
+
+  function applyLang() {
+    const all = document.querySelectorAll('[id^="t-"], #pending-overlay-headline, #pending-overlay-message, #pending-overlay-status-text');
+    all.forEach(el=>{
+      const id = el.id;
+      const val = strings[state.lang][id];
+      if (val) el.textContent = val;
+    });
+    // how / gdpr bodies
+    const howBody = document.getElementById('how-body');
+    if (howBody && !howBody.classList.contains('hidden')) howBody.textContent = strings[state.lang]['how-body'];
+    const gdprBody = document.getElementById('gdpr-body');
+    if (gdprBody && !gdprBody.classList.contains('hidden')) gdprBody.textContent = strings[state.lang]['gdpr-body'];
+
+    // lang buttons active
+    document.getElementById('lang-el').setAttribute('data-active', state.lang==='el');
+    document.getElementById('lang-en').setAttribute('data-active', state.lang==='en');
+
+    // city placeholder
+    const citySelect = document.getElementById('city');
+    if (citySelect) {
+      citySelect.options[0].textContent = state.lang==='el' ? '— Επιλογή πόλης —' : '— Select city —';
     }
     attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
     attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
@@ -1411,10 +1524,23 @@
       })(performance.now());
     }
 
-    /* ========== Supabase helpers ========== */
-    function sb(){ return window.supabase; }
-    function hasSupabase(){ return !!(window.supabase && window.ENV && window.ENV.SUPABASE_URL); }
-    const LS_REQ = 'mr:lastRequest';
+    // show pending
+    showPendingOverlay();
+
+    // insert to supabase
+    let reqId = crypto.randomUUID();
+    const payload = {
+      id: reqId,
+      city,
+      medicine_name: name,
+      quantity: qty,
+      medicine_type: type || null,
+      active_substance: substance || null,
+      barcode: barcode || null,
+      allow_generic: allowGeneric,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
 
     /* ========== Results + Pharmacy modal + Pickup timer ========== */
     const results = document.getElementById('results');
@@ -1704,32 +1830,89 @@
       return insertRequestRow(baseRow);
     }
 
-    /* ========== POLLING RESPONSES ========== */
-    async function fetchResponses(requestId){
-      const { data: rows, error } = await sb()
-        .from('responses')
-        .select('id, request_id, is_generic, pharmacy_id, available')
-        .eq('request_id', requestId)
-        .eq('available', true);
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
 
-      if(error) throw error;
-      if(!rows || !rows.length) return [];
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
+  }
 
-      const pharmacyIds = [...new Set(rows.map(r=>r.pharmacy_id).filter(Boolean))];
-      let pharmacies = [];
-      if(pharmacyIds.length){
-        const { data: phs } = await sb()
-          .from('pharmacies')
-          .select('id,name,address,phone,hours_json,lat,lng')
-          .in('id', pharmacyIds);
-        pharmacies = phs || [];
-      }
-      const byId = Object.fromEntries(pharmacies.map(p=>[p.id, p]));
-      return rows.map(r=>({
-        id: r.id,
-        is_generic: !!r.is_generic,
-        pharmacy: byId[r.pharmacy_id] || { id:r.pharmacy_id, name:'Φαρμακείο', address:'—', phone:'—' }
-      }));
+  // ==========================
+  //  PHARMACY MODAL / RESERVE
+  // ==========================
+  function openPharmacyModal(resp) {
+    state.reservation.pharmacy = resp;
+    const modal = document.getElementById('pharm-modal');
+    document.getElementById('pm-title').textContent = resp.pharmacy_name || 'Φαρμακείο';
+    document.getElementById('pm-address').textContent = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (resp.pharmacy_address || '-');
+    const mapsBtn = document.getElementById('pm-maps');
+    if (resp.latitude && resp.longitude) {
+      mapsBtn.href = `https://maps.google.com/?q=${resp.latitude},${resp.longitude}`;
+      mapsBtn.classList.remove('opacity-50','pointer-events-none');
+    } else if (resp.pharmacy_address) {
+      const q = encodeURIComponent(resp.pharmacy_address);
+      mapsBtn.href = `https://maps.google.com/?q=${q}`;
+      mapsBtn.classList.remove('opacity-50','pointer-events-none');
+    } else {
+      mapsBtn.href = '#';
+      mapsBtn.classList.add('opacity-50','pointer-events-none');
+    }
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  async function confirmReservationFromModal() {
+    const resp = state.reservation.pharmacy;
+    if (!resp) return;
+    const modal = document.getElementById('pharm-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+
+    // update request to reserved
+    if (state.supabase && state.currentRequestId) {
+      const pickupUntil = new Date(Date.now() + 60*60*1000).toISOString();
+      const { error } = await state.supabase.from('requests').update({
+        status: 'reserved',
+        chosen_pharmacy: resp.pharmacy_id || resp.id || null,
+        pickup_until: pickupUntil
+      }).eq('id', state.currentRequestId);
+      if (error) console.error(error);
+      startCountdown(pickupUntil);
+      showReservationBox(resp, pickupUntil);
+      showCelebration();
+    } else {
+      const pickupUntil = new Date(Date.now() + 60*60*1000).toISOString();
+      startCountdown(pickupUntil);
+      showReservationBox(resp, pickupUntil);
+      showCelebration();
+    }
+  }
+
+  function showReservationBox(resp, pickupUntil) {
+    document.getElementById('pickup-box').classList.remove('hidden');
+    document.getElementById('results-list').classList.add('hidden');
+    document.getElementById('status-reserved-name').textContent = resp.pharmacy_name || 'Pharmacy';
+    document.getElementById('status-reserved-address').textContent = resp.pharmacy_address || '';
+    if (resp.has_generic) {
+      document.getElementById('status-reserved-generic').classList.remove('hidden');
+    } else {
+      document.getElementById('status-reserved-generic').classList.add('hidden');
     }
 
     async function renderResults(items){
@@ -1920,6 +2103,11 @@
     const btnPushAllow = document.getElementById('push-allow');
     const btnPushDeny  = document.getElementById('push-deny');
 
+    statusNotifyBtn?.addEventListener('click', ()=>{
+      pushToast?.classList.remove('hidden');
+      pushToast?.scrollIntoView({ behavior:'smooth', block:'end' });
+    });
+
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
       const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -1944,72 +2132,30 @@
       const { error } = await sb().from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
       if (error) console.warn('save sub error', error);
     }
+    closeBtn.addEventListener('click', stop);
+    stopBtn.addEventListener('click', stop);
+  }
 
-    async function ensurePushSubscribed(reg) {
-      try{
-        if (!('Notification' in window) || !('PushManager' in window)) return;
-        const publicKey = (window.ENV && window.ENV.VAPID_PUBLIC_KEY) || '';
-        if (!publicKey) return;
-
-        if (Notification.permission === 'granted') {
-          const existing = await reg.pushManager.getSubscription();
-          if (existing) { await saveSubscriptionToSupabase(existing); return; }
-          const sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey)
-          });
-          await saveSubscriptionToSupabase(sub);
-          return;
-        }
-        if (Notification.permission === 'default') {
-          pushToast.classList.remove('hidden');
-        }
-      }catch(err){ console.warn('push subscribe error', err); }
+  // ==========================
+  //  AUTH (mocked / simple)
+  // ==========================
+  function openAuthModal(role) {
+    const mUsers = document.getElementById('auth-modal-users');
+    const mPharm = document.getElementById('auth-modal-pharmacies');
+    if (role === 'pharmacies') {
+      mPharm.classList.remove('hidden');
+      mPharm.classList.add('flex');
+    } else {
+      mUsers.classList.remove('hidden');
+      mUsers.classList.add('flex');
     }
-
-    btnPushAllow?.addEventListener('click', async ()=>{
-      pushToast.classList.add('hidden');
-      try{
-        const perm = await Notification.requestPermission();
-        if (perm !== 'granted') return;
-        const reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) return;
-        await ensurePushSubscribed(reg);
-      }catch(e){ console.warn(e); }
-    });
-    btnPushDeny?.addEventListener('click', ()=> pushToast.classList.add('hidden'));
-
-    /* ========== PWA install & SW update flow ========== */
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').then(async reg => {
-        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          nw?.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              reg.waiting?.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          window.location.reload();
-        });
-
-        // 3c: push subscription
-        await ensurePushSubscribed(reg);
-      }).catch(console.warn);
-    }
-    let deferredPrompt=null;
-    const installBtn = document.getElementById('cta-install');
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault(); deferredPrompt = e; installBtn.classList.remove('hidden');
-    });
-    installBtn.addEventListener('click', async ()=>{
-      if(!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt=null; installBtn.classList.add('hidden');
-    });
+  }
+  function closeAuthModals() {
+    document.getElementById('auth-modal-users').classList.add('hidden');
+    document.getElementById('auth-modal-users').classList.remove('flex');
+    document.getElementById('auth-modal-pharmacies').classList.add('hidden');
+    document.getElementById('auth-modal-pharmacies').classList.remove('flex');
+  }
 
     /* ========== Init ========== */
     applyLang();

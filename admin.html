@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="el" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MediRadar — Διαχείριση</title>
+  <meta name="application-name" content="MediRadar" />
+  <meta name="apple-mobile-web-app-title" content="MediRadar" />
+  <meta name="description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="og:site_name" content="MediRadar" />
+  <meta property="og:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <meta property="twitter:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
+  <link rel="icon" href="/icons/icon-192.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .app-bg {
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
+        linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
+    }
+    .dark .app-bg {
+      background:
+        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
+        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
+        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
+        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
+        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
+    }
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      border-radius: 1rem;
+    }
+    .dark .glass-surface {
+      background: rgba(15, 23, 42, 0.62);
+      border-color: rgba(148, 163, 184, 0.32);
+      box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
+    }
+    .glass-header {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    }
+    .dark .glass-header {
+      background: rgba(15, 23, 42, 0.72);
+      border-bottom-color: rgba(148, 163, 184, 0.35);
+      box-shadow: 0 12px 32px rgba(2, 6, 23, 0.55);
+    }
+    .card {
+      border-radius: 1rem;
+    }
+    .global-emoji-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .global-emoji-layer span {
+      position: absolute;
+      font-size: clamp(2.75rem, 6vw, 4rem);
+      opacity: 0.18;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+    }
+    .global-emoji-layer span:nth-child(1) { top: 8%; left: 12%; animation: adminEmojiFloatA 34s linear infinite; }
+    .global-emoji-layer span:nth-child(2) { top: 22%; right: 18%; animation: adminEmojiFloatB 38s linear infinite; }
+    .global-emoji-layer span:nth-child(3) { bottom: 14%; left: 20%; animation: adminEmojiFloatC 42s linear infinite; }
+    .global-emoji-layer span:nth-child(4) { bottom: 8%; right: 16%; animation: adminEmojiFloatD 36s linear infinite; }
+    .global-emoji-layer span:nth-child(5) { top: 46%; left: 46%; opacity: 0.14; animation: adminEmojiFloatE 44s linear infinite; }
+    .dark .global-emoji-layer span { opacity: 0.22; }
+    @keyframes adminEmojiFloatA {
+      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
+      45% { transform: translate3d(22px, -18px, 0) scale(1.04); opacity: 0.18; }
+      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.06; }
+    }
+    @keyframes adminEmojiFloatB {
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
+      50% { transform: translate3d(-26px, 20px, 0) scale(1.06); opacity: 0.19; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.05; }
+    }
+    @keyframes adminEmojiFloatC {
+      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+      55% { transform: translate3d(18px, -14px, 0) scale(1.05); opacity: 0.2; }
+      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+    }
+    @keyframes adminEmojiFloatD {
+      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
+      45% { transform: translate3d(-18px, -16px, 0) scale(0.95); opacity: 0.18; }
+      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.06; }
+    }
+    @keyframes adminEmojiFloatE {
+      0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
+      50% { transform: translate3d(14px, 22px, 0) scale(1.08); opacity: 0.16; }
+      100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.05; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="env.js" defer></script>
+</head>
+<body class="min-h-full app-bg text-slate-900 dark:text-slate-100 font-sans">
+
+  <div class="global-emoji-layer" aria-hidden="true">
+    <span>💊</span>
+    <span>💉</span>
+    <span>🩹</span>
+    <span>🧴</span>
+    <span>💚</span>
+  </div>
+
+  <header class="glass-header border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-white font-semibold">MR</span>
+        <div>
+          <p class="text-sm uppercase tracking-wide text-slate-500 dark:text-slate-400">Πίνακας Ελέγχου</p>
+          <h1 class="text-xl font-semibold">MediRadar Admin</h1>
+        </div>
+      </div>
+      <div class="text-sm text-right">
+        <p id="admin-email" class="font-medium">—</p>
+        <p class="text-slate-500 dark:text-slate-400">Σύνδεση απαραίτητη</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-10 relative z-10" id="admin-root">
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4" id="metric-cards">
+      <article class="card glass-surface p-5">
+        <p class="text-sm text-slate-500">Σύνολο αιτήσεων</p>
+        <p class="mt-2 text-3xl font-semibold" id="metric-total-requests">—</p>
+      </article>
+      <article class="card glass-surface p-5">
+        <p class="text-sm text-slate-500">Αιτήσεις σε εξέλιξη</p>
+        <p class="mt-2 text-3xl font-semibold" id="metric-pending">—</p>
+      </article>
+      <article class="card glass-surface p-5">
+        <p class="text-sm text-slate-500">Ενεργά φαρμακεία</p>
+        <p class="mt-2 text-3xl font-semibold" id="metric-pharmacies">—</p>
+        <p class="text-xs text-slate-500" id="metric-pharmacies-breakdown"></p>
+      </article>
+      <article class="card glass-surface p-5">
+        <p class="text-sm text-slate-500">Εγγεγραμμένοι χρήστες</p>
+        <p class="mt-2 text-3xl font-semibold" id="metric-users">—</p>
+      </article>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-2" aria-labelledby="charts-title">
+      <div class="card glass-surface p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold" id="charts-title">Ροή αιτήσεων (30 ημέρες)</h2>
+          <span class="text-xs text-slate-500" id="chart-updated-at"></span>
+        </div>
+        <canvas id="chart-requests" class="mt-4 h-64"></canvas>
+      </div>
+      <div class="card glass-surface p-6">
+        <h2 class="text-lg font-semibold">Κατανομή κατάστασης</h2>
+        <canvas id="chart-status" class="mt-6 h-64"></canvas>
+      </div>
+    </section>
+
+    <section class="card glass-surface p-6" aria-labelledby="requests-table-title">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold" id="requests-table-title">Πίνακας αιτήσεων</h2>
+          <p class="text-sm text-slate-500">Φίλτραρε και άλλαξε χειροκίνητα την κατάσταση.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <label class="flex flex-col text-xs uppercase tracking-wide text-slate-500">
+            Κατάσταση
+            <select id="filter-status" class="mt-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              <option value="">Όλες</option>
+              <option value="pending">Σε αναμονή</option>
+              <option value="available">Διαθέσιμες</option>
+              <option value="reserved">Δεσμευμένες</option>
+              <option value="completed">Ολοκληρωμένες</option>
+              <option value="cancelled">Ακυρωμένες</option>
+              <option value="expired">Έληξαν</option>
+            </select>
+          </label>
+          <label class="flex flex-col text-xs uppercase tracking-wide text-slate-500">
+            Πόλη
+            <input id="filter-city" type="text" placeholder="π.χ. Αθήνα" class="mt-1 w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+          </label>
+          <label class="flex flex-col text-xs uppercase tracking-wide text-slate-500">
+            Αναζήτηση
+            <input id="filter-query" type="search" placeholder="φαρμακευτικό προϊόν" class="mt-1 w-48 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" />
+          </label>
+          <button id="filter-apply" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-brand-700">Εφαρμογή</button>
+        </div>
+      </div>
+      <div class="mt-6 overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800" id="requests-table">
+          <thead class="bg-slate-50 dark:bg-slate-900/40">
+            <tr>
+              <th class="px-3 py-2 text-left font-semibold">ID</th>
+              <th class="px-3 py-2 text-left font-semibold">Ημ/νία</th>
+              <th class="px-3 py-2 text-left font-semibold">Πόλη</th>
+              <th class="px-3 py-2 text-left font-semibold">Προϊόν</th>
+              <th class="px-3 py-2 text-left font-semibold">Ποσότητα</th>
+              <th class="px-3 py-2 text-left font-semibold">Κατάσταση</th>
+              <th class="px-3 py-2 text-left font-semibold">Ενέργειες</th>
+            </tr>
+          </thead>
+          <tbody id="requests-tbody" class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tr>
+              <td colspan="7" class="px-3 py-6 text-center text-slate-500" id="requests-empty">Φόρτωση…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card glass-surface p-6" aria-labelledby="moderation-title">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold" id="moderation-title">Moderation Φαρμακείων</h2>
+          <p class="text-sm text-slate-500">Έγκριση/αναστολή συμμετοχής φαρμακείων.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs uppercase tracking-wide text-slate-500">
+            Κατάσταση
+            <select id="pharmacy-filter" class="mt-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+              <option value="">Όλες</option>
+              <option value="pending">Υπό έγκριση</option>
+              <option value="approved">Εγκεκριμένες</option>
+              <option value="suspended">Σε αναστολή</option>
+            </select>
+          </label>
+          <button id="pharmacy-refresh" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Ανανέωση</button>
+        </div>
+      </div>
+      <div class="mt-4 overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800" id="pharmacies-table">
+          <thead class="bg-slate-50 dark:bg-slate-900/40">
+            <tr>
+              <th class="px-3 py-2 text-left font-semibold">ID</th>
+              <th class="px-3 py-2 text-left font-semibold">Όνομα</th>
+              <th class="px-3 py-2 text-left font-semibold">Πόλη</th>
+              <th class="px-3 py-2 text-left font-semibold">Τηλέφωνο</th>
+              <th class="px-3 py-2 text-left font-semibold">Κατάσταση</th>
+              <th class="px-3 py-2 text-left font-semibold">Ενέργειες</th>
+            </tr>
+          </thead>
+          <tbody id="pharmacies-tbody" class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tr>
+              <td colspan="6" class="px-3 py-6 text-center text-slate-500" id="pharmacies-empty">Φόρτωση…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card glass-surface p-6" aria-labelledby="audit-title">
+      <h2 class="text-lg font-semibold" id="audit-title">Audit log</h2>
+      <p class="text-sm text-slate-500">Καταγράφονται όλες οι ενέργειες moderation.</p>
+      <ul id="audit-log" class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+        <li>Φόρτωση…</li>
+      </ul>
+    </section>
+  </main>
+
+  <template id="request-row-template">
+    <tr class="align-top">
+      <td class="px-3 py-2 font-mono text-xs"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+    </tr>
+  </template>
+
+  <template id="pharmacy-row-template">
+    <tr class="align-top">
+      <td class="px-3 py-2 font-mono text-xs"></td>
+      <td class="px-3 py-2 font-medium"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+      <td class="px-3 py-2"></td>
+    </tr>
+  </template>
+
+  <script type="module">
+    import { bookingAuthContext, guardRoute, getSessionRoles } from './script.js';
+
+    const state = {
+      summary: null,
+      requests: [],
+      pharmacies: [],
+      charts: {}
+    };
+
+    const metricEls = {
+      total: document.getElementById('metric-total-requests'),
+      pending: document.getElementById('metric-pending'),
+      pharmacies: document.getElementById('metric-pharmacies'),
+      pharmaciesBreakdown: document.getElementById('metric-pharmacies-breakdown'),
+      users: document.getElementById('metric-users')
+    };
+
+    const chartEls = {
+      requests: document.getElementById('chart-requests'),
+      status: document.getElementById('chart-status'),
+      updatedAt: document.getElementById('chart-updated-at')
+    };
+
+    const requestFilters = {
+      status: document.getElementById('filter-status'),
+      city: document.getElementById('filter-city'),
+      query: document.getElementById('filter-query'),
+      apply: document.getElementById('filter-apply')
+    };
+
+    const requestTable = {
+      tbody: document.getElementById('requests-tbody'),
+      empty: document.getElementById('requests-empty'),
+      template: document.getElementById('request-row-template')
+    };
+
+    const pharmacyTable = {
+      tbody: document.getElementById('pharmacies-tbody'),
+      empty: document.getElementById('pharmacies-empty'),
+      template: document.getElementById('pharmacy-row-template'),
+      filter: document.getElementById('pharmacy-filter'),
+      refresh: document.getElementById('pharmacy-refresh')
+    };
+
+    const auditList = document.getElementById('audit-log');
+    const adminEmailEl = document.getElementById('admin-email');
+
+    function formatDate(value) {
+      if (!value) return '—';
+      const dt = new Date(value);
+      if (Number.isNaN(dt.getTime())) return value;
+      return dt.toLocaleString('el-GR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function formatStatus(status) {
+      const map = {
+        pending: 'Σε αναμονή',
+        available: 'Διαθέσιμη',
+        reserved: 'Δεσμευμένη',
+        completed: 'Ολοκληρωμένη',
+        cancelled: 'Ακυρωμένη',
+        expired: 'Έληξε',
+        approved: 'Εγκεκριμένο',
+        suspended: 'Σε αναστολή'
+      };
+      return map[status] || status || '—';
+    }
+
+    function getSessionToken() {
+      const session = bookingAuthContext.getSession();
+      return session?.access_token || null;
+    }
+
+    async function apiFetch(path, { method = 'GET', body, params } = {}) {
+      const token = getSessionToken();
+      if (!token) throw new Error('missing_token');
+      const url = new URL(`/.netlify/functions/${path}`, window.location.origin);
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            url.searchParams.set(key, value);
+          }
+        });
+      }
+      const response = await fetch(url.toString(), {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!response.ok) {
+        let payload = {};
+        try { payload = await response.json(); } catch { /* noop */ }
+        const error = new Error(payload?.error || 'request_failed');
+        error.payload = payload;
+        throw error;
+      }
+      return response.json();
+    }
+
+    function updateMetrics(summary) {
+      if (!summary) return;
+      metricEls.total.textContent = summary.metrics.totalRequests.toLocaleString('el-GR');
+      metricEls.pending.textContent = summary.metrics.pendingRequests.toLocaleString('el-GR');
+      metricEls.pharmacies.textContent = summary.metrics.pharmacies.toLocaleString('el-GR');
+      metricEls.pharmaciesBreakdown.textContent = `Εγκεκριμένα ${summary.metrics.pharmaciesApproved.toLocaleString('el-GR')} · Αναστολή ${summary.metrics.pharmaciesSuspended.toLocaleString('el-GR')}`;
+      metricEls.users.textContent = summary.metrics.users.toLocaleString('el-GR');
+      chartEls.updatedAt.textContent = `ενημέρωση ${formatDate(summary.generatedAt)}`;
+    }
+
+    function renderAuditLog(entries) {
+      auditList.innerHTML = '';
+      if (!entries?.length) {
+        const li = document.createElement('li');
+        li.textContent = 'Δεν υπάρχουν καταγραφές.';
+        auditList.appendChild(li);
+        return;
+      }
+      entries.forEach(entry => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="font-medium text-slate-900 dark:text-white">${entry.actor_email || '—'}</span> · ${entry.action} · ${entry.target_type}#${entry.target_id} <span class="text-xs text-slate-500">(${formatDate(entry.created_at)})</span>`;
+        auditList.appendChild(li);
+      });
+    }
+
+    function ensureChart(key, type, config) {
+      if (state.charts[key]) {
+        const chart = state.charts[key];
+        chart.data.labels = config.data.labels;
+        chart.data.datasets = config.data.datasets;
+        chart.options = config.options;
+        chart.update();
+        return chart;
+      }
+      const chart = new Chart(config.ctx, {
+        type,
+        data: config.data,
+        options: config.options
+      });
+      state.charts[key] = chart;
+      return chart;
+    }
+
+    function renderCharts(summary) {
+      if (!window.Chart || !summary) return;
+      const labels = summary.requestsByDay.map(item => item.date.slice(5));
+      ensureChart('requests', 'line', {
+        ctx: chartEls.requests,
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Σύνολο',
+              data: summary.requestsByDay.map(item => item.total),
+              borderColor: '#29a3a3',
+              backgroundColor: 'rgba(41,163,163,0.15)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Απαντήσεις',
+              data: summary.requestsByDay.map(item => item.resolved),
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99,102,241,0.15)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+
+      const statusEntries = Object.entries(summary.statusBreakdown);
+      ensureChart('status', 'doughnut', {
+        ctx: chartEls.status,
+        data: {
+          labels: statusEntries.map(([key]) => formatStatus(key)),
+          datasets: [{
+            data: statusEntries.map(([, value]) => value),
+            backgroundColor: ['#f97316','#22c55e','#6366f1','#94a3b8','#ef4444','#0ea5e9']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    function renderRequestsTable(items) {
+      requestTable.tbody.innerHTML = '';
+      if (!items?.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 7;
+        cell.className = 'px-3 py-6 text-center text-slate-500';
+        cell.textContent = 'Δεν βρέθηκαν αιτήσεις.';
+        row.appendChild(cell);
+        requestTable.tbody.appendChild(row);
+        return;
+      }
+      items.forEach(item => {
+        const row = requestTable.template.content.firstElementChild.cloneNode(true);
+        const cells = row.querySelectorAll('td');
+        cells[0].textContent = item.id;
+        cells[1].textContent = formatDate(item.created_at);
+        cells[2].textContent = item.city || '—';
+        cells[3].textContent = item.medicine_name || item.substance || '—';
+        cells[4].textContent = `${item.quantity || 1}${item.allow_generic ? ' · γενόσημο' : ''}`;
+
+        const statusContainer = document.createElement('div');
+        statusContainer.className = 'flex items-center gap-2';
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+        statusBadge.textContent = formatStatus(item.status);
+        statusContainer.appendChild(statusBadge);
+        cells[5].appendChild(statusContainer);
+
+        const actionWrapper = document.createElement('div');
+        actionWrapper.className = 'flex items-center gap-2';
+        const select = document.createElement('select');
+        select.className = 'rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900';
+        ['pending','available','reserved','completed','cancelled','expired'].forEach(status => {
+          const option = document.createElement('option');
+          option.value = status;
+          option.textContent = formatStatus(status);
+          if (status === item.status) option.selected = true;
+          select.appendChild(option);
+        });
+        select.dataset.requestId = item.id;
+        const button = document.createElement('button');
+        button.className = 'rounded-lg bg-brand-600 px-2 py-1 text-xs font-semibold text-white hover:bg-brand-700';
+        button.textContent = 'Ενημέρωση';
+        button.dataset.requestId = item.id;
+        actionWrapper.appendChild(select);
+        actionWrapper.appendChild(button);
+        cells[6].appendChild(actionWrapper);
+        requestTable.tbody.appendChild(row);
+      });
+    }
+
+    function renderPharmaciesTable(items) {
+      pharmacyTable.tbody.innerHTML = '';
+      if (!items?.length) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 6;
+        cell.className = 'px-3 py-6 text-center text-slate-500';
+        cell.textContent = 'Δεν βρέθηκαν φαρμακεία.';
+        row.appendChild(cell);
+        pharmacyTable.tbody.appendChild(row);
+        return;
+      }
+      items.forEach(item => {
+        const row = pharmacyTable.template.content.firstElementChild.cloneNode(true);
+        const cells = row.querySelectorAll('td');
+        cells[0].textContent = item.id;
+        cells[1].textContent = item.name || '—';
+        cells[2].textContent = item.city || '—';
+        cells[3].textContent = item.phone || '—';
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+        statusBadge.textContent = formatStatus(item.status);
+        cells[4].appendChild(statusBadge);
+
+        const actionWrapper = document.createElement('div');
+        actionWrapper.className = 'flex flex-wrap gap-2';
+        const actions = [
+          { label: 'Έγκριση', status: 'approved', style: 'bg-emerald-600 hover:bg-emerald-700' },
+          { label: 'Αναστολή', status: 'suspended', style: 'bg-rose-600 hover:bg-rose-700' },
+          { label: 'Επαναφορά', status: 'pending', style: 'bg-slate-600 hover:bg-slate-700' }
+        ];
+        actions.forEach(action => {
+          const btn = document.createElement('button');
+          btn.className = `rounded-lg px-2 py-1 text-xs font-semibold text-white ${action.style}`;
+          btn.textContent = action.label;
+          btn.dataset.pharmacyId = item.id;
+          btn.dataset.status = action.status;
+          actionWrapper.appendChild(btn);
+        });
+        cells[5].appendChild(actionWrapper);
+        pharmacyTable.tbody.appendChild(row);
+      });
+    }
+
+    async function loadSummary() {
+      const summary = await apiFetch('admin-summary');
+      state.summary = summary;
+      updateMetrics(summary);
+      renderCharts(summary);
+      renderAuditLog(summary.auditLog);
+      const roles = Array.from(getSessionRoles() || []).join(', ');
+      adminEmailEl.textContent = `${summary.actor.email || '—'} · ${roles || '—'}`;
+    }
+
+    async function loadRequests() {
+      requestTable.tbody.innerHTML = '';
+      const loadingRow = document.createElement('tr');
+      const loadingCell = document.createElement('td');
+      loadingCell.colSpan = 7;
+      loadingCell.className = 'px-3 py-6 text-center text-slate-500';
+      loadingCell.textContent = 'Φόρτωση…';
+      loadingRow.appendChild(loadingCell);
+      requestTable.tbody.appendChild(loadingRow);
+
+      const params = {
+        status: requestFilters.status.value,
+        city: requestFilters.city.value,
+        q: requestFilters.query.value
+      };
+      const data = await apiFetch('admin-requests', { params });
+      state.requests = data.items || [];
+      renderRequestsTable(state.requests);
+    }
+
+    async function loadPharmacies() {
+      pharmacyTable.tbody.innerHTML = '';
+      const loadingRow = document.createElement('tr');
+      const loadingCell = document.createElement('td');
+      loadingCell.colSpan = 6;
+      loadingCell.className = 'px-3 py-6 text-center text-slate-500';
+      loadingCell.textContent = 'Φόρτωση…';
+      loadingRow.appendChild(loadingCell);
+      pharmacyTable.tbody.appendChild(loadingRow);
+
+      const params = { status: pharmacyTable.filter.value };
+      const data = await apiFetch('admin-pharmacies', { params });
+      state.pharmacies = data.items || [];
+      renderPharmaciesTable(state.pharmacies);
+    }
+
+    async function handleRequestUpdate(event) {
+      const button = event.target.closest('button[data-request-id]');
+      if (!button) return;
+      const id = button.dataset.requestId;
+      const select = requestTable.tbody.querySelector(`select[data-request-id="${CSS.escape(id)}"]`);
+      if (!select) return;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Αποθήκευση…';
+      try {
+        await apiFetch('admin-requests', {
+          method: 'PATCH',
+          body: { id, status: select.value }
+        });
+        await Promise.all([loadSummary(), loadRequests()]);
+      } catch (error) {
+        console.error(error);
+        alert('Αποτυχία ενημέρωσης αιτήσης.');
+      } finally {
+        button.disabled = false;
+        if (document.body.contains(button)) {
+          button.textContent = originalText;
+        }
+      }
+    }
+
+    async function handlePharmacyAction(event) {
+      const button = event.target.closest('button[data-pharmacy-id]');
+      if (!button) return;
+      const id = button.dataset.pharmacyId;
+      const status = button.dataset.status;
+      const reason = status === 'suspended' ? (prompt('Λόγος αναστολής; (προαιρετικό)') || '') : '';
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Εργασία…';
+      try {
+        await apiFetch('admin-pharmacies', {
+          method: 'PATCH',
+          body: { id, status, reason }
+        });
+        await Promise.all([loadSummary(), loadPharmacies()]);
+      } catch (error) {
+        console.error(error);
+        alert('Αποτυχία ενημέρωσης φαρμακείου.');
+      } finally {
+        button.disabled = false;
+        if (document.body.contains(button)) {
+          button.textContent = originalText;
+        }
+      }
+    }
+
+    requestFilters.apply.addEventListener('click', () => loadRequests().catch(console.error));
+    requestFilters.status.addEventListener('change', () => loadRequests().catch(console.error));
+    requestFilters.city.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        loadRequests().catch(console.error);
+      }
+    });
+    requestFilters.query.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        loadRequests().catch(console.error);
+      }
+    });
+    pharmacyTable.refresh.addEventListener('click', () => loadPharmacies().catch(console.error));
+    pharmacyTable.filter.addEventListener('change', () => loadPharmacies().catch(console.error));
+    requestTable.tbody.addEventListener('click', handleRequestUpdate);
+    pharmacyTable.tbody.addEventListener('click', handlePharmacyAction);
+
+    (async () => {
+      const { allowed } = await guardRoute({ roles: ['admin'], redirectTo: '/' });
+      if (!allowed) {
+        document.getElementById('admin-root').innerHTML = '<div class="card glass-surface p-10 text-center text-lg font-semibold">Δεν έχεις πρόσβαση στη σελίδα διαχείρισης.</div>';
+        return;
+      }
+      try {
+        await loadSummary();
+        await loadRequests();
+        await loadPharmacies();
+      } catch (error) {
+        console.error(error);
+        alert('Αποτυχία φόρτωσης δεδομένων admin.');
+      }
+    })();
+  </script>
+</body>
+</html>
