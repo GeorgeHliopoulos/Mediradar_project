@@ -445,7 +445,6 @@ function bootstrapAuthPortals() {
   if (!roots.length) return;
   roots.forEach(root => initAuthPortal(root));
 }
-update magic link widget
 
 bootstrapAuthPortals();
 

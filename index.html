@@ -98,6 +98,39 @@
     #celebration-overlay .success-mark.animate-in { animation: successPop .6s ease forwards, successFade .5s ease forwards 2.4s; }
     @keyframes successPop { to { transform:scale(1); opacity:1; } }
     @keyframes successFade { to { transform:scale(.92); opacity:0; } }
+
+    .auth-portal-card { animation: authPortalIn .45s ease forwards; opacity:0; transform: translateY(16px) scale(.96); }
+    .auth-portal-card::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      padding:1px;
+      background:linear-gradient(135deg,#00c6ff,#0072ff);
+      pointer-events:none;
+      opacity:.9;
+      transition:opacity .3s ease;
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+    }
+    .auth-portal-card:hover::before {
+      opacity:1;
+    }
+    @keyframes authPortalIn { to { opacity:1; transform: translateY(0) scale(1); } }
+    .auth-card--pulse-success { animation: authSuccessGlow 1.2s ease-out; }
+    .auth-card--login-success { animation: authLoginSuccess 2s ease-out; }
+    .auth-card--shake-error { animation: authErrorShake .55s ease; }
+    @keyframes authSuccessGlow { 0% { box-shadow:0 0 0 0 rgba(16,185,129,0); border-color:rgba(16,185,129,0); } 50% { box-shadow:0 0 0 12px rgba(16,185,129,.12), 0 30px 60px rgba(15,23,42,.22); border-color:rgba(16,185,129,.35); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } }
+    @keyframes authLoginSuccess { 0% { box-shadow:0 0 0 0 rgba(34,197,94,0); border-color:rgba(34,197,94,0); transform:translateY(0) scale(1); } 25% { box-shadow:0 0 0 14px rgba(34,197,94,.14), 0 32px 70px rgba(15,23,42,.22); border-color:rgba(34,197,94,.4); transform:translateY(-4px) scale(1.01); } 70% { box-shadow:0 0 0 10px rgba(34,197,94,.08), 0 26px 60px rgba(15,23,42,.2); border-color:rgba(34,197,94,.22); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); transform:translateY(0) scale(1); } }
+    @keyframes authErrorShake { 0%, 100% { transform:translateX(0); box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } 20% { transform:translateX(-8px); box-shadow:0 0 0 10px rgba(248,113,113,.15), 0 30px 60px rgba(15,23,42,.2); border-color:rgba(248,113,113,.45); } 40% { transform:translateX(8px); } 60% { transform:translateX(-5px); } 80% { transform:translateX(5px); } }
+    .auth-success-active { animation: authSuccessSequence 2s ease forwards; }
+    @keyframes authSuccessSequence { 0% { opacity:0; transform:translateY(12px) scale(.95); } 20% { opacity:1; transform:translateY(0) scale(1); } 70% { opacity:1; transform:translateY(0) scale(1.02); } 100% { opacity:0; transform:translateY(-6px) scale(1.02); } }
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
@@ -2018,5 +2051,6 @@ By submitting a request:
   }
 
   </script>
+  <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>
