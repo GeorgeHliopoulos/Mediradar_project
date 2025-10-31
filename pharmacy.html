@@ -162,6 +162,48 @@
       border-color: rgba(148, 163, 184, 0.4);
       color: #e2e8f0;
     }
+    /* Ειδικό spinner για την ένδειξη φόρτωσης στα κουμπιά σύνδεσης */
+    .btn-loading-indicator {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 9999px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      animation: authSpinner 0.75s linear infinite;
+    }
+    @keyframes authSpinner {
+      to { transform: rotate(360deg); }
+    }
+    /* Toast ειδοποιήσεων για επιτυχία ή σφάλμα σύνδεσης */
+    #toast-stack {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 250;
+      pointer-events: none;
+    }
+    #toast-stack .toast {
+      pointer-events: auto;
+      min-width: 240px;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #toast-stack .toast--success { background: rgba(16, 185, 129, 0.94); }
+    #toast-stack .toast--error { background: rgba(248, 113, 113, 0.94); }
+    #toast-stack .toast--info { background: rgba(59, 130, 246, 0.94); }
+    #toast-stack .toast.toast--hide {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
     .dark .btn:hover { background: rgba(30, 41, 59, 0.6); }
     .auth-portal-card { animation: authPortalIn .45s ease forwards; opacity:0; transform: translateY(16px) scale(.96); }
     .auth-portal-card::before {
@@ -217,6 +259,8 @@
     <span>🧴</span>
     <span>💚</span>
   </div>
+  <!-- Στοίβα toast ειδοποιήσεων για την εμπειρία σύνδεσης -->
+  <div id="toast-stack" aria-live="polite" aria-atomic="true"></div>
   <div class="max-w-5xl mx-auto p-4">
     <header class="flex flex-wrap items-center justify-between gap-3 mb-4 glass-surface bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-4 py-3 shadow-soft">
       <div class="flex items-center gap-3">
@@ -488,11 +532,71 @@
     const supabase = supabaseClient || (SUPABASE_URL && SUPABASE_ANON_KEY
       ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null);
+    const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
     if(!supabase){
-      console.warn('Supabase configuration is missing.');
+      console.warn(missingSupabaseMessage);
     }
     const qs = (s, r=document)=>r.querySelector(s);
     const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
+    const toastStack = qs('#toast-stack');
+    const statusBaseClasses = ['text-slate-600','dark:text-slate-300'];
+    const statusSuccessClasses = ['text-emerald-600','dark:text-emerald-300'];
+    const statusErrorClasses = ['text-rose-600','dark:text-rose-300'];
+
+    /* Εμφάνιση toast μηνυμάτων για τις ροές σύνδεσης */
+    function showToast(message, tone='info'){
+      if(!toastStack){
+        alert(message);
+        return;
+      }
+      const resolvedTone = ['success','error','info'].includes(tone) ? tone : 'info';
+      const toast = document.createElement('div');
+      toast.classList.add('toast', `toast--${resolvedTone}`, 'toast--hide');
+      toast.textContent = message;
+      toastStack.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('toast--hide'));
+      setTimeout(() => {
+        toast.classList.add('toast--hide');
+        toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+      }, 4200);
+    }
+
+    /* Utility για το οπτικό loading στα κουμπιά */
+    function setButtonLoading(button, isLoading, label='Φόρτωση…'){
+      if(!button) return;
+      if(isLoading){
+        if(!button.dataset.originalHtml){
+          button.dataset.originalHtml = button.innerHTML;
+        }
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.classList.add('opacity-60','pointer-events-none');
+        button.innerHTML = `<span class="flex items-center justify-center gap-2"><span class="btn-loading-indicator" aria-hidden="true"></span>${label}</span>`;
+      } else {
+        button.disabled = false;
+        button.setAttribute('aria-busy', 'false');
+        button.classList.remove('opacity-60','pointer-events-none');
+        if(button.dataset.originalHtml){
+          button.innerHTML = button.dataset.originalHtml;
+          delete button.dataset.originalHtml;
+        }
+      }
+    }
+
+    /* Ενημέρωση των μηνυμάτων κατάστασης μέσα στο modal */
+    function setStatusMessage(element, message, tone='info'){
+      if(!element) return;
+      element.textContent = message;
+      element.classList.remove(...statusBaseClasses, ...statusSuccessClasses, ...statusErrorClasses);
+      if(tone === 'success'){
+        element.classList.add(...statusSuccessClasses);
+      } else if(tone === 'error'){
+        element.classList.add(...statusErrorClasses);
+      } else {
+        element.classList.add(...statusBaseClasses);
+      }
+    }
+
     const store = {
       pharmacy: null
     };
@@ -536,6 +640,13 @@
     const authHeaderEmail = qs('[data-auth-header-email]');
     const proInfoToggles = qsa('[data-pro-info-toggle]');
 
+    const pharmacyAuthRoot = authModals.pharmacies || null;
+    const pharmacyAuthForm = pharmacyAuthRoot?.querySelector('[data-auth-form="pharmacies"]');
+    const pharmacyEmailInput = pharmacyAuthRoot?.querySelector('#auth-pharm-email-input');
+    const pharmacyEmailButton = pharmacyAuthRoot?.querySelector('#auth-pharm-email-cta');
+    const pharmacyGoogleButton = pharmacyAuthRoot?.querySelector('[data-auth-google]');
+    const pharmacyStatusEl = pharmacyAuthRoot?.querySelector('[data-auth-status]');
+
     const hoursBox = qs('#hours-box');
     const hoursGrid = qs('#hours-grid');
     const saveHoursBtn = qs('#save-hours');
@@ -547,6 +658,94 @@
     const dayControls = new Map();
 
     let authSession = null;
+
+    /* Χειριστής για την αποστολή magic link στο email φαρμακείου */
+    async function handlePharmacyEmailLogin(event){
+      event.preventDefault();
+      const email = pharmacyEmailInput?.value?.trim();
+      if(!email){
+        const errorMessage = 'Αποτυχία σύνδεσης: συμπλήρωσε email φαρμακείου.';
+        showToast(errorMessage, 'error');
+        setStatusMessage(pharmacyStatusEl, 'Συμπλήρωσε email φαρμακείου.', 'error');
+        return;
+      }
+      if(!supabase){
+        const errorMessage = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
+        showToast(errorMessage, 'error');
+        setStatusMessage(pharmacyStatusEl, missingSupabaseMessage, 'error');
+        return;
+      }
+      setStatusMessage(pharmacyStatusEl, 'Γίνεται αποστολή magic link…', 'info');
+      setButtonLoading(pharmacyEmailButton, true, 'Αποστολή…');
+      try{
+        // Επιλογή Α (ενεργή): Magic Link μέσω Supabase
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: window.location.origin }
+        });
+        // Επιλογή Β (εναλλακτική): Google OAuth μέσω Supabase
+        // const { data, error } = await supabase.auth.signInWithOAuth({
+        //   provider: 'google',
+        //   options: { redirectTo: window.location.origin }
+        // });
+        // if(data?.url){
+        //   window.location.assign(data.url);
+        //   return;
+        // }
+        if(error) throw error;
+        const successMessage = 'Σου στείλαμε email σύνδεσης.';
+        showToast(successMessage, 'success');
+        setStatusMessage(pharmacyStatusEl, successMessage, 'success');
+        if(pharmacyEmailInput){ pharmacyEmailInput.value = ''; }
+      } catch(err){
+        const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
+        showToast(message, 'error');
+        setStatusMessage(pharmacyStatusEl, message, 'error');
+      } finally {
+        setButtonLoading(pharmacyEmailButton, false);
+      }
+    }
+
+    /* Χειριστής για σύνδεση μέσω Google OAuth */
+    async function handlePharmacyGoogleLogin(event){
+      event.preventDefault();
+      if(!supabase){
+        const errorMessage = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
+        showToast(errorMessage, 'error');
+        setStatusMessage(pharmacyStatusEl, missingSupabaseMessage, 'error');
+        return;
+      }
+      setStatusMessage(pharmacyStatusEl, 'Άνοιγμα Google για σύνδεση…', 'info');
+      setButtonLoading(pharmacyGoogleButton, true, 'Σύνδεση…');
+      try{
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin }
+        });
+        if(error) throw error;
+        if(data?.url){
+          window.location.assign(data.url);
+        } else {
+          showToast('Άνοιξε νέο παράθυρο Google για να συνεχίσεις.', 'info');
+        }
+      } catch(err){
+        const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
+        showToast(message, 'error');
+        setStatusMessage(pharmacyStatusEl, message, 'error');
+      } finally {
+        setButtonLoading(pharmacyGoogleButton, false);
+      }
+    }
+
+    if(pharmacyAuthForm){
+      pharmacyAuthForm.addEventListener('submit', handlePharmacyEmailLogin);
+    }
+    if(pharmacyGoogleButton){
+      pharmacyGoogleButton.addEventListener('click', handlePharmacyGoogleLogin);
+    }
+    if(!supabase && pharmacyStatusEl){
+      setStatusMessage(pharmacyStatusEl, missingSupabaseMessage, 'error');
+    }
 
     function getSessionUser(){
       return authSession?.user || null;
@@ -567,6 +766,9 @@
       if(statusEl){
         statusEl.classList.add('hidden');
         statusEl.textContent = '';
+      }
+      if(modal === pharmacyAuthRoot){
+        setStatusMessage(pharmacyStatusEl, '', 'info');
       }
     }
 
@@ -645,8 +847,9 @@
     }
 
     authOpenButtons.forEach(btn => {
-      btn.addEventListener('click', event => {
+      btn.addEventListener('click', async event => {
         event.preventDefault();
+        // Ορίζουμε τον handler ως async ώστε να μπορούμε να καλέσουμε Supabase hooks αν χρειαστεί
         openAuthModal(btn.dataset.authTarget || 'pharmacies');
       });
     });
