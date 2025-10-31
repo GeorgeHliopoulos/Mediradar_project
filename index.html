@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
 
-  <!-- Tailwind CDN -->
+  <!-- Tailwind (dev με CDN). Για production build θα το αλλάξουμε σε PostCSS/CLI. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -79,9 +79,24 @@
     }
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
-    #pending-overlay { transition: opacity .25s ease; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:.25rem .5rem; border-radius:999px; font-size:.75rem; }
+    /* Επιταχύνουμε και κάνουμε πιο έντονη την κίνηση των emoji */
+    @keyframes spinHourglass {
+      0%   { transform: translateY(0) scale(0.95) rotate(0deg); }
+      50%  { transform: translateY(-10px) scale(1.18) rotate(270deg); }
+      100% { transform: translateY(0) scale(0.95) rotate(540deg); }
+    }
+    /* Εφαρμόζουμε γρηγορότερη κίνηση & πιο ζωντανά χρώματα στο animated emoji */
+    .emoji-spinner {
+      animation: spinHourglass 0.6s ease-out infinite;
+      filter: saturate(1.4) brightness(1.1);
+      opacity: 1;
+      display: inline-flex;
+    }
+    /* μικρό, διακριτικό toast για ειδοποιήσεις */
     #push-toast { transition: transform .25s ease, opacity .25s ease; }
     #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
+    .lang-btn { transition: all .2s ease; }
     .lang-btn[data-active="true"] {
       background: linear-gradient(135deg, #29a3a3, #208181);
       color: #fff;
@@ -91,13 +106,10 @@
       background: linear-gradient(135deg, #7edbd9, #4cc2c1);
       color: #062322;
     }
-    .floating-emoji { position:absolute; bottom:-12%; font-size:2.5rem; opacity:0; animation: floatUp 3s ease-in forwards; }
-    @keyframes floatUp { 0%{ transform:translateY(40px) scale(.85); opacity:0; } 15%{ opacity:1; } 70%{ opacity:1; } 100%{ transform:translateY(-120%) scale(1.1); opacity:0; } }
-    #celebration-overlay { transition: opacity .35s ease; opacity:0; }
-    #celebration-overlay.flex { opacity:1; }
-    #celebration-overlay .success-mark.animate-in { animation: successPop .6s ease forwards, successFade .5s ease forwards 2.4s; }
-    @keyframes successPop { to { transform:scale(1); opacity:1; } }
-    @keyframes successFade { to { transform:scale(.92); opacity:0; } }
+    .flag-icon { display:inline-flex; align-items:center; justify-content:center; }
+    .flag-icon svg { width:24px; height:16px; border-radius:2px; box-shadow:0 0 0 1px rgba(15,23,42,.15); }
+    .dark .flag-icon svg { box-shadow:0 0 0 1px rgba(148,163,184,.4); }
+    .barcode-highlight { box-shadow:0 0 0 3px rgba(16,185,129,.45); }
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
@@ -109,30 +121,18 @@
     <span>💚</span>
   </div>
 
-  <!-- Celebration overlay -->
-  <div id="celebration-overlay" class="fixed inset-0 hidden pointer-events-none z-[60] items-center justify-center">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-transparent dark:via-slate-900/60"></div>
-    <div data-emoji-container class="absolute inset-0 overflow-hidden"></div>
-    <div class="relative flex flex-col items-center gap-4 pointer-events-auto" role="status" aria-live="assertive">
-      <div class="success-mark w-28 h-28 rounded-full bg-white/95 dark:bg-slate-900/90 border-4 border-emerald-400/70 shadow-2xl flex items-center justify-center text-emerald-500">
-        <svg viewBox="0 0 48 48" class="w-16 h-16" aria-hidden="true">
-          <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="4" />
-          <path d="M16 24l6 6 12-12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" />
-        </svg>
-      </div>
-      <p id="celebration-message" class="text-lg font-semibold text-slate-700 dark:text-slate-100 drop-shadow">Η αίτηση στάλθηκε!</p>
-    </div>
-  </div>
+  <!-- Confetti -->
+  <canvas id="confetti" class="fixed inset-0 pointer-events-none z-[60]" style="display:none;"></canvas>
 
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
+      <button id="pro-trigger" data-open-pro type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
         <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για φαρμακεία</span>
+        <span id="t-pro">Για επαγγελματίες</span>
       </button>
 
-      <div class="flex items-center gap-2 rounded-2xl glass-surface bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
+      <div class="flex items-center gap-2 rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
         <div class="flex items-center gap-1">
           <button id="lang-el" type="button" class="lang-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 bg-white/60 dark:bg-white/10 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-white/20">
             <span aria-hidden="true" class="flag-icon">
@@ -173,39 +173,19 @@
         <button id="theme-toggle" type="button" class="px-2.5 py-1.5 rounded-xl hover:bg-white dark:hover:bg-white/20">
           <span id="icon-sun" class="hidden">🌞</span><span id="icon-moon">🌙</span>
         </button>
-
-        <div class="hidden h-6 w-px bg-slate-200/80 dark:bg-slate-700/70 sm:block"></div>
-
-        <div class="flex items-center gap-2" data-auth-header>
-          <button type="button" data-auth-open data-auth-target="users" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-white/10 text-sm font-semibold hover:bg-white dark:hover:bg-white/20">
-            <span id="t-signinBTN">Σύνδεση</span>
-          </button>
-          <div data-auth-header-session class="hidden items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/80 dark:bg-white/10 px-2 py-1.5">
-            <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-semibold uppercase shadow-sm"></div>
-            <span data-auth-header-email class="text-sm font-semibold text-slate-700 dark:text-slate-200"></span>
-            <button type="button" data-auth-header-logout class="px-2 py-1 text-xs font-semibold rounded-lg border border-brand-500 text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Pending overlay -->
-  <div id="pending-overlay" class="fixed inset-0 hidden z-[70] items-center justify-center px-4">
-    <div class="w-full max-w-2xl">
-      <div class="relative overflow-hidden rounded-3xl border border-amber-400/70 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white shadow-soft">
-        <div class="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute -left-16 bottom-[-60px] h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="relative flex flex-col items-center gap-6 px-8 py-10 text-center sm:px-10">
-          <div class="grid h-20 w-20 place-items-center rounded-full bg-white/15 text-4xl" aria-hidden="true">⏳</div>
-          <div class="space-y-3">
-            <h3 id="pending-overlay-headline" class="text-2xl font-bold leading-tight sm:text-3xl">Τα φαρμακεία ενημερώθηκαν!</h3>
-            <p id="pending-overlay-message" class="text-sm text-white/90 sm:text-base">Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.</p>
-          </div>
-          <div id="pending-overlay-status" class="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm" role="status" aria-live="polite">
-            <span id="pending-overlay-status-text">Αναμονή απαντήσεων</span>
-            <span id="pending-overlay-elapsed" class="text-white/80">0s</span>
-          </div>
+  <!-- Pending toast -->
+  <div id="pending-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[min(760px,92vw)] pointer-events-none">
+    <div class="pointer-events-auto rounded-2xl p-4 border border-amber-300/70 bg-amber-50 text-amber-900 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 shadow-soft">
+      <div class="flex items-center gap-4">
+        <!-- Προσθέτουμε την κλάση emoji-spinner για πιο ζωηρή, γρήγορη κίνηση -->
+        <div class="text-4xl emoji-spinner">⏳</div>
+        <div class="text-sm sm:text-base">
+          <div id="t-pending">Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…</div>
+          <div class="mt-1 font-semibold opacity-80"><span id="wait-elapsed">0s</span></div>
         </div>
       </div>
     </div>
@@ -245,6 +225,42 @@
       <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
         📲 <span id="t-installBTN">Εγκατάσταση</span>
       </button>
+
+      <div class="sm:hidden mt-4">
+        <button id="pro-trigger-mobile" data-open-pro type="button" class="text-sm underline decoration-2">
+          <span id="t-pro-m">Για επαγγελματίες</span>
+        </button>
+      </div>
+
+      <div class="mt-16 max-w-3xl mx-auto w-full relative sm:min-h-[240px]">
+        <div class="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 backdrop-blur-sm p-6 text-left text-slate-700 dark:text-slate-300 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:left-0">
+          <h2 id="t-faqTitle" class="text-xl font-semibold">Συχνές ερωτήσεις (σύντομα διαθέσιμες)</h2>
+          <p id="t-faqSoon" class="mt-2 text-sm">Ετοιμάζουμε ενότητα FAQ με τις πιο συχνές απορίες σας. Αν έχεις ερώτηση, ενημέρωσέ μας.</p>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-4 items-center text-slate-500 dark:text-slate-400 w-full sm:w-[min(320px,45%)] sm:max-w-sm sm:absolute sm:bottom-0 sm:right-0 sm:items-end sm:text-right">
+          <a id="faq-contact" href="mailto:info@mediradar.gr" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:underline sm:self-end">
+            ✉️ <span id="t-faqContact">Επικοινωνία: info@mediradar.gr</span>
+          </a>
+          <div class="flex flex-col items-center sm:items-end gap-3 text-center sm:text-right">
+            <p id="t-shareTitle" class="text-xs uppercase tracking-[0.32em] text-slate-400 dark:text-slate-500">Μοιράσου το MediRadar</p>
+            <div class="flex items-center gap-3">
+              <a id="share-facebook" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fmediradar.gr" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο Facebook">
+                <span class="sr-only" id="t-shareFacebook">Κοινοποίηση στο Facebook</span>
+                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 22v-8.2h2.7l.4-3.2h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.6V4.2c-.3 0-1.2-.1-2.2-.1c-2.2 0-3.7 1.3-3.7 3.8v2.1H8.8v3.2h2.9V22h1.8Z"/></svg>
+              </a>
+              <a id="share-twitter" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fmediradar.gr" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο X">
+                <span class="sr-only" id="t-shareTwitter">Κοινοποίηση στο X</span>
+                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h4.4l3.2 4.7L15.7 3H20l-6.2 7.2L20 21h-4.4l-3.6-5.1L8.2 21H4l6.5-7.5L4 3Z"/></svg>
+              </a>
+              <a id="share-instagram" href="https://www.instagram.com/" target="_blank" rel="noopener" class="p-2 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-white/80 dark:hover:bg-white/10 transition" aria-label="Κοινοποίηση στο Instagram">
+                <span class="sr-only" id="t-shareInstagram">Κοινοποίηση στο Instagram</span>
+                <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5ZM12 9a3 3 0 1 0 3 3 3 3 0 0 0-3-3Zm6.25-2.75a1 1 0 1 1-1 1a1 1 0 0 1 1-1Z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -260,18 +276,41 @@
     </header>
 
     <section class="grid grid-cols-1 gap-4 sm:gap-5">
-      <!-- City dropdown -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="text-sm font-semibold flex items-center gap-2" for="city">
+      <!-- City -->
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+        <label class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">📍</span>
           <span id="t-city">Πόλη</span>
         </label>
-        <div class="mt-2 relative">
-          <select id="city" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">— Επιλογή πόλης —</option>
-          </select>
-          <div id="ac-city" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
-        </div>
+        <select id="city" required
+                class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
+          <option value="">— Επιλογή —</option>
+          <!-- Μεγάλα αστικά κέντρα + extra -->
+          <option>Αθήνα</option><option>Πειραιάς</option><option>Θεσσαλονίκη</option>
+          <option>Πάτρα</option><option>Ηράκλειο</option><option>Λάρισα</option>
+          <option>Βόλος</option><option>Ιωάννινα</option><option>Χανιά</option>
+          <option>Καλαμάτα</option><option>Καβάλα</option><option>Ξάνθη</option>
+          <option>Κομοτηνή</option><option>Αλεξανδρούπολη</option><option>Σέρρες</option>
+          <option>Τρίκαλα</option><option>Λαμία</option><option>Χαλκίδα</option>
+          <option>Κόρινθος</option><option>Ρόδος</option><option>Μυτιλήνη</option>
+          <option>Ρέθυμνο</option><option>Κέρκυρα</option><option>Χίος</option>
+          <option>Αγρίνιο</option><option>Βέροια</option><option>Δράμα</option>
+          <option>Κατερίνη</option><option>Κοζάνη</option><option>Ναύπλιο</option>
+          <option>Πύργος</option><option>Γλυφάδα</option>
+          <!-- Αττική – δήμοι -->
+          <option>Μαρούσι</option><option>Χαλάνδρι</option><option>Κηφισιά</option>
+          <option>Νέα Ιωνία</option><option>Μεταμόρφωση</option><option>Περιστέρι</option>
+          <option>Αιγάλεω</option><option>Καλλιθέα</option><option>Νέα Σμύρνη</option>
+          <option>Παλαιό Φάληρο</option><option>Άλιμος</option><option>Ιλίου</option>
+          <option>Ζωγράφου</option><option>Γαλάτσι</option><option>Βύρωνας</option>
+          <option>Δάφνη</option><option>Ηλιούπολη</option><option>Νίκαια</option>
+          <option>Κορυδαλλός</option><option>Πετρούπολη</option><option>Αργυρούπολη</option>
+          <option>Ηράκλειο Αττικής</option><option>Νέα Φιλαδέλφεια</option><option>Νέα Χαλκηδόνα</option>
+          <!-- Κρήτη extra -->
+          <option>Σητεία</option><option>Ιεράπετρα</option><option>Άγιος Νικόλαος</option>
+          <!-- Νησιά extra -->
+          <option>Κως</option><option>Σάμος</option><option>Σύρος</option><option>Πάρος</option><option>Νάξος</option>
+        </select>
       </div>
 
       <!-- Medicine -->
@@ -298,7 +337,7 @@
               <p id="t-barcodeHelp" class="text-xs text-slate-500 dark:text-slate-400">Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.</p>
             </div>
             <button id="barcode-start" type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-soft hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
-              <span aria-hidden="true">📸</span>
+              <span aria-hidden="true">🎯</span>
               <span id="t-barcodeStart">Άνοιγμα κάμερας</span>
             </button>
           </div>
@@ -318,6 +357,15 @@
         </div>
 
         <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+          <label class="text-sm font-semibold flex items-center gap-2">
+            <span class="w-6 h-6 grid place-items-center">📦</span>
+            <span id="t-qty">Ποσότητα (τεμάχια/κουτιά)</span>
+          </label>
+          <input id="quantity" type="number" min="1" value="1" required
+                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
+        </div>
+
+        <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
           <label class="text-sm font-semibold flex items-center gap-2">
             <span class="w-6 h-6 grid place-items-center">💊</span>
             <span id="t-type">Τύπος Φαρμάκου</span>
@@ -347,7 +395,7 @@
       </div>
 
       <!-- Substance -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
+      <div class="rounded-2xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
         <label class="text-sm font-semibold flex items-center gap-2">
           <span class="w-6 h-6 grid place-items-center">🧪</span>
           <span id="t-substance">Δραστική Ουσία</span> <span class="text-slate-400 ml-1" id="t-optional">(προαιρετικά)</span>
@@ -387,7 +435,7 @@
       </div>
     </section>
 
-    <!-- Results -->
+    <!-- Results & status flow -->
     <section id="results" class="hidden mt-6">
       <div class="rounded-3xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
         <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -395,6 +443,7 @@
             ← <span id="t-statusHome">Αρχική</span>
           </button>
           <h3 id="t-statusHeading" class="flex-1 text-center text-base sm:text-lg font-semibold">Κατάσταση αιτήματος</h3>
+          <div class="w-10 h-10" aria-hidden="true"></div>
         </div>
         <div class="p-6 space-y-8">
           <div id="results-pending" class="flex flex-col items-center gap-4 text-center py-10">
@@ -412,6 +461,7 @@
               <h4 id="t-statusListTitle" class="text-lg font-semibold">Φαρμακεία με διαθεσιμότητα</h4>
               <p id="t-statusListDesc" class="text-sm text-slate-500 dark:text-slate-400">Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.</p>
             </div>
+            <p id="distance-hint" class="hidden text-xs text-slate-500 dark:text-slate-400"></p>
             <div id="resultsList" class="space-y-3"></div>
           </div>
 
@@ -420,7 +470,6 @@
             <div class="space-y-2">
               <h4 id="status-reserved-name" class="text-2xl sm:text-3xl font-bold tracking-tight">City Pharmacy</h4>
               <p id="status-reserved-address" class="text-sm text-slate-600 dark:text-slate-300">Ιπποκράτους 12, Αθήνα</p>
-              <div id="status-reserved-hours" class="hidden text-xs text-slate-600 dark:text-slate-300 space-y-0.5"></div>
             </div>
             <div class="flex items-baseline gap-3">
               <span id="pickup-timer" class="text-5xl font-extrabold tracking-tight">60:00</span>
@@ -428,14 +477,19 @@
             </div>
             <div id="status-reserved-generic" class="hidden px-3 py-1 rounded-full bg-emerald-100/70 dark:bg-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-200">🧬 <span id="t-statusGenericBadge">Διαθέσιμο γενόσημο</span></div>
             <div class="flex flex-wrap justify-center gap-3">
-              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold flex flex-col items-center leading-tight">
-                <span id="t-statusExtendMain">+15 λεπτά</span>
-                <span id="t-statusExtendNote" class="text-xs font-normal text-emerald-600 dark:text-emerald-200/80">1 φορά/ημέρα</span>
+              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold">
+                <span id="t-statusExtend">+15 λεπτά</span>
               </button>
+              <a id="status-call" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 opacity-60 pointer-events-none" href="#">
+                📞 <span id="t-statusCall">Κλήση</span>
+              </a>
               <a id="status-directions" class="px-4 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 opacity-60 pointer-events-none" href="#" target="_blank" rel="noopener">
                 🧭 <span id="t-statusDirections">Οδηγίες</span>
               </a>
             </div>
+            <p id="extend-note" class="text-xs text-emerald-700 dark:text-emerald-200 text-center max-w-xs sm:max-w-sm mx-auto">
+              Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.
+            </p>
             <button id="status-done" data-go-home type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-sm font-semibold">
               <span id="t-statusBackHome">Επιστροφή στην αρχική</span>
             </button>
@@ -457,264 +511,151 @@
         </div>
       </div>
     </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="mt-16 px-6 pb-16">
-      <div class="max-w-4xl mx-auto rounded-3xl bg-white/85 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft p-6 sm:p-10">
-        <div class="space-y-3 text-center mb-6">
-          <p id="t-faqLabel" class="text-sm font-semibold text-brand-700 dark:text-brand-200 tracking-wide uppercase">FAQ</p>
-          <h2 id="t-faqTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Συχνές ερωτήσεις</h2>
-          <p id="t-faqIntro" class="text-sm sm:text-base text-slate-600 dark:text-slate-300">Βρες γρήγορα απαντήσεις για τη MediRadar.</p>
-        </div>
-        <div class="space-y-4" role="list">
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ1" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Πώς λειτουργεί η αναζήτηση διαθεσιμότητας;
-            </summary>
-            <p id="t-faqA1" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Συμπληρώνεις τα στοιχεία του φαρμάκου και ειδοποιούμε άμεσα τα κοντινά φαρμακεία. Μόλις υπάρξει διαθέσιμη απάντηση, λαμβάνεις ενημέρωση μέσα στην εφαρμογή.</p>
-          </details>
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ2" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Χρειάζεται να δημιουργήσω λογαριασμό;
-            </summary>
-            <p id="t-faqA2" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Μπορείς να ξεκινήσεις ως επισκέπτης. Για δέσμευση φαρμάκου ή παρακολούθηση ιστορικού, μπορείς να συνδεθείς με SMS, email ή SSO.</p>
-          </details>
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ3" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Πώς προστατεύονται τα δεδομένα μου;
-            </summary>
-            <p id="t-faqA3" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Χρησιμοποιούμε τα στοιχεία μόνο για την ολοκλήρωση του αιτήματός σου και εφαρμόζουμε μέτρα ασφαλείας σύμφωνα με τον GDPR. Μπορείς να διαβάσεις περισσότερα στην ενότητα Όροι &amp; GDPR.</p>
-          </details>
-        </div>
-      </div>
-    </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/40 backdrop-blur">
-    <div class="max-w-5xl mx-auto px-6 py-10">
-      <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        <div class="space-y-3">
-          <h3 id="t-footerTitle" class="text-lg font-semibold text-slate-900 dark:text-white">MediRadar</h3>
-          <p id="t-footerDescription" class="text-sm text-slate-600 dark:text-slate-400 max-w-sm">Δες τη διαθεσιμότητα φαρμάκων με λίγα κλικ και ενημερώσου σε πραγματικό χρόνο.</p>
-        </div>
-        <nav class="flex flex-wrap items-center gap-3 text-sm font-semibold text-brand-700 dark:text-brand-200">
-          <a id="t-footerNavFaq" href="#faq" class="hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">FAQ</a>
-          <button id="t-footerNavContact" type="button" data-contact-open class="footer-link hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Επικοινωνία</button>
-          <a id="t-footerNavShare" href="#share" class="hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Κοινοποίηση</a>
-        </nav>
-      </div>
-      <div id="share" class="mt-8">
-        <h4 id="t-shareHeading" class="text-sm font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wide mb-3">Μοιράσου τη MediRadar</h4>
-        <div class="share-buttons flex gap-2 flex-wrap">
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm" data-share-target="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook">
-            <span aria-hidden="true">📘</span><span>Facebook</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm" data-share-target="twitter" href="#" target="_blank" rel="noopener" aria-label="Twitter / X">
-            <span aria-hidden="true">🐦</span><span>Twitter</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm" data-share-target="linkedin" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <span aria-hidden="true">💼</span><span>LinkedIn</span>
-          </a>
-        </div>
-      </div>
-      <p class="mt-10 text-xs text-slate-500 dark:text-slate-400">© <span id="footer-year"></span> MediRadar. <span id="t-footerRights">Όλα τα δικαιώματα διατηρούνται.</span></p>
-    </div>
-  </footer>
-
-  <!-- CONTACT MODAL -->
-  <div id="contact-modal" class="fixed inset-0 z-[85] hidden px-4 items-center justify-center">
-    <div class="absolute inset-0 bg-slate-950/60" data-contact-close></div>
-    <div class="relative w-full max-w-lg mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft p-6 sm:p-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h3 id="t-contactTitle" class="text-xl font-bold text-slate-900 dark:text-white">Επικοινωνία</h3>
-          <p id="t-contactIntro" class="mt-1 text-sm text-slate-600 dark:text-slate-300">Είμαστε εδώ για να βοηθήσουμε με απορίες και συνεργασίες.</p>
-        </div>
-        <button id="contact-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500" data-contact-close aria-label="Κλείσιμο">✕</button>
-      </div>
-      <div class="mt-6 space-y-4 text-sm text-slate-700 dark:text-slate-300">
-        <p id="t-contactGeneral">Στείλε email στο <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="mailto:hello@mediradar.gr">hello@mediradar.gr</a> για γενικές πληροφορίες ή συνεργασίες.</p>
-        <p id="t-contactPrivacy">Για θέματα προστασίας δεδομένων επικοινώνησε στο <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="mailto:privacy@mediradar.gr">privacy@mediradar.gr</a>.</p>
-        <p id="t-contactPhone">Τηλέφωνο υποστήριξης: <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="tel:+302101234567">+30 210 123 4567</a> (Δευτέρα–Παρασκευή 09:00-17:00).</p>
-      </div>
-      <div class="mt-6 flex flex-wrap gap-3" role="list">
-        <a href="https://maps.app.goo.gl/" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" target="_blank" rel="noopener" role="listitem">
-          📍 <span id="t-contactLocation">Έδρα MediRadar</span>
-        </a>
-        <a href="https://www.linkedin.com/company/" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" target="_blank" rel="noopener" role="listitem">
-          💼 <span id="t-contactLinkedIn">LinkedIn</span>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- RESULTS DRAWER -->
-  <div id="results-modal" class="fixed inset-0 hidden z-[80] items-center justify-center md:items-end">
-    <div class="absolute inset-0 bg-slate-950/50" data-results-close="true"></div>
-    <div class="relative w-full max-w-3xl md:w-[min(720px,92vw)] mx-auto md:mb-6 rounded-3xl md:rounded-t-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft max-h-[92svh] overflow-hidden flex flex-col">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h3 id="results-modal-title" class="text-lg font-bold">Διαθέσιμα φαρμακεία</h3>
-          <p id="results-modal-subtitle" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Επίλεξε φαρμακείο για παραλαβή.</p>
-        </div>
-        <button id="results-modal-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span class="sr-only">Κλείσιμο</span>✕
-        </button>
-      </div>
-      <div id="results-location-alert" class="hidden px-5 py-3 text-sm flex items-center gap-2 border-b border-slate-200 dark:border-slate-800" aria-live="polite">
-        <span aria-hidden="true">📍</span>
-        <span id="results-location-text">Υπολογίζουμε αποστάσεις…</span>
-      </div>
-      <div id="results-modal-body" class="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-        <div id="results-loading" class="flex items-center justify-center py-8 text-sm text-slate-500 dark:text-slate-400">
-          <span id="results-loading-text">Φόρτωση…</span>
-        </div>
-        <div id="results-empty-modal" class="hidden text-center py-8 text-sm text-slate-500 dark:text-slate-400">
-          <p id="results-empty-text">Δεν υπάρχουν διαθέσιμα φαρμακεία αυτή τη στιγμή.</p>
-        </div>
-        <div id="results-error" class="hidden text-center py-8 text-sm text-rose-500">
-          <p id="results-error-text">Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.</p>
-        </div>
-        <div id="results-modal-list" class="space-y-4" role="list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- USER AUTH MODAL -->
-  <div data-auth-modal="users" id="auth-modal-users" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-user-title">
-    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
-    <div class="relative w-full max-w-xl mx-auto">
-      <div class="relative overflow-hidden rounded-3xl glass-surface border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
-          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
-        </div>
-        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
-        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="users">
-          <div class="flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
-              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
-                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
-              </svg>
-            </div>
-            <div class="space-y-2">
-              <h2 id="auth-user-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Σύνδεση στην πλατφόρμα MediRadar</h2>
-              <p id="auth-user-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνέχισε με magic link ή Google για να προχωρήσεις στη δέσμευση.</p>
-            </div>
+  <!-- PRO PORTAL MODAL -->
+  <div id="pro-modal" class="fixed inset-0 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm px-4 py-6 z-[70]">
+    <div class="relative w-full max-w-3xl max-h-[90svh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft p-6 sm:p-8">
+      <button id="pro-close" type="button" class="absolute top-4 right-4 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Κλείσιμο">✕</button>
+      <div class="space-y-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div class="space-y-1">
+            <h2 id="t-proModalTitle" class="text-2xl font-bold">Πρόσβαση φαρμακείων</h2>
+            <p id="t-proModalSubtitle" class="text-sm text-slate-600 dark:text-slate-400">Συνδέσου ή καταχώρησε το φαρμακείο σου για να απαντάς σε αιτήματα διαθεσιμότητας.</p>
           </div>
-          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
-          <div data-auth-forms class="space-y-5">
-            <form data-auth-form="users" class="space-y-4" novalidate>
-              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <span id="auth-users-email-label">Email</span>
-                <input id="auth-users-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
-              </label>
-              <button type="submit" id="auth-users-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
-              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
-                <span id="auth-users-google-cta">Σύνδεση με Google</span>
+        </div>
+
+        <div class="flex items-center gap-1 rounded-2xl bg-slate-100/80 dark:bg-white/5 p-1">
+          <button id="pro-tab-signin" type="button" class="flex-1 rounded-2xl px-4 py-2 text-sm font-semibold bg-white dark:bg-slate-800 shadow-soft" aria-selected="true">
+            <span id="t-proSigninTab">Σύνδεση</span>
+          </button>
+          <button id="pro-tab-register" type="button" class="flex-1 rounded-2xl px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200" aria-selected="false">
+            <span id="t-proRegisterTab">Εγγραφή</span>
+          </button>
+        </div>
+
+        <div id="pro-view-signin" class="space-y-5">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proSigninEmailLabel">Email φαρμακείου</span>
+              <input id="pro-signin-email" type="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proSigninPasswordLabel">Κωδικός πρόσβασης</span>
+              <input id="pro-signin-password" type="password" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="••••••••">
+            </label>
+          </div>
+          <button id="pro-signin-submit" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700" type="button">
+            <span id="t-proSigninSubmit">Σύνδεση</span>
+          </button>
+          <button id="pro-forgot" type="button" class="text-sm underline text-slate-600 dark:text-slate-300 hover:opacity-80 w-fit">
+            <span id="t-proForgot">Ξέχασες τον κωδικό;</span>
+          </button>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+              <span id="t-proSSO">Ή συνέχισε με</span>
+              <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-3">
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Google">
+                <span aria-hidden="true">🟢</span> Google
               </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
-            </form>
-          </div>
-          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
-            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
-            <p id="auth-user-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
-          </div>
-          <div data-auth-session class="hidden">
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
-              <div class="flex items-center gap-3">
-                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
-                <div class="text-left">
-                  <p id="auth-session-welcome" class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
-                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
-                </div>
-              </div>
-              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
-            </div>
-          </div>
-          <p id="auth-user-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PHARMACY AUTH MODAL -->
-  <div data-auth-modal="pharmacies" id="auth-modal-pharmacies" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-pharm-title">
-    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
-    <div class="relative w-full max-w-xl mx-auto">
-      <div class="relative overflow-hidden rounded-3xl glass-surface border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
-          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
-        </div>
-        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
-        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="pharmacies">
-          <div class="flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
-              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
-                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
-              </svg>
-            </div>
-            <div class="space-y-2">
-              <h2 id="auth-pharm-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Πρόσβαση Φαρμακείων</h2>
-              <p id="auth-pharm-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνδέσου ή εγγράψου στο MediRadar Pro για να απαντάς σε αιτήματα διαθεσιμότητας.</p>
-            </div>
-          </div>
-          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
-          <div data-auth-forms class="space-y-5">
-            <form data-auth-form="pharmacies" class="space-y-4" novalidate>
-              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <span id="auth-pharm-email-label">Email φαρμακείου</span>
-                <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
-              </label>
-              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
-              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
-                <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Microsoft">
+                <span aria-hidden="true">🪟</span> Microsoft
               </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
-            </form>
-          </div>
-          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
-            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
-            <p id="auth-pharm-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
-          </div>
-          <div data-auth-session class="hidden">
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
-              <div class="flex items-center gap-3">
-                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
-                <div class="text-left">
-                  <p class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
-                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
-                </div>
-              </div>
-              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Apple">
+                <span aria-hidden="true">🍎</span> Apple
+              </button>
             </div>
           </div>
-          <p id="auth-pharm-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
-          <button type="button" id="auth-pro-info-link" data-pro-info-toggle aria-expanded="false" class="mx-auto block text-xs font-semibold text-brand-700 underline decoration-dotted underline-offset-4 hover:text-brand-600 dark:text-brand-200 dark:hover:text-brand-100">Μάθετε περισσότερα για το MediRadar Pro</button>
-          <div data-pro-info-panel class="pro-info-panel glass-surface hidden text-left text-sm text-slate-700 dark:text-slate-200" role="region" aria-label="Πληροφορίες MediRadar Pro">
-            <h3>Γιατί να επιλέξετε το MediRadar Pro</h3>
-            <p>Το MediRadar Pro προσφέρει στους φαρμακοποιούς ένα εύχρηστο και γρήγορο σύστημα για να απαντούν άμεσα στα αιτήματα διαθεσιμότητας φαρμάκων των πελατών τους, χωρίς τηλεφωνήματα και καθυστερήσεις.</p>
-            <p>Με τη συνδρομή Pro:</p>
-            <ul>
-              <li><span aria-hidden="true">📱</span><span>Εξυπηρετείτε τους πελάτες σας σε πραγματικό χρόνο.</span></li>
-              <li><span aria-hidden="true">💬</span><span>Μειώνετε τα τηλεφωνήματα και την απασχόληση του προσωπικού.</span></li>
-              <li><span aria-hidden="true">⚡</span><span>Κερδίζετε νέους πελάτες που βλέπουν τη διαθεσιμότητά σας άμεσα.</span></li>
-              <li><span aria-hidden="true">💶</span><span>Εξοικονομείτε χρόνο και αυξάνετε τα κέρδη από γρήγορες πωλήσεις.</span></li>
-              <li><span aria-hidden="true">☁️</span><span>Δεν χρειάζεται εγκατάσταση — λειτουργεί 100% μέσω cloud.</span></li>
-            </ul>
-            <p>Η ετήσια συνδρομή ανέρχεται σε μόλις <b>€365/έτος</b> — λιγότερο από €1 την ημέρα, για να ενισχύσετε την εξυπηρέτηση και την εικόνα του φαρμακείου σας.</p>
-            <p><em>Επιλέξτε MediRadar Pro και κάντε το φαρμακείο σας μέρος της νέας ψηφιακής εποχής.</em></p>
+
+        </div>
+
+        <div id="pro-view-register" class="space-y-5 hidden">
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+              <span id="t-proSSO2">Ή συνέχισε με</span>
+              <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-3">
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Google">
+                <span aria-hidden="true">🟢</span> Google
+              </button>
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Microsoft">
+                <span aria-hidden="true">🪟</span> Microsoft
+              </button>
+              <button class="pro-sso-btn px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2" type="button" data-provider="Apple">
+                <span aria-hidden="true">🍎</span> Apple
+              </button>
+            </div>
           </div>
+
+          <div>
+            <h3 id="t-proRegisterHeading" class="text-lg font-semibold">Στοιχεία φαρμακείου</h3>
+            <p id="t-proRegisterDesc" class="mt-1 text-sm text-slate-600 dark:text-slate-400">Συμπλήρωσε τα στοιχεία του φαρμακείου για να ξεκινήσεις.</p>
+          </div>
+
+          <form id="pro-register-form" class="grid gap-4 sm:grid-cols-2">
+            <label class="text-sm font-semibold flex flex-col gap-2 sm:col-span-2">
+              <span id="t-proFieldBusinessName">Επωνυμία φαρμακείου</span>
+              <input id="pro-field-business" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Φαρμακείο Κεντρικής Πλατείας">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldVat">ΑΦΜ</span>
+              <input id="pro-field-vat" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="123456789">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldRegistrationNumber">Αριθμός άδειας</span>
+              <input id="pro-field-license" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="12345">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldContact">Υπεύθυνος επικοινωνίας</span>
+              <input id="pro-field-contact" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Μαρία Παπαδοπούλου">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldEmail">Email επικοινωνίας</span>
+              <input id="pro-field-email" type="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldPhone">Τηλέφωνο</span>
+              <input id="pro-field-phone" type="tel" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="2101234567">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2 sm:col-span-2">
+              <span id="t-proFieldAddress">Διεύθυνση</span>
+              <input id="pro-field-address" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Ιπποκράτους 12">
+            </label>
+            <label class="text-sm font-semibold flex flex-col gap-2">
+              <span id="t-proFieldCity">Πόλη</span>
+              <input id="pro-field-city" type="text" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="Αθήνα">
+            </label>
+            <div class="sm:col-span-2">
+              <button id="pro-register-submit" type="submit" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-brand-600 text-white font-semibold shadow-soft hover:bg-brand-700">
+                <span id="t-proRegisterSubmit">Αίτηση εγγραφής</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="text-sm text-slate-600 dark:text-slate-300">
+            <span id="t-proHaveAccount">Έχεις ήδη λογαριασμό;</span>
+            <button id="t-proGoSignin" data-pro-switch="signin" type="button" class="ml-1 font-semibold underline decoration-2">Σύνδεση</button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <button id="pro-back-home" type="button" data-go-home data-close-pro="true" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
+            <span aria-hidden="true">←</span>
+            <span id="t-proBackHome">Επιστροφή στην αρχική</span>
+          </button>
+          <p class="text-xs text-slate-500 dark:text-slate-400">MediRadar ©</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- HOW MODAL -->
+  <!-- HOW -->
   <div id="modal-how" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
     <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -787,518 +728,52 @@
     </div>
   </div>
 
-  <!-- env.js (ορίζεις SUPABASE_URL, SUPABASE_ANON_KEY) -->
-  <script src="./env.js"></script>
+  <!-- BARCODE MODAL -->
+  <div id="barcode-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-6 z-[70]">
+    <div class="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 id="t-barcodeModalTitle" class="text-lg font-bold">Σάρωση barcode</h3>
+        <button id="barcode-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Κλείσιμο">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div id="barcode-status" class="text-sm text-slate-600 dark:text-slate-300">Στόχευσε τον γραμμωτό κωδικό μέσα στο πλαίσιο.</div>
+        <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black">
+          <video id="barcode-video" class="w-full aspect-video" autoplay muted playsinline></video>
+        </div>
+        <div class="flex justify-end">
+          <button id="barcode-stop" type="button" class="hidden px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
+            <span id="t-barcodeStop">Διακοπή</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ENV (INLINE — χωρίς /env.js) ===== -->
+  <script>
+    window.ENV = window.ENV || {
+      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
+      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk',
+      VAPID_PUBLIC_KEY: 'BGS8pCF76A6Es7XAu3hcTAEE8vcRDl1JlWQ7Hym7m5WK63gIHqbuuSJl_xfC4l7729H5ClVqysTjnShnJwviHgo'
+    };
+  </script>
+
+  <!-- Supabase client -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
+    if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+      console.error('Missing Supabase ENV');
+    }
+    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase ready:', !!window.supabase);
+  </script>
 
   <!-- App JS -->
   <script>
-  // ==========================
-  //  GLOBAL STATE
-  // ==========================
-  const state = {
-    lang: localStorage.getItem('mediradar-lang') || 'el',
-    currentRequestId: null,
-    pollingTimer: null,
-    pollingStartedAt: null,
-    lastResponses: [],
-    reservation: {
-      active: false,
-      expiresAt: null,
-      extendUsed: false,
-      pharmacy: null
-    },
-    user: {
-      email: null,
-      role: null   // 'user' ή 'pharmacy'
-    },
-    cities: [],
-    supabase: null,
-    pendingSeconds: 0,
-    pendingInterval: null,
-    deferredPrompt: null
-  };
-
-  // ==========================
-  //  i18n STRINGS
-  // ==========================
-  const strings = {
-    el: {
-      't-pro':'Για φαρμακεία',
-      't-langElLabel':'Ελληνικά',
-      't-langEnLabel':'Αγγλικά',
-      't-signinBTN':'Σύνδεση',
-      't-hero':'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
-      't-searchBTN':'Αναζήτηση Φαρμάκου',
-      't-howBTN':'Πώς λειτουργεί',
-      't-installBTN':'Εγκατάσταση',
-      't-home':'Αρχική',
-      't-searchTitle':'Αναζήτηση Φαρμάκου',
-      't-city':'Πόλη',
-      't-medname':'Όνομα Φαρμάκου',
-      't-formatTip':'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
-      't-barcodeTitle':'Σάρωση barcode συνταγής ή κουτιού',
-      't-barcodeOptional':'(προαιρετικά)',
-      't-barcodeHelp':'Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.',
-      't-barcodeStart':'Άνοιγμα κάμερας',
-      't-qty':'Ποσότητα (τεμάχια/κουτιά)',
-      't-type':'Τύπος Φαρμάκου',
-      't-substance':'Δραστική Ουσία',
-      't-optional':'(προαιρετικά)',
-      't-doseEx':'Παράδειγμα δοσολογίας: Paracetamol 500mg.',
-      't-genericQ':'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
-      't-yes':'ΝΑΙ',
-      't-no':'ΟΧΙ',
-      't-accept':'Αποδέχομαι τους',
-      't-gdprLink':'Όρους Αναζήτησης & GDPR',
-      't-submit':'Υποβολή Αναζήτησης',
-      't-statusHome':'Αρχική',
-      't-statusHeading':'Κατάσταση αιτήματος',
-      't-statusPendingTitle':'Αναζητούμε το φαρμακό σου…',
-      't-statusPendingDesc':'Θα ειδοποιηθείς μόλις απαντήσει ένα φαρμακείο.',
-      't-statusListTitle':'Φαρμακεία με διαθεσιμότητα',
-      't-statusListDesc':'Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.',
-      't-statusReservedTitle':'Το φαρμακείο σε περιμένει',
-      't-statusReservedHint':'Χρόνος κράτησης',
-      't-statusGenericBadge':'Διαθέσιμο γενόσημο',
-      't-statusExtendMain':'+15 λεπτά',
-      't-statusExtendNote':'1 φορά/ημέρα',
-      't-statusDirections':'Οδηγίες',
-      't-statusBackHome':'Επιστροφή στην αρχική',
-      't-statusEmptyTitle':'Δεν βρέθηκαν φαρμακεία',
-      't-statusEmptyBody':'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
-      't-statusEmptyCta':'Δοκίμασε ξανά',
-      't-newSearch':'Νέα αναζήτηση',
-      't-faqLabel':'FAQ',
-      't-faqTitle':'Συχνές ερωτήσεις',
-      't-faqIntro':'Βρες γρήγορα απαντήσεις για τη MediRadar.',
-      't-faqQ1':'Πώς λειτουργεί η αναζήτηση διαθεσιμότητας;',
-      't-faqA1':'Συμπληρώνεις τα στοιχεία του φαρμάκου και ειδοποιούμε άμεσα τα κοντινά φαρμακεία. Μόλις υπάρξει διαθέσιμη απάντηση, λαμβάνεις ενημέρωση μέσα στην εφαρμογή.',
-      't-faqQ2':'Χρειάζεται να δημιουργήσω λογαριασμό;',
-      't-faqA2':'Μπορείς να ξεκινήσεις ως επισκέπτης. Για δέσμευση φαρμάκου ή παρακολούθηση ιστορικού, μπορείς να συνδεθείς με SMS, email ή SSO.',
-      't-faqQ3':'Πώς προστατεύονται τα δεδομένα μου;',
-      't-faqA3':'Χρησιμοποιούμε τα στοιχεία μόνο για την ολοκλήρωση του αιτήματός σου και εφαρμόζουμε μέτρα ασφαλείας σύμφωνα με τον GDPR. Μπορείς να διαβάσεις περισσότερα στην ενότητα Όροι & GDPR.',
-      't-footerTitle':'MediRadar',
-      't-footerDescription':'Δες τη διαθεσιμότητα φαρμάκων με λίγα κλικ και ενημερώσου σε πραγματικό χρόνο.',
-      't-footerNavFaq':'FAQ',
-      't-footerNavContact':'Επικοινωνία',
-      't-footerNavShare':'Κοινοποίηση',
-      't-shareHeading':'Μοιράσου τη MediRadar',
-      't-footerRights':'Όλα τα δικαιώματα διατηρούνται.',
-      't-contactTitle':'Επικοινωνία',
-      't-contactIntro':'Είμαστε εδώ για να βοηθήσουμε με απορίες και συνεργασίες.',
-      't-contactGeneral':'Στείλε email στο hello@mediradar.gr για γενικές πληροφορίες ή συνεργασίες.',
-      't-contactPrivacy':'Για θέματα προστασίας δεδομένων επικοινώνησε στο privacy@mediradar.gr.',
-      't-contactPhone':'Τηλέφωνο υποστήριξης: +30 210 123 4567 (Δευτέρα–Παρασκευή 09:00-17:00).',
-      't-contactLocation':'Έδρα MediRadar',
-      't-contactLinkedIn':'LinkedIn',
-      't-howTitle':'Πώς λειτουργεί το MediRadar',
-      't-continue':'Συνέχεια',
-      't-gdprTitle':'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης',
-      't-gdprAccept':'OK',
-      't-barcodeModalTitle':'Σάρωση barcode',
-      't-barcodeStop':'Διακοπή',
-      't-pushText':'🔔 Θες να λαμβάνεις ειδοποίηση όταν απαντά ένα φαρμακείο;',
-      't-pushNo':'Όχι τώρα',
-      't-pushYes':'Ενεργοποίηση',
-      'pending-overlay-headline':'Τα φαρμακεία ενημερώθηκαν!',
-      'pending-overlay-message':'Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.',
-      'pending-overlay-status-text':'Αναμονή απαντήσεων',
-      'how-body':`
-1️⃣ Συμπληρώνεις πόλη και φάρμακο
-2️⃣ Ειδοποιούμε άμεσα τα φαρμακεία που είναι κοντά σου
-3️⃣ Μόλις κάποιο απαντήσει, το βλέπεις στην οθόνη «Κατάσταση αιτήματος»
-4️⃣ Επιλέγεις φαρμακείο → κρατά το φάρμακο για 60’ να πας να το πάρεις
-5️⃣ Έχεις και +15’ παράταση μία φορά/ημέρα
-
-▶️ Η υπηρεσία για τον πολίτη είναι δωρεάν.
-▶️ Τα φαρμακεία το χρησιμοποιούν για να απαντούν χωρίς τηλέφωνα.
-`,
-      'gdpr-body':`
-Χρησιμοποιούμε τα στοιχεία που καταχωρείς (πόλη, όνομα φαρμάκου, προαιρετικό email) αποκλειστικά για να ειδοποιήσουμε φαρμακεία και να σου εμφανίσουμε τις απαντήσεις τους. Τα δεδομένα αποθηκεύονται με ασφαλή τρόπο σε υποδομή cloud (Supabase) και δεν διαβιβάζονται σε τρίτους εκτός από τα φαρμακεία που απαντούν στο αίτημά σου.
-
-Με την υποβολή αίτησης:
-• αποδέχεσαι ότι τα στοιχεία θα διαβιβαστούν στα φαρμακεία που θα απαντήσουν
-• αποδέχεσαι ότι αν δεσμεύσεις φαρμακείο, θα κρατήσει το φάρμακο για 60’ με βάση τη διαθεσιμότητα
-• μπορείς να ζητήσεις διαγραφή των δεδομένων σου στέλνοντας email στο privacy@mediradar.gr
-
-Για κάθε απορία, επικοινώνησε μαζί μας.
-`
-    },
-    en: {
-      't-pro':'For pharmacies',
-      't-langElLabel':'Greek',
-      't-langEnLabel':'English',
-      't-signinBTN':'Sign in',
-      't-hero':'Instantly check medicine availability in nearby pharmacies.',
-      't-searchBTN':'Find Medicine',
-      't-howBTN':'How it works',
-      't-installBTN':'Install',
-      't-home':'Home',
-      't-searchTitle':'Medicine search',
-      't-city':'City',
-      't-medname':'Medicine name',
-      't-formatTip':'Tip: Brand + dosage (e.g. “500mg”).',
-      't-barcodeTitle':'Scan prescription/box barcode',
-      't-barcodeOptional':'(optional)',
-      't-barcodeHelp':'Scan the barcode to auto-fill.',
-      't-barcodeStart':'Open camera',
-      't-qty':'Quantity (packs)',
-      't-type':'Medicine type',
-      't-substance':'Active substance',
-      't-optional':'(optional)',
-      't-doseEx':'Example dosage: Paracetamol 500mg.',
-      't-genericQ':'If this exact brand is not available, allow an equivalent (generic)?',
-      't-yes':'YES',
-      't-no':'NO',
-      't-accept':'I accept the',
-      't-gdprLink':'Search Terms & GDPR',
-      't-submit':'Send request',
-      't-statusHome':'Home',
-      't-statusHeading':'Request status',
-      't-statusPendingTitle':'We are contacting pharmacies…',
-      't-statusPendingDesc':'You will be notified as soon as a pharmacy responds.',
-      't-statusListTitle':'Pharmacies with availability',
-      't-statusListDesc':'Pick the pharmacy that suits you best.',
-      't-statusReservedTitle':'The pharmacy is waiting for you',
-      't-statusReservedHint':'Reservation time',
-      't-statusGenericBadge':'Generic available',
-      't-statusExtendMain':'+15 minutes',
-      't-statusExtendNote':'1 time/day',
-      't-statusDirections':'Directions',
-      't-statusBackHome':'Back to home',
-      't-statusEmptyTitle':'No pharmacies found',
-      't-statusEmptyBody':'We couldn’t find available pharmacies right now. Try again later or change your search details.',
-      't-statusEmptyCta':'Try again',
-      't-newSearch':'New search',
-      't-faqLabel':'FAQ',
-      't-faqTitle':'Frequently asked questions',
-      't-faqIntro':'Quick answers about MediRadar.',
-      't-faqQ1':'How does availability search work?',
-      't-faqA1':'You fill the medicine details and we notify nearby pharmacies. As soon as there is an answer, you see it in the app.',
-      't-faqQ2':'Do I need an account?',
-      't-faqA2':'You can start as a guest. For reservation or history, sign in with Email / SMS / SSO.',
-      't-faqQ3':'How is my data protected?',
-      't-faqA3':'We use your data only to complete your request and we apply GDPR measures.',
-      't-footerTitle':'MediRadar',
-      't-footerDescription':'Check medicine availability in a few clicks and get real-time updates.',
-      't-footerNavFaq':'FAQ',
-      't-footerNavContact':'Contact',
-      't-footerNavShare':'Share',
-      't-shareHeading':'Share MediRadar',
-      't-footerRights':'All rights reserved.',
-      't-contactTitle':'Contact',
-      't-contactIntro':'We’re here for questions and partnerships.',
-      't-contactGeneral':'Send an email to hello@mediradar.gr for general info or partnerships.',
-      't-contactPrivacy':'For privacy/GDPR please contact privacy@mediradar.gr.',
-      't-contactPhone':'Support phone: +30 210 123 4567 (Mon–Fri 09:00-17:00).',
-      't-contactLocation':'MediRadar HQ',
-      't-contactLinkedIn':'LinkedIn',
-      't-howTitle':'How MediRadar works',
-      't-continue':'Continue',
-      't-gdprTitle':'Data Protection Policy & Search Terms',
-      't-gdprAccept':'OK',
-      't-barcodeModalTitle':'Barcode scan',
-      't-barcodeStop':'Stop',
-      't-pushText':'🔔 Do you want a notification when a pharmacy responds?',
-      't-pushNo':'Not now',
-      't-pushYes':'Enable',
-      'pending-overlay-headline':'Pharmacies have been notified!',
-      'pending-overlay-message':'They are checking their stock and will reply shortly.',
-      'pending-overlay-status-text':'Waiting for responses',
-      'how-body':`
-1️⃣ Fill city and medicine
-2️⃣ We instantly ping nearby pharmacies
-3️⃣ When one of them responds, you see it in “Request status”
-4️⃣ Choose pharmacy → it reserves the medicine for 60’
-5️⃣ You may extend by +15’ once/day
-
-▶️ Free for citizens.
-▶️ Pharmacies use it to answer without phone calls.
-`,
-      'gdpr-body':`
-We use the details you submit (city, medicine, optional email) only to notify pharmacies and to show you their answers. Data is stored securely in cloud infrastructure (Supabase) and is not shared with third parties apart from the pharmacies that respond.
-
-By submitting a request:
-• you accept that the data will be sent to responding pharmacies
-• you accept that if you reserve a pharmacy, it will keep the medicine for 60’
-• you can request deletion at privacy@mediradar.gr
-`
-    }
-  };
-
-  // ==========================
-  //  CITY LIST
-  // ==========================
-  const citySuggestions = (() => {
-    const raw = `
-Άγιοι Θεόδωροι
-Άγιος Αθανάσιος
-Άγιος Νικόλαος
-Άγιος Νικόλαος Κρήτης
-Άγιος Στέφανος
-Άνδρος
-Άνοιξη
-Άρτα
-Αγία Βαρβάρα
-Αγία Μαρίνα Κορωπίου
-Αγία Μαρίνα Λέρου
-Αγία Μαρίνα Χανίων
-Αγία Παρασκευή
-Αγία Παρασκευή (Θεσσαλονίκης)
-Αγία Παρασκευή (Λέσβου)
-Αγία Τριάδα
-Αγιά
-Αγιάσος
-Αγιοι Ανάργυροι
-Αγρίνιο
-Αθήνα
-Αίγιο
-Αιγάλεω
-Αλεξανδρούπολη
-Αλμυρός
-Αμαλιάδα
-Αμπελώνας
-Αμύνταιο
-Αμφίκλεια
-Αντίκυρα
-Αρκαλοχώρι
-Αρμένοι
-Αρτέμιδα
-Αρχάνες
-Αχαΐα
-Αχαρνές
-Βάρη
-Βαρθολομιό
-Βασιλικά
-Βασιλικό Ευβοίας
-Βέλο
-Βέροια
-Βελβεντός
-Βόλος
-Βόρεια Κυνουρία
-Βούλα
-Βουλιαγμένη
-Βραχάτι
-Βραχνέικα
-Βριλήσσια
-Γαλάτσι
-Γαλατάς
-Γαργαλιάνοι
-Γαστούνη
-Γαύδος
-Γιαννιτσά
-Γλυφάδα
-Γούμενισσα
-Γρεβενά
-Δελβινάκι
-Δεσκάτη
-Διόνυσος
-Δομοκός
-Δράμα
-Δραπετσώνα
-Έδεσσα
-Εκάλη
-Ελασσόνα
-Ελευθερούπολη
-Ερυθρές
-Ζάκυνθος
-Ζάρακες
-Ζαρός
-Ζεφύρι
-Ζίτσα
-Ζωγράφου
-Ηγουμενίτσα
-Ηλιούπολη
-Ηράκλειο
-Ηράκλειο Αττικής
-Θάσος
-Θέρμη
-Θερμοπύλες
-Θεσσαλονίκη
-Θήβα
-Θήρα
-Ίλιον
-Ιεράπετρα
-Ιερισσός
-Ικαρία
-Ιστιαία
-Ιωάννινα
-Κάλυμνος
-Κάτω Αχαΐα
-Καβάλα
-Καλαβρύτα
-Καλαμάτα
-Καλαμπάκα
-Καλλιθέα
-Καμένα Βούρλα
-Καναλλάκι
-Καρδίτσα
-Καρλόβασι
-Καρπενήσι
-Καστέλλι
-Καστοριά
-Καστρί
-Κατερίνη
-Κέρκυρα
-Κεραμωτή
-Κερατέα
-Κερατσίνι
-Κηφισιά
-Κίσσαμος
-Κιλκίς
-Κόνιτσα
-Κόρινθος
-Κοζάνη
-Κοκκινιά
-Κομοτηνή
-Κορυδαλλός
-Κορωπί
-Κρανίδι
-Κρανιά
-Κρεμαστή
-Κρυονέρι
-Κρωπία
-Κύμη
-Κυπαρισσία
-Κως
-Λάρισα
-Λαγκαδάς
-Λαμία
-Λειβαθώ
-Λεπτοκαρυά
-Λευκάδα
-Λήμνος
-Λιβαδειά
-Λιτόχωρο
-Λουτρά Εδέσσης
-Λουτράκι
-Λυκόβρυση
-Μακρακώμη
-Μαλεβίζι
-Μαντούδι
-Μαραθώνας
-Μαρκόπουλο Μεσογαίας
-Μαρούσι
-Μεγαλόπολη
-Μεγανήσι
-Μεθώνη
-Μελίσσια
-Μενεμένη
-Μενίδι
-Μεσολόγγι
-Μεσσήνη
-Μεταμόρφωση
-Μήλος
-Μολάοι
-Μοσχάτο
-Μουζάκι
-Μύτικας
-Μυκόνος
-Μυρίνα
-Μυτιλήνη
-Νάξος
-Νάουσα
-Ναύπλιο
-Νέα Αγχίαλος
-Νέα Αρτάκη
-Νέα Ερυθραία
-Νέα Ιωνία
-Νέα Ιωνία Μαγνησίας
-Νέα Καλλικράτεια
-Νέα Μάκρη
-Νέα Μουδανιά
-Νέα Πέραμος
-Νέα Σμύρνη
-Νέα Φιλαδέλφεια
-Νέα Χαλκηδόνα
-Νεάπολη
-Νεάπολη Λακωνίας
-Νεοχώρι
-Νεράιδα
-Νεστόριο
-Νησί
-Νίκαια
-Νικήτη
-Νότια Κυνουρία
-Νυδρί
-Ξάνθη
-Ξυλόκαστρο
-Οινόφυτα
-Ορεστιάδα
-Πάργα
-Πάρος
-Πάτρα
-Παλαιό Φάληρο
-Παλαιόχωρα
-Παλλήνη
-Παναγιά
-Παπάγου
-Παραμυθιά
-Πειραιά
-Πειραιάς
-Πεντέλη
-Περιστέρι
-Πετρούπολη
-Πεύκη
-Πικέρμι
-Πλαταμώνας
-Πόρος
-Πόρτο Ράφτη
-Πολύγυρος
-Πολύκαστρο
-Πρέβεζα
-Πτολεμαΐδα
-Πύλος
-Πύργος
-Ραφήνα
-Ρέθυμνο
-Ρόδος
-Σάμος
-Σαλαμίνα
-Σαντορίνη
-Σέρβια
-Σέρρες
-Σητεία
-Σίνδος
-Σιάτιστα
-Σιδηρόκαστρο
-Σκιάθος
-Σκόπελος
-Σκύδρα
-Σούδα
-Σπάρτη
-Σπάτα
-Σταμάτα
-Στυλίδα
-Σύρος
-Ταύρος
-Τήνος
-Τρίκαλα
-Τρίπολη
-Τυμπάκι
-Φαιστός
-Φιλιατρά
-Φιλιππιάδα
-Φιλοθέη
-Φλώρινα
-Χαϊδάρι
-Χαλκίδα
-Χανιά
-Χερσόνησος
-Χίος
-Χολαργός
-Χώρα Μεσσηνίας
-Ψυχικό
-Ωραιόκαστρο`;
-    return Array.from(new Set(raw.split('\n').map(v=>v.trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'el',{sensitivity:'base'}));
-  })();
-
-  // ==========================
-  //  INIT
-  // ==========================
-  document.addEventListener('DOMContentLoaded', async () => {
-    // theme
+    /* ========== Theme ========== */
     const html = document.documentElement;
+    const bodyEl = document.body;
     const themeBtn = document.getElementById('theme-toggle');
     const iconSun = document.getElementById('icon-sun');
     const iconMoon = document.getElementById('icon-moon');
@@ -1311,16 +786,243 @@ By submitting a request:
       localStorage.setItem('mediradar-theme', dark?'dark':'light');
     }
 
-    // fill footer year
-    const fy = document.getElementById('footer-year');
-    if (fy) fy.textContent = new Date().getFullYear();
-
-    // Lang buttons
-    const langEl = document.getElementById('lang-el');
-    const langEn = document.getElementById('lang-en');
-    langEl.addEventListener('click', ()=>{ state.lang='el'; localStorage.setItem('mediradar-lang','el'); applyLang(); });
-    langEn.addEventListener('click', ()=>{ state.lang='en'; localStorage.setItem('mediradar-lang','en'); applyLang(); });
-    applyLang();
+    /* ========== i18n ========== */
+    const strings = {
+      el:{
+        hero:'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
+        searchBTN:'Αναζήτηση Φαρμάκου', howBTN:'Πώς λειτουργεί', signinBTN:'Σύνδεση', installBTN:'Εγκατάσταση',
+        searchTitle:'Αναζήτηση Φαρμάκου', home:'Αρχική', medname:'Όνομα Φαρμάκου', formatTip:'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
+        substance:'Δραστική Ουσία', optional:'(προαιρετικά)', doseEx:'Παράδειγμα δοσολογίας: Paracetamol 500mg.', type:'Τύπος Φαρμάκου',
+        qty:'Ποσότητα (τεμάχια/κουτιά)', select:'Επιλογή', genericQ:'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
+        yes:'ΝΑΙ', no:'ΟΧΙ', city:'Πόλη', accept:'Αποδέχομαι τους', submit:'Υποβολή Αναζήτησης', results:'Αποτελέσματα', newSearch:'Νέα αναζήτηση',
+        pro:'Για επαγγελματίες', howTitle:'Πώς λειτουργεί το MediRadar', continue:'Συνέχεια', pending:'Περιμένουμε απαντήσεις από τα κοντινά φαρμακεία…', pharmLogin:'Είσοδος φαρμακείων',
+        langGreek:'Ελληνικά', langEnglish:'Αγγλικά',
+        gdprLink:'Όρους Αναζήτησης & GDPR',
+        gdprTitle:'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης',
+        gdprBody:`<p>Η MediRadar επεξεργάζεται τα στοιχεία που καταχωρείς αποκλειστικά για την εξυπηρέτηση του αιτήματος διαθεσιμότητας.</p>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Συλλέγουμε το φάρμακο, την πόλη, την επιθυμητή ποσότητα και τυχόν πρόσθετες πληροφορίες που δίνεις (δραστική ουσία, barcode).</li>
+            <li>Χρησιμοποιούμε τα δεδομένα για να ενημερώσουμε τα συνεργαζόμενα φαρμακεία και να σε ειδοποιήσουμε για τις απαντήσεις τους.</li>
+            <li>Διατηρούμε τα στοιχεία μόνο όσο χρειάζεται για να ολοκληρωθεί το αίτημα ή έως 30 ημέρες, εκτός αν ζητήσεις νωρίτερα τη διαγραφή τους.</li>
+          </ul>
+          <p>Δεν διαβιβάζουμε δεδομένα σε τρίτους και εφαρμόζουμε τεχνικά μέτρα ασφάλειας σύμφωνα με τον GDPR.</p>
+          <p>Έχεις δικαίωμα πρόσβασης, διόρθωσης ή διαγραφής επικοινωνώντας στο <a class="text-brand-700 underline" href="mailto:privacy@mediradar.gr">privacy@mediradar.gr</a>.</p>`,
+        barcodeTitle:'Σάρωση barcode συνταγής ή κουτιού', barcodeHelp:'Χρησιμοποίησε την κάμερα για να σαρώσεις τον γραμμωτό κωδικό της συνταγής ή του κουτιού.',
+        barcodeStart:'Άνοιγμα κάμερας', barcodePlaceholder:'Ο κωδικός θα εμφανιστεί εδώ', barcodeModalTitle:'Σάρωση barcode',
+        barcodeStatusInit:'Στόχευσε τον γραμμωτό κωδικό μέσα στο πλαίσιο.', barcodeStatusScanning:'Σάρωση σε εξέλιξη…',
+        barcodeStatusSuccess:'Εντοπίστηκε κωδικός: %s', barcodeStatusNoApi:'Ο περιηγητής δεν υποστηρίζει αυτόματη ανάγνωση barcode. Συμπλήρωσε τον κωδικό χειροκίνητα.',
+        barcodeStatusNoCamera:'Δεν εντοπίστηκε κάμερα στη συσκευή.', barcodeStatusDenied:'Η πρόσβαση στην κάμερα απορρίφθηκε. Έλεγξε τις άδειες.',
+        barcodeStatusStopped:'Η σάρωση διακόπηκε. Μπορείς να κλείσεις το παράθυρο.', barcodeStop:'Διακοπή',
+        proModalTitle:'Πρόσβαση φαρμακείων', proModalSubtitle:'Συνδέσου ή καταχώρησε το φαρμακείο σου για να απαντάς σε αιτήματα διαθεσιμότητας.',
+        proSigninTab:'Σύνδεση', proRegisterTab:'Εγγραφή',
+        proSigninEmailLabel:'Email φαρμακείου', proSigninPasswordLabel:'Κωδικός πρόσβασης', proSigninSubmit:'Σύνδεση',
+        proForgot:'Ξέχασες τον κωδικό;', proSSO:'Ή συνέχισε με',
+        proHaveAccount:'Έχεις ήδη λογαριασμό;', proGoSignin:'Σύνδεση',
+        proRegisterHeading:'Στοιχεία φαρμακείου', proRegisterDesc:'Συμπλήρωσε τα στοιχεία του φαρμακείου για να ξεκινήσεις.',
+        proFieldBusinessName:'Επωνυμία φαρμακείου', proFieldVat:'ΑΦΜ', proFieldContact:'Υπεύθυνος επικοινωνίας',
+        proFieldEmail:'Email επικοινωνίας', proFieldPhone:'Τηλέφωνο', proFieldAddress:'Διεύθυνση', proFieldCity:'Πόλη',
+        proFieldRegistrationNumber:'Αριθμός άδειας', proRegisterSubmit:'Αίτηση εγγραφής', proBackHome:'Επιστροφή στην αρχική',
+        statusHeading:'Κατάσταση αιτήματος', statusPendingTitle:'Αναζητούμε το φαρμακό σου…',
+        statusPendingDesc:'Θα ειδοποιηθείς μόλις απαντήσει κάποιο φαρμακείο.',
+        statusListTitle:'Φαρμακεία με διαθεσιμότητα', statusListDesc:'Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.',
+        statusAccept:'Επιβεβαίωση', statusReservedTitle:'Το φαρμακείο σε περιμένει', statusReservedHint:'Χρόνος κράτησης',
+        statusExtend:'+15 λεπτά', statusCall:'Κλήση', statusDirections:'Οδηγίες',
+        statusGenericBadge:'Διαθέσιμο γενόσημο', statusGenericShort:'Γενόσημο',
+        extendNote:'Μπορείς να χρησιμοποιήσεις αυτή την επέκταση μόνο μία φορά ανά 12 ώρες.',
+        extendNoteUsed:'Έχεις ήδη χρησιμοποιήσει την επέκταση μέσα στις τελευταίες 12 ώρες.',
+        statusBackHome:'Επιστροφή στην αρχική', statusEmptyTitle:'Δεν βρέθηκαν φαρμακεία',
+        statusEmptyBody:'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
+        statusEmptyCta:'Δοκίμασε ξανά',
+        distanceAway:'%s χλμ. από εσένα',
+        distanceHintLoading:'Υπολογίζουμε αποστάσεις βάσει της τοποθεσίας σου…',
+        distanceHintDenied:'Ενεργοποίησε την τοποθεσία του προγράμματος περιήγησης για να δεις αποστάσεις.',
+        distanceHintUnsupported:'Η συσκευή δεν υποστηρίζει υπηρεσίες τοποθεσίας.',
+        distanceHintUnavailable:'Δεν ήταν δυνατός ο υπολογισμός αποστάσεων αυτή τη στιγμή.',
+        shareTitle:'Μοιράσου το MediRadar',
+        shareFacebook:'Κοινοποίηση στο Facebook',
+        shareTwitter:'Κοινοποίηση στο X',
+        shareInstagram:'Κοινοποίηση στο Instagram',
+        faqTitle:'Συχνές ερωτήσεις (σύντομα διαθέσιμες)',
+        faqSoon:'Ετοιμάζουμε ενότητα FAQ με τις πιο συχνές απορίες σας. Αν έχεις ερώτηση, ενημέρωσέ μας.',
+        faqContact:'Επικοινωνία: info@mediradar.gr'
+      },
+      en:{
+        hero:'Instant availability check at nearby pharmacies.',
+        searchBTN:'Medicine Search', howBTN:'How it works', signinBTN:'Sign in', installBTN:'Install',
+        searchTitle:'Medicine Search', home:'Home', medname:'Medicine Name', formatTip:'Tip: Brand name + dosage (e.g. “500mg”).',
+        substance:'Active Substance', optional:'(optional)', doseEx:'Dosage example: Paracetamol 500mg.', type:'Medicine Type',
+        qty:'Quantity (units/boxes)', select:'Select', genericQ:'If the specific brand is unavailable, may we suggest an equivalent (generic)?',
+        yes:'YES', no:'NO', city:'City', accept:'I accept the', submit:'Submit Search', results:'Results', newSearch:'New search',
+        pro:'For professionals', howTitle:'How MediRadar works', continue:'Continue', pending:'Waiting for responses from nearby pharmacies…', pharmLogin:'Pharmacy login',
+        langGreek:'Greek', langEnglish:'English',
+        gdprLink:'Search Terms & GDPR',
+        gdprTitle:'Data Protection & Search Terms',
+        gdprBody:`<p>MediRadar processes the details you provide solely to fulfil your medicine availability request.</p>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>We collect the medicine, city, desired quantity and any optional details you share (active substance, barcode).</li>
+            <li>Your data is used to notify participating pharmacies and relay their responses back to you.</li>
+            <li>Information is retained only for the time needed to complete the request or up to 30 days, unless you ask for earlier deletion.</li>
+          </ul>
+          <p>We do not pass data to third parties and apply security safeguards in line with GDPR requirements.</p>
+          <p>You may request access, correction or deletion by emailing <a class="text-brand-700 underline" href="mailto:privacy@mediradar.gr">privacy@mediradar.gr</a>.</p>`,
+        barcodeTitle:'Scan prescription or box barcode', barcodeHelp:'Use your camera to capture the prescription or medicine box barcode.',
+        barcodeStart:'Open camera', barcodePlaceholder:'The code will appear here', barcodeModalTitle:'Barcode scan',
+        barcodeStatusInit:'Align the barcode inside the frame.', barcodeStatusScanning:'Scanning…',
+        barcodeStatusSuccess:'Detected code: %s', barcodeStatusNoApi:'Your browser does not support automatic barcode reading. Enter the code manually.',
+        barcodeStatusNoCamera:'No camera was found on this device.', barcodeStatusDenied:'Camera access was denied. Check your permission settings.',
+        barcodeStatusStopped:'Scanning stopped. You can close this window.', barcodeStop:'Stop',
+        proModalTitle:'Pharmacy access', proModalSubtitle:'Sign in or register your pharmacy to respond to availability requests.',
+        proSigninTab:'Sign in', proRegisterTab:'Register',
+        proSigninEmailLabel:'Pharmacy email', proSigninPasswordLabel:'Password', proSigninSubmit:'Sign in',
+        proForgot:'Forgot password?', proSSO:'Or continue with',
+        proHaveAccount:'Already have an account?', proGoSignin:'Sign in',
+        proRegisterHeading:'Pharmacy details', proRegisterDesc:'Share your business information to get started.',
+        proFieldBusinessName:'Pharmacy name', proFieldVat:'VAT number', proFieldContact:'Primary contact',
+        proFieldEmail:'Contact email', proFieldPhone:'Phone', proFieldAddress:'Address', proFieldCity:'City',
+        proFieldRegistrationNumber:'License number', proRegisterSubmit:'Submit registration', proBackHome:'Back to home',
+        statusHeading:'Request status', statusPendingTitle:'Searching for your medicine…',
+        statusPendingDesc:'We will notify you as soon as a pharmacy responds.',
+        statusListTitle:'Pharmacies with availability', statusListDesc:'Choose the pharmacy that suits you for self pick-up.',
+        statusAccept:'Accept', statusReservedTitle:'Your pick-up is ready', statusReservedHint:'Reservation timer',
+        statusExtend:'+15 minutes', statusCall:'Call', statusDirections:'Directions',
+        statusGenericBadge:'Generic option available', statusGenericShort:'Generic',
+        extendNote:'You can use this extension only once every 12 hours.',
+        extendNoteUsed:'You have already used the extension within the last 12 hours.',
+        statusBackHome:'Back to home', statusEmptyTitle:'No pharmacies found',
+        statusEmptyBody:'We couldn’t find any pharmacies with availability right now. Please try again shortly or adjust your request.',
+        statusEmptyCta:'Try again',
+        distanceAway:'%s km from you',
+        distanceHintLoading:'Calculating distances based on your location…',
+        distanceHintDenied:'Enable location access in your browser to see distances.',
+        distanceHintUnsupported:'Your device does not support location services.',
+        distanceHintUnavailable:'We could not calculate distances right now.',
+        shareTitle:'Share MediRadar',
+        shareFacebook:'Share on Facebook',
+        shareTwitter:'Share on X',
+        shareInstagram:'Share on Instagram',
+        faqTitle:'FAQ (coming soon)',
+        faqSoon:'We are preparing an FAQ section with the most common questions. Let us know what you need.',
+        faqContact:'Contact: info@mediradar.gr'
+      }
+    };
+    const state = {
+      lang: localStorage.getItem('mediradar-lang') || 'el',
+      locationStatus: 'idle',
+      locationAttempted: false,
+      userCoords: null
+    };
+    let selectedPharmacy = null;
+    function t(k){ return strings[state.lang][k]; }
+    function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
+    function setHTML(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
+    function applyLang(){
+      document.documentElement.lang = state.lang;
+      setText('t-hero', t('hero'));
+      setText('t-searchBTN', t('searchBTN')); setText('t-howBTN', t('howBTN')); setText('t-signinBTN', t('signinBTN')); setText('t-installBTN', t('installBTN'));
+      setText('t-searchTitle', t('searchTitle')); setText('t-home', t('home'));
+      setText('t-medname', t('medname')); setText('t-formatTip', t('formatTip'));
+      setText('t-city', t('city'));
+      setText('t-qty', t('qty'));
+      setText('t-type', t('type'));
+      setText('t-substance', t('substance'));
+      setText('t-doseEx', t('doseEx'));
+      setText('t-genericQ', t('genericQ'));
+      setText('t-yes', t('yes'));
+      setText('t-no', t('no'));
+      setText('t-accept', t('accept'));
+      setText('t-gdprLink', t('gdprLink'));
+      setText('t-submit', t('submit'));
+      setText('t-results', t('results')); setText('t-newSearch', t('newSearch')); setText('t-pending', t('pending'));
+      setText('t-pro', t('pro')); setText('t-pro-m', t('pro'));
+      setText('t-howTitle', t('howTitle')); setText('t-continue', t('continue'));
+      setText('t-langElLabel', t('langGreek')); setText('t-langEnLabel', t('langEnglish'));
+      setText('t-barcodeTitle', t('barcodeTitle'));
+      setText('t-barcodeOptional', t('optional'));
+      setText('t-barcodeHelp', t('barcodeHelp'));
+      setText('t-barcodeStart', t('barcodeStart'));
+      setText('t-barcodeModalTitle', t('barcodeModalTitle'));
+      setText('t-barcodeStop', t('barcodeStop'));
+      setText('t-gdprTitle', t('gdprTitle'));
+      setHTML('gdpr-body', t('gdprBody'));
+      setText('t-proModalTitle', t('proModalTitle')); setText('t-proModalSubtitle', t('proModalSubtitle'));
+      setText('t-proSigninTab', t('proSigninTab')); setText('t-proRegisterTab', t('proRegisterTab'));
+      setText('t-proSigninEmailLabel', t('proSigninEmailLabel')); setText('t-proSigninPasswordLabel', t('proSigninPasswordLabel'));
+      setText('t-proSigninSubmit', t('proSigninSubmit')); setText('t-proForgot', t('proForgot'));
+      setText('t-proSSO', t('proSSO')); setText('t-proSSO2', t('proSSO'));
+      setText('t-proRegisterHeading', t('proRegisterHeading')); setText('t-proRegisterDesc', t('proRegisterDesc'));
+      setText('t-proFieldBusinessName', t('proFieldBusinessName')); setText('t-proFieldVat', t('proFieldVat'));
+      setText('t-proFieldRegistrationNumber', t('proFieldRegistrationNumber'));
+      setText('t-proFieldContact', t('proFieldContact')); setText('t-proFieldEmail', t('proFieldEmail'));
+      setText('t-proFieldPhone', t('proFieldPhone')); setText('t-proFieldAddress', t('proFieldAddress'));
+      setText('t-proFieldCity', t('proFieldCity'));
+      setText('t-proRegisterSubmit', t('proRegisterSubmit'));
+      setText('t-proHaveAccount', t('proHaveAccount')); setText('t-proGoSignin', t('proGoSignin'));
+      setText('t-proBackHome', t('proBackHome'));
+      setText('t-optional', t('optional'));
+      setText('t-shareTitle', t('shareTitle'));
+      setText('t-shareFacebook', t('shareFacebook'));
+      setText('t-shareTwitter', t('shareTwitter'));
+      setText('t-shareInstagram', t('shareInstagram'));
+      setText('t-faqTitle', t('faqTitle'));
+      setText('t-faqSoon', t('faqSoon'));
+      setText('t-faqContact', t('faqContact'));
+      if(typeof refreshExtendNote === 'function') refreshExtendNote();
+      setText('t-statusHeading', t('statusHeading'));
+      setText('t-statusPendingTitle', t('statusPendingTitle'));
+      setText('t-statusPendingDesc', t('statusPendingDesc'));
+      setText('t-statusListTitle', t('statusListTitle'));
+      setText('t-statusListDesc', t('statusListDesc'));
+      setText('t-statusReservedTitle', t('statusReservedTitle'));
+      setText('t-statusReservedHint', t('statusReservedHint'));
+      setText('t-statusGenericBadge', t('statusGenericBadge'));
+      setText('t-statusExtend', t('statusExtend'));
+      setText('t-statusCall', t('statusCall'));
+      setText('t-statusDirections', t('statusDirections'));
+      setText('t-statusBackHome', t('statusBackHome'));
+      setText('t-statusEmptyTitle', t('statusEmptyTitle'));
+      setText('t-statusEmptyBody', t('statusEmptyBody'));
+      setText('t-statusEmptyCta', t('statusEmptyCta'));
+      setText('t-statusHome', t('home'));
+      document.getElementById('medicine-name').placeholder = state.lang==='el'?'π.χ. Augmentin 875mg':'e.g. Augmentin 875mg';
+      document.getElementById('active-substance').placeholder = state.lang==='el'?'π.χ. Paracetamol':'e.g. Paracetamol';
+      document.getElementById('barcode-value').placeholder = t('barcodePlaceholder');
+      document.getElementById('pro-signin-email').placeholder = state.lang==='el'?'π.χ. pharmacy@domain.gr':'e.g. pharmacy@domain.com';
+      document.getElementById('pro-signin-password').placeholder = state.lang==='el'?'Ο κωδικός σου':'Your password';
+      document.getElementById('pro-field-business').placeholder = state.lang==='el'?'π.χ. Φαρμακείο Κεντρικής Πλατείας':'e.g. Central Square Pharmacy';
+      document.getElementById('pro-field-vat').placeholder = state.lang==='el'?'π.χ. 123456789':'e.g. 123456789';
+      document.getElementById('pro-field-license').placeholder = state.lang==='el'?'π.χ. 12345':'e.g. 12345';
+      document.getElementById('pro-field-contact').placeholder = state.lang==='el'?'π.χ. Μαρία Παπαδοπούλου':'e.g. Maria Papadopoulou';
+      document.getElementById('pro-field-email').placeholder = state.lang==='el'?'π.χ. pharmacy@domain.gr':'e.g. pharmacy@domain.com';
+      document.getElementById('pro-field-phone').placeholder = state.lang==='el'?'π.χ. 2101234567':'e.g. +30 2101234567';
+      document.getElementById('pro-field-address').placeholder = state.lang==='el'?'π.χ. Ιπποκράτους 12':'e.g. 12 Ippokratous St';
+      document.getElementById('pro-field-city').placeholder = state.lang==='el'?'π.χ. Αθήνα':'e.g. Athens';
+      themeBtn.setAttribute('aria-label', state.lang==='el'?'Αλλαγή θέματος':'Toggle theme');
+      document.getElementById('pro-trigger').setAttribute('aria-label', state.lang==='el'?'Πρόσβαση για επαγγελματίες':'Professionals area');
+      document.getElementById('pro-trigger-mobile').setAttribute('aria-label', state.lang==='el'?'Πρόσβαση για επαγγελματίες':'Professionals area');
+      document.getElementById('pro-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
+      document.getElementById('barcode-start').setAttribute('aria-label', state.lang==='el'?'Σάρωση barcode':'Scan barcode');
+      document.getElementById('barcode-close').setAttribute('aria-label', state.lang==='el'?'Κλείσιμο παραθύρου':'Close window');
+      document.getElementById('share-facebook')?.setAttribute('aria-label', t('shareFacebook'));
+      document.getElementById('share-twitter')?.setAttribute('aria-label', t('shareTwitter'));
+      document.getElementById('share-instagram')?.setAttribute('aria-label', t('shareInstagram'));
+      statusCallLink?.setAttribute('aria-label', t('statusCall'));
+      statusDirectionsLink?.setAttribute('aria-label', t('statusDirections'));
+      document.querySelectorAll('.status-accept-label').forEach(el=> el.textContent = t('statusAccept'));
+      document.querySelectorAll('.status-generic-label').forEach(el=> el.textContent = t('statusGenericShort'));
+      if(document.getElementById('barcode-modal').classList.contains('hidden')){
+        document.getElementById('barcode-status').textContent = t('barcodeStatusInit');
+      }
+      const langElBtn = document.getElementById('lang-el');
+      const langEnBtn = document.getElementById('lang-en');
+      langElBtn.dataset.active = state.lang==='el';
+      langEnBtn.dataset.active = state.lang==='en';
+      langElBtn.setAttribute('aria-pressed', state.lang==='el');
+      langEnBtn.setAttribute('aria-pressed', state.lang==='en');
+      updateDistanceHint();
+      localStorage.setItem('mediradar-lang', state.lang);
+    }
+    document.getElementById('lang-el').addEventListener('click', ()=>{ state.lang='el'; applyLang(); });
+    document.getElementById('lang-en').addEventListener('click', ()=>{ state.lang='en'; applyLang(); });
 
     // city dropdown
     const citySelect = document.getElementById('city');
@@ -1338,49 +1040,32 @@ By submitting a request:
     const ctaSearch = document.getElementById('cta-search');
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
-    const backBtns = document.querySelectorAll('[data-go-home]');
-    ctaSearch.addEventListener('click', ()=> {
-      splash.classList.add('hidden');
-      app.classList.remove('hidden');
-      window.scrollTo({top:0, behavior:'smooth'});
-    });
-    backBtns.forEach(btn=> btn.addEventListener('click', ()=>{
+    function goHome(){
+      stopPickupTimer();
+      if(demoTimeout){ clearTimeout(demoTimeout); demoTimeout=null; }
       app.classList.add('hidden');
       splash.classList.remove('hidden');
-      document.getElementById('results').classList.add('hidden');
-      history.replaceState(null,'',location.pathname);
-    }));
-
-    // contact modal
-    const contactModal = document.getElementById('contact-modal');
-    document.querySelectorAll('[data-contact-open]').forEach(b=> b.addEventListener('click', ()=>{
-      contactModal.classList.remove('hidden');
-      contactModal.classList.add('flex');
-    }));
-    document.querySelectorAll('[data-contact-close]').forEach(b=> b.addEventListener('click', ()=>{
-      contactModal.classList.add('hidden');
-      contactModal.classList.remove('flex');
-    }));
-
-    // how modal
-    const howModal = document.getElementById('modal-how');
-    document.getElementById('cta-how').addEventListener('click', ()=>{
-      howModal.classList.remove('hidden');
-      howModal.classList.add('flex');
-      document.getElementById('how-body').textContent = strings[state.lang]['how-body'];
+      hidePending();
+      const resultsSection = document.getElementById('results');
+      resultsSection?.classList.add('hidden');
+      document.getElementById('pickup-box')?.classList.add('hidden');
+      document.getElementById('results-pending')?.classList.remove('hidden');
+      document.getElementById('results-list')?.classList.add('hidden');
+      document.getElementById('results-empty')?.classList.add('hidden');
+      distanceHintEl?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    }
+    document.getElementById('cta-search').addEventListener('click', ()=>{ splash.classList.add('hidden'); app.classList.remove('hidden'); window.scrollTo({ top: 0, behavior:'smooth' }); });
+    document.body.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-go-home]');
+      if(!btn) return;
+      event.preventDefault();
+      if (btn.dataset.closePro === 'true') {
+        closeProModal();
+      }
+      goHome();
     });
-    document.getElementById('how-close').addEventListener('click', ()=>{ howModal.classList.add('hidden'); howModal.classList.remove('flex'); });
-    document.getElementById('how-ok').addEventListener('click', ()=>{ howModal.classList.add('hidden'); howModal.classList.remove('flex'); });
-
-    // gdpr
-    const gdprModal = document.getElementById('gdpr-modal');
-    document.getElementById('gdpr-open').addEventListener('click', ()=>{
-      gdprModal.classList.remove('hidden');
-      gdprModal.classList.add('flex');
-      document.getElementById('gdpr-body').textContent = strings[state.lang]['gdpr-body'];
-    });
-    document.getElementById('gdpr-close').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
-    document.getElementById('gdpr-ok').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
 
     /* ========== Modals (How/GDPR/Login) ========== */
     const modalHow = document.getElementById('modal-how');
@@ -1468,19 +1153,260 @@ By submitting a request:
       const txt = t(key);
       barcodeStatus.textContent = (value !== undefined && txt.includes('%s')) ? txt.replace('%s', value) : txt;
     }
-    pushDeny.addEventListener('click', ()=>{
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-    });
-    pushAllow.addEventListener('click', async ()=>{
-      // απλή επίδειξη
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-      if ('Notification' in window) {
-        const perm = await Notification.requestPermission();
-        if (perm === 'granted') {
-          new Notification('Θα σε ενημερώσουμε όταν απαντήσει φαρμακείο.');
+
+    async function ensureBarcodeDetector(){
+      if(barcodeDetector) return barcodeDetector;
+      if(!('BarcodeDetector' in window)) return null;
+      try{
+        barcodeDetector = new BarcodeDetector({ formats: barcodeFormats });
+      }catch(err){
+        console.warn('BarcodeDetector init error', err);
+        try{ barcodeDetector = new BarcodeDetector(); }
+        catch(err2){ console.warn('BarcodeDetector fallback failed', err2); barcodeDetector = null; }
+      }
+      return barcodeDetector;
+    }
+
+    function openBarcodeModal(){
+      setBarcodeStatus('barcodeStatusInit');
+      barcodeModal.classList.remove('hidden');
+      barcodeModal.classList.add('flex');
+      bodyEl.classList.add('overflow-hidden');
+    }
+
+    function stopBarcodeScan(keepStatus=false){
+      barcodeActive = false;
+      if(barcodeStream){
+        barcodeStream.getTracks().forEach(track=>track.stop());
+        barcodeStream = null;
+      }
+      if(barcodeVideo){
+        barcodeVideo.pause?.();
+        barcodeVideo.srcObject = null;
+      }
+      barcodeStopBtn.classList.add('hidden');
+      if(!keepStatus){
+        setBarcodeStatus('barcodeStatusInit');
+      }
+    }
+
+    function closeBarcodeModal(){
+      stopBarcodeScan();
+      barcodeModal.classList.add('hidden');
+      barcodeModal.classList.remove('flex');
+      bodyEl.classList.remove('overflow-hidden');
+    }
+
+    async function startBarcodeScan(){
+      if(!navigator.mediaDevices?.getUserMedia){
+        setBarcodeStatus('barcodeStatusNoCamera');
+        barcodeStopBtn.classList.add('hidden');
+        return;
+      }
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }});
+        barcodeStream = stream;
+        barcodeVideo.srcObject = stream;
+        await barcodeVideo.play();
+        barcodeStopBtn.classList.remove('hidden');
+        const detector = await ensureBarcodeDetector();
+        if(!detector){
+          setBarcodeStatus('barcodeStatusNoApi');
+          return;
         }
+        barcodeActive = true;
+        setBarcodeStatus('barcodeStatusScanning');
+        requestAnimationFrame(scanLoop);
+      }catch(err){
+        console.warn('Barcode camera error', err);
+        if(err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')){
+          setBarcodeStatus('barcodeStatusDenied');
+        }else{
+          setBarcodeStatus('barcodeStatusNoCamera');
+        }
+        stopBarcodeScan(true);
+      }
+    }
+
+    async function scanLoop(){
+      if(!barcodeActive || !barcodeDetector) return;
+      try{
+        const barcodes = await barcodeDetector.detect(barcodeVideo);
+        if(barcodes && barcodes.length){
+          const code = String(barcodes[0].rawValue || '').trim();
+          if(code){
+            barcodeInput.value = code;
+            barcodeInput.focus();
+            barcodeInput.classList.add('barcode-highlight');
+            setTimeout(()=> barcodeInput.classList.remove('barcode-highlight'), 1400);
+            setBarcodeStatus('barcodeStatusSuccess', code);
+            stopBarcodeScan(true);
+            setTimeout(()=> closeBarcodeModal(), 900);
+            return;
+          }
+        }
+      }catch(err){
+        console.warn('Barcode detect error', err);
+      }
+      if(barcodeActive) requestAnimationFrame(scanLoop);
+    }
+
+    barcodeStartBtn?.addEventListener('click', ()=>{ openBarcodeModal(); startBarcodeScan(); });
+    barcodeCloseBtn?.addEventListener('click', closeBarcodeModal);
+    barcodeModal?.addEventListener('click', (event)=>{ if(event.target === barcodeModal){ closeBarcodeModal(); }});
+    barcodeStopBtn?.addEventListener('click', ()=>{ stopBarcodeScan(true); setBarcodeStatus('barcodeStatusStopped'); });
+    document.addEventListener('keydown', (event)=>{ if(event.key === 'Escape' && !barcodeModal.classList.contains('hidden')) closeBarcodeModal(); });
+
+    /* ========== Pro modal (pharmacies) ========== */
+    const proModal = document.getElementById('pro-modal');
+    const proClose = document.getElementById('pro-close');
+    const proTabSignin = document.getElementById('pro-tab-signin');
+    const proTabRegister = document.getElementById('pro-tab-register');
+    const proSigninView = document.getElementById('pro-view-signin');
+    const proRegisterView = document.getElementById('pro-view-register');
+    const proOpeners = document.querySelectorAll('[data-open-pro]');
+    const proSwitchers = document.querySelectorAll('[data-pro-switch]');
+    const proSigninBtn = document.getElementById('pro-signin-submit');
+    const proForgotBtn = document.getElementById('pro-forgot');
+    const proRegisterForm = document.getElementById('pro-register-form');
+
+    function setProMode(mode='signin'){
+      const isSignin = mode==='signin';
+      proSigninView.classList.toggle('hidden', !isSignin);
+      proRegisterView.classList.toggle('hidden', isSignin);
+      proTabSignin.classList.toggle('bg-white', isSignin);
+      proTabSignin.classList.toggle('dark:bg-slate-800', isSignin);
+      proTabSignin.classList.toggle('text-slate-900', isSignin);
+      proTabSignin.classList.toggle('dark:text-slate-100', isSignin);
+      proTabSignin.classList.toggle('text-slate-600', !isSignin);
+      proTabSignin.classList.toggle('dark:text-slate-400', !isSignin);
+      proTabSignin.classList.toggle('shadow-soft', isSignin);
+      proTabSignin.setAttribute('aria-selected', isSignin);
+      proTabRegister.classList.toggle('bg-white', !isSignin);
+      proTabRegister.classList.toggle('dark:bg-slate-800', !isSignin);
+      proTabRegister.classList.toggle('text-slate-900', !isSignin);
+      proTabRegister.classList.toggle('dark:text-slate-100', !isSignin);
+      proTabRegister.classList.toggle('text-slate-600', isSignin);
+      proTabRegister.classList.toggle('dark:text-slate-400', isSignin);
+      proTabRegister.classList.toggle('shadow-soft', !isSignin);
+      proTabRegister.setAttribute('aria-selected', !isSignin);
+    }
+
+    function openProModal(mode='signin'){
+      setProMode(mode);
+      proModal.classList.remove('hidden');
+      proModal.classList.add('flex');
+      bodyEl.classList.add('overflow-hidden');
+    }
+
+    function closeProModal(){
+      proModal.classList.add('hidden');
+      proModal.classList.remove('flex');
+      bodyEl.classList.remove('overflow-hidden');
+      setProMode('signin');
+    }
+
+    proOpeners.forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        openProModal(btn.dataset.mode || 'signin');
+      });
+    });
+    proTabSignin.addEventListener('click', ()=> setProMode('signin'));
+    proTabRegister.addEventListener('click', ()=> setProMode('register'));
+    proSwitchers.forEach(btn=> btn.addEventListener('click', ()=> setProMode(btn.dataset.proSwitch || 'signin')));
+    proClose.addEventListener('click', closeProModal);
+    proModal.addEventListener('click', (event)=>{ if(event.target === proModal){ closeProModal(); }});
+    document.addEventListener('keydown', (event)=>{ if(event.key === 'Escape' && !proModal.classList.contains('hidden')) closeProModal(); });
+
+    document.querySelectorAll('.pro-sso-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const provider = btn.dataset.provider;
+        alert(state.lang==='el'
+          ? `Η σύνδεση με ${provider} θα είναι σύντομα διαθέσιμη.`
+          : `${provider} sign-in is coming soon.`);
+      });
+    });
+
+    proSigninBtn.addEventListener('click', ()=>{
+      alert(state.lang==='el'
+        ? 'Η σύνδεση φαρμακείου θα είναι σύντομα διαθέσιμη.'
+        : 'Pharmacy sign-in will be available soon.');
+    });
+
+    proForgotBtn.addEventListener('click', ()=>{
+      alert(state.lang==='el'
+        ? 'Θα προσθέσουμε ροή ανάκτησης κωδικού σύντομα.'
+        : 'Password recovery will be added soon.');
+    });
+
+    proRegisterForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      alert(state.lang==='el'
+        ? 'Ευχαριστούμε! Η ομάδα MediRadar θα επικοινωνήσει μαζί σου για την ολοκλήρωση της εγγραφής.'
+        : 'Thanks! The MediRadar team will reach out to finish your registration.');
+      closeProModal();
+    });
+
+    /* ========== Autocomplete (demo) ========== */
+    const AC_MEDICINES = [
+      'Algofren 400mg',
+      'Apotel 500mg',
+      'Augmentin 875mg/125mg',
+      'Bepanthene 5% Cream',
+      'Betadine 10%',
+      'Canesten 1% Cream',
+      'Clavulin 875/125mg',
+      'Daktarin Gel',
+      'Depon 500mg',
+      'Efferalgan 500mg',
+      'Fucidin 2%',
+      'Gaviscon Double Action',
+      'Humira 40mg Pen',
+      'Imodium 2mg',
+      'Losec 20mg',
+      'Nurofen Express 400mg',
+      'Otrivin 0.1% Spray',
+      'Panadol 500mg',
+      'Plavix 75mg',
+      'Prospan Syrup',
+      'Salospir 100mg',
+      'Synagis 100mg',
+      'Voltaren 50mg',
+      'Xanax 0.5mg',
+      'Zylapour 300mg',
+      'Zyrtec 10mg'
+    ];
+    const AC_SUBSTANCES = [
+      'Acetylcysteine 600mg',
+      'Acetylsalicylic Acid 100mg',
+      'Acyclovir 400mg',
+      'Allopurinol 300mg',
+      'Amlodipine 5mg',
+      'Amoxicillin 500mg',
+      'Amoxicillin + Clavulanic Acid 875/125mg',
+      'Atorvastatin 20mg',
+      'Azithromycin 500mg',
+      'Cetirizine 10mg',
+      'Doxycycline 100mg',
+      'Ibuprofen 400mg',
+      'Levocetirizine 5mg',
+      'Metformin 1000mg',
+      'Metoprolol 50mg',
+      'Omeprazole 20mg',
+      'Paracetamol 500mg',
+      'Rivaroxaban 20mg',
+      'Rosuvastatin 10mg',
+      'Salbutamol 2mg/5ml',
+      'Valsartan 160mg'
+    ];
+    function attachAutocomplete(inputId, listId, data){
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      let idx = -1;
+      function render(items){
+        list.innerHTML = items.map((x,i)=>`<div class="ac-item px-3 py-2 text-sm hover:bg-brand-50 dark:hover:bg-slate-800 ${i===idx?'bg-brand-50 dark:bg-slate-800':''}" data-val="${x}">${x}</div>`).join('');
+        list.classList.toggle('hidden', items.length===0);
       }
     });
 
@@ -1567,24 +1493,35 @@ By submitting a request:
     if (citySelect) {
       citySelect.options[0].textContent = state.lang==='el' ? '— Επιλογή πόλης —' : '— Select city —';
     }
-  }
+    attachAutocomplete('medicine-name','ac-medicine',AC_MEDICINES);
+    attachAutocomplete('active-substance','ac-substance',AC_SUBSTANCES);
 
-  // ==========================
-  //  SUBMIT REQUEST
-  // ==========================
-  async function onSubmitRequest() {
-    const city = document.getElementById('city').value.trim();
-    const name = document.getElementById('medicine-name').value.trim();
-    const qty = parseInt(document.getElementById('quantity').value,10) || 1;
-    const type = document.getElementById('medicine-type').value.trim();
-    const substance = document.getElementById('active-substance').value.trim();
-    const barcode = document.getElementById('barcode-value').value.trim();
-    const allowGeneric = document.querySelector('input[name="allow-generic"]:checked')?.value === 'YES';
-    const gdpr = document.getElementById('gdpr-checkbox').checked;
-
-    if (!city || !name || !gdpr) {
-      alert(state.lang==='el' ? 'Συμπλήρωσε πόλη, φάρμακο και αποδέξου τους όρους.' : 'Fill city, medicine and accept terms.');
-      return;
+    /* ========== Pending + Confetti ========== */
+    const pendingToast=document.getElementById('pending-toast'), waitSpan=document.getElementById('wait-elapsed');
+    let waitT=null, waitStart=0;
+    function showPending(){
+      waitStart=Date.now();
+      pendingToast.classList.remove('hidden');
+      if(waitT) clearInterval(waitT);
+      waitT=setInterval(()=>{waitSpan.textContent=Math.floor((Date.now()-waitStart)/1000)+'s'},500);
+      setResultsState('pending');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function hidePending(){ pendingToast.classList.add('hidden'); if(waitT){clearInterval(waitT); waitT=null;} }
+    function fireConfetti(ms=3500){
+      const c=document.getElementById('confetti'),ctx=c.getContext('2d');
+      const W=c.width=innerWidth,H=c.height=innerHeight; c.style.display='block';
+      const N=180,P=Array.from({length:N},()=>({x:Math.random()*W,y:-20-Math.random()*H*.3,r:2+Math.random()*4,vx:-1+Math.random()*2,vy:2+Math.random()*3,a:Math.random()*Math.PI,va:-.2+Math.random()*.4}));
+      let run=true; const end=performance.now()+ms;
+      (function loop(t){ if(t>end) run=false;
+        ctx.clearRect(0,0,W,H);
+        P.forEach(p=>{ if(run) p.vy+=.02; p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
+          if(p.y>H+20){p.y=-20;p.x=Math.random()*W;p.vy=2+Math.random()*3}
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
+          ctx.fillStyle=`hsl(${(p.x/W)*360},90%,55%)`; ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); ctx.restore();
+        });
+        if(run) requestAnimationFrame(loop); else { c.style.display='none'; ctx.clearRect(0,0,W,H); }
+      })(performance.now());
     }
 
     // show pending
@@ -1605,72 +1542,218 @@ By submitting a request:
       created_at: new Date().toISOString()
     };
 
-    if (state.supabase) {
-      const { error } = await state.supabase.from('requests').insert(payload);
-      if (error) {
-        console.error(error);
+    /* ========== Results + Pharmacy modal + Pickup timer ========== */
+    const results = document.getElementById('results');
+    const resultsList = document.getElementById('resultsList');
+    const resultsPending = document.getElementById('results-pending');
+    const resultsListWrap = document.getElementById('results-list');
+    const resultsEmpty = document.getElementById('results-empty');
+    const distanceHintEl = document.getElementById('distance-hint');
+    const pickupBox = document.getElementById('pickup-box');
+    const pickupTimerEl = document.getElementById('pickup-timer');
+    const extendBtn = document.getElementById('extend-btn');
+    const extendNoteEl = document.getElementById('extend-note');
+    const EXTEND_STORAGE_KEY = 'pickup-extend-at';
+    const LEGACY_EXTEND_KEY = 'pickup-extend-date';
+    const EXTEND_COOLDOWN_MS = 12 * 60 * 60 * 1000;
+    const statusReservedName = document.getElementById('status-reserved-name');
+    const statusReservedAddress = document.getElementById('status-reserved-address');
+    const statusReservedGeneric = document.getElementById('status-reserved-generic');
+    const statusCallLink = document.getElementById('status-call');
+    const statusDirectionsLink = document.getElementById('status-directions');
+    const statusEmptyBtn = document.getElementById('status-empty-btn');
+
+    function readExtendTimestamp(){
+      const raw = localStorage.getItem(EXTEND_STORAGE_KEY);
+      if(raw){
+        const numeric = Number(raw);
+        if(!Number.isNaN(numeric)) return numeric;
+        const parsed = Date.parse(raw);
+        if(!Number.isNaN(parsed)) return parsed;
+        localStorage.removeItem(EXTEND_STORAGE_KEY);
+      }
+      const legacy = localStorage.getItem(LEGACY_EXTEND_KEY);
+      if(legacy){
+        localStorage.removeItem(LEGACY_EXTEND_KEY);
+        const parsedLegacy = Date.parse(legacy);
+        if(!Number.isNaN(parsedLegacy)){
+          localStorage.setItem(EXTEND_STORAGE_KEY, String(parsedLegacy));
+          return parsedLegacy;
+        }
+      }
+      return null;
+    }
+    function writeExtendTimestamp(ts){
+      localStorage.setItem(EXTEND_STORAGE_KEY, String(ts));
+      localStorage.removeItem(LEGACY_EXTEND_KEY);
+    }
+    function canUseExtend(){
+      const last = readExtendTimestamp();
+      return !last || (Date.now() - last) >= EXTEND_COOLDOWN_MS;
+    }
+    function refreshExtendNote(){
+      const key = extendBtn && extendBtn.disabled ? 'extendNoteUsed' : 'extendNote';
+      if(extendBtn){
+        extendBtn.setAttribute('title', t(key));
+        extendBtn.setAttribute('aria-disabled', extendBtn.disabled ? 'true' : 'false');
+      }
+      if(extendNoteEl){
+        extendNoteEl.textContent = t(key);
+      }
+    }
+    function updateExtendAvailability(){
+      if(!extendBtn) return true;
+      const allowed = canUseExtend();
+      extendBtn.disabled = !allowed;
+      extendBtn.classList.toggle('opacity-50', !allowed);
+      extendBtn.classList.toggle('cursor-not-allowed', !allowed);
+      refreshExtendNote();
+      return allowed;
+    }
+
+    let pInt=null, remaining=0, pollInt=null, demoTimeout=null;
+
+    function showResultsWrapper(){ results.classList.remove('hidden'); }
+    function setResultsState(state){
+      showResultsWrapper();
+      resultsPending?.classList.toggle('hidden', state!=='pending');
+      resultsListWrap?.classList.toggle('hidden', state!=='list');
+      resultsEmpty?.classList.toggle('hidden', state!=='empty');
+      pickupBox?.classList.toggle('hidden', state!=='reserved');
+      if(state==='pending'){
+        resultsList.innerHTML='';
+        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
+        if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
+        statusReservedGeneric?.classList.add('hidden');
+      }
+      if(state==='empty'){
+        if(statusCallLink){ statusCallLink.href = '#'; setLinkAvailability(statusCallLink, false); }
+        if(statusDirectionsLink){ statusDirectionsLink.href = '#'; setLinkAvailability(statusDirectionsLink, false); }
+        statusReservedGeneric?.classList.add('hidden');
+      }
+      if(state==='pending' || state==='empty'){ selectedPharmacy = null; }
+      if(state!=='pending'){
+        results.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    }
+    function setLinkAvailability(el, enabled){
+      if(!el) return;
+      el.classList.toggle('opacity-60', !enabled);
+      el.classList.toggle('pointer-events-none', !enabled);
+    }
+
+    function updateDistanceHint(){
+      if(!distanceHintEl) return;
+      switch(state.locationStatus){
+        case 'loading':
+          distanceHintEl.textContent = t('distanceHintLoading');
+          distanceHintEl.classList.remove('hidden');
+          break;
+        case 'denied':
+          distanceHintEl.textContent = t('distanceHintDenied');
+          distanceHintEl.classList.remove('hidden');
+          break;
+        case 'unsupported':
+          distanceHintEl.textContent = t('distanceHintUnsupported');
+          distanceHintEl.classList.remove('hidden');
+          break;
+        case 'unavailable':
+          distanceHintEl.textContent = t('distanceHintUnavailable');
+          distanceHintEl.classList.remove('hidden');
+          break;
+        default:
+          distanceHintEl.classList.add('hidden');
+          break;
       }
     }
 
-    state.currentRequestId = reqId;
-    state.lastResponses = [];
-    startPolling(reqId);
-
-    document.getElementById('results').classList.remove('hidden');
-    document.getElementById('results-pending').classList.remove('hidden');
-    document.getElementById('results-list').classList.add('hidden');
-    document.getElementById('results-empty').classList.add('hidden');
-  }
-
-  function showPendingOverlay() {
-    const overlay = document.getElementById('pending-overlay');
-    overlay.classList.remove('hidden');
-    overlay.classList.add('flex');
-    state.pendingSeconds = 0;
-    if (state.pendingInterval) clearInterval(state.pendingInterval);
-    state.pendingInterval = setInterval(()=>{
-      state.pendingSeconds++;
-      document.getElementById('pending-overlay-elapsed').textContent = state.pendingSeconds + 's';
-    },1000);
-  }
-  function hidePendingOverlay() {
-    const overlay = document.getElementById('pending-overlay');
-    overlay.classList.add('hidden');
-    overlay.classList.remove('flex');
-    if (state.pendingInterval) {
-      clearInterval(state.pendingInterval);
-      state.pendingInterval = null;
+    let locatingPromise = null;
+    async function requestUserLocation(){
+      if(state.userCoords) return state.userCoords;
+      if(state.locationStatus === 'denied' || state.locationStatus === 'unsupported'){
+        updateDistanceHint();
+        return null;
+      }
+      if(!('geolocation' in navigator)){
+        state.locationStatus = 'unsupported';
+        updateDistanceHint();
+        return null;
+      }
+      if(locatingPromise){
+        return locatingPromise;
+      }
+      state.locationAttempted = true;
+      state.locationStatus = 'loading';
+      updateDistanceHint();
+      locatingPromise = new Promise((resolve)=>{
+        navigator.geolocation.getCurrentPosition((pos)=>{
+          state.userCoords = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          };
+          state.locationStatus = 'ready';
+          locatingPromise = null;
+          updateDistanceHint();
+          resolve(state.userCoords);
+        }, (err)=>{
+          locatingPromise = null;
+          if(err && err.code === err.PERMISSION_DENIED){
+            state.locationStatus = 'denied';
+          }else{
+            state.locationStatus = 'unavailable';
+          }
+          updateDistanceHint();
+          resolve(null);
+        }, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 120000
+        });
+      });
+      return locatingPromise;
     }
-  }
 
-  // ==========================
-  //  POLLING
-  // ==========================
-  function startPolling(requestId) {
-    if (!requestId || !state.supabase) return;
-    if (state.pollingTimer) clearInterval(state.pollingTimer);
-    state.pollingStartedAt = Date.now();
-    pollOnce(requestId);
-    state.pollingTimer = setInterval(()=> pollOnce(requestId), 5000);
-  }
-
-  async function pollOnce(requestId) {
-    if (!state.supabase) return;
-    const { data, error } = await state.supabase.from('responses').select('*').eq('request_id', requestId).order('created_at', { ascending: true });
-    if (error) {
-      console.error(error);
-      return;
+    function haversineDistanceKm(lat1, lon1, lat2, lon2){
+      const R = 6371;
+      const toRad = (deg)=> deg * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
     }
-    if (data && data.length) {
-      state.lastResponses = data;
-      renderResponses(data);
-    } else {
-      // after X seconds show empty
-      const elapsed = (Date.now() - state.pollingStartedAt)/1000;
-      if (elapsed > 30) {
-        hidePendingOverlay();
-        document.getElementById('results-pending').classList.add('hidden');
-        document.getElementById('results-empty').classList.remove('hidden');
+
+    function formatDistance(km){
+      if(Number.isNaN(km)) return null;
+      const rounded = km >= 10 ? Math.round(km) : Math.round(km * 10) / 10;
+      return rounded.toFixed(rounded % 1 === 0 ? 0 : 1);
+    }
+    function populateReservedDetails(pharmacy){
+      const fallbackName = state.lang==='el'?'Φαρμακείο':'Pharmacy';
+      const fallbackAddress = state.lang==='el'?'Χωρίς διαθέσιμη διεύθυνση':'No address provided';
+      statusReservedName.textContent = pharmacy?.name || fallbackName;
+      statusReservedAddress.textContent = pharmacy?.addr || fallbackAddress;
+      statusReservedGeneric.classList.toggle('hidden', !pharmacy?.is_generic);
+      if(pharmacy?.tel){
+        const tel = pharmacy.tel.replace(/\s+/g,'');
+        statusCallLink.href = `tel:${tel}`;
+        setLinkAvailability(statusCallLink, true);
+      } else {
+        statusCallLink.href = '#';
+        setLinkAvailability(statusCallLink, false);
+      }
+      const querySource = pharmacy?.addr || pharmacy?.name || '';
+      if(querySource){
+        const encoded = encodeURIComponent(querySource);
+        let href = `https://www.google.com/maps?q=${encoded}`;
+        if(pharmacy?.lat && pharmacy?.lng){
+          href = `https://www.google.com/maps?q=${encoded}@${pharmacy.lat},${pharmacy.lng},17z`;
+        }
+        statusDirectionsLink.href = href;
+        setLinkAvailability(statusDirectionsLink, true);
+      } else {
+        statusDirectionsLink.href = '#';
+        setLinkAvailability(statusDirectionsLink, false);
       }
     }
 
@@ -1679,8 +1762,7 @@ By submitting a request:
     function startPickupTimer(sec){
       setResultsState('reserved');
       remaining=sec; pickupTimerEl.textContent=fmt(remaining);
-      const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
-      extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
+      updateExtendAvailability();
       if(pInt) clearInterval(pInt);
       pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
     }
@@ -1698,6 +1780,54 @@ By submitting a request:
           await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
         }
       };
+    }
+
+    statusEmptyBtn?.addEventListener('click', ()=>{
+      hidePending();
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
+
+    const pm = document.getElementById('pharm-modal');
+    const pmTitle = document.getElementById('pm-title');
+    const pmAddr  = document.getElementById('pm-address');
+    const pmPhone = document.getElementById('pm-phone');
+    const pmCall  = document.getElementById('pm-call');
+    const pmMaps  = document.getElementById('pm-maps');
+    const pmConfirm = document.getElementById('pm-confirm');
+    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
+
+    /* ========== CREATE REQUEST ========== */
+    async function insertRequestRow(row){
+      const { data, error } = await sb().from('requests').insert(row).select('id,created_at').single();
+      if(error) throw error;
+      return data;
+    }
+
+    async function createRequest(payload){
+      if(!hasSupabase()) throw new Error('NO_DB');
+      const baseRow = {
+        status: 'pending',
+        med_name: payload.med_name,
+        active_substance: payload.active_substance || null,
+        med_type: payload.med_type || null,
+        quantity: payload.quantity,
+        allow_generic: payload.allow_generic,
+        city: payload.city
+      };
+      if(payload.barcode){
+        try {
+          return await insertRequestRow({ ...baseRow, barcode_value: payload.barcode });
+        } catch(err){
+          console.warn('Falling back without barcode_value column', err);
+        }
+      }
+      return insertRequestRow(baseRow);
     }
 
     statusEmptyBtn?.addEventListener('click', ()=>{
@@ -1787,8 +1917,34 @@ By submitting a request:
 
     async function renderResults(items){
       resultsList.innerHTML='';
-      items.forEach(item=>{
+      const safeItems = Array.isArray(items) ? items : [];
+      const hasGeoData = safeItems.some(item => {
+        const ph = item?.pharmacy || {};
+        const lat = ph.lat !== undefined && ph.lat !== null ? parseFloat(ph.lat) : NaN;
+        const lng = ph.lng !== undefined && ph.lng !== null ? parseFloat(ph.lng) : NaN;
+        return Number.isFinite(lat) && Number.isFinite(lng);
+      });
+      let coords = state.userCoords;
+      if(hasGeoData && !coords){
+        coords = await requestUserLocation();
+      }
+      if(!hasGeoData){
+        distanceHintEl?.classList.add('hidden');
+      } else if(!coords && state.locationStatus === 'idle'){
+        updateDistanceHint();
+      }
+      safeItems.forEach(item=>{
         const ph=item.pharmacy || {};
+        const lat = ph.lat !== undefined && ph.lat !== null ? parseFloat(ph.lat) : null;
+        const lng = ph.lng !== undefined && ph.lng !== null ? parseFloat(ph.lng) : null;
+        let distanceLabel='';
+        if(coords && Number.isFinite(lat) && Number.isFinite(lng)){
+          const km = haversineDistanceKm(coords.lat, coords.lng, lat, lng);
+          const formatted = formatDistance(km);
+          if(formatted){
+            distanceLabel = t('distanceAway').replace('%s', formatted);
+          }
+        }
         const card = document.createElement('article');
         card.className = 'result-card flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/50 px-4 py-4 shadow-soft';
         card.innerHTML = `
@@ -1798,6 +1954,7 @@ By submitting a request:
           <div class="flex flex-col flex-1 min-w-0 text-left">
             <p class="font-semibold text-slate-900 dark:text-slate-100 truncate">${ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy')}</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${ph.address || '—'}</p>
+            ${distanceLabel ? `<p class="mt-1 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1"><span aria-hidden="true">📍</span><span>${distanceLabel}</span></p>` : ''}
           </div>
           <div class="flex flex-col items-end gap-2 shrink-0">
             ${item.is_generic ? `<span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 text-xs font-semibold status-generic-label-wrapper"><span class="status-generic-label">${t('statusGenericShort')}</span></span>` : ''}
@@ -1813,103 +1970,96 @@ By submitting a request:
         card.dataset.generic = item.is_generic ? 'true' : 'false';
         resultsList.appendChild(card);
       });
-      if(items.length){
+      if(safeItems.length){
         setResultsState('list');
+        if(pushToast && !pushToast.dataset.shown){
+          pushToast.classList.remove('hidden');
+          pushToast.dataset.shown = 'true';
+        }
       }else{
         setResultsState('empty');
       }
     }
-    state.reservation.active = true;
-    state.reservation.expiresAt = pickupUntil;
-    state.reservation.extendUsed = false;
-  }
 
-  let countdownInterval = null;
-  function startCountdown(iso) {
-    if (countdownInterval) clearInterval(countdownInterval);
-    function update(){
-      const now = Date.now();
-      const diff = new Date(iso).getTime() - now;
-      if (diff <= 0) {
-        clearInterval(countdownInterval);
-        document.getElementById('pickup-timer').textContent = '00:00';
-        return;
+    function scheduleDemoResults(allow_generic, barcode){
+      if(pollInt){ clearInterval(pollInt); pollInt=null; }
+      if(demoTimeout){ clearTimeout(demoTimeout); }
+      demoTimeout = setTimeout(async ()=>{
+        hidePending();
+        const demoItems = [
+          { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
+          { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false },
+          { pharmacy:{ name:'PharmaPlus Care', address:'Αχαρνών 45, Αθήνα', phone:'+30 210 5556677', lat:37.997, lng:23.727 }, is_generic: false }
+        ];
+        if(barcode){ console.info('Submitted barcode:', barcode); }
+        await renderResults(demoItems);
+        demoTimeout = null;
+      }, 4500);
+    }
+
+    resultsList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.select-pharm'); if(!btn) return;
+      const card = btn.closest('.result-card'); if(!card) return;
+      selectedPharmacy = {
+        name: card.dataset.name,
+        addr: card.dataset.addr,
+        tel: card.dataset.tel,
+        lat: card.dataset.lat,
+        lng: card.dataset.lng,
+        is_generic: card.dataset.generic === 'true'
+      };
+      pmTitle.textContent = selectedPharmacy.name;
+      pmAddr.textContent  = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (selectedPharmacy.addr || '—');
+      pmPhone.textContent = (state.lang==='el'?'Τηλέφωνο: ':'Phone: ') + (selectedPharmacy.tel || '—');
+      pmCall.href = selectedPharmacy.tel ? `tel:${selectedPharmacy.tel.replace(/\s+/g,'')}` : '#';
+      pmMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(selectedPharmacy.addr||selectedPharmacy.name)}${selectedPharmacy.lat?`@${selectedPharmacy.lat},${selectedPharmacy.lng},17z`:''}`;
+      pm.classList.remove('hidden'); pm.classList.add('flex');
+    });
+
+    document.getElementById('pm-close').onclick = ()=> pm.classList.add('hidden');
+    document.getElementById('pm-confirm').onclick = async ()=>{
+      if(!selectedPharmacy) return;
+      pm.classList.add('hidden');
+      const sec = 60*60;
+      populateReservedDetails(selectedPharmacy);
+      startPickupTimer(sec);
+      if(hasSupabase() && window.currentRequest?.id){
+        const untilISO = new Date(Date.now()+sec*1000).toISOString();
+        await sb().from('requests').update({ status:'reserved', pickup_until: untilISO }).eq('id', window.currentRequest.id);
       }
-      const mins = Math.floor(diff/1000/60);
-      const secs = Math.floor((diff/1000)%60);
-      document.getElementById('pickup-timer').textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-    }
-    update();
-    countdownInterval = setInterval(update, 1000);
-  }
+    };
 
-  async function extendReservation() {
-    if (!state.reservation.active || state.reservation.extendUsed) return;
-    const newIso = new Date(new Date(state.reservation.expiresAt).getTime() + 15*60*1000).toISOString();
-    state.reservation.expiresAt = newIso;
-    state.reservation.extendUsed = true;
-    startCountdown(newIso);
-    if (state.supabase && state.currentRequestId) {
-      await state.supabase.from('requests').update({
-        pickup_until: newIso
-      }).eq('id', state.currentRequestId);
-    }
-    alert(state.lang==='el' ? 'Η κράτηση παρατάθηκε για 15 λεπτά.' : 'Reservation extended by 15 minutes.');
-  }
+    document.getElementById('newSearch').addEventListener('click', ()=>{
+      hidePending();
+      stopPickupTimer();
+      if(demoTimeout){ clearTimeout(demoTimeout); demoTimeout=null; }
+      results.classList.add('hidden');
+      resultsPending?.classList.remove('hidden');
+      resultsListWrap?.classList.add('hidden');
+      resultsEmpty?.classList.add('hidden');
+      pickupBox?.classList.add('hidden');
+      selectedPharmacy = null;
+      window.scrollTo({ top: 0, behavior:'smooth' });
+    });
 
-  function resetToSearch() {
-    document.getElementById('results').classList.add('hidden');
-    document.getElementById('results-pending').classList.add('hidden');
-    document.getElementById('results-list').classList.add('hidden');
-    document.getElementById('results-empty').classList.add('hidden');
-    document.getElementById('pickup-box').classList.add('hidden');
-    state.currentRequestId = null;
-    if (state.pollingTimer) { clearInterval(state.pollingTimer); state.pollingTimer=null; }
-  }
+    /* ========== SUBMIT FLOW ========== */
+    document.getElementById('submitBtn').addEventListener('click', async (e)=>{
+      e.preventDefault();
+      const med_name = document.getElementById('medicine-name').value.trim();
+      const active_substance = document.getElementById('active-substance').value.trim();
+      const barcode = document.getElementById('barcode-value').value.trim();
+      const med_type = document.getElementById('medicine-type').value || null;
+      const quantity = parseInt(document.getElementById('quantity').value || '1',10);
+      const allow_generic = (document.querySelector('input[name="allow-generic"]:checked')?.value==='YES');
+      const city = document.getElementById('city').value;
 
-  function showCelebration() {
-    const ov = document.getElementById('celebration-overlay');
-    ov.classList.remove('hidden');
-    ov.classList.add('flex');
-    const emojiContainer = ov.querySelector('[data-emoji-container]');
-    emojiContainer.innerHTML = '';
-    for (let i=0;i<9;i++){
-      const span = document.createElement('span');
-      span.className = 'floating-emoji';
-      span.textContent = ['🎉','🎊','💊','💚','✅'][Math.floor(Math.random()*5)];
-      span.style.left = (10 + Math.random()*80) + '%';
-      span.style.animationDelay = (Math.random()*0.5) + 's';
-      emojiContainer.appendChild(span);
-    }
-    const mark = ov.querySelector('.success-mark');
-    mark.classList.add('animate-in');
-    setTimeout(()=>{
-      mark.classList.remove('animate-in');
-      ov.classList.add('hidden');
-      ov.classList.remove('flex');
-    }, 3000);
-  }
+      if(!med_name) return alert(state.lang==='el'?'Συμπλήρωσε το όνομα φαρμάκου':'Enter medicine name');
+      if(!city) return alert(state.lang==='el'?'Επίλεξε πόλη':'Select city');
+      if(!document.getElementById('gdpr-checkbox').checked) return alert(state.lang==='el'?'Αποδέξου τους όρους':'Accept terms');
 
-  function closeResultsModal() {
-    const m = document.getElementById('results-modal');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
-  }
+      fireConfetti(3500);
+      showPending();
 
-  // ==========================
-  //  BARCODE CAMERA
-  // ==========================
-  function initBarcode() {
-    const modal = document.getElementById('barcode-modal');
-    const startBtn = document.getElementById('barcode-start');
-    const closeBtn = document.getElementById('barcode-close');
-    const stopBtn = document.getElementById('barcode-stop');
-    const video = document.getElementById('barcode-video');
-    let stream = null;
-
-    startBtn.addEventListener('click', async ()=>{
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
       try {
         let inserted = null;
         if(hasSupabase()){
@@ -1936,17 +2086,7 @@ By submitting a request:
             }catch(err){ console.warn('poll error', err); }
           }, 3000);
         } else {
-          setTimeout(()=>{
-            hidePending();
-          const items = [
-            { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
-            { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false }
-          ];
-          if(barcode){
-            console.info('Submitted barcode:', barcode);
-          }
-          renderResults(items);
-        }, 4500);
+          scheduleDemoResults(allow_generic, barcode);
         }
       } catch(err){
         console.error(err);
@@ -2017,6 +2157,12 @@ By submitting a request:
     document.getElementById('auth-modal-pharmacies').classList.remove('flex');
   }
 
+    /* ========== Init ========== */
+    applyLang();
+    try{
+      const saved = JSON.parse(localStorage.getItem(LS_REQ) || 'null');
+      if(saved?.id){ window.currentRequest = saved; }
+    }catch{}
   </script>
 </body>
 </html>
