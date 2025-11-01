@@ -97,6 +97,42 @@
     #pending-overlay { transition: opacity .25s ease; }
     #push-toast { transition: transform .25s ease, opacity .25s ease; }
     #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
+    /* Spinner και toast για ορατή ανάδραση στη ροή σύνδεσης */
+    .btn-loading-indicator {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 9999px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      animation: authSpinner 0.75s linear infinite;
+    }
+    @keyframes authSpinner { to { transform: rotate(360deg); } }
+    #toast-stack {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 250;
+      pointer-events: none;
+    }
+    #toast-stack .toast {
+      pointer-events: auto;
+      min-width: 240px;
+      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #toast-stack .toast.toast--success { background: rgba(16, 185, 129, 0.94); }
+    #toast-stack .toast.toast--error { background: rgba(239, 68, 68, 0.94); }
+    #toast-stack .toast.toast--info { background: rgba(59, 130, 246, 0.94); }
+    #toast-stack .toast.toast--hide { opacity: 0; transform: translateY(-6px); }
     .lang-btn[data-active="true"] {
       background: linear-gradient(135deg, #29a3a3, #208181);
       color: #fff;
@@ -153,14 +189,17 @@
     <span>💊</span>
     <span>🩺</span>
     <span>💉</span>
+    <span>🩺</span>
     <span>🩹</span>
     <span>🧴</span>
     <span>⚕️</span>
     <span>🧬</span>
     <span>🏥</span>
-    <span>🫀</span>
     <span>🩸</span>
   </div>
+
+  <!-- Στοίβα toast για μηνύματα σύνδεσης -->
+  <div id="toast-stack" aria-live="assertive" aria-atomic="true"></div>
 
   <!-- Celebration overlay -->
   <div id="celebration-overlay" class="fixed inset-0 hidden pointer-events-none z-[60] items-center justify-center">
@@ -1420,12 +1459,393 @@ By submitting a request:
   //  INIT
   // ==========================
   document.addEventListener('DOMContentLoaded', async () => {
+    // Προστασία από διπλή εκτέλεση σε περίπτωση πολλαπλών script blocks
+    if(window.__mediradarInitDone__){
+      return;
+    }
+    window.__mediradarInitDone__ = true;
     // theme
     const html = document.documentElement;
     const themeBtn = document.getElementById('theme-toggle');
     const iconSun = document.getElementById('icon-sun');
     const iconMoon = document.getElementById('icon-moon');
     const pushToast = document.getElementById('push-toast');
+    const toastStack = document.getElementById('toast-stack');
+    const statusBaseClasses = ['text-slate-600','dark:text-slate-300'];
+    const statusSuccessClasses = ['text-emerald-600','dark:text-emerald-300'];
+    const statusErrorClasses = ['text-rose-600','dark:text-rose-300'];
+
+    /* Βοηθητικά για εμφανή μηνύματα κατά τη σύνδεση */
+    function showToast(message, tone='info'){
+      if(!toastStack){
+        alert(message);
+        return;
+      }
+      const resolvedTone = ['success','error','info'].includes(tone) ? tone : 'info';
+      const toast = document.createElement('div');
+      toast.classList.add('toast', `toast--${resolvedTone}`, 'toast--hide');
+      toast.textContent = message;
+      toastStack.appendChild(toast);
+      requestAnimationFrame(()=> toast.classList.remove('toast--hide'));
+      setTimeout(()=>{
+        toast.classList.add('toast--hide');
+        toast.addEventListener('transitionend', ()=> toast.remove(), { once: true });
+      }, 4200);
+    }
+
+    function setButtonLoading(button, isLoading, label='Φόρτωση…'){
+      if(!button) return;
+      if(isLoading){
+        if(!button.dataset.originalHtml){
+          button.dataset.originalHtml = button.innerHTML;
+        }
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.classList.add('opacity-60','pointer-events-none');
+        button.innerHTML = `<span class="flex items-center justify-center gap-2"><span class="btn-loading-indicator" aria-hidden="true"></span>${label}</span>`;
+      } else {
+        button.disabled = false;
+        button.setAttribute('aria-busy', 'false');
+        button.classList.remove('opacity-60','pointer-events-none');
+        if(button.dataset.originalHtml){
+          button.innerHTML = button.dataset.originalHtml;
+          delete button.dataset.originalHtml;
+        }
+      }
+    }
+
+    function setStatusMessage(element, message, tone='info'){
+      if(!element) return;
+      element.textContent = message || '';
+      element.classList.remove(...statusBaseClasses, ...statusSuccessClasses, ...statusErrorClasses);
+      if(tone === 'success'){
+        element.classList.add(...statusSuccessClasses);
+      } else if(tone === 'error'){
+        element.classList.add(...statusErrorClasses);
+      } else {
+        element.classList.add(...statusBaseClasses);
+      }
+    }
+
+    const supabaseUrl = window.SUPABASE_URL || window.ENV?.SUPABASE_URL;
+    const supabaseKey = window.SUPABASE_ANON_KEY || window.ENV?.SUPABASE_ANON_KEY;
+    const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
+    let supabase = window.mediradarSupabase || null;
+    if(!supabase && window.supabase && supabaseUrl && supabaseKey){
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      window.mediradarSupabase = supabase;
+    }
+    if(!supabase){
+      console.warn(`${missingSupabaseMessage} (url:${supabaseUrl?'ok':'—'}, anonKey:${supabaseKey?'ok':'—'}, supabaseJs:${window.supabase?'ok':'—'})`);
+    }
+    if(!state.supabase && supabase){
+      state.supabase = supabase;
+    }
+
+    const authModals = {
+      users: document.getElementById('auth-modal-users'),
+      pharmacies: document.getElementById('auth-modal-pharmacies')
+    };
+    const authRoots = Array.from(document.querySelectorAll('[data-auth-root]'));
+    const authOpenButtons = Array.from(document.querySelectorAll('[data-auth-open]'));
+    const authCloseButtons = Array.from(document.querySelectorAll('[data-auth-close]'));
+    const authHeader = document.querySelector('[data-auth-header]');
+    const headerOpenButtons = authHeader ? Array.from(authHeader.querySelectorAll('[data-auth-open]')) : [];
+    const authHeaderSession = document.querySelector('[data-auth-header-session]');
+    const authHeaderAvatar = document.querySelector('[data-auth-header-avatar]');
+    const authHeaderEmail = document.querySelector('[data-auth-header-email]');
+    const authHeaderLogout = document.querySelector('[data-auth-header-logout]');
+    const proInfoToggles = Array.from(document.querySelectorAll('[data-pro-info-toggle]'));
+
+    let activeAuthModal = null;
+    let authSession = null;
+
+    function getAuthUserLabel(user){
+      if(!user) return '';
+      return user.email || user.user_metadata?.name || user.phone || '';
+    }
+
+    function hideProInfoPanel(panel, toggle){
+      if(!panel) return;
+      const finalize = () => {
+        panel.classList.add('hidden');
+        panel.classList.remove('is-visible');
+        panel.removeEventListener('transitionend', finalize);
+      };
+      panel.addEventListener('transitionend', finalize, { once: true });
+      panel.classList.remove('is-visible');
+      toggle?.setAttribute('aria-expanded', 'false');
+    }
+
+    proInfoToggles.forEach(toggle => {
+      const root = toggle.closest('[data-auth-root]');
+      const panel = root?.querySelector('[data-pro-info-panel]');
+      if(!panel) return;
+      toggle.addEventListener('click', () => {
+        const isVisible = panel.classList.contains('is-visible') && !panel.classList.contains('hidden');
+        if(isVisible){
+          hideProInfoPanel(panel, toggle);
+        } else {
+          panel.classList.remove('hidden');
+          requestAnimationFrame(()=> panel.classList.add('is-visible'));
+          toggle.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    function openAuthModal(target='pharmacies'){
+      const modal = authModals[target] || authModals.pharmacies || authModals.users;
+      if(!modal) return;
+      activeAuthModal = modal;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      const globalStatus = modal.querySelector('[data-auth-status-global]');
+      if(globalStatus){
+        globalStatus.classList.add('hidden');
+        globalStatus.textContent = '';
+      }
+      setStatusMessage(modal.querySelector('[data-auth-status]'), '', 'info');
+    }
+
+    function closeAuthModal(modal = activeAuthModal){
+      if(!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if(modal === activeAuthModal){
+        activeAuthModal = null;
+      }
+      const panel = modal.querySelector('[data-pro-info-panel]');
+      const toggle = modal.querySelector('[data-pro-info-toggle]');
+      hideProInfoPanel(panel, toggle);
+      if(!document.querySelector('[data-auth-modal].flex')){
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function closeAuthModals(){
+      Object.values(authModals).forEach(closeAuthModal);
+    }
+
+    authOpenButtons.forEach(btn => {
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        openAuthModal(btn.dataset.authTarget || 'pharmacies');
+      });
+    });
+
+    authCloseButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = btn.closest('[data-auth-modal]');
+        closeAuthModal(modal || undefined);
+      });
+    });
+
+    document.addEventListener('keydown', event => {
+      if(event.key === 'Escape'){
+        closeAuthModal();
+      }
+    });
+
+    function updateAuthHeaderUI(user){
+      const loggedIn = !!user;
+      headerOpenButtons.forEach(btn => btn.classList.toggle('hidden', loggedIn));
+      if(authHeaderSession){
+        authHeaderSession.classList.toggle('hidden', !loggedIn);
+      }
+      if(authHeaderEmail){
+        authHeaderEmail.textContent = getAuthUserLabel(user);
+      }
+      if(authHeaderAvatar){
+        const label = (getAuthUserLabel(user) || 'Μ').trim();
+        authHeaderAvatar.textContent = label ? label.charAt(0).toUpperCase() : 'Μ';
+      }
+    }
+
+    async function signOutSafely(){
+      if(!supabase) return;
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.warn('signout error', err);
+      }
+    }
+
+    authHeaderLogout?.addEventListener('click', signOutSafely);
+
+    function toggleSessionViews(user){
+      const loggedIn = !!user;
+      authRoots.forEach(root => {
+        const formsWrapper = root.querySelector('[data-auth-forms]');
+        const successView = root.querySelector('[data-auth-success]');
+        const sessionWrapper = root.querySelector('[data-auth-session]');
+        const statusEl = root.querySelector('[data-auth-status]');
+        const userEmailEl = root.querySelector('[data-auth-user-email]');
+        const avatarEl = root.querySelector('[data-auth-avatar]');
+        if(loggedIn){
+          formsWrapper?.classList.add('hidden');
+          successView?.classList.add('hidden');
+          if(sessionWrapper){
+            sessionWrapper.classList.remove('hidden');
+            if(userEmailEl){ userEmailEl.textContent = getAuthUserLabel(user); }
+            if(avatarEl){
+              const initial = (getAuthUserLabel(user) || 'Μ').trim();
+              avatarEl.textContent = initial ? initial.charAt(0).toUpperCase() : 'Μ';
+            }
+          }
+          setStatusMessage(statusEl, '', 'info');
+        } else {
+          formsWrapper?.classList.remove('hidden');
+          sessionWrapper?.classList.add('hidden');
+          setStatusMessage(statusEl, '', 'info');
+        }
+      });
+    }
+
+    function applyAuthSession(session){
+      authSession = session || null;
+      const user = authSession?.user || null;
+      updateAuthHeaderUI(user);
+      toggleSessionViews(user);
+      if(user && activeAuthModal){
+        setTimeout(()=> closeAuthModal(), 2000);
+      }
+    }
+
+    function resolveCopy(role){
+      if(role === 'pharmacies'){
+        return {
+          missingEmail: 'Αποτυχία σύνδεσης: συμπλήρωσε email φαρμακείου.',
+          sending: 'Γίνεται αποστολή magic link…',
+          success: 'Σου στείλαμε email σύνδεσης.',
+          google: 'Άνοιγμα Google για σύνδεση…'
+        };
+      }
+      return {
+        missingEmail: 'Αποτυχία σύνδεσης: συμπλήρωσε email.',
+        sending: 'Γίνεται αποστολή magic link…',
+        success: 'Σου στείλαμε email σύνδεσης.',
+        google: 'Άνοιγμα Google για σύνδεση…'
+      };
+    }
+
+    authRoots.forEach(root => {
+      const role = root.dataset.authRole || 'users';
+      const copy = resolveCopy(role);
+      const form = root.querySelector('[data-auth-form]');
+      const emailInput = root.querySelector('input[type="email"]');
+      const emailButton = root.querySelector('[data-auth-email-button]');
+      const googleButton = root.querySelector('[data-auth-google]');
+      const statusEl = root.querySelector('[data-auth-status]');
+      const globalStatus = root.querySelector('[data-auth-status-global]');
+      const formsWrapper = root.querySelector('[data-auth-forms]');
+      const successView = root.querySelector('[data-auth-success]');
+      const logoutBtn = root.querySelector('[data-auth-logout]');
+
+      logoutBtn?.addEventListener('click', signOutSafely);
+
+      if(!supabase && statusEl){
+        setStatusMessage(statusEl, missingSupabaseMessage, 'error');
+      }
+
+      form?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const email = emailInput?.value?.trim();
+        if(!email){
+          showToast(copy.missingEmail, 'error');
+          setStatusMessage(statusEl, copy.missingEmail, 'error');
+          return;
+        }
+        if(!supabase){
+          const message = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
+          showToast(message, 'error');
+          setStatusMessage(statusEl, missingSupabaseMessage, 'error');
+          return;
+        }
+        if(globalStatus){
+          globalStatus.classList.add('hidden');
+          globalStatus.textContent = '';
+        }
+        setStatusMessage(statusEl, copy.sending, 'info');
+        setButtonLoading(emailButton, true, 'Αποστολή…');
+        try {
+          // Επιλογή Α (ενεργή): Magic Link μέσω Supabase
+          const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: window.location.origin }
+          });
+          // Επιλογή Β (εναλλακτική): Google OAuth μέσω Supabase
+          // const { data, error } = await supabase.auth.signInWithOAuth({
+          //   provider: 'google',
+          //   options: { redirectTo: window.location.origin }
+          // });
+          if(error) throw error;
+          const successMessage = copy.success;
+          showToast(successMessage, 'success');
+          setStatusMessage(statusEl, successMessage, 'success');
+          if(emailInput){ emailInput.value = ''; }
+          if(formsWrapper && successView){
+            successView.classList.remove('hidden');
+            formsWrapper.classList.add('hidden');
+            setTimeout(()=>{
+              successView.classList.add('hidden');
+              formsWrapper.classList.remove('hidden');
+            }, 4200);
+          }
+        } catch (err) {
+          const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
+          showToast(message, 'error');
+          setStatusMessage(statusEl, message, 'error');
+        } finally {
+          setButtonLoading(emailButton, false);
+        }
+      });
+
+      googleButton?.addEventListener('click', async event => {
+        event.preventDefault();
+        if(!supabase){
+          const message = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
+          showToast(message, 'error');
+          setStatusMessage(statusEl, missingSupabaseMessage, 'error');
+          return;
+        }
+        if(globalStatus){
+          globalStatus.classList.add('hidden');
+          globalStatus.textContent = '';
+        }
+        setStatusMessage(statusEl, copy.google, 'info');
+        setButtonLoading(googleButton, true, 'Σύνδεση…');
+        try {
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin }
+          });
+          if(error) throw error;
+          if(data?.url){
+            window.location.assign(data.url);
+          } else {
+            showToast('Άνοιξε νέο παράθυρο Google για να συνεχίσεις.', 'info');
+          }
+        } catch (err) {
+          const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
+          showToast(message, 'error');
+          setStatusMessage(statusEl, message, 'error');
+        } finally {
+          setButtonLoading(googleButton, false);
+        }
+      });
+    });
+
+    if(supabase){
+      supabase.auth.getSession()
+        .then(({ data }) => applyAuthSession(data?.session || null))
+        .catch(()=> applyAuthSession(null));
+      supabase.auth.onAuthStateChange((_event, session) => {
+        applyAuthSession(session || null);
+      });
+    } else {
+      applyAuthSession(null);
+    }
     function setTheme(mode){
       const dark = mode==='dark';
       html.classList.toggle('dark', dark);
@@ -1504,74 +1924,6 @@ By submitting a request:
     });
     document.getElementById('gdpr-close').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
     document.getElementById('gdpr-ok').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
-
-    /* ========== Modals (How/GDPR/Login) ========== */
-    const modalHow = document.getElementById('modal-how');
-    document.getElementById('cta-how').onclick = ()=> {
-      modalHow.classList.remove('hidden'); modalHow.classList.add('flex');
-      const body = state.lang==='el'
-        ? `<div class="space-y-4">
-            <div class="space-y-2">
-              <p class="text-base font-semibold">🚀 MediRadar – Το φάρμακό σου, χωρίς καθυστερήσεις!</p>
-              <p>Ψάχνεις φάρμακο και δεν θες να χάνεις χρόνο;</p>
-              <p>Με το MediRadar, βρίσκεις άμεσα ποιο φαρμακείο έχει διαθέσιμο το φαρμακό σου – χωρίς άσκοπες κλήσεις, χωρίς περιττές μετακινήσεις!</p>
-            </div>
-            <div class="space-y-2">
-              <p class="font-semibold">🧠 Πώς λειτουργεί;</p>
-              <p>Μπαίνεις στην πλατφόρμα, συμπληρώνεις τα στοιχεία του φαρμάκου και… τέλος! Τα συνεργαζόμενα φαρμακεία λαμβάνουν την αίτησή σου και σου απαντούν θετικά. Το φάρμακο σε περιμένει για παραλαβή σε μόλις 60 λεπτά!</p>
-            </div>
-            <div class="space-y-2">
-              <p class="font-semibold">💡 Γιατί να το χρησιμοποιήσεις;</p>
-              <ul class="list-disc pl-5 space-y-2">
-                <li>✅ Γρήγορη και εύκολη αναζήτηση φαρμάκου</li>
-                <li>✅ Χωρίς τηλεφωνήματα ή αναμονές</li>
-                <li>✅ Χωρίς άγχος για πληρωμές ή αποστολές</li>
-                <li>✅ Αν έχεις συνταγή, όλα γίνονται στο φαρμακείο</li>
-                <li>✅ Δεν συλλέγουμε τιμές ή ιατρικά δεδομένα</li>
-              </ul>
-            </div>
-            <p>🎯 Εσύ ασχολείσαι μόνο με την υγεία σου – εμείς με όλα τα υπόλοιπα!</p>
-          </div>`
-        : `<div class="space-y-4">
-            <div class="space-y-2">
-              <p class="text-base font-semibold">🚀 MediRadar – Your medicine, without delays!</p>
-              <p>Looking for medication and don’t want to waste time?</p>
-              <p>With MediRadar you instantly see which pharmacy has your medicine available—no unnecessary calls or trips.</p>
-            </div>
-            <div class="space-y-2">
-              <p class="font-semibold">🧠 How it works?</p>
-              <p>Visit the platform, fill in the medicine details and… done! Partner pharmacies receive your request and reply with availability. Your medicine is ready for pick-up within just 60 minutes.</p>
-            </div>
-            <div class="space-y-2">
-              <p class="font-semibold">💡 Why use it?</p>
-              <ul class="list-disc pl-5 space-y-2">
-                <li>✅ Fast and easy medicine search</li>
-                <li>✅ No phone calls or waiting lines</li>
-                <li>✅ No stress about payments or shipping</li>
-                <li>✅ If you have a prescription, everything happens at the pharmacy</li>
-                <li>✅ We do not collect pricing or medical data</li>
-              </ul>
-            </div>
-            <p>🎯 You focus on your health — we handle the rest!</p>
-          </div>`;
-      document.getElementById('how-body').innerHTML = body;
-    };
-    document.getElementById('how-close').onclick = ()=> modalHow.classList.add('hidden');
-    document.getElementById('how-ok').onclick    = ()=> modalHow.classList.add('hidden');
-
-    const modalGdpr = document.getElementById('gdpr-modal');
-    document.getElementById('gdpr-open').onclick = ()=> { modalGdpr.classList.remove('hidden'); modalGdpr.classList.add('flex'); };
-    document.getElementById('gdpr-close').onclick= ()=> modalGdpr.classList.add('hidden');
-    document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
-
-    const loginModal = document.getElementById('login-modal');
-    document.getElementById('cta-signin').onclick = ()=>{ loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); };
-    document.getElementById('login-close').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-email-btn').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-google').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-apple').onclick  = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-guest').onclick  = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-forgot').onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
 
     /* ========== Barcode scanning ========== */
     const barcodeModal = document.getElementById('barcode-modal');
@@ -2167,26 +2519,6 @@ async function handleDirectPharmacySignIn(button) {
     stopBtn.addEventListener('click', stop);
   }
 
-  // ==========================
-  //  AUTH (mocked / simple)
-  // ==========================
-  function openAuthModal(role) {
-    const mUsers = document.getElementById('auth-modal-users');
-    const mPharm = document.getElementById('auth-modal-pharmacies');
-    if (role === 'pharmacies') {
-      mPharm.classList.remove('hidden');
-      mPharm.classList.add('flex');
-    } else {
-      mUsers.classList.remove('hidden');
-      mUsers.classList.add('flex');
-    }
-  }
-  function closeAuthModals() {
-    document.getElementById('auth-modal-users').classList.add('hidden');
-    document.getElementById('auth-modal-users').classList.remove('flex');
-    document.getElementById('auth-modal-pharmacies').classList.add('hidden');
-    document.getElementById('auth-modal-pharmacies').classList.remove('flex');
-  }
 
   </script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
