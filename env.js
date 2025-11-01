@@ -14,6 +14,12 @@
   window.SUPABASE_URL = SUPABASE_URL;
   window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
 
+  // ➕ Νέα λογική: γεμίζουμε το window.ENV ώστε ο supabase client να φτιαχτεί σωστά
+  window.ENV = Object.assign({}, window.ENV, {
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  });
+
   // αν έχει ήδη φορτωθεί το supabase-js από το HTML, φτιάξε client ΜΙΑ φορά
   if (window.supabase && !window.mediradarSupabase) {
     window.mediradarSupabase = window.supabase.createClient(
