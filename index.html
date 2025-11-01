@@ -1426,6 +1426,8 @@ By submitting a request:
     const iconSun = document.getElementById('icon-sun');
     const iconMoon = document.getElementById('icon-moon');
     const pushToast = document.getElementById('push-toast');
+    const pushAllow = document.getElementById('push-allow');
+    const pushDeny = document.getElementById('push-deny');
     function setTheme(mode){
       const dark = mode==='dark';
       html.classList.toggle('dark', dark);
@@ -1600,21 +1602,25 @@ By submitting a request:
       const txt = t(key);
       barcodeStatus.textContent = (value !== undefined && txt.includes('%s')) ? txt.replace('%s', value) : txt;
     }
-    pushDeny.addEventListener('click', ()=>{
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-    });
-    pushAllow.addEventListener('click', async ()=>{
-      // απλή επίδειξη
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-      if ('Notification' in window) {
-        const perm = await Notification.requestPermission();
-        if (perm === 'granted') {
-          new Notification('Θα σε ενημερώσουμε όταν απαντήσει φαρμακείο.');
+    if (pushDeny) {
+      pushDeny.addEventListener('click', () => {
+        pushToast?.classList.add('hidden');
+        localStorage.setItem('mediradar-push-dismissed', '1');
+      });
+    }
+    if (pushAllow) {
+      pushAllow.addEventListener('click', async () => {
+        // απλή επίδειξη
+        pushToast?.classList.add('hidden');
+        localStorage.setItem('mediradar-push-dismissed', '1');
+        if ('Notification' in window) {
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            new Notification('Θα σε ενημερώσουμε όταν απαντήσει φαρμακείο.');
+          }
         }
-      }
-    });
+      });
+    }
 
     // barcode modal
     initBarcode();
