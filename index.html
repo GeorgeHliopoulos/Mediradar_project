@@ -1565,13 +1565,22 @@ By submitting a request:
     document.getElementById('gdpr-ok').onclick   = ()=> modalGdpr.classList.add('hidden');
 
     const loginModal = document.getElementById('login-modal');
-    document.getElementById('cta-signin').onclick = ()=>{ loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); };
-    document.getElementById('login-close').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-email-btn').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-google').onclick = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-apple').onclick  = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-guest').onclick  = ()=> loginModal.classList.add('hidden');
-    document.getElementById('login-forgot').onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
+    const legacyLoginBtn = document.getElementById('cta-signin');
+    if (loginModal && legacyLoginBtn) {
+      legacyLoginBtn.onclick = ()=>{ loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); };
+      const loginClose = document.getElementById('login-close');
+      if (loginClose) loginClose.onclick = ()=> loginModal.classList.add('hidden');
+      const loginEmailBtn = document.getElementById('login-email-btn');
+      if (loginEmailBtn) loginEmailBtn.onclick = ()=> loginModal.classList.add('hidden');
+      const loginGoogle = document.getElementById('login-google');
+      if (loginGoogle) loginGoogle.onclick = ()=> loginModal.classList.add('hidden');
+      const loginApple = document.getElementById('login-apple');
+      if (loginApple) loginApple.onclick  = ()=> loginModal.classList.add('hidden');
+      const loginGuest = document.getElementById('login-guest');
+      if (loginGuest) loginGuest.onclick  = ()=> loginModal.classList.add('hidden');
+      const loginForgot = document.getElementById('login-forgot');
+      if (loginForgot) loginForgot.onclick = ()=> alert('Θα προστεθεί ροή υπενθύμισης κωδικού.');
+    }
 
     /* ========== Barcode scanning ========== */
     const barcodeModal = document.getElementById('barcode-modal');
