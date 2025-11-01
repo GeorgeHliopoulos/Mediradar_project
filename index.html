@@ -160,9 +160,10 @@
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+      <!-- 🛠️ Κουμπί login για τα φαρμακεία ώστε να καλεί τον Supabase handler -->
       <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
         <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για φαρμακεία</span>
+        <span id="t-pro">Σύνδεση για Φαρμακεία</span>
       </button>
 
       <div class="flex items-center gap-2 rounded-2xl glass-surface bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
@@ -856,7 +857,7 @@
   // ==========================
   const strings = {
     el: {
-      't-pro':'Για φαρμακεία',
+      't-pro':'Σύνδεση για Φαρμακεία', // 🛠️ Ενημερώθηκε για να δείχνει ξεκάθαρα την ενέργεια σύνδεσης
       't-langElLabel':'Ελληνικά',
       't-langEnLabel':'Αγγλικά',
       't-signinBTN':'Σύνδεση',
@@ -958,7 +959,7 @@
 `
     },
     en: {
-      't-pro':'For pharmacies',
+      't-pro':'Pharmacy sign-in',
       't-langElLabel':'Greek',
       't-langEnLabel':'English',
       't-signinBTN':'Sign in',
