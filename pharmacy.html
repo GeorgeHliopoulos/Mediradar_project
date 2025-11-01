@@ -612,9 +612,11 @@
 
     /* ---------- setup ---------- */
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
-    const supabase = supabaseClient || (SUPABASE_URL && SUPABASE_ANON_KEY
-      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null);
+    const supabase = supabaseClient
+      || window.mediradarSupabase
+      || (SUPABASE_URL && SUPABASE_ANON_KEY
+        ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null);
     if(!supabase){
       console.warn('Supabase configuration is missing.');
     }

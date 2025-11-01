@@ -1611,8 +1611,13 @@ By submitting a request:
     initBarcode();
 
     // Supabase
-    if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
+    if (window.mediradarSupabase) {
+      // 🆕 Επαναχρησιμοποιούμε τον έτοιμο Supabase client του env.js
+      state.supabase = window.mediradarSupabase;
+    } else if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
       state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    } else if (!window.supabase && (window.SUPABASE_URL || window.SUPABASE_ANON_KEY)) {
+      console.warn('⚠️ Το supabase-js script δεν φορτώθηκε σωστά. Έλεγξε την <script> ετικέτα.');
     }
 
     // Submit
@@ -1659,14 +1664,16 @@ By submitting a request:
     // Fake auth buttons
     document.querySelectorAll('[data-auth-open]').forEach(btn=>{
       btn.addEventListener('click', async event=>{
+        event.preventDefault();
         const isDirect = btn.dataset.authDirect === 'true';
         if(isDirect){
-          event.preventDefault();
           await handleDirectPharmacySignIn(btn);
           return;
         }
-        const target = btn.getAttribute('data-auth-target');
-        openAuthModal(target);
+        const target = btn.getAttribute('data-auth-target') || 'users';
+        if (target) {
+          openAuthModal(target);
+        }
       });
     });
     document.querySelectorAll('[data-auth-close]').forEach(btn=>{
@@ -1676,18 +1683,33 @@ By submitting a request:
 
 async function handleDirectPharmacySignIn(button) {
   // 🛠️ Άμεση σύνδεση Supabase από το CTA με ορατό feedback
-  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+  const modalPharm = document.getElementById('auth-modal-pharmacies');
+  const hasKeys = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY);
+
+  if (!hasKeys) {
     console.warn('⚠️ Δεν βρέθηκαν τα κλειδιά Supabase στο env.js.');
     showAuthToast('Αποτυχία σύνδεσης: λείπουν ρυθμίσεις Supabase.', 'error');
+    if (modalPharm) {
+      modalPharm.classList.remove('hidden');
+      modalPharm.classList.add('flex');
+    }
     return;
   }
 
-  if (!state.supabase && window.supabase) {
-    state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  if (!state.supabase) {
+    if (window.mediradarSupabase) {
+      state.supabase = window.mediradarSupabase;
+    } else if (window.supabase) {
+      state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    }
   }
 
   if (!state.supabase) {
     showAuthToast('Αποτυχία σύνδεσης: δεν δημιουργήθηκε client.', 'error');
+    if (modalPharm) {
+      modalPharm.classList.remove('hidden');
+      modalPharm.classList.add('flex');
+    }
     return;
   }
 
