@@ -161,7 +161,7 @@
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
       <!-- 🛠️ Κουμπί login για τα φαρμακεία ώστε να καλεί τον Supabase handler -->
-      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
+      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" data-auth-direct="true" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
         <span aria-hidden="true">💼</span>
         <span id="t-pro">Σύνδεση για Φαρμακεία</span>
       </button>
@@ -1060,6 +1060,75 @@ By submitting a request:
     }
   };
 
+  const EMAIL_REDIRECT_URL = (window.ENV && typeof window.ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && window.ENV.SUPABASE_EMAIL_REDIRECT_URL.length)
+    ? window.ENV.SUPABASE_EMAIL_REDIRECT_URL
+    : `${window.location.origin}/pharmacy.html`;
+
+  let authToastTimer = null;
+
+  function ensureAuthToast() {
+    let toast = document.querySelector('[data-med-toast]');
+    if (toast) return toast;
+    toast = document.createElement('div');
+    toast.dataset.medToast = 'true';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.style.cssText = `
+      position: fixed;
+      left: 50%;
+      bottom: 2.5rem;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,0.92);
+      color: #fff;
+      padding: 0.9rem 1.4rem;
+      border-radius: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+      z-index: 9999;
+      max-width: min(92vw, 420px);
+      text-align: center;
+    `;
+    document.body.appendChild(toast);
+    return toast;
+  }
+
+  function showAuthToast(message, tone = 'info') {
+    const toast = ensureAuthToast();
+    toast.textContent = message;
+    toast.style.background = tone === 'error' ? 'rgba(185, 28, 28, 0.92)' : 'rgba(15,23,42,0.92)';
+    toast.style.opacity = '1';
+    clearTimeout(authToastTimer);
+    authToastTimer = window.setTimeout(() => {
+      toast.style.opacity = '0';
+    }, 4200);
+  }
+
+  function setAuthButtonLoading(button, isLoading) {
+    if (!button) return;
+    if (isLoading) {
+      if (!button.dataset.originalLabel) {
+        button.dataset.originalLabel = button.textContent;
+      }
+      button.textContent = 'Σύνδεση…';
+      button.disabled = true;
+      button.classList.add('opacity-70');
+      button.setAttribute('aria-busy', 'true');
+    } else {
+      const label = button.dataset.originalLabel;
+      if (label) {
+        button.textContent = label;
+        delete button.dataset.originalLabel;
+      }
+      button.disabled = false;
+      button.classList.remove('opacity-70');
+      button.setAttribute('aria-busy', 'false');
+    }
+  }
+
   // ==========================
   //  CITY LIST
   // ==========================
@@ -1569,7 +1638,13 @@ By submitting a request:
 
     // Fake auth buttons
     document.querySelectorAll('[data-auth-open]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', async event=>{
+        const isDirect = btn.dataset.authDirect === 'true';
+        if(isDirect){
+          event.preventDefault();
+          await handleDirectPharmacySignIn(btn);
+          return;
+        }
         const target = btn.getAttribute('data-auth-target');
         openAuthModal(target);
       });
@@ -1578,6 +1653,48 @@ By submitting a request:
       btn.addEventListener('click', closeAuthModals);
     });
   });
+
+async function handleDirectPharmacySignIn(button) {
+  // 🛠️ Άμεση σύνδεση Supabase από το CTA με ορατό feedback
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    console.warn('⚠️ Δεν βρέθηκαν τα κλειδιά Supabase στο env.js.');
+    showAuthToast('Αποτυχία σύνδεσης: λείπουν ρυθμίσεις Supabase.', 'error');
+    return;
+  }
+
+  if (!state.supabase && window.supabase) {
+    state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  }
+
+  if (!state.supabase) {
+    showAuthToast('Αποτυχία σύνδεσης: δεν δημιουργήθηκε client.', 'error');
+    return;
+  }
+
+  const email = window.prompt('Πληκτρολόγησε το email σου για magic link:');
+  const trimmed = email?.trim();
+  if (!trimmed) {
+    showAuthToast('Παρακαλούμε συμπλήρωσε email για να συνεχίσεις.', 'error');
+    return;
+  }
+
+  try {
+    setAuthButtonLoading(button, true);
+    const { error } = await state.supabase.auth.signInWithOtp({
+      email: trimmed,
+      options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+    });
+    // Εναλλακτικά, ενεργοποίησε Google OAuth:
+    // const { error } = await state.supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) throw error;
+    showAuthToast('Σου στείλαμε email σύνδεσης.');
+  } catch (err) {
+    const message = err?.message || 'Κάτι πήγε στραβά.';
+    showAuthToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
+  } finally {
+    setAuthButtonLoading(button, false);
+  }
+}
 
   function applyLang() {
     const all = document.querySelectorAll('[id^="t-"], #pending-overlay-headline, #pending-overlay-message, #pending-overlay-status-text');

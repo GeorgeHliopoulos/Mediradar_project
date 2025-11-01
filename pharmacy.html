@@ -225,7 +225,7 @@
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2" data-auth-header>
-          <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
+          <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" data-auth-direct="true" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
           <div data-auth-header-session class="hidden items-center gap-2">
             <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
             <span data-auth-header-email class="text-sm font-semibold"></span>
@@ -506,6 +506,75 @@
       errors: []
     };
 
+    const EMAIL_REDIRECT_URL = (window.ENV && typeof window.ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && window.ENV.SUPABASE_EMAIL_REDIRECT_URL.length)
+      ? window.ENV.SUPABASE_EMAIL_REDIRECT_URL
+      : `${window.location.origin}/pharmacy.html`;
+
+    let authToastTimer = null;
+
+    function ensureAuthToast(){
+      let toast = document.querySelector('[data-med-toast]');
+      if(toast) return toast;
+      toast = document.createElement('div');
+      toast.dataset.medToast = 'true';
+      toast.setAttribute('role','status');
+      toast.setAttribute('aria-live','polite');
+      toast.style.cssText = `
+        position: fixed;
+        left: 50%;
+        bottom: 2.5rem;
+        transform: translateX(-50%);
+        background: rgba(15,23,42,0.92);
+        color: #fff;
+        padding: 0.9rem 1.4rem;
+        border-radius: 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+        z-index: 9999;
+        max-width: min(92vw, 420px);
+        text-align: center;
+      `;
+      document.body.appendChild(toast);
+      return toast;
+    }
+
+    function showAuthToast(message, tone='info'){
+      const toast = ensureAuthToast();
+      toast.textContent = message;
+      toast.style.background = tone === 'error' ? 'rgba(185, 28, 28, 0.92)' : 'rgba(15,23,42,0.92)';
+      toast.style.opacity = '1';
+      clearTimeout(authToastTimer);
+      authToastTimer = window.setTimeout(()=>{
+        toast.style.opacity = '0';
+      }, 4200);
+    }
+
+    function setAuthButtonLoading(button, isLoading){
+      if(!button) return;
+      if(isLoading){
+        if(!button.dataset.originalLabel){
+          button.dataset.originalLabel = button.textContent;
+        }
+        button.textContent = 'Σύνδεση…';
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        button.setAttribute('aria-busy','true');
+      } else {
+        const label = button.dataset.originalLabel;
+        if(label){
+          button.textContent = label;
+          delete button.dataset.originalLabel;
+        }
+        button.disabled = false;
+        button.classList.remove('opacity-70');
+        button.setAttribute('aria-busy','false');
+      }
+    }
+
     /* ---------- theme ---------- */
     const html = document.documentElement;
     const themeBtn = qs('#theme-toggle');
@@ -531,6 +600,8 @@
     let activeAuthModal = null;
     const authCloseEls = qsa('[data-auth-close]');
     const authOpenButtons = qsa('[data-auth-open]');
+    const modalAuthButtons = authOpenButtons.filter(btn => btn.dataset.authDirect !== 'true');
+    const directPharmacyButton = authOpenButtons.find(btn => btn.dataset.authDirect === 'true') || null;
     const authHeaderSession = qs('[data-auth-header-session]');
     const authHeaderAvatar = qs('[data-auth-header-avatar]');
     const authHeaderEmail = qs('[data-auth-header-email]');
@@ -618,6 +689,39 @@
       }
     }
 
+    async function handleDirectPharmacySignIn(button){
+      // 🛠️ Άμεση ροή magic link από το CTA με feedback στον φαρμακοποιό
+      if(!supabase){
+        console.warn('⚠️ Το Supabase δεν ρυθμίστηκε – έλεγξε τα κλειδιά στο env.js.');
+        showAuthToast('Αποτυχία σύνδεσης: λείπουν ρυθμίσεις Supabase.', 'error');
+        return;
+      }
+
+      const email = window.prompt('Πληκτρολόγησε το email σου για magic link:');
+      const trimmed = email?.trim();
+      if(!trimmed){
+        showAuthToast('Παρακαλούμε συμπλήρωσε email για να συνεχίσεις.', 'error');
+        return;
+      }
+
+      try{
+        setAuthButtonLoading(button, true);
+        const { error } = await supabase.auth.signInWithOtp({
+          email: trimmed,
+          options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+        });
+        // Εναλλακτική: Google OAuth ροή
+        // const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+        if(error) throw error;
+        showAuthToast('Σου στείλαμε email σύνδεσης.');
+      }catch(err){
+        const message = err?.message || 'Κάτι πήγε στραβά.';
+        showAuthToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
+      }finally{
+        setAuthButtonLoading(button, false);
+      }
+    }
+
     function updateAuthHeaderUI(userOverride){
       const user = userOverride || getSessionUser();
       const email = user?.email || user?.user_metadata?.name || user?.phone || '';
@@ -644,12 +748,19 @@
       });
     }
 
-    authOpenButtons.forEach(btn => {
+    modalAuthButtons.forEach(btn => {
       btn.addEventListener('click', event => {
         event.preventDefault();
         openAuthModal(btn.dataset.authTarget || 'pharmacies');
       });
     });
+
+    if(directPharmacyButton){
+      directPharmacyButton.addEventListener('click', async event => {
+        event.preventDefault();
+        await handleDirectPharmacySignIn(directPharmacyButton);
+      });
+    }
 
     authCloseEls.forEach(btn => btn.addEventListener('click', () => {
       const modal = btn.closest('[data-auth-modal]');
