@@ -46,33 +46,36 @@
       border-color: rgba(148, 163, 184, 0.32);
       box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
     }
-    /* 💊 Ενισχυμένη κίνηση φαρμακευτικών emoji για πιο έντονο και γρήγορο υπόβαθρο */
-    .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
     .global-emoji-layer span {
       position: absolute;
-      font-size: clamp(3rem, 7vw, 4.5rem);
-      opacity: 0.28;
+      font-size: clamp(3rem, 6.5vw, 4.6rem);
+      opacity: 0.3;
+      filter: drop-shadow(0 18px 28px rgba(14, 165, 233, 0.25));
       animation-iteration-count: infinite;
       animation-timing-function: linear;
-      filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.32));
     }
-    .global-emoji-layer span:nth-child(1) { top: 6%; left: 10%; animation-name: globalEmojiFloatA; animation-duration: 24s; }
-    .global-emoji-layer span:nth-child(2) { top: 18%; right: 12%; animation-name: globalEmojiFloatB; animation-duration: 26s; }
-    .global-emoji-layer span:nth-child(3) { top: 38%; left: 38%; animation-name: globalEmojiFloatC; animation-duration: 28s; opacity: 0.24; }
-    .global-emoji-layer span:nth-child(4) { bottom: 18%; left: 16%; animation-name: globalEmojiFloatD; animation-duration: 25s; }
-    .global-emoji-layer span:nth-child(5) { bottom: 10%; right: 14%; animation-name: globalEmojiFloatE; animation-duration: 27s; }
-    .global-emoji-layer span:nth-child(6) { top: 62%; left: 8%; animation-name: globalEmojiFloatF; animation-duration: 23s; }
-    .global-emoji-layer span:nth-child(7) { top: 12%; right: 34%; animation-name: globalEmojiFloatG; animation-duration: 22s; }
-    .global-emoji-layer span:nth-child(8) { bottom: 28%; right: 32%; animation-name: globalEmojiFloatH; animation-duration: 24s; }
-    .dark .global-emoji-layer span { opacity: 0.32; }
-    @keyframes globalEmojiFloatA { 0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } 45% { transform: translate3d(36px, -22px, 0) scale(1.08); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } }
-    @keyframes globalEmojiFloatB { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } 50% { transform: translate3d(-32px, 20px, 0) scale(1.1); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } }
-    @keyframes globalEmojiFloatC { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } 55% { transform: translate3d(28px, 26px, 0) scale(1.12); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } }
-    @keyframes globalEmojiFloatD { 0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } 48% { transform: translate3d(30px, -24px, 0) scale(1.08); opacity: 0.31; } 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } }
-    @keyframes globalEmojiFloatE { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } 52% { transform: translate3d(-30px, -18px, 0) scale(1.05); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } }
-    @keyframes globalEmojiFloatF { 0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } 58% { transform: translate3d(34px, -16px, 0) scale(1.08); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } }
-    @keyframes globalEmojiFloatG { 0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } 50% { transform: translate3d(-24px, 28px, 0) scale(1.12); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } }
-    @keyframes globalEmojiFloatH { 0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } 56% { transform: translate3d(22px, -28px, 0) scale(1.09); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } }
+    .global-emoji-layer span:nth-child(1) { top: 6%; left: 10%; animation: globalEmojiFloatA 18s linear infinite; }
+    .global-emoji-layer span:nth-child(2) { top: 16%; right: 14%; animation: globalEmojiFloatB 22s linear infinite; }
+    .global-emoji-layer span:nth-child(3) { bottom: 18%; left: 16%; animation: globalEmojiFloatC 24s linear infinite; }
+    .global-emoji-layer span:nth-child(4) { bottom: 10%; right: 12%; animation: globalEmojiFloatD 20s linear infinite; }
+    .global-emoji-layer span:nth-child(5) { top: 44%; left: 44%; animation: globalEmojiFloatE 26s linear infinite; opacity: 0.26; }
+    .global-emoji-layer span:nth-child(6) { top: 26%; left: 30%; animation: globalEmojiFloatF 19s linear infinite; }
+    .global-emoji-layer span:nth-child(7) { bottom: 28%; right: 28%; animation: globalEmojiFloatG 21s linear infinite; }
+    .global-emoji-layer span:nth-child(8) { top: 58%; right: 18%; animation: globalEmojiFloatH 23s linear infinite; }
+    .global-emoji-layer span:nth-child(9) { bottom: 12%; left: 38%; animation: globalEmojiFloatI 17s linear infinite; }
+    .global-emoji-layer span:nth-child(10) { top: 10%; left: 52%; animation: globalEmojiFloatJ 29s linear infinite; }
+    .dark .global-emoji-layer span { opacity: 0.38; filter: drop-shadow(0 18px 30px rgba(56, 189, 248, 0.35)); }
+    @keyframes globalEmojiFloatA { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; } 45% { transform: translate3d(36px, -24px, 0) scale(1.08); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; } }
+    @keyframes globalEmojiFloatB { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; } 50% { transform: translate3d(-42px, 28px, 0) scale(1.12); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; } }
+    @keyframes globalEmojiFloatC { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; } 55% { transform: translate3d(34px, -20px, 0) scale(1.08); opacity: 0.36; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; } }
+    @keyframes globalEmojiFloatD { 0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.08; } 50% { transform: translate3d(-32px, -30px, 0) scale(0.96); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.08; } }
+    @keyframes globalEmojiFloatE { 0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; } 50% { transform: translate3d(26px, 30px, 0) scale(1.1); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; } }
+    @keyframes globalEmojiFloatF { 0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.08; } 45% { transform: translate3d(30px, -26px, 0) scale(1.06); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.08; } }
+    @keyframes globalEmojiFloatG { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.09; } 50% { transform: translate3d(-34px, 32px, 0) scale(1.08); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.09; } }
+    @keyframes globalEmojiFloatH { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; } 55% { transform: translate3d(22px, -34px, 0) scale(1.1); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; } }
+    @keyframes globalEmojiFloatI { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; } 50% { transform: translate3d(-26px, 28px, 0) scale(1.05); opacity: 0.33; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; } }
+    @keyframes globalEmojiFloatJ { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; } 50% { transform: translate3d(34px, 26px, 0) scale(1.1); opacity: 0.28; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; } }
     .app-bg {
       background:
         radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
@@ -146,18 +149,53 @@
     #celebration-overlay .success-mark.animate-in { animation: successPop .6s ease forwards, successFade .5s ease forwards 2.4s; }
     @keyframes successPop { to { transform:scale(1); opacity:1; } }
     @keyframes successFade { to { transform:scale(.92); opacity:0; } }
+
+    .auth-portal-card { animation: authPortalIn .45s ease forwards; opacity:0; transform: translateY(16px) scale(.96); }
+    .auth-portal-card::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      padding:1px;
+      background:linear-gradient(135deg,#00c6ff,#0072ff);
+      pointer-events:none;
+      opacity:.9;
+      transition:opacity .3s ease;
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+    }
+    .auth-portal-card:hover::before {
+      opacity:1;
+    }
+    @keyframes authPortalIn { to { opacity:1; transform: translateY(0) scale(1); } }
+    .auth-card--pulse-success { animation: authSuccessGlow 1.2s ease-out; }
+    .auth-card--login-success { animation: authLoginSuccess 2s ease-out; }
+    .auth-card--shake-error { animation: authErrorShake .55s ease; }
+    @keyframes authSuccessGlow { 0% { box-shadow:0 0 0 0 rgba(16,185,129,0); border-color:rgba(16,185,129,0); } 50% { box-shadow:0 0 0 12px rgba(16,185,129,.12), 0 30px 60px rgba(15,23,42,.22); border-color:rgba(16,185,129,.35); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } }
+    @keyframes authLoginSuccess { 0% { box-shadow:0 0 0 0 rgba(34,197,94,0); border-color:rgba(34,197,94,0); transform:translateY(0) scale(1); } 25% { box-shadow:0 0 0 14px rgba(34,197,94,.14), 0 32px 70px rgba(15,23,42,.22); border-color:rgba(34,197,94,.4); transform:translateY(-4px) scale(1.01); } 70% { box-shadow:0 0 0 10px rgba(34,197,94,.08), 0 26px 60px rgba(15,23,42,.2); border-color:rgba(34,197,94,.22); } 100% { box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); transform:translateY(0) scale(1); } }
+    @keyframes authErrorShake { 0%, 100% { transform:translateX(0); box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } 20% { transform:translateX(-8px); box-shadow:0 0 0 10px rgba(248,113,113,.15), 0 30px 60px rgba(15,23,42,.2); border-color:rgba(248,113,113,.45); } 40% { transform:translateX(8px); } 60% { transform:translateX(-5px); } 80% { transform:translateX(5px); } }
+    .auth-success-active { animation: authSuccessSequence 2s ease forwards; }
+    @keyframes authSuccessSequence { 0% { opacity:0; transform:translateY(12px) scale(.95); } 20% { opacity:1; transform:translateY(0) scale(1); } 70% { opacity:1; transform:translateY(0) scale(1.02); } 100% { opacity:0; transform:translateY(-6px) scale(1.02); } }
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
   <div class="global-emoji-layer" aria-hidden="true">
     <span>💊</span>
+    <span>🩺</span>
     <span>💉</span>
     <span>🩺</span>
     <span>🩹</span>
     <span>🧴</span>
-    <span>💚</span>
     <span>⚕️</span>
-    <span>💠</span>
+    <span>🧬</span>
+    <span>🏥</span>
+    <span>🩸</span>
   </div>
 
   <!-- Στοίβα toast για μηνύματα σύνδεσης -->
@@ -181,9 +219,10 @@
   <!-- Top bar -->
   <div class="absolute top-3 left-3 right-3 z-50">
     <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
+      <!-- 🛠️ Κουμπί login για τα φαρμακεία ώστε να καλεί τον Supabase handler -->
+      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" data-auth-direct="true" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
         <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για φαρμακεία</span>
+        <span id="t-pro">Σύνδεση για Φαρμακεία</span>
       </button>
 
       <div class="flex items-center gap-2 rounded-2xl glass-surface bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
@@ -877,7 +916,7 @@
   // ==========================
   const strings = {
     el: {
-      't-pro':'Για φαρμακεία',
+      't-pro':'Σύνδεση για Φαρμακεία', // 🛠️ Ενημερώθηκε για να δείχνει ξεκάθαρα την ενέργεια σύνδεσης
       't-langElLabel':'Ελληνικά',
       't-langEnLabel':'Αγγλικά',
       't-signinBTN':'Σύνδεση',
@@ -979,7 +1018,7 @@
 `
     },
     en: {
-      't-pro':'For pharmacies',
+      't-pro':'Pharmacy sign-in',
       't-langElLabel':'Greek',
       't-langEnLabel':'English',
       't-signinBTN':'Sign in',
@@ -1079,6 +1118,75 @@ By submitting a request:
 `
     }
   };
+
+  const EMAIL_REDIRECT_URL = (window.ENV && typeof window.ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && window.ENV.SUPABASE_EMAIL_REDIRECT_URL.length)
+    ? window.ENV.SUPABASE_EMAIL_REDIRECT_URL
+    : `${window.location.origin}/pharmacy.html`;
+
+  let authToastTimer = null;
+
+  function ensureAuthToast() {
+    let toast = document.querySelector('[data-med-toast]');
+    if (toast) return toast;
+    toast = document.createElement('div');
+    toast.dataset.medToast = 'true';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.style.cssText = `
+      position: fixed;
+      left: 50%;
+      bottom: 2.5rem;
+      transform: translateX(-50%);
+      background: rgba(15,23,42,0.92);
+      color: #fff;
+      padding: 0.9rem 1.4rem;
+      border-radius: 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+      z-index: 9999;
+      max-width: min(92vw, 420px);
+      text-align: center;
+    `;
+    document.body.appendChild(toast);
+    return toast;
+  }
+
+  function showAuthToast(message, tone = 'info') {
+    const toast = ensureAuthToast();
+    toast.textContent = message;
+    toast.style.background = tone === 'error' ? 'rgba(185, 28, 28, 0.92)' : 'rgba(15,23,42,0.92)';
+    toast.style.opacity = '1';
+    clearTimeout(authToastTimer);
+    authToastTimer = window.setTimeout(() => {
+      toast.style.opacity = '0';
+    }, 4200);
+  }
+
+  function setAuthButtonLoading(button, isLoading) {
+    if (!button) return;
+    if (isLoading) {
+      if (!button.dataset.originalLabel) {
+        button.dataset.originalLabel = button.textContent;
+      }
+      button.textContent = 'Σύνδεση…';
+      button.disabled = true;
+      button.classList.add('opacity-70');
+      button.setAttribute('aria-busy', 'true');
+    } else {
+      const label = button.dataset.originalLabel;
+      if (label) {
+        button.textContent = label;
+        delete button.dataset.originalLabel;
+      }
+      button.disabled = false;
+      button.classList.remove('opacity-70');
+      button.setAttribute('aria-busy', 'false');
+    }
+  }
 
   // ==========================
   //  CITY LIST
@@ -1900,7 +2008,65 @@ By submitting a request:
       document.getElementById('pharm-modal').classList.remove('flex');
     });
 
+    // Fake auth buttons
+    document.querySelectorAll('[data-auth-open]').forEach(btn=>{
+      btn.addEventListener('click', async event=>{
+        const isDirect = btn.dataset.authDirect === 'true';
+        if(isDirect){
+          event.preventDefault();
+          await handleDirectPharmacySignIn(btn);
+          return;
+        }
+        const target = btn.getAttribute('data-auth-target');
+        openAuthModal(target);
+      });
+    });
+    document.querySelectorAll('[data-auth-close]').forEach(btn=>{
+      btn.addEventListener('click', closeAuthModals);
+    });
   });
+
+async function handleDirectPharmacySignIn(button) {
+  // 🛠️ Άμεση σύνδεση Supabase από το CTA με ορατό feedback
+  if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    console.warn('⚠️ Δεν βρέθηκαν τα κλειδιά Supabase στο env.js.');
+    showAuthToast('Αποτυχία σύνδεσης: λείπουν ρυθμίσεις Supabase.', 'error');
+    return;
+  }
+
+  if (!state.supabase && window.supabase) {
+    state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  }
+
+  if (!state.supabase) {
+    showAuthToast('Αποτυχία σύνδεσης: δεν δημιουργήθηκε client.', 'error');
+    return;
+  }
+
+  const email = window.prompt('Πληκτρολόγησε το email σου για magic link:');
+  const trimmed = email?.trim();
+  if (!trimmed) {
+    showAuthToast('Παρακαλούμε συμπλήρωσε email για να συνεχίσεις.', 'error');
+    return;
+  }
+
+  try {
+    setAuthButtonLoading(button, true);
+    const { error } = await state.supabase.auth.signInWithOtp({
+      email: trimmed,
+      options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+    });
+    // Εναλλακτικά, ενεργοποίησε Google OAuth:
+    // const { error } = await state.supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) throw error;
+    showAuthToast('Σου στείλαμε email σύνδεσης.');
+  } catch (err) {
+    const message = err?.message || 'Κάτι πήγε στραβά.';
+    showAuthToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
+  } finally {
+    setAuthButtonLoading(button, false);
+  }
+}
 
   function applyLang() {
     const all = document.querySelectorAll('[id^="t-"], #pending-overlay-headline, #pending-overlay-message, #pending-overlay-status-text');
@@ -2355,6 +2521,6 @@ By submitting a request:
 
 
   </script>
-
+  <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>

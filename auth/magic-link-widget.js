@@ -84,6 +84,50 @@ function applyBrandingMetadata() {
 
 applyBrandingMetadata();
 
+// 🆕 Εμφανίζουμε σύντομα toasts για feedback στον χρήστη
+let toastTimer = null;
+
+function ensureToast() {
+  let toast = document.querySelector('[data-med-toast]');
+  if (toast) return toast;
+  toast = document.createElement('div');
+  toast.dataset.medToast = 'true';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.style.cssText = `
+    position: fixed;
+    left: 50%;
+    bottom: 2.5rem;
+    transform: translateX(-50%);
+    background: rgba(15,23,42,0.92);
+    color: #fff;
+    padding: 0.9rem 1.4rem;
+    border-radius: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+    z-index: 9999;
+    max-width: min(92vw, 420px);
+    text-align: center;
+  `;
+  document.body.appendChild(toast);
+  return toast;
+}
+
+function showToast(message, type = 'info') {
+  const toast = ensureToast();
+  toast.textContent = message;
+  toast.style.background = type === 'error' ? 'rgba(185, 28, 28, 0.92)' : 'rgba(15,23,42,0.92)';
+  toast.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    toast.style.opacity = '0';
+  }, 4200);
+}
+
 const STATUS_MESSAGES = {
   success: '✅ Magic link στάλθηκε στο email σας!',
   missingEmail: 'Παρακαλούμε συμπληρώστε το email σας.',
@@ -178,10 +222,25 @@ function setLoading(form, isLoading) {
   const googleBtn = form.querySelector('[data-auth-google]');
   emailBtn?.classList.toggle('opacity-80', isLoading);
   if (emailBtn) {
+    // 🆕 Ελληνικό feedback: αλλάζουμε προσωρινά την ετικέτα του κουμπιού
+    if (isLoading) {
+      emailBtn.dataset.originalLabel = emailBtn.textContent;
+      emailBtn.textContent = 'Σύνδεση…';
+    } else if (emailBtn.dataset.originalLabel) {
+      emailBtn.textContent = emailBtn.dataset.originalLabel;
+      delete emailBtn.dataset.originalLabel;
+    }
     emailBtn.disabled = !!isLoading;
     emailBtn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
   }
   if (googleBtn) {
+    if (isLoading) {
+      googleBtn.dataset.originalLabel = googleBtn.textContent;
+      googleBtn.textContent = 'Google…';
+    } else if (googleBtn.dataset.originalLabel) {
+      googleBtn.textContent = googleBtn.dataset.originalLabel;
+      delete googleBtn.dataset.originalLabel;
+    }
     googleBtn.disabled = !!isLoading;
     googleBtn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
   }
@@ -212,12 +271,16 @@ async function handleEmailSubmit(event, supabase) {
       email,
       options: { emailRedirectTo: EMAIL_REDIRECT_URL }
     });
+    // Εναλλακτική ροή (Google OAuth) – αφήνουμε σχολιασμένη την κλήση για reference
+    // await supabase.auth.signInWithOAuth({ provider: 'google' });
     if (error) throw error;
     setStatus(statusEl, 'success', STATUS_MESSAGES.success);
     form.reset();
+    showToast('Σου στείλαμε email σύνδεσης.', 'success');
   } catch (error) {
     const message = error?.message || STATUS_MESSAGES.genericError;
     setStatus(statusEl, 'error', message);
+    showToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
   } finally {
     setLoading(form, false);
   }
@@ -241,9 +304,11 @@ async function handleGoogleClick(form, supabase) {
     if (!data?.url) {
       setStatus(statusEl, 'success', 'Συνδέεστε με Google…');
     }
+    showToast('Συνδέεστε μέσω Google.', 'success');
   } catch (error) {
     const message = error?.message || STATUS_MESSAGES.genericError;
     setStatus(statusEl, 'error', message);
+    showToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
   } finally {
     setLoading(form, false);
   }
@@ -356,6 +421,7 @@ function showSupabaseError(root) {
       btn.classList.add('opacity-60');
     });
   });
+  console.warn('⚠️ Το Supabase δεν ρυθμίστηκε – έλεγχος των κλειδιών στο env.js.');
 }
 
 function initAuthPortal(root) {
@@ -378,9 +444,14 @@ function initAuthPortal(root) {
   }
 
   forms.forEach(form => {
-    form.addEventListener('submit', event => handleEmailSubmit(event, supabase));
+    // 🛠️ Δένουμε το submit με async handler για να περιμένει το Supabase flow
+    form.addEventListener('submit', async event => {
+      await handleEmailSubmit(event, supabase);
+    });
     const googleButton = form.querySelector('[data-auth-google]');
-    googleButton?.addEventListener('click', () => handleGoogleClick(form, supabase));
+    googleButton?.addEventListener('click', async () => {
+      await handleGoogleClick(form, supabase);
+    });
     const demoButton = form.querySelector('[data-demo-login]');
     if (demoButton) {
       demoButton.addEventListener('click', async () => {
@@ -445,7 +516,6 @@ function bootstrapAuthPortals() {
   if (!roots.length) return;
   roots.forEach(root => initAuthPortal(root));
 }
-update magic link widget
 
 bootstrapAuthPortals();
 

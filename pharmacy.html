@@ -50,65 +50,78 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 0;
+      z-index: 1;
       overflow: hidden;
     }
     .global-emoji-layer span {
       position: absolute;
-      font-size: clamp(3rem, 7vw, 4.5rem);
+      font-size: clamp(3rem, 6.5vw, 4.6rem);
       opacity: 0.3;
+      filter: drop-shadow(0 18px 28px rgba(13, 148, 136, 0.25));
       animation-iteration-count: infinite;
       animation-timing-function: linear;
       filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.28));
     }
-    .global-emoji-layer span:nth-child(1) { top: 8%; left: 12%; animation: pharmEmojiFloatA 22s linear infinite; }
-    .global-emoji-layer span:nth-child(2) { top: 20%; right: 14%; animation: pharmEmojiFloatB 24s linear infinite; }
-    .global-emoji-layer span:nth-child(3) { top: 40%; left: 40%; animation: pharmEmojiFloatC 26s linear infinite; opacity: 0.26; }
-    .global-emoji-layer span:nth-child(4) { bottom: 18%; left: 18%; animation: pharmEmojiFloatD 23s linear infinite; }
-    .global-emoji-layer span:nth-child(5) { bottom: 10%; right: 14%; animation: pharmEmojiFloatE 25s linear infinite; }
-    .global-emoji-layer span:nth-child(6) { top: 62%; left: 10%; animation: pharmEmojiFloatF 21s linear infinite; }
-    .global-emoji-layer span:nth-child(7) { top: 14%; right: 32%; animation: pharmEmojiFloatG 22s linear infinite; }
-    .global-emoji-layer span:nth-child(8) { bottom: 30%; right: 30%; animation: pharmEmojiFloatH 24s linear infinite; }
-    .dark .global-emoji-layer span { opacity: 0.34; }
+    .global-emoji-layer span:nth-child(1) { top: 7%; left: 12%; animation: pharmEmojiFloatA 18s linear infinite; }
+    .global-emoji-layer span:nth-child(2) { top: 18%; right: 12%; animation: pharmEmojiFloatB 21s linear infinite; }
+    .global-emoji-layer span:nth-child(3) { bottom: 18%; left: 18%; animation: pharmEmojiFloatC 24s linear infinite; }
+    .global-emoji-layer span:nth-child(4) { bottom: 10%; right: 14%; animation: pharmEmojiFloatD 19s linear infinite; }
+    .global-emoji-layer span:nth-child(5) { top: 44%; left: 46%; animation: pharmEmojiFloatE 25s linear infinite; opacity: 0.26; }
+    .global-emoji-layer span:nth-child(6) { top: 28%; left: 30%; animation: pharmEmojiFloatF 17s linear infinite; }
+    .global-emoji-layer span:nth-child(7) { bottom: 28%; right: 26%; animation: pharmEmojiFloatG 20s linear infinite; }
+    .global-emoji-layer span:nth-child(8) { top: 58%; right: 20%; animation: pharmEmojiFloatH 22s linear infinite; }
+    .global-emoji-layer span:nth-child(9) { bottom: 12%; left: 36%; animation: pharmEmojiFloatI 16s linear infinite; }
+    .global-emoji-layer span:nth-child(10) { top: 12%; left: 52%; animation: pharmEmojiFloatJ 28s linear infinite; }
+    .dark .global-emoji-layer span { opacity: 0.38; filter: drop-shadow(0 18px 32px rgba(45, 212, 191, 0.35)); }
     @keyframes pharmEmojiFloatA {
-      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; }
-      45% { transform: translate3d(28px, -20px, 0) scale(1.1); opacity: 0.34; }
-      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; }
+      0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; }
+      45% { transform: translate3d(34px, -26px, 0) scale(1.08); opacity: 0.32; }
+      100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; }
     }
     @keyframes pharmEmojiFloatB {
-      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
-      50% { transform: translate3d(-30px, 22px, 0) scale(1.12); opacity: 0.36; }
-      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; }
+      50% { transform: translate3d(-36px, 28px, 0) scale(1.12); opacity: 0.33; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.07; }
     }
     @keyframes pharmEmojiFloatC {
-      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
-      55% { transform: translate3d(32px, 20px, 0) scale(1.14); opacity: 0.3; }
-      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
+      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; }
+      55% { transform: translate3d(28px, -22px, 0) scale(1.08); opacity: 0.36; }
+      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; }
     }
     @keyframes pharmEmojiFloatD {
-      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.12; }
-      45% { transform: translate3d(28px, -20px, 0) scale(1.08); opacity: 0.3; }
-      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.12; }
+      0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.08; }
+      50% { transform: translate3d(-32px, -30px, 0) scale(0.96); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.08; }
     }
     @keyframes pharmEmojiFloatE {
-      0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; }
-      50% { transform: translate3d(-28px, -18px, 0) scale(1.08); opacity: 0.3; }
-      100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; }
+      0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
+      50% { transform: translate3d(28px, 30px, 0) scale(1.08); opacity: 0.3; }
+      100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.07; }
     }
     @keyframes pharmEmojiFloatF {
-      0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; }
-      58% { transform: translate3d(30px, -16px, 0) scale(1.08); opacity: 0.3; }
-      100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; }
+      0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.08; }
+      45% { transform: translate3d(26px, -28px, 0) scale(1.05); opacity: 0.28; }
+      100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.08; }
     }
     @keyframes pharmEmojiFloatG {
-      0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; }
-      50% { transform: translate3d(-22px, 28px, 0) scale(1.12); opacity: 0.34; }
-      100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; }
+      0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.09; }
+      50% { transform: translate3d(-30px, 32px, 0) scale(1.06); opacity: 0.33; }
+      100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.09; }
     }
     @keyframes pharmEmojiFloatH {
-      0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.1; }
-      56% { transform: translate3d(24px, -28px, 0) scale(1.1); opacity: 0.32; }
-      100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.1; }
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.08; }
+      55% { transform: translate3d(26px, -32px, 0) scale(1.09); opacity: 0.32; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.08; }
+    }
+    @keyframes pharmEmojiFloatI {
+      0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; }
+      50% { transform: translate3d(-24px, 26px, 0) scale(1.04); opacity: 0.32; }
+      100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.1; }
+    }
+    @keyframes pharmEmojiFloatJ {
+      0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; }
+      50% { transform: translate3d(32px, 22px, 0) scale(1.08); opacity: 0.28; }
+      100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.08; }
     }
     .pro-info-panel {
       padding: 1.5rem;
@@ -284,13 +297,16 @@
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
   <div class="global-emoji-layer" aria-hidden="true">
     <span>💊</span>
+    <span>🩺</span>
     <span>💉</span>
     <span>🩺</span>
     <span>🩹</span>
     <span>🧴</span>
-    <span>💚</span>
     <span>⚕️</span>
-    <span>💠</span>
+    <span>🧬</span>
+    <span>🏥</span>
+    <span>🫀</span>
+    <span>🩸</span>
   </div>
 
   <!-- ✨ Νέος πίνακας ελέγχου φαρμακείου με DEMO λειτουργία -->
@@ -346,9 +362,7 @@
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2" data-auth-header>
-          <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
-          <!-- 🧪 Κουμπί για άμεση σύνδεση DEMO φαρμακείου -->
-          <button id="demo-login-btn" type="button" class="btn bg-emerald-600/90 text-white hover:bg-emerald-600 shadow" title="Σύνδεση επίδειξης">Σύνδεση DEMO Φαρμακείου</button>
+          <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" data-auth-direct="true" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
           <div data-auth-header-session class="hidden items-center gap-2">
             <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
             <span data-auth-header-email class="text-sm font-semibold"></span>
@@ -1250,6 +1264,75 @@
       errors: []
     };
 
+    const EMAIL_REDIRECT_URL = (window.ENV && typeof window.ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && window.ENV.SUPABASE_EMAIL_REDIRECT_URL.length)
+      ? window.ENV.SUPABASE_EMAIL_REDIRECT_URL
+      : `${window.location.origin}/pharmacy.html`;
+
+    let authToastTimer = null;
+
+    function ensureAuthToast(){
+      let toast = document.querySelector('[data-med-toast]');
+      if(toast) return toast;
+      toast = document.createElement('div');
+      toast.dataset.medToast = 'true';
+      toast.setAttribute('role','status');
+      toast.setAttribute('aria-live','polite');
+      toast.style.cssText = `
+        position: fixed;
+        left: 50%;
+        bottom: 2.5rem;
+        transform: translateX(-50%);
+        background: rgba(15,23,42,0.92);
+        color: #fff;
+        padding: 0.9rem 1.4rem;
+        border-radius: 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+        z-index: 9999;
+        max-width: min(92vw, 420px);
+        text-align: center;
+      `;
+      document.body.appendChild(toast);
+      return toast;
+    }
+
+    function showAuthToast(message, tone='info'){
+      const toast = ensureAuthToast();
+      toast.textContent = message;
+      toast.style.background = tone === 'error' ? 'rgba(185, 28, 28, 0.92)' : 'rgba(15,23,42,0.92)';
+      toast.style.opacity = '1';
+      clearTimeout(authToastTimer);
+      authToastTimer = window.setTimeout(()=>{
+        toast.style.opacity = '0';
+      }, 4200);
+    }
+
+    function setAuthButtonLoading(button, isLoading){
+      if(!button) return;
+      if(isLoading){
+        if(!button.dataset.originalLabel){
+          button.dataset.originalLabel = button.textContent;
+        }
+        button.textContent = 'Σύνδεση…';
+        button.disabled = true;
+        button.classList.add('opacity-70');
+        button.setAttribute('aria-busy','true');
+      } else {
+        const label = button.dataset.originalLabel;
+        if(label){
+          button.textContent = label;
+          delete button.dataset.originalLabel;
+        }
+        button.disabled = false;
+        button.classList.remove('opacity-70');
+        button.setAttribute('aria-busy','false');
+      }
+    }
+
     /* ---------- theme ---------- */
     const html = document.documentElement;
     const themeBtn = qs('#theme-toggle');
@@ -1275,6 +1358,8 @@
     let activeAuthModal = null;
     const authCloseEls = qsa('[data-auth-close]');
     const authOpenButtons = qsa('[data-auth-open]');
+    const modalAuthButtons = authOpenButtons.filter(btn => btn.dataset.authDirect !== 'true');
+    const directPharmacyButton = authOpenButtons.find(btn => btn.dataset.authDirect === 'true') || null;
     const authHeaderSession = qs('[data-auth-header-session]');
     const authHeaderAvatar = qs('[data-auth-header-avatar]');
     const authHeaderEmail = qs('[data-auth-header-email]');
@@ -1460,6 +1545,39 @@
       }
     }
 
+    async function handleDirectPharmacySignIn(button){
+      // 🛠️ Άμεση ροή magic link από το CTA με feedback στον φαρμακοποιό
+      if(!supabase){
+        console.warn('⚠️ Το Supabase δεν ρυθμίστηκε – έλεγξε τα κλειδιά στο env.js.');
+        showAuthToast('Αποτυχία σύνδεσης: λείπουν ρυθμίσεις Supabase.', 'error');
+        return;
+      }
+
+      const email = window.prompt('Πληκτρολόγησε το email σου για magic link:');
+      const trimmed = email?.trim();
+      if(!trimmed){
+        showAuthToast('Παρακαλούμε συμπλήρωσε email για να συνεχίσεις.', 'error');
+        return;
+      }
+
+      try{
+        setAuthButtonLoading(button, true);
+        const { error } = await supabase.auth.signInWithOtp({
+          email: trimmed,
+          options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+        });
+        // Εναλλακτική: Google OAuth ροή
+        // const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+        if(error) throw error;
+        showAuthToast('Σου στείλαμε email σύνδεσης.');
+      }catch(err){
+        const message = err?.message || 'Κάτι πήγε στραβά.';
+        showAuthToast(`Αποτυχία σύνδεσης: ${message}`, 'error');
+      }finally{
+        setAuthButtonLoading(button, false);
+      }
+    }
+
     function updateAuthHeaderUI(userOverride){
       const user = userOverride || getSessionUser();
       const email = user?.email || user?.user_metadata?.name || user?.phone || '';
@@ -1486,13 +1604,20 @@
       });
     }
 
-    authOpenButtons.forEach(btn => {
-      btn.addEventListener('click', async event => {
+    modalAuthButtons.forEach(btn => {
+      btn.addEventListener('click', event => {
         event.preventDefault();
         // Ορίζουμε τον handler ως async ώστε να μπορούμε να καλέσουμε Supabase hooks αν χρειαστεί
         openAuthModal(btn.dataset.authTarget || 'pharmacies');
       });
     });
+
+    if(directPharmacyButton){
+      directPharmacyButton.addEventListener('click', async event => {
+        event.preventDefault();
+        await handleDirectPharmacySignIn(directPharmacyButton);
+      });
+    }
 
     authCloseEls.forEach(btn => btn.addEventListener('click', () => {
       const modal = btn.closest('[data-auth-modal]');

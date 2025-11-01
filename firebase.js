@@ -9,6 +9,10 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const ENV = window.ENV || {};
 
+// ➕ Ελληνικό fallback: αν το window.ENV είναι άδειο, διαβάζουμε τα globals του env.js
+const SUPABASE_URL = ENV.SUPABASE_URL || window.SUPABASE_URL;
+const SUPABASE_ANON_KEY = ENV.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY;
+
 let firebaseApp = null;
 let firebaseAuth = null;
 let firestore = null;
@@ -37,8 +41,8 @@ if (hasFirebaseConfig) {
 
 let supabaseClient = null;
 
-if (ENV.SUPABASE_URL && ENV.SUPABASE_ANON_KEY) {
-  supabaseClient = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY, {
+if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -46,7 +50,8 @@ if (ENV.SUPABASE_URL && ENV.SUPABASE_ANON_KEY) {
     }
   });
 } else {
-  console.warn('[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY.');
+  // ⚠️ Ελληνικό μήνυμα για πιο κατανοητό debug
+  console.warn('[supabase] Δεν βρέθηκαν SUPABASE_URL ή SUPABASE_ANON_KEY στο env.js.');
 }
 
 export {
