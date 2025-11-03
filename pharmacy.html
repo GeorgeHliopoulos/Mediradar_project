@@ -609,12 +609,6 @@
 
   <!-- ENV -->
   <script src="/env.js"></script>
-  <script>
-    window.ENV = window.ENV || {
-      SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
-    };
-  </script>
 
   <!-- Supabase + App -->
   <script type="module">
@@ -630,13 +624,25 @@
     } from "./pharmacy/schedule.js";
 
     /* ---------- setup ---------- */
-    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.ENV || {};
-    const supabase = supabaseClient || (SUPABASE_URL && SUPABASE_ANON_KEY
+    const env = window.ENV || {};
+    const SUPABASE_URL = env.SUPABASE_URL || window.SUPABASE_URL || '';
+    const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
+    const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
+    const hasSupabaseConfig = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+    const supabase = supabaseClient || (hasSupabaseConfig
       ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null);
-    const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
-    if(!supabase){
-      console.warn(missingSupabaseMessage);
+    const supabaseStatus = {
+      ready: !!supabase,
+      reason: hasSupabaseConfig ? 'client_unavailable' : 'missing_config'
+    };
+    const runningWithoutSupabase = !supabaseStatus.ready;
+    const supabaseFallbackNotice = 'Η εφαρμογή λειτουργεί σε demo λειτουργία χωρίς σύνδεση Supabase.';
+    if(supabase && !window.mediradarSupabase){
+      window.mediradarSupabase = supabase;
+    }
+    if(!supabaseStatus.ready){
+      console.warn(`${missingSupabaseMessage} (url:${hasSupabaseConfig ? 'ok' : '—'}, client:${supabaseClient ? 'reused' : 'missing'})`);
     }
 
     const DEMO_CREDENTIALS = {
@@ -807,10 +813,11 @@
         accessState.allowed = true;
         return true;
       }
-      if(!supabase){
+      if(runningWithoutSupabase){
         accessState.allowed = true;
         accessGate.classList.add('hidden');
         publicShell?.classList.remove('hidden');
+        setAccessMessage(supabaseFallbackNotice, 'warning');
         return true;
       }
       const allowed = userHasPharmacyAccess(session);
@@ -851,6 +858,8 @@
       openingHoursDirty: false,
       openingHoursLoading: false
     };
+
+    let demoLoginInFlight = false;
 
     function cloneOpeningHours(payload = createEmptyOpeningHours()){
       return JSON.parse(JSON.stringify(payload));
@@ -1396,6 +1405,14 @@
 
     // 🧪 Χειριστής για το κουμπί «Σύνδεση DEMO Φαρμακείου»
     async function handleDemoLogin(){
+      if(demoLoginInFlight){
+        return;
+      }
+      if(dashboardState.demoSession && runningWithoutSupabase){
+        showToast('Η demo λειτουργία είναι ήδη ενεργή.', 'info');
+        return;
+      }
+      demoLoginInFlight = true;
       setButtonLoading(demoLoginBtn, true, 'Σύνδεση DEMO…');
       try{
         if(!supabase){
@@ -1430,7 +1447,8 @@
         renderDashboardRequests(getDemoRequestsFallback());
         showToast('Fallback DEMO χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
       }finally{
-        setButtonLoading(demoLoginBtn, false, 'Σύνδεση…');
+        demoLoginInFlight = false;
+        setButtonLoading(demoLoginBtn, false);
       }
     }
 
@@ -1805,8 +1823,10 @@
       updateScheduleButtons();
 
       const allowed = enforceAccessGate(authSession);
-      if(!supabase && !authSession?.user){
-        setAccessMessage('');
+      if(runningWithoutSupabase){
+        if(!authSession?.user){
+          setAccessMessage(supabaseFallbackNotice, 'warning');
+        }
       } else if(allowed){
         setAccessMessage('');
       } else if(loggedIn){

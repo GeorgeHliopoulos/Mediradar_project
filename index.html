@@ -2184,17 +2184,6 @@ By submitting a request:
       selectedPharmacy = null;
       window.scrollTo({ top: 0, behavior:'smooth' });
     });
-
-    statusEmptyBtn?.addEventListener('click', ()=>{
-      hidePending();
-      results.classList.add('hidden');
-      resultsPending?.classList.remove('hidden');
-      resultsListWrap?.classList.add('hidden');
-      resultsEmpty?.classList.add('hidden');
-      pickupBox?.classList.add('hidden');
-      selectedPharmacy = null;
-      window.scrollTo({ top: 0, behavior:'smooth' });
-    });
   }
 
   // ==========================
