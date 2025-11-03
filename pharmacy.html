@@ -293,6 +293,20 @@
     <span>💠</span>
   </div>
 
+  <section id="pharmacy-access-gate" class="px-4 py-6 max-w-3xl mx-auto">
+    <div class="glass-surface bg-white/85 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 px-6 py-6 rounded-2xl shadow-soft flex flex-col gap-4">
+      <div>
+        <h1 class="text-2xl font-bold">Πρόσβαση MediRadar Pro</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Η περιοχή φαρμακείου εμφανίζεται μόνο σε συνεργάτες με ειδική πρόσβαση. Συνδέσου με τα διαπιστευτήρια που σου έχουμε αποδώσει για να συνεχίσεις.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="pharmacy-access-login" type="button" class="btn bg-brand-600 text-white hover:bg-brand-700 shadow">Σύνδεση φαρμακείου</button>
+        <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Επιστροφή</a>
+      </div>
+      <p id="pharmacy-access-message" class="hidden text-sm text-slate-600 dark:text-slate-300"></p>
+    </div>
+  </section>
+
   <!-- ✨ Νέος πίνακας ελέγχου φαρμακείου με DEMO λειτουργία -->
   <main id="pharmacy-dashboard" class="hidden px-4 py-6 sm:py-8 max-w-6xl mx-auto">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -338,7 +352,7 @@
   </main>
   <!-- Στοίβα toast ειδοποιήσεων για την εμπειρία σύνδεσης -->
   <div id="toast-stack" aria-live="polite" aria-atomic="true"></div>
-  <div id="public-shell" class="max-w-5xl mx-auto p-4">
+  <div id="public-shell" class="hidden max-w-5xl mx-auto p-4">
     <header class="flex flex-wrap items-center justify-between gap-3 mb-4 glass-surface bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-4 py-3 shadow-soft">
       <div class="flex items-center gap-3">
         <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Αρχική</a>
@@ -364,6 +378,7 @@
       <p class="font-semibold">Οδηγίες DEMO:</p>
       <p class="mt-1">Πάτησε «Σύνδεση DEMO Φαρμακείου» για να μπεις άμεσα με τα στοιχεία <code class="font-mono">demo@pharmacy.gr</code> / <code class="font-mono">Demo123!</code>.</p>
       <p class="mt-1">Θα εμφανιστεί το ταμπλό του demo φαρμακείου με αιτήματα πελατών και μπορείς να αποθηκεύσεις δοκιμαστικό ωράριο.</p>
+      <p class="mt-1">Η είσοδος DEMO δημιουργεί αυτόματα ένα δοκιμαστικό φαρμακείο και μερικά αιτήματα επίδειξης για να εξερευνήσεις τις λειτουργίες.</p>
     </div>
 
     <!-- PHARMACY PICK/CREATE -->
@@ -623,6 +638,64 @@
     if(!supabase){
       console.warn(missingSupabaseMessage);
     }
+
+    const DEMO_CREDENTIALS = {
+      email: 'demo@pharmacy.gr',
+      password: 'Demo123!'
+    };
+
+    const DEMO_PHARMACY = {
+      id: 'demo-pharmacy',
+      name: 'Demo Φαρμακείο',
+      city: 'Αθήνα',
+      address: 'Εικονική διεύθυνση',
+      phone: '2100000000',
+      isDemo: true
+    };
+
+    const DEMO_USER_METADATA = {
+      role: 'pharmacy',
+      pharmacy_id: DEMO_PHARMACY.id,
+      pharmacy_name: DEMO_PHARMACY.name,
+      pharmacy_city: DEMO_PHARMACY.city,
+      pharmacy_address: DEMO_PHARMACY.address,
+      pharmacy_phone: DEMO_PHARMACY.phone,
+      demo: true
+    };
+
+    const DEMO_REQUEST_TEMPLATES = [
+      {
+        med_name: 'Παρακεταμόλη 500mg',
+        med_type: 'Δισκία',
+        quantity: 1,
+        allow_generic: true,
+        customer_name: 'Ελένη'
+      },
+      {
+        med_name: 'Αντιβηχικό Σιρόπι',
+        med_type: 'Σιρόπι',
+        quantity: 2,
+        allow_generic: false,
+        customer_name: 'Γιώργος'
+      },
+      {
+        med_name: 'Αντισταμινικά',
+        med_type: 'Δισκία',
+        quantity: 1,
+        allow_generic: true,
+        customer_name: 'Μαρία'
+      }
+    ];
+
+    function buildDemoRequestsPayload(){
+      const now = Date.now();
+      return DEMO_REQUEST_TEMPLATES.map((template, index) => ({
+        ...template,
+        city: DEMO_PHARMACY.city,
+        status: 'pending',
+        created_at: new Date(now - index * 20 * 60 * 1000).toISOString()
+      }));
+    }
     const qs = (s, r=document)=>r.querySelector(s);
     const qsa = (s, r=document)=>[...r.querySelectorAll(s)];
     const toastStack = qs('#toast-stack');
@@ -645,6 +718,112 @@
     const openingHoursSaveBtn = qs('#save-opening-hours');
     const openingHoursResetBtn = qs('#reset-opening-hours');
     const openingHoursFillWeekBtn = qs('#opening-hours-add-week');
+
+    const accessGate = qs('#pharmacy-access-gate');
+    const accessLoginBtn = qs('#pharmacy-access-login');
+    const accessMessageEl = qs('#pharmacy-access-message');
+    const accessState = { allowed: false };
+
+    function setAccessMessage(message = '', tone = 'muted'){
+      if(!accessMessageEl) return;
+      accessMessageEl.textContent = message || '';
+      accessMessageEl.classList.toggle('hidden', !message);
+      accessMessageEl.classList.remove('text-slate-600','dark:text-slate-300','text-amber-600','dark:text-amber-300','text-rose-600','dark:text-rose-300','text-emerald-600','dark:text-emerald-300');
+      if(!message){
+        accessMessageEl.classList.add('text-slate-600','dark:text-slate-300');
+        return;
+      }
+      if(tone === 'error'){
+        accessMessageEl.classList.add('text-rose-600','dark:text-rose-300');
+      } else if(tone === 'warning'){
+        accessMessageEl.classList.add('text-amber-600','dark:text-amber-300');
+      } else if(tone === 'success'){
+        accessMessageEl.classList.add('text-emerald-600','dark:text-emerald-300');
+      } else {
+        accessMessageEl.classList.add('text-slate-600','dark:text-slate-300');
+      }
+    }
+
+    function addRoleCandidate(target, value){
+      if(!target || value === undefined || value === null) return;
+      if(Array.isArray(value)){
+        value.forEach(entry => addRoleCandidate(target, entry));
+        return;
+      }
+      if(typeof value === 'object'){
+        Object.values(value).forEach(entry => addRoleCandidate(target, entry));
+        return;
+      }
+      const normalized = value.toString().trim().toLowerCase();
+      if(normalized){
+        target.add(normalized);
+      }
+    }
+
+    function isTruthyFlag(value){
+      if(value === true || value === false) return value;
+      if(typeof value === 'number'){
+        return !Number.isNaN(value) && value !== 0;
+      }
+      if(typeof value === 'string'){
+        const normalized = value.trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'y' || normalized === 'enabled';
+      }
+      return false;
+    }
+
+    function userHasPharmacyAccess(session){
+      const user = session?.user;
+      if(!user) return false;
+      const roles = new Set();
+      [
+        user.role,
+        user.app_metadata?.role,
+        user.app_metadata?.roles,
+        user.user_metadata?.role,
+        user.user_metadata?.roles
+      ].forEach(source => addRoleCandidate(roles, source));
+      if(roles.has('pharmacy') || roles.has('pharmacy_admin')) return true;
+
+      const meta = user.user_metadata || {};
+      const appMeta = user.app_metadata || {};
+      const flagSources = [
+        meta.pharmacy_access,
+        meta.pharmacyAccess,
+        meta.hasPharmacyAccess,
+        appMeta.pharmacy_access,
+        appMeta.pharmacyAccess
+      ];
+      if(flagSources.some(isTruthyFlag)) return true;
+
+      if(meta.pharmacy_id || meta.pharmacyId || appMeta.pharmacy_id || appMeta.pharmacyId) return true;
+      if(isTruthyFlag(meta.demo) || isTruthyFlag(appMeta.demo_access)) return true;
+
+      return false;
+    }
+
+    function enforceAccessGate(session){
+      if(!accessGate){
+        accessState.allowed = true;
+        return true;
+      }
+      if(!supabase){
+        accessState.allowed = true;
+        accessGate.classList.add('hidden');
+        publicShell?.classList.remove('hidden');
+        return true;
+      }
+      const allowed = userHasPharmacyAccess(session);
+      accessState.allowed = allowed;
+      if(allowed){
+        accessGate.classList.add('hidden');
+        publicShell?.classList.remove('hidden');
+      } else {
+        publicShell?.classList.add('hidden');
+        accessGate.classList.remove('hidden');
+      }
+      return allowed;
+    }
 
     // 🕒 Απλό σύστημα ωραρίου με πολλαπλές ζώνες ανά ημέρα
     const DASHBOARD_DAYS = [
@@ -675,6 +854,77 @@
 
     function cloneOpeningHours(payload = createEmptyOpeningHours()){
       return JSON.parse(JSON.stringify(payload));
+    }
+
+    function getDemoRequestsFallback(){
+      return buildDemoRequestsPayload().map((row, index) => ({
+        ...row,
+        id: `demo-${index + 1}`
+      }));
+    }
+
+    async function ensureDemoSupabaseSetup(){
+      if(!supabase) return null;
+      try{
+        const { data: { user } } = await supabase.auth.getUser();
+        if(!user){
+          return null;
+        }
+
+        const metadata = user.user_metadata || {};
+        const needsMetadataUpdate = Object.entries(DEMO_USER_METADATA)
+          .some(([key, value]) => metadata[key] !== value);
+
+        if(needsMetadataUpdate){
+          const updated = await supabase.auth.updateUser({ data: { ...metadata, ...DEMO_USER_METADATA } });
+          if(updated.error){
+            throw updated.error;
+          }
+        }
+
+        const { error: upsertError } = await supabase
+          .from('pharmacies')
+          .upsert({
+            id: DEMO_PHARMACY.id,
+            name: DEMO_PHARMACY.name,
+            city: DEMO_PHARMACY.city,
+            address: DEMO_PHARMACY.address,
+            phone: DEMO_PHARMACY.phone
+          }, { onConflict: 'id' });
+        if(upsertError){
+          throw upsertError;
+        }
+
+        return user;
+      }catch(err){
+        console.warn('ensureDemoSupabaseSetup error', err);
+        return null;
+      }
+    }
+
+    async function seedDemoRequests(){
+      if(!supabase) return;
+      try{
+        const { data, error } = await supabase
+          .from('requests')
+          .select('id')
+          .eq('city', DEMO_PHARMACY.city)
+          .in('status', ['pending','has_responses'])
+          .limit(1);
+        if(error){
+          throw error;
+        }
+        if(data && data.length){
+          return;
+        }
+        const payload = buildDemoRequestsPayload();
+        const { error: insertError } = await supabase.from('requests').insert(payload);
+        if(insertError){
+          throw insertError;
+        }
+      }catch(err){
+        console.warn('seedDemoRequests error', err);
+      }
     }
 
     function normalizeTimeValue(value){
@@ -1009,9 +1259,9 @@
         dashboardEmptyState.textContent = 'Δεν υπάρχουν αιτήματα που να χρειάζονται απάντηση.';
       }
       if(!supabase){
+        renderDashboardRequests(getDemoRequestsFallback());
         if(dashboardEmptyState){
-          dashboardEmptyState.textContent = 'Δεν υπάρχει διαθέσιμη σύνδεση Supabase.';
-          dashboardEmptyState.classList.remove('hidden');
+          dashboardEmptyState.classList.add('hidden');
         }
         return;
       }
@@ -1070,7 +1320,9 @@
     }
 
     function leaveDashboard(){
-      if(publicShell){ publicShell.classList.remove('hidden'); }
+      if(publicShell){
+        publicShell.classList.toggle('hidden', !accessState.allowed);
+      }
       if(dashboardShell){ dashboardShell.classList.add('hidden'); }
       demoDashboardPill?.classList.add('hidden');
       if(dashboardUserPill){ dashboardUserPill.textContent = '—'; }
@@ -1144,39 +1396,38 @@
 
     // 🧪 Χειριστής για το κουμπί «Σύνδεση DEMO Φαρμακείου»
     async function handleDemoLogin(){
-      const fallbackPharmacy = {
-        id: 'demo-pharmacy',
-        name: 'Demo Φαρμακείο',
-        city: 'Αθήνα',
-        address: 'Εικονική διεύθυνση',
-        phone: '2100000000',
-        isDemo: true
-      };
       setButtonLoading(demoLoginBtn, true, 'Σύνδεση DEMO…');
       try{
         if(!supabase){
-          enterDashboard({ user: null, isDemo: true, pharmacy: fallbackPharmacy });
+          enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
+          renderDashboardRequests(getDemoRequestsFallback());
           showToast('Demo λειτουργία χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
           return;
         }
-        const credentials = { email: 'demo@pharmacy.gr', password: 'Demo123!' };
-        let { error } = await supabase.auth.signInWithPassword(credentials);
+        let { error } = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
         if(error){
           const { error: signUpError } = await supabase.auth.signUp({
-            email: credentials.email,
-            password: credentials.password,
-            options: {
-              data: { role: 'pharmacy', pharmacy_id: fallbackPharmacy.id, demo: true }
-            }
+            email: DEMO_CREDENTIALS.email,
+            password: DEMO_CREDENTIALS.password,
+            options: { data: { ...DEMO_USER_METADATA } }
           });
           if(signUpError){ throw signUpError; }
-          const retry = await supabase.auth.signInWithPassword(credentials);
+          const retry = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
           if(retry.error){ throw retry.error; }
+        }
+        await ensureDemoSupabaseSetup();
+        await seedDemoRequests();
+        await loadPharmacies();
+        const { data } = await supabase.auth.getSession();
+        if(data?.session){
+          authSession = data.session;
+          updateAuthSessionUI();
         }
         showToast('Συνδέθηκες ως demo@pharmacy.gr (κωδικός Demo123!).', 'success');
       }catch(err){
         console.warn('handleDemoLogin fallback', err);
-        enterDashboard({ user: null, isDemo: true, pharmacy: fallbackPharmacy });
+        enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
+        renderDashboardRequests(getDemoRequestsFallback());
         showToast('Fallback DEMO χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
       }finally{
         setButtonLoading(demoLoginBtn, false, 'Σύνδεση…');
@@ -1494,6 +1745,11 @@
       });
     });
 
+    accessLoginBtn?.addEventListener('click', event => {
+      event.preventDefault();
+      openAuthModal('pharmacies');
+    });
+
     authCloseEls.forEach(btn => btn.addEventListener('click', () => {
       const modal = btn.closest('[data-auth-modal]');
       closeAuthModal(modal || undefined);
@@ -1537,16 +1793,33 @@
     });
 
     function updateAuthSessionUI(){
-      if(!authSessionEl) return;
       const loggedIn = !!authSession?.user;
       const identifier = authSession?.user?.email || authSession?.user?.phone || authSession?.user?.user_metadata?.name || authSession?.user?.id || '';
-      authSessionEl.textContent = loggedIn
-        ? `Συνδεδεμένος ως ${identifier || 'λογαριασμός'}`
-        : 'Δεν έχεις συνδεθεί';
+      if(authSessionEl){
+        authSessionEl.textContent = loggedIn
+          ? `Συνδεδεμένος ως ${identifier || 'λογαριασμός'}`
+          : 'Δεν έχεις συνδεθεί';
+      }
       updateAuthHeaderUI();
       hoursAuthAlert?.classList.toggle('hidden', loggedIn);
       updateScheduleButtons();
-      syncDashboardWithSession(authSession);
+
+      const allowed = enforceAccessGate(authSession);
+      if(!supabase && !authSession?.user){
+        setAccessMessage('');
+      } else if(allowed){
+        setAccessMessage('');
+      } else if(loggedIn){
+        setAccessMessage('Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να ενεργοποιηθεί η πρόσβαση.', 'warning');
+      } else {
+        setAccessMessage('Η περιοχή φαρμακείου είναι διαθέσιμη μόνο σε εξουσιοδοτημένους συνεργάτες. Συνδέσου με τα στοιχεία που σου έχουν δοθεί.', 'muted');
+      }
+
+      if(allowed){
+        syncDashboardWithSession(authSession);
+      } else if(!dashboardState.demoSession){
+        leaveDashboard();
+      }
     }
     updateAuthSessionUI();
 
@@ -1558,9 +1831,20 @@
 
     /* ---------- pharmacy CRUD ---------- */
     async function loadPharmacies(){
+      if(!selPh){ return; }
+      if(!supabase){
+        const fallback = [DEMO_PHARMACY];
+        selPh.innerHTML = `<option value="">— Επιλογή —</option>` + fallback.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name} — ${p.city||'—'}</option>`).join('');
+        return;
+      }
       const { data, error } = await supabase.from('pharmacies').select('id,name,city,address,phone').order('name');
       if(error){ console.warn(error); return; }
-      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + (data||[]).map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name} — ${p.city||'—'}</option>`).join('');
+      const list = Array.isArray(data) ? data.slice() : [];
+      const hasDemo = list.some(item => item.id === DEMO_PHARMACY.id);
+      if(!hasDemo){
+        list.unshift({ ...DEMO_PHARMACY });
+      }
+      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + list.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name}${p.id===DEMO_PHARMACY.id?' (DEMO)':''} — ${p.city||'—'}</option>`).join('');
     }
 
     async function createPharmacy(){
@@ -1872,6 +2156,32 @@
       emptyState.classList.add('hidden');
       if(!store.pharmacy?.city) return;
 
+      if(!supabase){
+        const demoRows = getDemoRequestsFallback();
+        if(!demoRows.length){
+          emptyState.textContent = 'Δεν υπάρχουν αιτήματα αυτή τη στιγμή.';
+          emptyState.classList.remove('hidden');
+          return;
+        }
+        demoRows.forEach(row=>{
+          const card = document.createElement('div');
+          card.className = 'rounded-xl border p-3 bg-white/80 dark:bg-slate-900/60';
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">${row.med_name}</div>
+              <div class="text-xs text-slate-500">${new Date(row.created_at).toLocaleString()}</div>
+            </div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">
+              Τύπος: ${row.med_type||'—'} • Ποσ: ${row.quantity}
+            </div>
+            <div class="mt-2 text-xs text-slate-500">* Demo αίτημα</div>
+          `;
+          card.dataset.id = row.id;
+          reqList.appendChild(card);
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('requests')
         .select('id, created_at, med_name, active_substance, med_type, quantity, allow_generic, city, status')
@@ -1909,6 +2219,10 @@
 
     async function sendResponse(reqId, available, isGeneric){
       if(!store.pharmacy?.id){ alert('Διάλεξε φαρμακείο πρώτα.'); return; }
+      if(!supabase){
+        showToast('Demo λειτουργία: οι απαντήσεις δεν αποθηκεύονται.', 'info');
+        return;
+      }
       const payload = { request_id: reqId, pharmacy_id: store.pharmacy.id, available: !!available, is_generic: !!isGeneric };
       const { error } = await supabase.from('responses').insert(payload);
       if(error){ alert('Σφάλμα καταχώρησης απάντησης'); console.warn(error); return; }

@@ -1461,6 +1461,85 @@ By submitting a request:
 
     let activeAuthModal = null;
     let authSession = null;
+    let proAccessRequested = false;
+    const PHARMACY_PORTAL_URL = '/pharmacy.html';
+    const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
+
+    function addRoleCandidate(target, value){
+      if(!target || value === undefined || value === null) return;
+      if(Array.isArray(value)){
+        value.forEach(item => addRoleCandidate(target, item));
+        return;
+      }
+      if(typeof value === 'object'){
+        Object.values(value).forEach(item => addRoleCandidate(target, item));
+        return;
+      }
+      const normalized = value.toString().trim().toLowerCase();
+      if(normalized){
+        target.add(normalized);
+      }
+    }
+
+    function isTruthyFlag(value){
+      if(value === true || value === false) return value;
+      if(typeof value === 'number'){
+        return !Number.isNaN(value) && value !== 0;
+      }
+      if(typeof value === 'string'){
+        const normalized = value.trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'y' || normalized === 'enabled';
+      }
+      return false;
+    }
+
+    function userHasPharmacyAccess(session){
+      const user = session?.user;
+      if(!user) return false;
+      const roles = new Set();
+      [
+        user.role,
+        user.app_metadata?.role,
+        user.app_metadata?.roles,
+        user.user_metadata?.role,
+        user.user_metadata?.roles
+      ].forEach(source => addRoleCandidate(roles, source));
+      if(roles.has('pharmacy') || roles.has('pharmacy_admin')) return true;
+
+      const meta = user.user_metadata || {};
+      const appMeta = user.app_metadata || {};
+      const accessFlags = [
+        meta.pharmacy_access,
+        meta.pharmacyAccess,
+        meta.hasPharmacyAccess,
+        appMeta.pharmacy_access,
+        appMeta.pharmacyAccess
+      ];
+      if(accessFlags.some(isTruthyFlag)) return true;
+
+      if(meta.pharmacy_id || meta.pharmacyId || appMeta.pharmacy_id || appMeta.pharmacyId) return true;
+      if(isTruthyFlag(meta.demo) || isTruthyFlag(appMeta.demo_access)) return true;
+
+      return false;
+    }
+
+    function tryOpenPharmacyPortal(){
+      if(userHasPharmacyAccess(authSession)){
+        window.location.href = PHARMACY_PORTAL_URL;
+        return true;
+      }
+      return false;
+    }
+
+    function showPharmacyAccessDenied(modal){
+      if(!modal) return;
+      const globalStatus = modal.querySelector('[data-auth-status-global]');
+      if(globalStatus){
+        globalStatus.textContent = pharmacyAccessDeniedMessage;
+        globalStatus.classList.remove('hidden');
+      }
+    }
+
 
     function getAuthUserLabel(user){
       if(!user) return '';
@@ -1520,6 +1599,9 @@ By submitting a request:
       const panel = modal.querySelector('[data-pro-info-panel]');
       const toggle = modal.querySelector('[data-pro-info-toggle]');
       hideProInfoPanel(panel, toggle);
+      if(modal.dataset && modal.dataset.authModal === 'pharmacies'){
+        proAccessRequested = false;
+      }
       if(!document.querySelector('[data-auth-modal].flex')){
         document.body.classList.remove('overflow-hidden');
       }
@@ -1532,7 +1614,19 @@ By submitting a request:
     authOpenButtons.forEach(btn => {
       btn.addEventListener('click', event => {
         event.preventDefault();
-        openAuthModal(btn.dataset.authTarget || 'pharmacies');
+        const target = btn.dataset.authTarget || 'pharmacies';
+        if(target === 'pharmacies'){
+          proAccessRequested = true;
+          if(tryOpenPharmacyPortal()){
+            return;
+          }
+          openAuthModal('pharmacies');
+          if(authSession?.user && !userHasPharmacyAccess(authSession)){
+            showPharmacyAccessDenied(authModals.pharmacies);
+          }
+          return;
+        }
+        openAuthModal(target);
       });
     });
 
@@ -1609,7 +1703,20 @@ By submitting a request:
       const user = authSession?.user || null;
       updateAuthHeaderUI(user);
       toggleSessionViews(user);
+
+      const hasAccess = userHasPharmacyAccess(authSession);
+      if(proAccessRequested && hasAccess){
+        proAccessRequested = false;
+        window.location.href = PHARMACY_PORTAL_URL;
+        return;
+      }
+
       if(user && activeAuthModal){
+        if(proAccessRequested && !hasAccess){
+          showPharmacyAccessDenied(activeAuthModal || authModals.pharmacies);
+          proAccessRequested = false;
+          return;
+        }
         setTimeout(()=> closeAuthModal(), 2000);
       }
     }
