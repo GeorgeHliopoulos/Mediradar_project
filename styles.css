@@ -179,38 +179,39 @@ input[type="text"]:focus, input[type="number"]:focus, select:focus{
 .share-buttons{
   display:flex;
   flex-wrap:wrap;
-  gap:12px;
+  gap:8px;
 }
 
 .share-btn{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  padding:8px 16px;
-  border-radius:999px;
-  background:rgba(15,23,42,.05);
-  border:1px solid rgba(15,23,42,.08);
-  color:#0f172a;
+  padding:6px 12px;
+  border-radius:12px;
+  background:rgba(15,23,42,.03);
+  border:1px solid rgba(15,23,42,.07);
+  color:#1e293b;
   font-weight:600;
   text-decoration:none;
-  transition: background .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
 }
 
 .share-btn:hover{
-  background:rgba(41,163,163,.10);
-  box-shadow:0 8px 18px rgba(15,23,42,.12);
-  transform:translateY(-1px);
+  background:rgba(41,163,163,.08);
+  border-color:rgba(41,163,163,.25);
+  color:#0f172a;
 }
 
 .dark .share-btn{
-  background:rgba(15,23,42,.45);
+  background:rgba(15,23,42,.35);
   border-color:rgba(148,163,184,.25);
-  color:#e7eef5;
+  color:#e2e8f0;
 }
 
 .dark .share-btn:hover{
-  background:rgba(63,185,185,.22);
-  box-shadow:0 10px 22px rgba(0,0,0,.35);
+  background:rgba(41,163,163,.22);
+  border-color:rgba(125,211,211,.35);
+  color:#ecfeff;
 }
 
 /* Animations */
