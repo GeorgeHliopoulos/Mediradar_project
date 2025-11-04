@@ -303,6 +303,12 @@
         <button id="pharmacy-access-login" type="button" class="btn bg-brand-600 text-white hover:bg-brand-700 shadow">Σύνδεση φαρμακείου</button>
         <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Επιστροφή</a>
       </div>
+      <div class="demo-entry mt-4">
+        <button class="btn" data-demo-login>Try DEMO</button>
+        <small class="opacity-70 block mt-2" data-demo-credentials hidden>
+          Demo: <code>demo@mediradar.test</code> / <code>demo1234!</code>
+        </small>
+      </div>
       <p id="pharmacy-access-message" class="hidden text-sm text-slate-600 dark:text-slate-300"></p>
     </div>
   </section>
@@ -362,7 +368,7 @@
         <div class="flex items-center gap-2" data-auth-header>
           <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
           <!-- 🧪 Κουμπί για άμεση σύνδεση DEMO φαρμακείου -->
-          <button id="demo-login-btn" type="button" class="btn bg-emerald-600/90 text-white hover:bg-emerald-600 shadow" title="Σύνδεση επίδειξης">Σύνδεση DEMO Φαρμακείου</button>
+          <button id="demo-login-btn" type="button" data-demo-login class="btn bg-emerald-600/90 text-white hover:bg-emerald-600 shadow" title="Σύνδεση επίδειξης">Σύνδεση DEMO Φαρμακείου</button>
           <div data-auth-header-session class="hidden items-center gap-2">
             <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
             <span data-auth-header-email class="text-sm font-semibold"></span>
@@ -712,7 +718,7 @@
     // 📌 Στοιχεία που αφορούν τον νέο πίνακα ελέγχου και το DEMO login
     const publicShell = qs('#public-shell');
     const dashboardShell = qs('#pharmacy-dashboard');
-    const demoLoginBtn = qs('#demo-login-btn');
+    const demoLoginButtons = qsa('[data-demo-login]');
     const dashboardSubtitle = qs('#dashboard-subtitle');
     const dashboardUserPill = qs('#dashboard-user-pill');
     const demoDashboardPill = qs('#demo-dashboard-pill');
@@ -1403,6 +1409,11 @@
       }
     }
 
+    function setDemoButtonsLoading(isLoading, label){
+      if(!demoLoginButtons?.length) return;
+      demoLoginButtons.forEach(btn => setButtonLoading(btn, isLoading, label));
+    }
+
     // 🧪 Χειριστής για το κουμπί «Σύνδεση DEMO Φαρμακείου»
     async function handleDemoLogin(){
       if(demoLoginInFlight){
@@ -1413,7 +1424,7 @@
         return;
       }
       demoLoginInFlight = true;
-      setButtonLoading(demoLoginBtn, true, 'Σύνδεση DEMO…');
+      setDemoButtonsLoading(true, 'Σύνδεση DEMO…');
       try{
         if(!supabase){
           enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
@@ -1448,7 +1459,7 @@
         showToast('Fallback DEMO χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
       }finally{
         demoLoginInFlight = false;
-        setButtonLoading(demoLoginBtn, false);
+        setDemoButtonsLoading(false);
       }
     }
 
@@ -2260,7 +2271,9 @@
     cancelHoursBtn?.addEventListener('click', handleCancelSchedule);
     reloadReq?.addEventListener('click', loadRequests);
 
-    demoLoginBtn?.addEventListener('click', handleDemoLogin);
+    if(demoLoginButtons.length){
+      demoLoginButtons.forEach(btn => btn.addEventListener('click', handleDemoLogin));
+    }
     dashboardReloadBtn?.addEventListener('click', loadDashboardRequests);
     openingHoursFillWeekBtn?.addEventListener('click', applyDefaultWeekTemplate);
     openingHoursResetBtn?.addEventListener('click', resetOpeningHoursToSaved);
@@ -2308,6 +2321,7 @@
     /* ---------- init ---------- */
     await loadPharmacies();
   </script>
+  <script src="./demo-login.js"></script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
 </html>

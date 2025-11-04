@@ -14,6 +14,9 @@
   window.SUPABASE_URL = SUPABASE_URL;
   window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
 
+  window.DEMO_EMAIL = window.DEMO_EMAIL || (window.ENV?.DEMO_EMAIL ?? 'demo@mediradar.test');
+  window.DEMO_PASSWORD = window.DEMO_PASSWORD || (window.ENV?.DEMO_PASSWORD ?? 'demo1234!');
+
   // αν έχει ήδη φορτωθεί το supabase-js από το HTML, φτιάξε client ΜΙΑ φορά
   if (window.supabase && !window.mediradarSupabase) {
     window.mediradarSupabase = window.supabase.createClient(
