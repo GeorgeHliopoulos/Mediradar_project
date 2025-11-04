@@ -303,11 +303,13 @@
         <button id="pharmacy-access-login" type="button" class="btn bg-brand-600 text-white hover:bg-brand-700 shadow">Σύνδεση φαρμακείου</button>
         <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Επιστροφή</a>
       </div>
-      <div class="demo-entry mt-4">
-        <button class="btn" data-demo-login>Try DEMO</button>
-        <small class="opacity-70 block mt-2" data-demo-credentials hidden>
-          Demo: <code>demo@mediradar.test</code> / <code>demo1234!</code>
-        </small>
+      <div class="mt-4">
+        <div class="demo-entry">
+          <button class="btn" data-demo-login>Try DEMO</button>
+          <small class="opacity-70 block mt-2" data-demo-credentials hidden>
+            Demo: <code>demo@mediradar.test</code> / <code>demo1234!</code>
+          </small>
+        </div>
       </div>
       <p id="pharmacy-access-message" class="hidden text-sm text-slate-600 dark:text-slate-300"></p>
     </div>
@@ -613,12 +615,35 @@
     </div>
   </div>
 
-  <!-- ENV -->
-  <script src="/env.js"></script>
+  <script src="env.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.47.10/dist/umd/supabase.js"></script>
+  <script>
+    (function initSupabaseClient() {
+      const existing = window.supabase;
+      if (existing && typeof existing.auth === 'object') {
+        if (!window.mediradarSupabase) {
+          window.mediradarSupabase = existing;
+        }
+        return;
+      }
+      if (window.Supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        try {
+          const client = window.Supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+          if (client) {
+            window.supabase = client;
+            if (!window.mediradarSupabase) {
+              window.mediradarSupabase = client;
+            }
+          }
+        } catch (err) {
+          console.warn('[supabase] Failed to initialize client', err);
+        }
+      }
+    })();
+  </script>
 
   <!-- Supabase + App -->
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     import { supabaseClient } from "./firebase.js";
     import {
       WEEK_DAYS,
@@ -635,9 +660,12 @@
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
     const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
     const hasSupabaseConfig = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
-    const supabase = supabaseClient || (hasSupabaseConfig
-      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null);
+    const globalSupabase = window.mediradarSupabase
+      || (window.supabase && typeof window.supabase.auth === 'object' ? window.supabase : null);
+    let supabase = supabaseClient || globalSupabase;
+    if(!supabase && hasSupabaseConfig && window.Supabase?.createClient){
+      supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
     const supabaseStatus = {
       ready: !!supabase,
       reason: hasSupabaseConfig ? 'client_unavailable' : 'missing_config'
@@ -648,7 +676,8 @@
       window.mediradarSupabase = supabase;
     }
     if(!supabaseStatus.ready){
-      console.warn(`${missingSupabaseMessage} (url:${hasSupabaseConfig ? 'ok' : '—'}, client:${supabaseClient ? 'reused' : 'missing'})`);
+      const clientStatus = supabaseClient ? 'reused' : (globalSupabase ? 'global' : 'missing');
+      console.warn(`${missingSupabaseMessage} (url:${hasSupabaseConfig ? 'ok' : '—'}, client:${clientStatus})`);
     }
 
     const DEMO_CREDENTIALS = {
@@ -2323,5 +2352,6 @@
   </script>
   <script src="./demo-login.js"></script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
+  <script src="demo-login.js"></script>
 </body>
 </html>

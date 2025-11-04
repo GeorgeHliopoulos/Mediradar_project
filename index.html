@@ -29,9 +29,6 @@
     }
   </script>
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     body { position: relative; overflow-x: hidden; }
     .glass-surface {
@@ -857,8 +854,37 @@
     </div>
   </div>
 
-  <!-- env.js (ορίζεις SUPABASE_URL, SUPABASE_ANON_KEY) -->
-  <script src="./env.js"></script>
+  <script src="env.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.47.10/dist/umd/supabase.js"></script>
+  <script>
+    (function initSupabaseClient() {
+      const existing = window.supabase;
+      if (existing && typeof existing.auth === 'object') {
+        if (!window.mediradarSupabase) {
+          window.mediradarSupabase = existing;
+        }
+        return;
+      }
+      if (window.Supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        try {
+          const client = window.Supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+          if (client) {
+            window.supabase = client;
+            if (!window.mediradarSupabase) {
+              window.mediradarSupabase = client;
+            }
+          }
+        } catch (err) {
+          console.warn('[supabase] Failed to initialize client', err);
+        }
+      }
+    })();
+  </script>
+  <script>
+    window.pushDeny = window.pushDeny || function (e) {
+      console.warn('[push] Denied/unavailable', e);
+    };
+  </script>
 
   <!-- App JS -->
   <script>
@@ -1439,12 +1465,18 @@ By submitting a request:
     const supabaseKey = window.SUPABASE_ANON_KEY || window.ENV?.SUPABASE_ANON_KEY;
     const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
     let supabase = window.mediradarSupabase || null;
-    if(!supabase && window.supabase && supabaseUrl && supabaseKey){
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    if(!supabase && window.supabase && typeof window.supabase.auth === 'object'){
+      supabase = window.supabase;
+    }
+    if(!supabase && window.Supabase?.createClient && supabaseUrl && supabaseKey){
+      supabase = window.Supabase.createClient(supabaseUrl, supabaseKey);
+    }
+    if(supabase && !window.mediradarSupabase){
       window.mediradarSupabase = supabase;
     }
     if(!supabase){
-      console.warn(`${missingSupabaseMessage} (url:${supabaseUrl?'ok':'—'}, anonKey:${supabaseKey?'ok':'—'}, supabaseJs:${window.supabase?'ok':'—'})`);
+      const hasClient = window.supabase && typeof window.supabase.auth === 'object';
+      console.warn(`${missingSupabaseMessage} (url:${supabaseUrl?'ok':'—'}, anonKey:${supabaseKey?'ok':'—'}, supabaseClient:${hasClient?'ok':'—'})`);
     }
     if(!state.supabase && supabase){
       state.supabase = supabase;
@@ -1978,8 +2010,19 @@ By submitting a request:
     initBarcode();
 
     // Supabase
-    if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
-      state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    if (!state.supabase) {
+      if (window.mediradarSupabase && typeof window.mediradarSupabase.auth === 'object') {
+        state.supabase = window.mediradarSupabase;
+      } else if (window.supabase && typeof window.supabase.auth === 'object') {
+        state.supabase = window.supabase;
+      } else if (window.Supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        try {
+          state.supabase = window.Supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+          window.mediradarSupabase = state.supabase;
+        } catch (err) {
+          console.warn('[supabase] Inline init failed', err);
+        }
+      }
     }
 
     // Submit
@@ -2468,7 +2511,7 @@ By submitting a request:
 
   </script>
 
-  <script src="./demo-login.js"></script>
+  <script src="demo-login.js"></script>
 
 </body>
 </html>
