@@ -14,11 +14,18 @@
   window.SUPABASE_URL = SUPABASE_URL;
   window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
 
-  // αν έχει ήδη φορτωθεί το supabase-js από το HTML, φτιάξε client ΜΙΑ φορά
-  if (window.supabase && !window.mediradarSupabase) {
-    window.mediradarSupabase = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+  window.DEMO_EMAIL = window.DEMO_EMAIL || (window.ENV?.DEMO_EMAIL ?? 'demo@mediradar.test');
+  window.DEMO_PASSWORD = window.DEMO_PASSWORD || (window.ENV?.DEMO_PASSWORD ?? 'demo1234!');
+
+  // αν υπάρχει έτοιμος client ή μπορεί να φτιαχτεί από το UMD, αποθήκευσέ τον ΜΙΑ φορά
+  if (!window.mediradarSupabase) {
+    if (window.supabase && typeof window.supabase.auth === 'object') {
+      window.mediradarSupabase = window.supabase;
+    } else if (window.Supabase?.createClient) {
+      window.mediradarSupabase = window.Supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+    }
   }
 })();

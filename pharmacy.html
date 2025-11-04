@@ -303,6 +303,14 @@
         <button id="pharmacy-access-login" type="button" class="btn bg-brand-600 text-white hover:bg-brand-700 shadow">Σύνδεση φαρμακείου</button>
         <a href="/" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">← Επιστροφή</a>
       </div>
+      <div class="mt-4">
+        <div class="demo-entry">
+          <button class="btn" data-demo-login>Try DEMO</button>
+          <small class="opacity-70 block mt-2" data-demo-credentials hidden>
+            Demo: <code>demo@mediradar.test</code> / <code>demo1234!</code>
+          </small>
+        </div>
+      </div>
       <p id="pharmacy-access-message" class="hidden text-sm text-slate-600 dark:text-slate-300"></p>
     </div>
   </section>
@@ -362,7 +370,7 @@
         <div class="flex items-center gap-2" data-auth-header>
           <button id="signin-btn" type="button" data-auth-open data-auth-target="pharmacies" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">Σύνδεση</button>
           <!-- 🧪 Κουμπί για άμεση σύνδεση DEMO φαρμακείου -->
-          <button id="demo-login-btn" type="button" class="btn bg-emerald-600/90 text-white hover:bg-emerald-600 shadow" title="Σύνδεση επίδειξης">Σύνδεση DEMO Φαρμακείου</button>
+          <button id="demo-login-btn" type="button" data-demo-login class="btn bg-emerald-600/90 text-white hover:bg-emerald-600 shadow" title="Σύνδεση επίδειξης">Σύνδεση DEMO Φαρμακείου</button>
           <div data-auth-header-session class="hidden items-center gap-2">
             <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold grid place-items-center">Μ</div>
             <span data-auth-header-email class="text-sm font-semibold"></span>
@@ -607,12 +615,35 @@
     </div>
   </div>
 
-  <!-- ENV -->
-  <script src="/env.js"></script>
+  <script src="env.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.47.10/dist/umd/supabase.js"></script>
+  <script>
+    (function initSupabaseClient() {
+      const existing = window.supabase;
+      if (existing && typeof existing.auth === 'object') {
+        if (!window.mediradarSupabase) {
+          window.mediradarSupabase = existing;
+        }
+        return;
+      }
+      if (window.Supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        try {
+          const client = window.Supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+          if (client) {
+            window.supabase = client;
+            if (!window.mediradarSupabase) {
+              window.mediradarSupabase = client;
+            }
+          }
+        } catch (err) {
+          console.warn('[supabase] Failed to initialize client', err);
+        }
+      }
+    })();
+  </script>
 
   <!-- Supabase + App -->
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
     import { supabaseClient } from "./firebase.js";
     import {
       WEEK_DAYS,
@@ -629,9 +660,12 @@
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || '';
     const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
     const hasSupabaseConfig = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
-    const supabase = supabaseClient || (hasSupabaseConfig
-      ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null);
+    const globalSupabase = window.mediradarSupabase
+      || (window.supabase && typeof window.supabase.auth === 'object' ? window.supabase : null);
+    let supabase = supabaseClient || globalSupabase;
+    if(!supabase && hasSupabaseConfig && window.Supabase?.createClient){
+      supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
     const supabaseStatus = {
       ready: !!supabase,
       reason: hasSupabaseConfig ? 'client_unavailable' : 'missing_config'
@@ -642,7 +676,8 @@
       window.mediradarSupabase = supabase;
     }
     if(!supabaseStatus.ready){
-      console.warn(`${missingSupabaseMessage} (url:${hasSupabaseConfig ? 'ok' : '—'}, client:${supabaseClient ? 'reused' : 'missing'})`);
+      const clientStatus = supabaseClient ? 'reused' : (globalSupabase ? 'global' : 'missing');
+      console.warn(`${missingSupabaseMessage} (url:${hasSupabaseConfig ? 'ok' : '—'}, client:${clientStatus})`);
     }
 
     const DEMO_CREDENTIALS = {
@@ -712,7 +747,7 @@
     // 📌 Στοιχεία που αφορούν τον νέο πίνακα ελέγχου και το DEMO login
     const publicShell = qs('#public-shell');
     const dashboardShell = qs('#pharmacy-dashboard');
-    const demoLoginBtn = qs('#demo-login-btn');
+    const demoLoginButtons = qsa('[data-demo-login]');
     const dashboardSubtitle = qs('#dashboard-subtitle');
     const dashboardUserPill = qs('#dashboard-user-pill');
     const demoDashboardPill = qs('#demo-dashboard-pill');
@@ -1403,6 +1438,11 @@
       }
     }
 
+    function setDemoButtonsLoading(isLoading, label){
+      if(!demoLoginButtons?.length) return;
+      demoLoginButtons.forEach(btn => setButtonLoading(btn, isLoading, label));
+    }
+
     // 🧪 Χειριστής για το κουμπί «Σύνδεση DEMO Φαρμακείου»
     async function handleDemoLogin(){
       if(demoLoginInFlight){
@@ -1413,7 +1453,7 @@
         return;
       }
       demoLoginInFlight = true;
-      setButtonLoading(demoLoginBtn, true, 'Σύνδεση DEMO…');
+      setDemoButtonsLoading(true, 'Σύνδεση DEMO…');
       try{
         if(!supabase){
           enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
@@ -1448,7 +1488,7 @@
         showToast('Fallback DEMO χωρίς Supabase: demo@pharmacy.gr / Demo123!.', 'info');
       }finally{
         demoLoginInFlight = false;
-        setButtonLoading(demoLoginBtn, false);
+        setDemoButtonsLoading(false);
       }
     }
 
@@ -2260,7 +2300,9 @@
     cancelHoursBtn?.addEventListener('click', handleCancelSchedule);
     reloadReq?.addEventListener('click', loadRequests);
 
-    demoLoginBtn?.addEventListener('click', handleDemoLogin);
+    if(demoLoginButtons.length){
+      demoLoginButtons.forEach(btn => btn.addEventListener('click', handleDemoLogin));
+    }
     dashboardReloadBtn?.addEventListener('click', loadDashboardRequests);
     openingHoursFillWeekBtn?.addEventListener('click', applyDefaultWeekTemplate);
     openingHoursResetBtn?.addEventListener('click', resetOpeningHoursToSaved);
@@ -2309,5 +2351,6 @@
     await loadPharmacies();
   </script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
+  <script src="demo-login.js"></script>
 </body>
 </html>
