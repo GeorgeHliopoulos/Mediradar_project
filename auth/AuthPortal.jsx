@@ -299,7 +299,7 @@ export default function AuthPortal() {
                         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-slate-900/30 transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {activeFormState.loading === 'email' ? <Spinner /> : null}
-                        <span>Σύνδεση / Εγγραφή με Email</span>
+                        <span>Συνέχεια με Magic Link (Email)</span>
                       </button>
 
                       <button
