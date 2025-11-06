@@ -320,11 +320,19 @@
           <span class="w-6 h-6 grid place-items-center">📍</span>
           <span id="t-city">Πόλη</span>
         </label>
-        <div class="mt-2 relative">
-          <select id="city" class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">— Επιλογή πόλης —</option>
-          </select>
-          <div id="ac-city" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
+        <div class="mt-2">
+          <div class="flex gap-2">
+            <div class="relative flex-1" data-city-autocomplete>
+              <input id="city-input" type="text" autocomplete="off"
+                     class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
+                     placeholder="— Επιλογή πόλης —" />
+              <div id="ac-city" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg max-h-64 overflow-auto"></div>
+            </div>
+            <button id="geolocate-button" type="button"
+                    class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap">
+              📍 Κοντά Μου
+            </button>
+          </div>
         </div>
       </div>
 
@@ -876,6 +884,7 @@
       role: null   // 'user' ή 'pharmacy'
     },
     cities: [],
+    userLocation: null,
     supabase: null,
     pendingSeconds: 0,
     pendingInterval: null,
@@ -898,6 +907,16 @@
       't-home':'Αρχική',
       't-searchTitle':'Αναζήτηση Φαρμάκου',
       't-city':'Πόλη',
+      't-cityPlaceholder':'Πληκτρολόγησε πόλη',
+      't-nearMe':'📍 Κοντά Μου',
+      't-currentLocation':'Τρέχουσα Τοποθεσία',
+      't-geolocateUnsupported':'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.',
+      't-geolocateDenied':'Η πρόσβαση στην τοποθεσία απορρίφθηκε.',
+      't-geolocateUnavailable':'Η τοποθεσία δεν είναι διαθέσιμη.',
+      't-geolocateTimeout':'Λήξη χρόνου για τον εντοπισμό τοποθεσίας.',
+      't-geolocateError':'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.',
+      't-geolocateLoading':'Εντοπισμός…',
+      't-cityInvalid':'Επίλεξε μια έγκυρη πόλη από τη λίστα.',
       't-medname':'Όνομα Φαρμάκου',
       't-formatTip':'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
       't-barcodeTitle':'Σάρωση barcode συνταγής ή κουτιού',
@@ -968,7 +987,7 @@
       'pending-overlay-message':'Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.',
       'pending-overlay-status-text':'Αναμονή απαντήσεων',
       'how-body':`
-1️⃣ Συμπληρώνεις πόλη και φάρμακο
+1️⃣ Επιλέγεις τοποθεσία ή πόλη και φάρμακο
 2️⃣ Ειδοποιούμε άμεσα τα φαρμακεία που είναι κοντά σου
 3️⃣ Μόλις κάποιο απαντήσει, το βλέπεις στην οθόνη «Κατάσταση αιτήματος»
 4️⃣ Επιλέγεις φαρμακείο → κρατά το φάρμακο για 60’ να πας να το πάρεις
@@ -978,7 +997,7 @@
 ▶️ Τα φαρμακεία το χρησιμοποιούν για να απαντούν χωρίς τηλέφωνα.
 `,
       'gdpr-body':`
-Χρησιμοποιούμε τα στοιχεία που καταχωρείς (πόλη, όνομα φαρμάκου, προαιρετικό email) αποκλειστικά για να ειδοποιήσουμε φαρμακεία και να σου εμφανίσουμε τις απαντήσεις τους. Τα δεδομένα αποθηκεύονται με ασφαλή τρόπο σε υποδομή cloud (Supabase) και δεν διαβιβάζονται σε τρίτους εκτός από τα φαρμακεία που απαντούν στο αίτημά σου.
+Χρησιμοποιούμε τα στοιχεία που καταχωρείς (τοποθεσία/πόλη, όνομα φαρμάκου, προαιρετικό email) αποκλειστικά για να ειδοποιήσουμε φαρμακεία και να σου εμφανίσουμε τις απαντήσεις τους. Τα δεδομένα αποθηκεύονται με ασφαλή τρόπο σε υποδομή cloud (Supabase) και δεν διαβιβάζονται σε τρίτους εκτός από τα φαρμακεία που απαντούν στο αίτημά σου.
 
 Με την υποβολή αίτησης:
 • αποδέχεσαι ότι τα στοιχεία θα διαβιβαστούν στα φαρμακεία που θα απαντήσουν
@@ -1000,6 +1019,16 @@
       't-home':'Home',
       't-searchTitle':'Medicine search',
       't-city':'City',
+      't-cityPlaceholder':'Type a city',
+      't-nearMe':'📍 Near Me',
+      't-currentLocation':'Current Location',
+      't-geolocateUnsupported':'Geolocation is not supported on this device.',
+      't-geolocateDenied':'Location access was denied.',
+      't-geolocateUnavailable':'Location information is unavailable.',
+      't-geolocateTimeout':'Timed out while retrieving location.',
+      't-geolocateError':'Unable to retrieve location.',
+      't-geolocateLoading':'Locating…',
+      't-cityInvalid':'Please pick a valid city from the list.',
       't-medname':'Medicine name',
       't-formatTip':'Tip: Brand + dosage (e.g. “500mg”).',
       't-barcodeTitle':'Scan prescription/box barcode',
@@ -1070,7 +1099,7 @@
       'pending-overlay-message':'They are checking their stock and will reply shortly.',
       'pending-overlay-status-text':'Waiting for responses',
       'how-body':`
-1️⃣ Fill city and medicine
+1️⃣ Select location or city and medicine
 2️⃣ We instantly ping nearby pharmacies
 3️⃣ When one of them responds, you see it in “Request status”
 4️⃣ Choose pharmacy → it reserves the medicine for 60’
@@ -1080,7 +1109,7 @@
 ▶️ Pharmacies use it to answer without phone calls.
 `,
       'gdpr-body':`
-We use the details you submit (city, medicine, optional email) only to notify pharmacies and to show you their answers. Data is stored securely in cloud infrastructure (Supabase) and is not shared with third parties apart from the pharmacies that respond.
+We use the details you submit (location/city, medicine, optional email) only to notify pharmacies and to show you their answers. Data is stored securely in cloud infrastructure (Supabase) and is not shared with third parties apart from the pharmacies that respond.
 
 By submitting a request:
 • you accept that the data will be sent to responding pharmacies
@@ -1091,271 +1120,346 @@ By submitting a request:
   };
 
   // ==========================
-  //  CITY LIST
+  //  CITY LIST & LOCATION HELPERS
   // ==========================
-  const citySuggestions = (() => {
-    const raw = `
-Άγιοι Θεόδωροι
-Άγιος Αθανάσιος
-Άγιος Νικόλαος
-Άγιος Νικόλαος Κρήτης
-Άγιος Στέφανος
-Άνδρος
-Άνοιξη
-Άρτα
-Αγία Βαρβάρα
-Αγία Μαρίνα Κορωπίου
-Αγία Μαρίνα Λέρου
-Αγία Μαρίνα Χανίων
-Αγία Παρασκευή
-Αγία Παρασκευή (Θεσσαλονίκης)
-Αγία Παρασκευή (Λέσβου)
-Αγία Τριάδα
-Αγιά
-Αγιάσος
-Αγιοι Ανάργυροι
-Αγρίνιο
-Αθήνα
-Αίγιο
-Αιγάλεω
-Αλεξανδρούπολη
-Αλμυρός
-Αμαλιάδα
-Αμπελώνας
-Αμύνταιο
-Αμφίκλεια
-Αντίκυρα
-Αρκαλοχώρι
-Αρμένοι
-Αρτέμιδα
-Αρχάνες
-Αχαΐα
-Αχαρνές
-Βάρη
-Βαρθολομιό
-Βασιλικά
-Βασιλικό Ευβοίας
-Βέλο
-Βέροια
-Βελβεντός
-Βόλος
-Βόρεια Κυνουρία
-Βούλα
-Βουλιαγμένη
-Βραχάτι
-Βραχνέικα
-Βριλήσσια
-Γαλάτσι
-Γαλατάς
-Γαργαλιάνοι
-Γαστούνη
-Γαύδος
-Γιαννιτσά
-Γλυφάδα
-Γούμενισσα
-Γρεβενά
-Δελβινάκι
-Δεσκάτη
-Διόνυσος
-Δομοκός
-Δράμα
-Δραπετσώνα
-Έδεσσα
-Εκάλη
-Ελασσόνα
-Ελευθερούπολη
-Ερυθρές
-Ζάκυνθος
-Ζάρακες
-Ζαρός
-Ζεφύρι
-Ζίτσα
-Ζωγράφου
-Ηγουμενίτσα
-Ηλιούπολη
-Ηράκλειο
-Ηράκλειο Αττικής
-Θάσος
-Θέρμη
-Θερμοπύλες
-Θεσσαλονίκη
-Θήβα
-Θήρα
-Ίλιον
-Ιεράπετρα
-Ιερισσός
-Ικαρία
-Ιστιαία
-Ιωάννινα
-Κάλυμνος
-Κάτω Αχαΐα
-Καβάλα
-Καλαβρύτα
-Καλαμάτα
-Καλαμπάκα
-Καλλιθέα
-Καμένα Βούρλα
-Καναλλάκι
-Καρδίτσα
-Καρλόβασι
-Καρπενήσι
-Καστέλλι
-Καστοριά
-Καστρί
-Κατερίνη
-Κέρκυρα
-Κεραμωτή
-Κερατέα
-Κερατσίνι
-Κηφισιά
-Κίσσαμος
-Κιλκίς
-Κόνιτσα
-Κόρινθος
-Κοζάνη
-Κοκκινιά
-Κομοτηνή
-Κορυδαλλός
-Κορωπί
-Κρανίδι
-Κρανιά
-Κρεμαστή
-Κρυονέρι
-Κρωπία
-Κύμη
-Κυπαρισσία
-Κως
-Λάρισα
-Λαγκαδάς
-Λαμία
-Λειβαθώ
-Λεπτοκαρυά
-Λευκάδα
-Λήμνος
-Λιβαδειά
-Λιτόχωρο
-Λουτρά Εδέσσης
-Λουτράκι
-Λυκόβρυση
-Μακρακώμη
-Μαλεβίζι
-Μαντούδι
-Μαραθώνας
-Μαρκόπουλο Μεσογαίας
-Μαρούσι
-Μεγαλόπολη
-Μεγανήσι
-Μεθώνη
-Μελίσσια
-Μενεμένη
-Μενίδι
-Μεσολόγγι
-Μεσσήνη
-Μεταμόρφωση
-Μήλος
-Μολάοι
-Μοσχάτο
-Μουζάκι
-Μύτικας
-Μυκόνος
-Μυρίνα
-Μυτιλήνη
-Νάξος
-Νάουσα
-Ναύπλιο
-Νέα Αγχίαλος
-Νέα Αρτάκη
-Νέα Ερυθραία
-Νέα Ιωνία
-Νέα Ιωνία Μαγνησίας
-Νέα Καλλικράτεια
-Νέα Μάκρη
-Νέα Μουδανιά
-Νέα Πέραμος
-Νέα Σμύρνη
-Νέα Φιλαδέλφεια
-Νέα Χαλκηδόνα
-Νεάπολη
-Νεάπολη Λακωνίας
-Νεοχώρι
-Νεράιδα
-Νεστόριο
-Νησί
-Νίκαια
-Νικήτη
-Νότια Κυνουρία
-Νυδρί
-Ξάνθη
-Ξυλόκαστρο
-Οινόφυτα
-Ορεστιάδα
-Πάργα
-Πάρος
-Πάτρα
-Παλαιό Φάληρο
-Παλαιόχωρα
-Παλλήνη
-Παναγιά
-Παπάγου
-Παραμυθιά
-Πειραιά
-Πειραιάς
-Πεντέλη
-Περιστέρι
-Πετρούπολη
-Πεύκη
-Πικέρμι
-Πλαταμώνας
-Πόρος
-Πόρτο Ράφτη
-Πολύγυρος
-Πολύκαστρο
-Πρέβεζα
-Πτολεμαΐδα
-Πύλος
-Πύργος
-Ραφήνα
-Ρέθυμνο
-Ρόδος
-Σάμος
-Σαλαμίνα
-Σαντορίνη
-Σέρβια
-Σέρρες
-Σητεία
-Σίνδος
-Σιάτιστα
-Σιδηρόκαστρο
-Σκιάθος
-Σκόπελος
-Σκύδρα
-Σούδα
-Σπάρτη
-Σπάτα
-Σταμάτα
-Στυλίδα
-Σύρος
-Ταύρος
-Τήνος
-Τρίκαλα
-Τρίπολη
-Τυμπάκι
-Φαιστός
-Φιλιατρά
-Φιλιππιάδα
-Φιλοθέη
-Φλώρινα
-Χαϊδάρι
-Χαλκίδα
-Χανιά
-Χερσόνησος
-Χίος
-Χολαργός
-Χώρα Μεσσηνίας
-Ψυχικό
-Ωραιόκαστρο`;
-    return Array.from(new Set(raw.split('\n').map(v=>v.trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'el',{sensitivity:'base'}));
-  })();
+  const LOCATION_STORAGE_KEY = 'mediradar-user-location';
+  const CITY_JSON_URL = './greek_cities.json';
+  const cityData = {
+    list: [],
+    normalizedMap: new Map()
+  };
+
+  function normalizeForSearch(value = '') {
+    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  function buildCityData(list) {
+    cityData.list = list;
+    cityData.normalizedMap = new Map();
+    list.forEach(city => {
+      const key = normalizeForSearch(city);
+      if (!cityData.normalizedMap.has(key)) {
+        cityData.normalizedMap.set(key, city);
+      }
+    });
+    state.cities = list;
+    return list;
+  }
+
+  async function ensureCityDataLoaded() {
+    if (cityData.list.length) return cityData.list;
+    try {
+      const response = await fetch(CITY_JSON_URL);
+      if (!response.ok) throw new Error(`Failed to load ${CITY_JSON_URL}`);
+      const json = await response.json();
+      const rawList = Array.isArray(json) ? json : Array.isArray(json?.cities) ? json.cities : [];
+      const sanitized = Array.from(new Set(rawList
+        .filter(item => typeof item === 'string')
+        .map(item => item.trim())
+        .filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b, 'el', { sensitivity: 'base' }));
+      return buildCityData(sanitized);
+    } catch (error) {
+      console.error('Failed to load city suggestions', error);
+      return buildCityData([]);
+    }
+  }
+
+  function findCityMatch(value) {
+    if (!value) return null;
+    const normalized = normalizeForSearch(value);
+    return cityData.normalizedMap.get(normalized) || null;
+  }
+
+  function loadStoredUserLocation() {
+    try {
+      const stored = localStorage.getItem(LOCATION_STORAGE_KEY);
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed.latitude === 'number' && typeof parsed.longitude === 'number') {
+        return {
+          latitude: Number(parsed.latitude),
+          longitude: Number(parsed.longitude),
+          accuracy: typeof parsed.accuracy === 'number' ? Number(parsed.accuracy) : undefined,
+          timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now()
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to restore stored location', error);
+    }
+    return null;
+  }
+
+  function persistUserLocation(coords) {
+    if (!coords) return null;
+    const location = {
+      latitude: Number(coords.latitude),
+      longitude: Number(coords.longitude),
+      accuracy: typeof coords.accuracy === 'number' ? Number(coords.accuracy) : undefined,
+      timestamp: Date.now()
+    };
+    state.userLocation = location;
+    window.userLocation = { ...location };
+    try {
+      localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(location));
+    } catch (error) {
+      console.warn('Failed to persist user location', error);
+    }
+    return location;
+  }
+
+  function clearStoredUserLocation() {
+    state.userLocation = null;
+    delete window.userLocation;
+    try {
+      localStorage.removeItem(LOCATION_STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear stored location', error);
+    }
+    const input = document.getElementById('city-input');
+    if (input) {
+      delete input.dataset.usingLocation;
+      delete input.dataset.locationLabel;
+      input.classList.remove('italic');
+    }
+  }
+
+  function getCurrentLocationLabel() {
+    return strings[state.lang]?.['t-currentLocation'] || 'Τρέχουσα Τοποθεσία';
+  }
+
+  function updateCityInputUi() {
+    const input = document.getElementById('city-input');
+    if (input) {
+      const placeholder = strings[state.lang]?.['t-cityPlaceholder'] || 'Πληκτρολόγησε πόλη';
+      input.placeholder = placeholder;
+      if (input.dataset.usingLocation === 'true') {
+        const label = getCurrentLocationLabel();
+        input.value = label;
+        input.dataset.locationLabel = label;
+        input.classList.add('italic');
+      } else {
+        input.classList.remove('italic');
+      }
+    }
+    const geolocateButton = document.getElementById('geolocate-button');
+    if (geolocateButton) {
+      geolocateButton.textContent = strings[state.lang]?.['t-nearMe'] || '📍 Near Me';
+    }
+  }
+
+  function markCityInputAsLocation() {
+    const input = document.getElementById('city-input');
+    if (!input) return;
+    input.dataset.usingLocation = 'true';
+    updateCityInputUi();
+  }
+
+  function getGeolocationErrorMessage(error) {
+    if (!error || typeof error.code !== 'number') {
+      return strings[state.lang]?.['t-geolocateError'] || 'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.';
+    }
+    const messages = {
+      1: strings[state.lang]?.['t-geolocateDenied'] || 'Η πρόσβαση στην τοποθεσία απορρίφθηκε.',
+      2: strings[state.lang]?.['t-geolocateUnavailable'] || 'Η τοποθεσία δεν είναι διαθέσιμη.',
+      3: strings[state.lang]?.['t-geolocateTimeout'] || 'Λήξη χρόνου για τον εντοπισμό τοποθεσίας.'
+    };
+    return messages[error.code] || strings[state.lang]?.['t-geolocateError'] || 'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.';
+  }
+
+  function resolveCitySelection() {
+    const input = document.getElementById('city-input');
+    const rawValue = input?.value?.trim() || '';
+    if (state.userLocation) {
+      return { type: 'location', label: getCurrentLocationLabel(), location: state.userLocation };
+    }
+    if (!rawValue) {
+      return { type: 'empty' };
+    }
+    const match = findCityMatch(rawValue);
+    if (match) {
+      if (input) input.value = match;
+      return { type: 'city', label: match };
+    }
+    return { type: 'invalid', attempted: rawValue };
+  }
+
+  async function initCityAutocomplete(options = {}) {
+    const { setButtonLoading } = options;
+    const input = document.getElementById('city-input');
+    const list = document.getElementById('ac-city');
+    const wrapper = input?.closest('[data-city-autocomplete]');
+    const geolocateButton = document.getElementById('geolocate-button');
+    if (!input || !list || !wrapper) {
+      return;
+    }
+
+    await ensureCityDataLoaded();
+    updateCityInputUi();
+
+    let suggestions = [];
+    let activeIndex = -1;
+
+    function hideSuggestions() {
+      list.classList.add('hidden');
+      list.innerHTML = '';
+      suggestions = [];
+      activeIndex = -1;
+    }
+
+    function highlightActive() {
+      Array.from(list.children).forEach((item, index) => {
+        item.classList.toggle('bg-slate-100', index === activeIndex);
+        item.classList.toggle('dark:bg-slate-700', index === activeIndex);
+      });
+    }
+
+    function showSuggestions(items) {
+      list.innerHTML = '';
+      if (!items.length) {
+        hideSuggestions();
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      items.forEach(city => {
+        const option = document.createElement('div');
+        option.className = 'ac-item px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700';
+        option.textContent = city;
+        option.dataset.value = city;
+        option.addEventListener('mousedown', (event) => {
+          event.preventDefault();
+          clearStoredUserLocation();
+          input.value = city;
+          hideSuggestions();
+        });
+        frag.appendChild(option);
+      });
+      list.appendChild(frag);
+      list.classList.remove('hidden');
+      suggestions = items;
+      activeIndex = -1;
+    }
+
+    function filterSuggestions(query) {
+      const normalizedQuery = normalizeForSearch(query);
+      if (!normalizedQuery) {
+        return cityData.list.slice(0, 10);
+      }
+      return cityData.list.filter(city => normalizeForSearch(city).includes(normalizedQuery)).slice(0, 10);
+    }
+
+    input.addEventListener('input', () => {
+      const value = input.value || '';
+      if (input.dataset.usingLocation === 'true' && input.dataset.locationLabel !== value.trim()) {
+        clearStoredUserLocation();
+      }
+      const filtered = filterSuggestions(value);
+      if (filtered.length) {
+        showSuggestions(filtered);
+      } else {
+        hideSuggestions();
+      }
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.dataset.usingLocation === 'true') {
+        input.select();
+        return;
+      }
+      const filtered = filterSuggestions(input.value || '');
+      if (filtered.length) {
+        showSuggestions(filtered);
+      }
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!suggestions.length) {
+          const filtered = filterSuggestions(input.value || '');
+          if (filtered.length) showSuggestions(filtered);
+        }
+        if (suggestions.length) {
+          activeIndex = Math.min(activeIndex + 1, suggestions.length - 1);
+          highlightActive();
+        }
+      } else if (event.key === 'ArrowUp') {
+        if (suggestions.length) {
+          event.preventDefault();
+          activeIndex = Math.max(activeIndex - 1, 0);
+          highlightActive();
+        }
+      } else if (event.key === 'Enter') {
+        if (suggestions.length && activeIndex >= 0) {
+          event.preventDefault();
+          const city = suggestions[activeIndex];
+          clearStoredUserLocation();
+          input.value = city;
+          hideSuggestions();
+        } else {
+          const match = findCityMatch(input.value);
+          if (match) {
+            input.value = match;
+          }
+        }
+      } else if (event.key === 'Escape') {
+        hideSuggestions();
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => {
+        hideSuggestions();
+        const match = findCityMatch(input.value);
+        if (match) {
+          input.value = match;
+        }
+      }, 120);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!wrapper.contains(event.target)) {
+        hideSuggestions();
+      }
+    });
+
+    if (geolocateButton) {
+      geolocateButton.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert(strings[state.lang]?.['t-geolocateUnsupported'] || 'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.');
+          return;
+        }
+        const loadingLabel = strings[state.lang]?.['t-geolocateLoading'] || 'Εντοπισμός…';
+        if (typeof setButtonLoading === 'function') {
+          setButtonLoading(geolocateButton, true, loadingLabel);
+        } else {
+          geolocateButton.disabled = true;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            if (typeof setButtonLoading === 'function') {
+              setButtonLoading(geolocateButton, false);
+            } else {
+              geolocateButton.disabled = false;
+            }
+            persistUserLocation(position.coords);
+            markCityInputAsLocation();
+            hideSuggestions();
+            input.blur();
+          },
+          (error) => {
+            if (typeof setButtonLoading === 'function') {
+              setButtonLoading(geolocateButton, false);
+            } else {
+              geolocateButton.disabled = false;
+            }
+            alert(getGeolocationErrorMessage(error));
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+        );
+      });
+    }
+  }
 
   // ==========================
   //  INIT
@@ -1867,24 +1971,24 @@ By submitting a request:
     const fy = document.getElementById('footer-year');
     if (fy) fy.textContent = new Date().getFullYear();
 
+    state.userLocation = loadStoredUserLocation();
+    if (state.userLocation) {
+      window.userLocation = { ...state.userLocation };
+    }
+
+    await initCityAutocomplete({ setButtonLoading });
+    if (state.userLocation) {
+      markCityInputAsLocation();
+    } else {
+      updateCityInputUi();
+    }
+
     // Lang buttons
     const langEl = document.getElementById('lang-el');
     const langEn = document.getElementById('lang-en');
     langEl.addEventListener('click', ()=>{ state.lang='el'; localStorage.setItem('mediradar-lang','el'); applyLang(); });
     langEn.addEventListener('click', ()=>{ state.lang='en'; localStorage.setItem('mediradar-lang','en'); applyLang(); });
     applyLang();
-
-    // city dropdown
-    const citySelect = document.getElementById('city');
-    const frag = document.createDocumentFragment();
-    citySuggestions.forEach(name=>{
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      frag.appendChild(opt);
-    });
-    citySelect.appendChild(frag);
-    state.cities = citySuggestions;
 
     // CTA
     const ctaSearch = document.getElementById('cta-search');
@@ -2036,18 +2140,15 @@ By submitting a request:
     document.getElementById('lang-el').setAttribute('data-active', state.lang==='el');
     document.getElementById('lang-en').setAttribute('data-active', state.lang==='en');
 
-    // city placeholder
-    const citySelect = document.getElementById('city');
-    if (citySelect) {
-      citySelect.options[0].textContent = state.lang==='el' ? '— Επιλογή πόλης —' : '— Select city —';
-    }
+    updateCityInputUi();
   }
 
   // ==========================
   //  SUBMIT REQUEST
   // ==========================
   async function onSubmitRequest() {
-    const city = document.getElementById('city').value.trim();
+    const cityInput = document.getElementById('city-input');
+    const citySelection = resolveCitySelection();
     const name = document.getElementById('medicine-name').value.trim();
     const qty = parseInt(document.getElementById('quantity').value,10) || 1;
     const type = document.getElementById('medicine-type').value.trim();
@@ -2056,8 +2157,17 @@ By submitting a request:
     const allowGeneric = document.querySelector('input[name="allow-generic"]:checked')?.value === 'YES';
     const gdpr = document.getElementById('gdpr-checkbox').checked;
 
-    if (!city || !name || !gdpr) {
-      alert(state.lang==='el' ? 'Συμπλήρωσε πόλη, φάρμακο και αποδέξου τους όρους.' : 'Fill city, medicine and accept terms.');
+    if (citySelection.type === 'invalid') {
+      alert(strings[state.lang]?.['t-cityInvalid'] || (state.lang==='el' ? 'Επίλεξε μια έγκυρη πόλη από τη λίστα.' : 'Select a valid city from the list.'));
+      cityInput?.focus();
+      return;
+    }
+
+    if (citySelection.type === 'empty' || !name || !gdpr) {
+      alert(state.lang==='el' ? 'Επίλεξε τοποθεσία ή πόλη, συμπλήρωσε φάρμακο και αποδέξου τους όρους.' : 'Select location or city, add the medicine and accept the terms.');
+      if (citySelection.type === 'empty') {
+        cityInput?.focus();
+      }
       return;
     }
 
@@ -2068,7 +2178,7 @@ By submitting a request:
     let reqId = crypto.randomUUID();
     const payload = {
       id: reqId,
-      city,
+      city: citySelection.label,
       medicine_name: name,
       quantity: qty,
       medicine_type: type || null,
