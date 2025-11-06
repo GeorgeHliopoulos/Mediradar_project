@@ -280,22 +280,35 @@
 
   <!-- Splash -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
-    <div class="w-full max-w-4xl text-center">
-      <div class="main-logo-container">
-        <h1 class="mediradar-text-logo">MediRadar</h1>
-        <p id="t-hero" class="logo-subtitle">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
+    <div class="w-full max-w-4xl">
+      <div class="hero-stage">
+        <div class="hero-scene background-container" aria-hidden="true">
+          <span class="background-element pill pill--one"></span>
+          <span class="background-element syringe syringe--one"></span>
+          <span class="background-element pill pill--two is-secondary"></span>
+          <span class="background-element bottle bottle--one is-secondary"></span>
+        </div>
+        <div class="hero-content text-center">
+          <div class="hero-logo-badge">
+            <img src="mediradar_logo.png" alt="Λογότυπο MediRadar" class="hero-logo-img">
+          </div>
+          <div class="main-logo-container">
+            <h1 class="mediradar-text-logo">MediRadar</h1>
+            <p id="t-hero" class="logo-subtitle">Απλή, γρήγορη εύρεση φαρμάκων σε διαθέσιμα φαρμακεία.</p>
+          </div>
+          <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
+            <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+              <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
+            </button>
+            <button id="cta-how" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+              <span id="t-howBTN">Πώς λειτουργεί</span>
+            </button>
+          </div>
+          <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
+            📲 <span id="t-installBTN">Εγκατάσταση</span>
+          </button>
+        </div>
       </div>
-      <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
-        </button>
-        <button id="cta-how" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-howBTN">Πώς λειτουργεί</span>
-        </button>
-      </div>
-      <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
-        📲 <span id="t-installBTN">Εγκατάσταση</span>
-      </button>
     </div>
   </section>
 
@@ -550,7 +563,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200/70 dark:border-slate-800/60 bg-white/40 dark:bg-slate-950/20">
+  <footer class="site-footer border-t border-slate-200/70 dark:border-slate-800/60 bg-white/40 dark:bg-slate-950/20">
     <div class="max-w-5xl mx-auto px-6 py-8">
       <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div class="space-y-2">
