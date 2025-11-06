@@ -281,17 +281,17 @@
   <!-- Splash -->
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <div class="w-full max-w-4xl text-center">
-      <div class="main-logo-container">
-        <h1 class="mediradar-text-logo">MediRadar</h1>
-        <p id="t-hero" class="logo-subtitle">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
-      </div>
-      <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
-        </button>
-        <button id="cta-how" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-howBTN">Πώς λειτουργεί</span>
-        </button>
+      <div class="main-logo-section">
+        <h1 class="mediradar-brand-title">MediRadar</h1>
+        <p id="t-hero" class="mediradar-tagline">Απλή, γρήγορη εύρεση φαρμάκων σε διαθέσιμα φαρμακεία.</p>
+        <div class="main-cta-buttons">
+          <button id="cta-search" class="primary-button">
+            <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
+          </button>
+          <button id="cta-how" class="secondary-button" data-modal-target="#howItWorksModal">
+            <span id="t-howBTN">Πώς Λειτουργεί;</span>
+          </button>
+        </div>
       </div>
       <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
         📲 <span id="t-installBTN">Εγκατάσταση</span>
@@ -550,46 +550,16 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-200/70 dark:border-slate-800/60 bg-white/40 dark:bg-slate-950/20">
-    <div class="max-w-5xl mx-auto px-6 py-8">
-      <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        <div class="space-y-2">
-          <h3 id="t-footerTitle" class="text-base font-semibold text-slate-800 dark:text-slate-100">MediRadar</h3>
-          <p id="t-footerDescription" class="text-sm text-slate-500 dark:text-slate-400 max-w-sm">Δες τη διαθεσιμότητα φαρμάκων
-με λίγα κλικ και ενημερώσου σε πραγματικό χρόνο.</p>
-        </div>
-        <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          <button type="button" data-contact-open class="footer-link inline-flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">✉️</span>
-            <span id="t-footerNavContact">Επικοινωνία</span>
-          </button>
-          <a href="#faq" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">❓</span>
-            <span id="t-footerNavFaq">FAQ</span>
-          </a>
-          <a href="#share" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">🔗</span>
-            <span id="t-footerNavShare">Κοινοποίηση</span>
-          </a>
-        </nav>
-      </div>
-      <div id="share" class="mt-6">
-        <h4 id="t-shareHeading" class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide mb-3">Μοίρασου τη MediRadar</h4>
-        <div class="share-buttons flex gap-2 flex-wrap text-sm text-slate-500 dark:text-slate-300">
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook">
-            <span aria-hidden="true">📘</span><span>Facebook</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="twitter" href="#" target="_blank" rel="noopener" aria-label="Twitter / X">
-            <span aria-hidden="true">🐦</span><span>Twitter</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="linkedin" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <span aria-hidden="true">💼</span><span>LinkedIn</span>
-          </a>
-        </div>
-      </div>
-      <p class="mt-8 text-xs text-slate-400 dark:text-slate-500">© <span id="footer-year"></span> MediRadar. <span id="t-footerRights">Όλα τα δικαιώματα διατηρούνται.</span></p>
-    </div>
+  <footer>
+    <a href="#terms">Όροι Χρήσης</a> |
+    <a href="#privacy">Πολιτική Απορρήτου &amp; GDPR</a> |
+    <a href="#contact" data-contact-open>Επικοινωνία</a>
+    <p>&copy; 2025 MediRadar. All rights reserved.</p>
   </footer>
+
+  <div id="terms" hidden></div>
+  <div id="privacy" hidden></div>
+  <div id="contact" hidden></div>
 
   <!-- CONTACT MODAL -->
   <div id="contact-modal" class="fixed inset-0 z-[85] hidden px-4 items-center justify-center">
@@ -898,9 +868,9 @@
       't-langElLabel':'Ελληνικά',
       't-langEnLabel':'Αγγλικά',
       't-signinBTN':'Σύνδεση',
-      't-hero':'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
+      't-hero':'Απλή, γρήγορη εύρεση φαρμάκων σε διαθέσιμα φαρμακεία.',
       't-searchBTN':'Αναζήτηση Φαρμάκου',
-      't-howBTN':'Πώς λειτουργεί',
+      't-howBTN':'Πώς Λειτουργεί;',
       't-installBTN':'Εγκατάσταση',
       't-home':'Αρχική',
       't-searchTitle':'Αναζήτηση Φαρμάκου',
@@ -1010,9 +980,9 @@
       't-langElLabel':'Greek',
       't-langEnLabel':'English',
       't-signinBTN':'Sign in',
-      't-hero':'Instantly check medicine availability in nearby pharmacies.',
+      't-hero':'Simple, fast medicine discovery in available pharmacies.',
       't-searchBTN':'Find Medicine',
-      't-howBTN':'How it works',
+      't-howBTN':'How it works?',
       't-installBTN':'Install',
       't-home':'Home',
       't-searchTitle':'Medicine search',
