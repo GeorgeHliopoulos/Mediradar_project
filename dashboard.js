@@ -181,6 +181,25 @@ export async function loadClientRequests({
     return [];
   }
 
+  let session = currentSession || null;
+  if (!session) {
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    if (sessionError) {
+      console.warn('[dashboard] Failed to verify session before fetching requests', sessionError);
+    }
+    session = sessionData?.session || null;
+  }
+  if (!session) {
+    setStatus(statusEl, 'Η συνεδρία έληξε. Συνδεθείτε ξανά για να δείτε αιτήματα.', 'error');
+    if (container) container.innerHTML = '';
+    if (emptyEl) emptyEl.classList.remove('hidden');
+    if (reloadButton) {
+      reloadButton.disabled = false;
+      reloadButton.removeAttribute('aria-busy');
+    }
+    return [];
+  }
+
   setStatus(statusEl, 'Φόρτωση αιτημάτων…', 'info');
   if (container) container.innerHTML = '';
   if (emptyEl) emptyEl.classList.add('hidden');
@@ -229,6 +248,18 @@ async function handleRequestAction(requestId, action, context = {}) {
   if (!requestId) return;
   if (!supabase) {
     setStatus(requestsStatusEl, 'Δεν υπάρχει σύνδεση Supabase.', 'error');
+    return;
+  }
+  let session = currentSession || null;
+  if (!session) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.warn('[dashboard] Failed to verify session before updating request', sessionError);
+    }
+    session = sessionData?.session || null;
+  }
+  if (!session) {
+    setStatus(requestsStatusEl, 'Η συνεδρία έληξε. Συνδεθείτε ξανά για να απαντήσετε στα αιτήματα.', 'error');
     return;
   }
   const statusValue = action === 'available' ? 'available' : 'unavailable';
