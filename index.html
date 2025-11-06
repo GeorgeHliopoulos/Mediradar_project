@@ -46,15 +46,24 @@
       border-color: rgba(148, 163, 184, 0.32);
       box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
     }
-    /* 💊 Ενισχυμένη κίνηση φαρμακευτικών emoji για πιο έντονο και γρήγορο υπόβαθρο */
+    /* 💊 Ενισχυμένη κίνηση 3D Gboard-style φαρμακευτικών emoji για πιο έντονο και γρήγορο υπόβαθρο */
     .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .global-emoji-layer span {
       position: absolute;
-      font-size: clamp(3rem, 7vw, 4.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(3.2rem, 7vw, 4.6rem);
+      height: clamp(3.2rem, 7vw, 4.6rem);
       opacity: 0.28;
       animation-iteration-count: infinite;
       animation-timing-function: linear;
       filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.32));
+    }
+    .global-emoji-layer span img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     .global-emoji-layer span:nth-child(1) { top: 6%; left: 10%; animation-name: globalEmojiFloatA; animation-duration: 24s; }
     .global-emoji-layer span:nth-child(2) { top: 18%; right: 12%; animation-name: globalEmojiFloatB; animation-duration: 26s; }
@@ -88,6 +97,91 @@
         radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
         radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
         linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
+    }
+    .main-logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: clamp(2.75rem, 7vw, 4.25rem) auto clamp(1.5rem, 4vw, 2.75rem);
+    }
+    .hero-logo-button {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(0.75rem, 2.6vw, 1.15rem);
+      border-radius: clamp(1.9rem, 6vw, 2.9rem);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: radial-gradient(120% 120% at 50% 12%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08) 62%, rgba(255, 255, 255, 0));
+      box-shadow: 0 26px 54px rgba(15, 23, 42, 0.24), 0 16px 32px rgba(41, 163, 163, 0.16);
+      backdrop-filter: blur(18px);
+      cursor: default;
+      isolation: isolate;
+      overflow: hidden;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .hero-logo-button::before {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0));
+      opacity: 0.55;
+      z-index: 0;
+    }
+    .hero-logo-button::after {
+      content: '';
+      position: absolute;
+      inset: -55% 18% 58%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.65);
+      filter: blur(0.5px);
+      transform: rotate(-8deg);
+      opacity: 0.55;
+      z-index: 0;
+    }
+    .hero-logo-button:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 32px 64px rgba(15, 23, 42, 0.28), 0 22px 38px rgba(41, 163, 163, 0.22);
+    }
+    .hero-logo-image {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: clamp(180px, 45vw, 300px);
+      height: auto;
+      border-radius: clamp(1.6rem, 5vw, 2.4rem);
+      filter: drop-shadow(0 22px 38px rgba(15, 23, 42, 0.25)) saturate(1.05);
+      transform: perspective(900px) rotateX(6deg);
+      transition: transform 0.35s ease, filter 0.35s ease;
+    }
+    .hero-logo-button:hover .hero-logo-image {
+      transform: perspective(900px) rotateX(0deg) translateY(-3px);
+      filter: drop-shadow(0 26px 42px rgba(15, 23, 42, 0.28)) saturate(1.1);
+    }
+    .dark .hero-logo-button {
+      border-color: rgba(148, 163, 184, 0.4);
+      background: radial-gradient(120% 120% at 50% 12%, rgba(148, 163, 184, 0.32), rgba(15, 23, 42, 0.55) 62%, rgba(15, 23, 42, 0));
+      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.55), 0 18px 38px rgba(76, 194, 193, 0.2);
+    }
+    .dark .hero-logo-button::before {
+      background: linear-gradient(140deg, rgba(148, 163, 184, 0.4), rgba(15, 23, 42, 0));
+      opacity: 0.6;
+    }
+    .dark .hero-logo-button::after {
+      background: rgba(148, 163, 184, 0.45);
+      opacity: 0.45;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
@@ -150,14 +244,14 @@
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
   <div class="global-emoji-layer" aria-hidden="true">
-    <span>💊</span>
-    <span>💉</span>
-    <span>🩺</span>
-    <span>🩹</span>
-    <span>🧴</span>
-    <span>💚</span>
-    <span>⚕️</span>
-    <span>💠</span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f48a/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f489/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa7a/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa79/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9f4/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f49a/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2695_fe0f/emoji.svg" alt="" loading="lazy" /></span>
+    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a0/emoji.svg" alt="" loading="lazy" /></span>
   </div>
 
   <!-- Στοίβα toast για μηνύματα σύνδεσης -->
@@ -282,14 +376,16 @@
   <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
     <div class="w-full max-w-4xl text-center">
       <div class="main-logo-container">
-        <h1 class="mediradar-text-logo">MediRadar</h1>
-        <p id="t-hero" class="logo-subtitle">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
+        <div class="hero-logo-button" role="img" aria-labelledby="t-heroLogoLabel">
+          <span id="t-heroLogoLabel" class="sr-only">Λογότυπο MediRadar</span>
+          <img src="./mediradar_logo.png" alt="" aria-hidden="true" class="hero-logo-image" />
+        </div>
       </div>
       <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+        <button id="cta-search" type="button" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.03] sm:scale-[1.08] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
           <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
         </button>
-        <button id="cta-how" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+        <button id="cta-how" type="button" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
           <span id="t-howBTN">Πώς λειτουργεί</span>
         </button>
       </div>
@@ -899,6 +995,7 @@
       't-langEnLabel':'Αγγλικά',
       't-signinBTN':'Σύνδεση',
       't-hero':'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
+      't-heroLogoLabel':'Λογότυπο MediRadar',
       't-searchBTN':'Αναζήτηση Φαρμάκου',
       't-howBTN':'Πώς λειτουργεί',
       't-installBTN':'Εγκατάσταση',
@@ -1011,6 +1108,7 @@
       't-langEnLabel':'English',
       't-signinBTN':'Sign in',
       't-hero':'Instantly check medicine availability in nearby pharmacies.',
+      't-heroLogoLabel':'MediRadar logo',
       't-searchBTN':'Find Medicine',
       't-howBTN':'How it works',
       't-installBTN':'Install',
@@ -2202,11 +2300,18 @@ By submitting a request:
     const splash = document.getElementById('splash');
     const app = document.getElementById('app');
     const backBtns = document.querySelectorAll('[data-go-home]');
-    ctaSearch.addEventListener('click', ()=> {
-      splash.classList.add('hidden');
-      app.classList.remove('hidden');
-      window.scrollTo({top:0, behavior:'smooth'});
-    });
+
+    const openSearchExperience = () => {
+      if (splash && app) {
+        splash.classList.add('hidden');
+        app.classList.remove('hidden');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    if (ctaSearch) {
+      ctaSearch.addEventListener('click', openSearchExperience);
+    }
     backBtns.forEach(btn=> btn.addEventListener('click', ()=>{
       app.classList.add('hidden');
       splash.classList.remove('hidden');
