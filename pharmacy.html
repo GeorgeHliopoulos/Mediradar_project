@@ -376,7 +376,7 @@
     <!-- ℹ️ Μικρή ενημέρωση για το πώς λειτουργεί η DEMO είσοδος -->
     <div class="mb-5 rounded-2xl border border-emerald-300/50 bg-emerald-100/70 dark:bg-emerald-900/40 dark:border-emerald-700/60 p-4 text-sm text-emerald-900 dark:text-emerald-100 shadow-soft">
       <p class="font-semibold">Οδηγίες DEMO:</p>
-      <p class="mt-1">Πάτησε «Σύνδεση DEMO Φαρμακείου» για να μπεις άμεσα με τα στοιχεία <code class="font-mono">demo@mediradar.gr</code> / <code class="font-mono">Demo123!</code>.</p>
+      <p class="mt-1">Πάτησε «Σύνδεση DEMO Φαρμακείου» για να μπεις άμεσα με τα στοιχεία <code class="font-mono">info@mediradar.gr</code> / <code class="font-mono">Demo123!</code>.</p>
       <p class="mt-1">Θα εμφανιστεί το ταμπλό του demo φαρμακείου με αιτήματα πελατών και μπορείς να αποθηκεύσεις δοκιμαστικό ωράριο.</p>
       <p class="mt-1">Η είσοδος DEMO δημιουργεί αυτόματα ένα δοκιμαστικό φαρμακείο και μερικά αιτήματα επίδειξης για να εξερευνήσεις τις λειτουργίες.</p>
     </div>
@@ -649,7 +649,7 @@
     }
 
     const DEMO_CREDENTIALS = {
-      email: 'demo@mediradar.gr',
+      email: 'info@mediradar.gr',
       password: 'Demo123!'
     };
 
@@ -1422,7 +1422,7 @@
         if(!supabase){
           enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
           renderDashboardRequests(getDemoRequestsFallback());
-        showToast('Demo λειτουργία χωρίς Supabase: demo@mediradar.gr / Demo123!.', 'info');
+        showToast('Demo λειτουργία χωρίς Supabase: info@mediradar.gr / Demo123!.', 'info');
           return;
         }
         let { error } = await supabase.auth.signInWithPassword(DEMO_CREDENTIALS);
@@ -1444,12 +1444,12 @@
           authSession = data.session;
           updateAuthSessionUI();
         }
-        showToast('Συνδέθηκες ως demo@mediradar.gr (κωδικός Demo123!).', 'success');
+        showToast('Συνδέθηκες ως info@mediradar.gr (κωδικός Demo123!).', 'success');
       }catch(err){
         console.warn('handleDemoLogin fallback', err);
         enterDashboard({ user: null, isDemo: true, pharmacy: DEMO_PHARMACY });
         renderDashboardRequests(getDemoRequestsFallback());
-        showToast('Fallback DEMO χωρίς Supabase: demo@mediradar.gr / Demo123!.', 'info');
+        showToast('Fallback DEMO χωρίς Supabase: info@mediradar.gr / Demo123!.', 'info');
       }finally{
         demoLoginInFlight = false;
         setButtonLoading(demoLoginBtn, false);

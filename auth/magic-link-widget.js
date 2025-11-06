@@ -27,7 +27,16 @@ const APP_LOGO =
     ? ENV.SUPABASE_APP_LOGO
     : `${NORMALIZED_SITE_URL}/icons/icon-512.png`;
 
-const DEFAULT_DEMO_EMAIL = 'demo@mediradar.gr';
+const DEFAULT_DEMO_EMAIL = 'info@mediradar.gr';
+
+const AUTH_CHANNEL_PREFIX = 'mediradar_auth_channel_';
+const AUTH_CHANNEL_EVENT = 'AUTH_SUCCESS';
+const AUTH_CHANNEL_STORAGE_KEY = 'mediradar.auth.channel';
+
+let activeAuthChannel = null;
+let activeAuthChannelName = null;
+let authBroadcastSent = false;
+let authCleanupRegistered = false;
 
 function ensureMetaTag({ selector, name, property, content }) {
   if (!content || !document?.head) return;
@@ -102,6 +111,139 @@ function qs(root, selector) {
 function qsa(root, selector) {
   return Array.from(root.querySelectorAll(selector));
 }
+
+function detectAuthRedirect() {
+  try {
+    if (typeof window === 'undefined') return false;
+    const hash = typeof window.location?.hash === 'string' ? window.location.hash : '';
+    const search = typeof window.location?.search === 'string' ? window.location.search : '';
+    const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+    searchParams.forEach((value, key) => {
+      if (!params.has(key)) params.set(key, value);
+    });
+    const hasToken = params.has('access_token');
+    const type = (params.get('type') || '').toLowerCase();
+    const validTypes = ['magiclink', 'recovery', 'signup', 'invite'];
+    return hasToken || validTypes.includes(type);
+  } catch (error) {
+    console.warn('[auth] Failed to detect auth redirect', error);
+    return false;
+  }
+}
+
+function normalizeEmail(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function getAuthChannelName(identifier) {
+  const normalized = normalizeEmail(identifier);
+  if (!normalized) return null;
+  const safe = normalized.replace(/[^a-z0-9]/g, '_');
+  return `${AUTH_CHANNEL_PREFIX}${safe}`;
+}
+
+function storeAuthChannelName(channelName) {
+  try {
+    if (channelName) {
+      localStorage.setItem(AUTH_CHANNEL_STORAGE_KEY, channelName);
+    }
+  } catch (error) {
+    console.warn('[auth] Failed to store auth channel name', error);
+  }
+}
+
+function clearStoredAuthChannelName() {
+  try {
+    localStorage.removeItem(AUTH_CHANNEL_STORAGE_KEY);
+  } catch (error) {
+    console.warn('[auth] Failed to clear stored auth channel name', error);
+  }
+}
+
+async function cleanupAuthChannel(supabase) {
+  if (activeAuthChannel) {
+    try {
+      await activeAuthChannel.unsubscribe();
+    } catch (error) {
+      console.warn('[auth] Failed to unsubscribe from auth channel', error);
+    }
+    try {
+      supabase?.removeChannel?.(activeAuthChannel);
+    } catch (error) {
+      console.warn('[auth] Failed to remove auth channel', error);
+    }
+  }
+  activeAuthChannel = null;
+  activeAuthChannelName = null;
+  clearStoredAuthChannelName();
+}
+
+async function subscribeToAuthSuccess(email, supabase) {
+  if (!supabase) return;
+  const channelName = getAuthChannelName(email);
+  if (!channelName) return;
+  await cleanupAuthChannel(supabase);
+  storeAuthChannelName(channelName);
+  let channel;
+  try {
+    channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
+    channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
+      await cleanupAuthChannel(supabase);
+      try {
+        window.location.href = '/dashboard.html';
+      } catch (error) {
+        console.warn('[auth] Failed to redirect after auth success', error);
+      }
+    });
+    activeAuthChannel = channel;
+    activeAuthChannelName = channelName;
+    await channel.subscribe(status => {
+      if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+        cleanupAuthChannel(supabase);
+      }
+    });
+  } catch (error) {
+    console.warn('[auth] Failed to subscribe to auth channel', error);
+  }
+}
+
+async function broadcastAuthSuccess(user, supabase) {
+  if (!supabase || !user?.email || authBroadcastSent || !authRedirectDetected) return;
+  const channelName = getAuthChannelName(user.email);
+  if (!channelName) return;
+  let channel = null;
+  try {
+    channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
+    await channel.subscribe();
+    await channel.send({
+      type: 'broadcast',
+      event: AUTH_CHANNEL_EVENT,
+      payload: {
+        email: user.email,
+        timestamp: new Date().toISOString()
+      }
+    });
+    authBroadcastSent = true;
+  } catch (error) {
+    console.warn('[auth] Failed to broadcast auth success', error);
+  } finally {
+    if (channel) {
+      try {
+        await channel.unsubscribe();
+      } catch (error) {
+        console.warn('[auth] Failed to unsubscribe auth broadcast channel', error);
+      }
+      try {
+        supabase.removeChannel?.(channel);
+      } catch (error) {
+        console.warn('[auth] Failed to remove auth broadcast channel', error);
+      }
+    }
+  }
+}
+
+const authRedirectDetected = detectAuthRedirect();
 
 function setActiveTab(root, tab) {
   if (!tab) return;
@@ -213,6 +355,7 @@ async function handleEmailSubmit(event, supabase) {
       options: { emailRedirectTo: EMAIL_REDIRECT_URL }
     });
     if (error) throw error;
+    await subscribeToAuthSuccess(email, supabase);
     setStatus(statusEl, 'success', STATUS_MESSAGES.success);
     form.reset();
   } catch (error) {
@@ -334,6 +477,7 @@ async function refreshUser(root, supabase) {
       globalStatus.classList.add('hidden');
     }
     updateSessionUI(root, user);
+    await broadcastAuthSuccess(user, supabase);
     return user;
   } catch (error) {
     const globalStatus = qs(root, '[data-auth-status-global]');
@@ -362,6 +506,12 @@ function initAuthPortal(root) {
   if (!root) return;
 
   const supabase = supabaseClient;
+  if (!authCleanupRegistered) {
+    authCleanupRegistered = true;
+    window.addEventListener('beforeunload', () => {
+      cleanupAuthChannel(supabase);
+    });
+  }
   const forms = qsa(root, '[data-auth-form]');
   const logoutButton = qs(root, '[data-auth-logout]');
   const tabs = qsa(root, '[data-auth-tab]');
@@ -397,6 +547,7 @@ function initAuthPortal(root) {
             options: { emailRedirectTo: EMAIL_REDIRECT_URL }
           });
           if (error) throw error;
+          await subscribeToAuthSuccess(DEFAULT_DEMO_EMAIL, supabase);
           setStatus(statusEl, 'success', STATUS_MESSAGES.demoSuccess);
         } catch (error) {
           setStatus(statusEl, 'error', STATUS_MESSAGES.demoError);
@@ -415,6 +566,7 @@ function initAuthPortal(root) {
     if (!supabase) return;
     try {
       await supabase.auth.signOut();
+      await cleanupAuthChannel(supabase);
       updateSessionUI(root, null);
     } catch (error) {
       const globalStatus = qs(root, '[data-auth-status-global]');
@@ -430,9 +582,10 @@ function initAuthPortal(root) {
 
   refreshUser(root, supabase);
 
-  const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
     const user = session?.user || null;
     updateSessionUI(root, user);
+    await broadcastAuthSuccess(user, supabase);
   });
 
   window.addEventListener('beforeunload', () => {

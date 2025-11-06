@@ -1534,6 +1534,154 @@ By submitting a request:
       }
     }
 
+    const AUTH_CHANNEL_PREFIX = 'mediradar_auth_channel_';
+    const AUTH_CHANNEL_EVENT = 'AUTH_SUCCESS';
+    const AUTH_CHANNEL_STORAGE_KEY = 'mediradar.auth.channel';
+
+    function detectAuthRedirect(){
+      try {
+        const hash = typeof window.location?.hash === 'string' ? window.location.hash : '';
+        const search = typeof window.location?.search === 'string' ? window.location.search : '';
+        const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+        const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+        searchParams.forEach((value, key) => {
+          if(!params.has(key)) params.set(key, value);
+        });
+        const hasToken = params.has('access_token');
+        const type = (params.get('type') || '').toLowerCase();
+        const validTypes = ['magiclink', 'signup', 'recovery', 'invite'];
+        return hasToken || validTypes.includes(type);
+      } catch (err) {
+        console.warn('[auth] Failed to detect auth redirect', err);
+        return false;
+      }
+    }
+
+    function normalizeEmail(value){
+      return typeof value === 'string' ? value.trim().toLowerCase() : '';
+    }
+
+    function getAuthChannelName(identifier){
+      const normalized = normalizeEmail(identifier);
+      if(!normalized) return null;
+      const safe = normalized.replace(/[^a-z0-9]/g, '_');
+      return `${AUTH_CHANNEL_PREFIX}${safe}`;
+    }
+
+    function storeAuthChannelName(channelName){
+      try {
+        if(channelName){
+          localStorage.setItem(AUTH_CHANNEL_STORAGE_KEY, channelName);
+        }
+      } catch (err) {
+        console.warn('[auth] Failed to store auth channel name', err);
+      }
+    }
+
+    function clearStoredAuthChannelName(){
+      try {
+        localStorage.removeItem(AUTH_CHANNEL_STORAGE_KEY);
+      } catch (err) {
+        console.warn('[auth] Failed to clear stored auth channel name', err);
+      }
+    }
+
+    let authRealtimeChannel = null;
+    let authRealtimeChannelName = null;
+    let authBroadcastSent = false;
+    let authCleanupRegistered = false;
+    const authRedirectDetected = detectAuthRedirect();
+
+    async function cleanupAuthRealtimeChannel(){
+      if(authRealtimeChannel){
+        try {
+          await authRealtimeChannel.unsubscribe();
+        } catch (err) {
+          console.warn('[auth] Failed to unsubscribe auth channel', err);
+        }
+        try {
+          supabase?.removeChannel?.(authRealtimeChannel);
+        } catch (err) {
+          console.warn('[auth] Failed to remove auth channel', err);
+        }
+      }
+      authRealtimeChannel = null;
+      authRealtimeChannelName = null;
+      clearStoredAuthChannelName();
+    }
+
+    async function subscribeToAuthChannel(email){
+      if(!supabase) return;
+      const channelName = getAuthChannelName(email);
+      if(!channelName) return;
+      await cleanupAuthRealtimeChannel();
+      storeAuthChannelName(channelName);
+      let channel;
+      try {
+        channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
+        channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
+          await cleanupAuthRealtimeChannel();
+          try {
+            window.location.href = '/dashboard.html';
+          } catch (err) {
+            console.warn('[auth] Failed to redirect after auth success', err);
+          }
+        });
+        authRealtimeChannel = channel;
+        authRealtimeChannelName = channelName;
+        await channel.subscribe(status => {
+          if(status === 'CHANNEL_ERROR' || status === 'CLOSED'){
+            cleanupAuthRealtimeChannel();
+          }
+        });
+      } catch (err) {
+        console.warn('[auth] Failed to subscribe to auth channel', err);
+      }
+    }
+
+    async function broadcastAuthSuccess(user){
+      if(!supabase || !user?.email || !authRedirectDetected || authBroadcastSent) return;
+      const channelName = getAuthChannelName(user.email);
+      if(!channelName) return;
+      let channel = null;
+      try {
+        channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
+        await channel.subscribe();
+        await channel.send({
+          type: 'broadcast',
+          event: AUTH_CHANNEL_EVENT,
+          payload: {
+            email: user.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+        authBroadcastSent = true;
+      } catch (err) {
+        console.warn('[auth] Failed to broadcast auth success', err);
+      } finally {
+        if(channel){
+          try {
+            await channel.unsubscribe();
+          } catch (unsubscribeErr) {
+            console.warn('[auth] Failed to unsubscribe auth broadcast channel', unsubscribeErr);
+          }
+          try {
+            supabase?.removeChannel?.(channel);
+          } catch (removeErr) {
+            console.warn('[auth] Failed to remove auth broadcast channel', removeErr);
+          }
+        }
+      }
+    }
+
+    function ensureAuthCleanupRegistered(){
+      if(authCleanupRegistered) return;
+      authCleanupRegistered = true;
+      window.addEventListener('beforeunload', () => {
+        cleanupAuthRealtimeChannel();
+      });
+    }
+
     const supabaseUrl = window.SUPABASE_URL || window.ENV?.SUPABASE_URL;
     const supabaseKey = window.SUPABASE_ANON_KEY || window.ENV?.SUPABASE_ANON_KEY;
     const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
@@ -1547,6 +1695,9 @@ By submitting a request:
     }
     if(!state.supabase && supabase){
       state.supabase = supabase;
+    }
+    if(supabase){
+      ensureAuthCleanupRegistered();
     }
 
     const authModals = {
@@ -1733,7 +1884,7 @@ By submitting a request:
         globalStatus.textContent = '';
       }
       if(emailInput){
-        emailInput.value = 'demo@mediradar.gr';
+        emailInput.value = 'info@mediradar.gr';
       }
       if(!supabase){
         showToast(missingSupabaseMessage, 'error');
@@ -1744,11 +1895,12 @@ By submitting a request:
       setButtonLoading(emailButton, true, 'Αποστολή demo…');
       try {
         const { error } = await supabase.auth.signInWithOtp({
-          email: 'demo@mediradar.gr',
+          email: 'info@mediradar.gr',
           options: { emailRedirectTo: dashboardRedirectUrl }
         });
         if(error) throw error;
-        const message = 'Στείλαμε demo magic link στο demo@mediradar.gr';
+        await subscribeToAuthChannel('info@mediradar.gr');
+        const message = 'Στείλαμε demo magic link στο info@mediradar.gr';
         showToast(message, 'success');
         setStatusMessage(statusEl, message, 'success');
       } catch (err) {
@@ -1813,6 +1965,7 @@ By submitting a request:
       if(!supabase) return;
       try {
         await supabase.auth.signOut();
+        await cleanupAuthRealtimeChannel();
       } catch (err) {
         console.warn('signout error', err);
       }
@@ -1854,6 +2007,9 @@ By submitting a request:
       const user = authSession?.user || null;
       updateAuthHeaderUI(user);
       toggleSessionViews(user);
+      if(user){
+        broadcastAuthSuccess(user).catch(err => console.warn('[auth] Failed to signal auth success', err));
+      }
 
       const hasAccess = userHasPharmacyAccess(authSession);
       if(proAccessRequested && hasAccess){
@@ -1946,6 +2102,7 @@ By submitting a request:
           //   options: { redirectTo: redirectUrl }
           // });
           if(error) throw error;
+          await subscribeToAuthChannel(email);
           const successMessage = copy.success;
           showToast(successMessage, 'success');
           setStatusMessage(statusEl, successMessage, 'success');

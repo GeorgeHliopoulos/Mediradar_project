@@ -25,6 +25,78 @@ if (supabase && !window.mediradarSupabase) {
   window.mediradarSupabase = supabase;
 }
 
+const AUTH_CHANNEL_PREFIX = 'mediradar_auth_channel_';
+const AUTH_CHANNEL_EVENT = 'AUTH_SUCCESS';
+
+function detectAuthRedirect() {
+  try {
+    const hash = typeof window.location?.hash === 'string' ? window.location.hash : '';
+    const search = typeof window.location?.search === 'string' ? window.location.search : '';
+    const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+    const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+    searchParams.forEach((value, key) => {
+      if (!params.has(key)) params.set(key, value);
+    });
+    const hasToken = params.has('access_token');
+    const type = (params.get('type') || '').toLowerCase();
+    const validTypes = ['magiclink', 'signup', 'recovery', 'invite'];
+    return hasToken || validTypes.includes(type);
+  } catch (error) {
+    console.warn('[dashboard] Failed to detect auth redirect', error);
+    return false;
+  }
+}
+
+function normalizeEmail(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function getAuthChannelName(identifier) {
+  const normalized = normalizeEmail(identifier);
+  if (!normalized) return null;
+  const safe = normalized.replace(/[^a-z0-9]/g, '_');
+  return `${AUTH_CHANNEL_PREFIX}${safe}`;
+}
+
+const authRedirectDetected = detectAuthRedirect();
+let authBroadcastSent = false;
+
+async function broadcastAuthSuccess(user) {
+  if (!supabase || !user?.email || authBroadcastSent || !authRedirectDetected) return;
+  const channelName = getAuthChannelName(user.email);
+  if (!channelName) return;
+  let channel = null;
+  try {
+    channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
+    await channel.subscribe();
+    await channel.send({
+      type: 'broadcast',
+      event: AUTH_CHANNEL_EVENT,
+      payload: {
+        email: user.email,
+        timestamp: new Date().toISOString(),
+        source: 'dashboard'
+      }
+    });
+    authBroadcastSent = true;
+  } catch (error) {
+    console.warn('[dashboard] Failed to broadcast auth success', error);
+  } finally {
+    if (channel) {
+      try {
+        await channel.unsubscribe();
+      } catch (unsubscribeError) {
+        console.warn('[dashboard] Failed to unsubscribe auth broadcast channel', unsubscribeError);
+      }
+      try {
+        supabase.removeChannel?.(channel);
+      } catch (removeError) {
+        console.warn('[dashboard] Failed to remove auth broadcast channel', removeError);
+      }
+    }
+  }
+}
+
 const LOGIN_URL = '/index.html';
 
 const requestsSection = document.getElementById('requests-container');
@@ -319,6 +391,11 @@ function handleAuthSession(session) {
   const user = currentSession?.user || null;
   updateUserHeader(user);
   scheduleManager?.setUser(user);
+  if (user) {
+    broadcastAuthSuccess(user).catch(error => {
+      console.warn('[dashboard] Failed to signal auth success', error);
+    });
+  }
 
   if (!user) {
     renderRequests([], requestsList, requestsEmptyEl);
