@@ -730,8 +730,8 @@
               </svg>
             </div>
             <div class="space-y-2">
-              <h2 id="auth-pharm-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Πρόσβαση Φαρμακείων</h2>
-              <p id="auth-pharm-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνδέσου ή εγγράψου στο MediRadar Pro για να απαντάς σε αιτήματα διαθεσιμότητας.</p>
+              <h2 id="auth-pharm-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard Φαρμακείου (MediRadar Pro)</h2>
+              <p id="auth-pharm-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Απαντήστε σε Αιτήματα Πελατών &amp; Διαχειριστείτε το Ωράριο σας</p>
             </div>
           </div>
           <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
@@ -741,7 +741,7 @@
                 <span id="auth-pharm-email-label">Email φαρμακείου</span>
                 <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
               </label>
-              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
+              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Συνέχεια με Magic Link (Email)</button>
               <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
                 <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
@@ -767,6 +767,7 @@
           </div>
           <p id="auth-pharm-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
           <button type="button" id="auth-pro-info-link" data-pro-info-toggle aria-expanded="false" class="mx-auto block text-xs font-semibold text-brand-700 underline decoration-dotted underline-offset-4 hover:text-brand-600 dark:text-brand-200 dark:hover:text-brand-100">Μάθετε περισσότερα για το MediRadar Pro</button>
+          <a id="demo-login-link" href="#" class="mx-auto block text-[11px] font-semibold text-slate-500 hover:text-brand-600 dark:text-slate-300 dark:hover:text-brand-200">Δοκιμάστε το Dashboard (Demo)</a>
           <div data-pro-info-panel class="pro-info-panel glass-surface hidden text-left text-sm text-slate-700 dark:text-slate-200" role="region" aria-label="Πληροφορίες MediRadar Pro">
             <h3>Γιατί να επιλέξετε το MediRadar Pro</h3>
             <p>Το MediRadar Pro προσφέρει στους φαρμακοποιούς ένα εύχρηστο και γρήγορο σύστημα για να απαντούν άμεσα στα αιτήματα διαθεσιμότητας φαρμάκων των πελατών τους, χωρίς τηλεφωνήματα και καθυστερήσεις.</p>
@@ -1562,11 +1563,13 @@ By submitting a request:
     const authHeaderEmail = document.querySelector('[data-auth-header-email]');
     const authHeaderLogout = document.querySelector('[data-auth-header-logout]');
     const proInfoToggles = Array.from(document.querySelectorAll('[data-pro-info-toggle]'));
+    const demoLoginLink = document.getElementById('demo-login-link');
 
     let activeAuthModal = null;
     let authSession = null;
     let proAccessRequested = false;
-    const PHARMACY_PORTAL_URL = '/pharmacy.html';
+    const DASHBOARD_URL = '/dashboard.html';
+    const dashboardRedirectUrl = new URL(DASHBOARD_URL, window.location.origin).href;
     const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
 
     function addRoleCandidate(target, value){
@@ -1629,7 +1632,7 @@ By submitting a request:
 
     function tryOpenPharmacyPortal(){
       if(userHasPharmacyAccess(authSession)){
-        window.location.href = PHARMACY_PORTAL_URL;
+        window.location.href = DASHBOARD_URL;
         return true;
       }
       return false;
@@ -1715,6 +1718,48 @@ By submitting a request:
       Object.values(authModals).forEach(closeAuthModal);
     }
 
+    async function handleDemoLogin(event){
+      event?.preventDefault?.();
+      const modal = authModals.pharmacies || null;
+      if(modal){
+        openAuthModal('pharmacies');
+      }
+      const statusEl = modal?.querySelector('[data-auth-status]') || null;
+      const globalStatus = modal?.querySelector('[data-auth-status-global]') || null;
+      const emailInput = modal?.querySelector('#auth-pharm-email-input') || null;
+      const emailButton = modal?.querySelector('#auth-pharm-email-cta') || null;
+      if(globalStatus){
+        globalStatus.classList.add('hidden');
+        globalStatus.textContent = '';
+      }
+      if(emailInput){
+        emailInput.value = 'demo@mediradar.gr';
+      }
+      if(!supabase){
+        showToast(missingSupabaseMessage, 'error');
+        setStatusMessage(statusEl, missingSupabaseMessage, 'error');
+        return;
+      }
+      setStatusMessage(statusEl, 'Γίνεται αποστολή demo magic link…', 'info');
+      setButtonLoading(emailButton, true, 'Αποστολή demo…');
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email: 'demo@mediradar.gr',
+          options: { emailRedirectTo: dashboardRedirectUrl }
+        });
+        if(error) throw error;
+        const message = 'Στείλαμε demo magic link στο demo@mediradar.gr';
+        showToast(message, 'success');
+        setStatusMessage(statusEl, message, 'success');
+      } catch (err) {
+        const message = `Αποτυχία demo σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
+        showToast(message, 'error');
+        setStatusMessage(statusEl, message, 'error');
+      } finally {
+        setButtonLoading(emailButton, false);
+      }
+    }
+
     authOpenButtons.forEach(btn => {
       btn.addEventListener('click', event => {
         event.preventDefault();
@@ -1740,6 +1785,8 @@ By submitting a request:
         closeAuthModal(modal || undefined);
       });
     });
+
+    demoLoginLink?.addEventListener('click', handleDemoLogin);
 
     document.addEventListener('keydown', event => {
       if(event.key === 'Escape'){
@@ -1811,7 +1858,12 @@ By submitting a request:
       const hasAccess = userHasPharmacyAccess(authSession);
       if(proAccessRequested && hasAccess){
         proAccessRequested = false;
-        window.location.href = PHARMACY_PORTAL_URL;
+        window.location.href = DASHBOARD_URL;
+        return;
+      }
+
+      if(user && hasAccess){
+        window.location.href = DASHBOARD_URL;
         return;
       }
 
@@ -1845,6 +1897,7 @@ By submitting a request:
     authRoots.forEach(root => {
       const role = root.dataset.authRole || 'users';
       const copy = resolveCopy(role);
+      const redirectUrl = role === 'pharmacies' ? dashboardRedirectUrl : window.location.origin;
       const form = root.querySelector('[data-auth-form]');
       const emailInput = root.querySelector('input[type="email"]');
       const emailButton = root.querySelector('[data-auth-email-button]');
@@ -1885,12 +1938,12 @@ By submitting a request:
           // Επιλογή Α (ενεργή): Magic Link μέσω Supabase
           const { error } = await supabase.auth.signInWithOtp({
             email,
-            options: { emailRedirectTo: window.location.origin }
+            options: { emailRedirectTo: redirectUrl }
           });
           // Επιλογή Β (εναλλακτική): Google OAuth μέσω Supabase
           // const { data, error } = await supabase.auth.signInWithOAuth({
           //   provider: 'google',
-          //   options: { redirectTo: window.location.origin }
+          //   options: { redirectTo: redirectUrl }
           // });
           if(error) throw error;
           const successMessage = copy.success;
@@ -1931,7 +1984,7 @@ By submitting a request:
         try {
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin }
+            options: { redirectTo: redirectUrl }
           });
           if(error) throw error;
           if(data?.url){
