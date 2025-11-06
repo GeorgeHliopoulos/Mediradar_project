@@ -13,6 +13,7 @@
   <link rel="icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="styles.css">
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,49 +47,7 @@
       border-color: rgba(148, 163, 184, 0.32);
       box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
     }
-    /* 💊 Ενισχυμένη κίνηση φαρμακευτικών emoji για πιο έντονο και γρήγορο υπόβαθρο */
-    .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-    .global-emoji-layer span {
-      position: absolute;
-      font-size: clamp(3rem, 7vw, 4.5rem);
-      opacity: 0.28;
-      animation-iteration-count: infinite;
-      animation-timing-function: linear;
-      filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.32));
-    }
-    .global-emoji-layer span:nth-child(1) { top: 6%; left: 10%; animation-name: globalEmojiFloatA; animation-duration: 24s; }
-    .global-emoji-layer span:nth-child(2) { top: 18%; right: 12%; animation-name: globalEmojiFloatB; animation-duration: 26s; }
-    .global-emoji-layer span:nth-child(3) { top: 38%; left: 38%; animation-name: globalEmojiFloatC; animation-duration: 28s; opacity: 0.24; }
-    .global-emoji-layer span:nth-child(4) { bottom: 18%; left: 16%; animation-name: globalEmojiFloatD; animation-duration: 25s; }
-    .global-emoji-layer span:nth-child(5) { bottom: 10%; right: 14%; animation-name: globalEmojiFloatE; animation-duration: 27s; }
-    .global-emoji-layer span:nth-child(6) { top: 62%; left: 8%; animation-name: globalEmojiFloatF; animation-duration: 23s; }
-    .global-emoji-layer span:nth-child(7) { top: 12%; right: 34%; animation-name: globalEmojiFloatG; animation-duration: 22s; }
-    .global-emoji-layer span:nth-child(8) { bottom: 28%; right: 32%; animation-name: globalEmojiFloatH; animation-duration: 24s; }
-    .dark .global-emoji-layer span { opacity: 0.32; }
-    @keyframes globalEmojiFloatA { 0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } 45% { transform: translate3d(36px, -22px, 0) scale(1.08); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } }
-    @keyframes globalEmojiFloatB { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } 50% { transform: translate3d(-32px, 20px, 0) scale(1.1); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } }
-    @keyframes globalEmojiFloatC { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } 55% { transform: translate3d(28px, 26px, 0) scale(1.12); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } }
-    @keyframes globalEmojiFloatD { 0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } 48% { transform: translate3d(30px, -24px, 0) scale(1.08); opacity: 0.31; } 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } }
-    @keyframes globalEmojiFloatE { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } 52% { transform: translate3d(-30px, -18px, 0) scale(1.05); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } }
-    @keyframes globalEmojiFloatF { 0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } 58% { transform: translate3d(34px, -16px, 0) scale(1.08); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } }
-    @keyframes globalEmojiFloatG { 0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } 50% { transform: translate3d(-24px, 28px, 0) scale(1.12); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } }
-    @keyframes globalEmojiFloatH { 0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } 56% { transform: translate3d(22px, -28px, 0) scale(1.09); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } }
-    .app-bg {
-      background:
-        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
-        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
-        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
-        linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
-    }
-    .dark .app-bg{
-      background:
-        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
-        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
-        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
-        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
-    }
+    
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
     #pending-overlay { transition: opacity .25s ease; }
@@ -148,16 +107,13 @@
     @keyframes successFade { to { transform:scale(.92); opacity:0; } }
   </style>
 </head>
-<body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
-  <div class="global-emoji-layer" aria-hidden="true">
-    <span>💊</span>
-    <span>💉</span>
-    <span>🩺</span>
-    <span>🩹</span>
-    <span>🧴</span>
-    <span>💚</span>
-    <span>⚕️</span>
-    <span>💠</span>
+<body class="min-h-full text-slate-900 dark:text-slate-200 font-sans">
+  <div class="background-scene" aria-hidden="true">
+    <div class="background-element pill pill-a"></div>
+    <div class="background-element pill pill-b is-secondary"></div>
+    <div class="background-element pill pill-c"></div>
+    <div class="background-element syringe is-secondary"></div>
+    <div class="background-element drop"></div>
   </div>
 
   <!-- Στοίβα toast για μηνύματα σύνδεσης -->
@@ -283,7 +239,7 @@
     <div class="w-full max-w-4xl text-center">
       <div class="main-logo-container">
         <h1 class="mediradar-text-logo">MediRadar</h1>
-        <p id="t-hero" class="logo-subtitle">Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.</p>
+        <p id="t-hero" class="logo-subtitle">Απλή, γρήγορη εύρεση φαρμάκων σε διαθέσιμα φαρμακεία.</p>
       </div>
       <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
         <button id="cta-search" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.05] sm:scale-[1.1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">

@@ -26,6 +26,135 @@ body{
   background-color:#eaf7fa;
 }
 
+.background-scene{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.background-element{
+  position:absolute;
+  filter: drop-shadow(0 2.8vh 3.6vh rgba(9, 27, 44, 0.25));
+  will-change: transform;
+  opacity:0.92;
+  animation: slowFloat 20s ease-in-out infinite alternate;
+}
+
+.background-element.pill{
+  border-radius:999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 206, 214, 0.95) 42%, rgba(250, 126, 145, 0.95) 100%);
+  box-shadow:
+    inset 0.4vw 0.4vw 1vw rgba(255, 255, 255, 0.7),
+    inset -0.9vw -0.7vw 1.3vw rgba(194, 37, 66, 0.25);
+}
+
+.background-element.pill::after{
+  content:"";
+  position:absolute;
+  inset:12%;
+  border-radius:999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 186, 200, 0.55) 100%);
+  mix-blend-mode: screen;
+}
+
+.pill-a{
+  top:12vh;
+  left:6vw;
+  width:20vw;
+  height:7.5vw;
+  transform:rotate(-18deg);
+}
+
+.pill-b{
+  bottom:10vh;
+  left:8vw;
+  width:15vw;
+  height:6vw;
+  transform:rotate(26deg);
+}
+
+.pill-c{
+  top:32vh;
+  right:22vw;
+  width:12vw;
+  height:5vw;
+  transform:rotate(14deg);
+}
+
+.background-element.syringe{
+  top:18vh;
+  right:6vw;
+  width:22vw;
+  height:4.4vw;
+  border-radius:2.4vw;
+  background: linear-gradient(90deg, rgba(245, 249, 255, 0.95) 0%, rgba(211, 229, 255, 0.95) 45%, rgba(190, 215, 252, 0.9) 100%);
+  box-shadow:
+    inset 0.3vw 0.3vw 0.8vw rgba(255, 255, 255, 0.7),
+    inset -0.6vw -0.5vw 0.9vw rgba(74, 112, 170, 0.25);
+}
+
+.background-element.syringe::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:-4vw;
+  transform:translateY(-50%);
+  width:4vw;
+  height:0.4vw;
+  border-radius:0.3vw;
+  background: linear-gradient(90deg, rgba(162, 204, 255, 0.8), rgba(255,255,255,0.9));
+  box-shadow: 0 0.2vw 0.6vw rgba(41, 83, 135, 0.25);
+}
+
+.background-element.syringe::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  right:-3vw;
+  transform:translateY(-50%);
+  width:3vw;
+  height:0.3vw;
+  border-radius:0.3vw;
+  background: linear-gradient(90deg, rgba(198, 228, 255, 0.85), rgba(255,255,255,0.95));
+  box-shadow: 0 0.25vw 0.7vw rgba(51, 78, 120, 0.22);
+}
+
+.background-element.drop{
+  bottom:16vh;
+  right:12vw;
+  width:9vw;
+  height:12vw;
+  border-radius:44% 44% 52% 52% / 58% 58% 46% 46%;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85) 0%, rgba(166, 236, 223, 0.85) 40%, rgba(85, 197, 186, 0.92) 100%);
+  box-shadow:
+    inset 0.5vw 0.6vw 1.2vw rgba(255, 255, 255, 0.7),
+    inset -0.9vw -0.7vw 1.4vw rgba(20, 94, 86, 0.25);
+}
+
+.background-element.drop::after{
+  content:"";
+  position:absolute;
+  inset:18% 22% 36% 22%;
+  border-radius:50% 50% 60% 60%;
+  background: radial-gradient(circle at 40% 20%, rgba(255,255,255,0.75), rgba(142, 222, 210, 0.6));
+}
+
+.background-element.is-secondary{
+  opacity:0.86;
+}
+
+@keyframes slowFloat {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(10px, 10px); }
+    100% { transform: translate(0, 0); }
+}
+
+@media (max-width:600px){
+  .background-element.is-secondary{ display:none; }
+}
+
 /* Optional: Dark mode αν βάζεις class="dark" στο <html> ή στο <body> */
 .dark body,
 @media (prefers-color-scheme: dark){
