@@ -30,8 +30,9 @@
   </script>
 
   <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="/js/afterLoginRedirect.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/env.js"></script>
+  <script src="/js/afterLoginRedirect.js?v=1"></script>
 
   <style>
     body { position: relative; overflow-x: hidden; }
@@ -954,9 +955,6 @@
     </div>
   </div>
 
-  <!-- env.js (ορίζεις SUPABASE_URL, SUPABASE_ANON_KEY) -->
-  <script src="./env.js"></script>
-
   <!-- App JS -->
   <script>
   // ==========================
@@ -1718,7 +1716,7 @@ By submitting a request:
         channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
           await cleanupAuthRealtimeChannel();
           try {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/pharmacy.html';
           } catch (err) {
             console.warn('[auth] Failed to redirect after auth success', err);
           }
@@ -1815,8 +1813,8 @@ By submitting a request:
     let activeAuthModal = null;
     let authSession = null;
     let proAccessRequested = false;
-    const DASHBOARD_URL = '/dashboard.html';
-    const dashboardRedirectUrl = new URL(DASHBOARD_URL, window.location.origin).href;
+    const PHARMACY_URL = '/pharmacy.html';
+    const pharmacyRedirectUrl = window.location.origin + '/pharmacy.html';
     const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
 
     function addRoleCandidate(target, value){
@@ -1879,7 +1877,7 @@ By submitting a request:
 
     function tryOpenPharmacyPortal(){
       if(userHasPharmacyAccess(authSession)){
-        window.location.href = DASHBOARD_URL;
+        window.location.href = PHARMACY_URL;
         return true;
       }
       return false;
@@ -1992,7 +1990,7 @@ By submitting a request:
       try {
         const { error } = await supabase.auth.signInWithOtp({
           email: 'info@mediradar.gr',
-          options: { emailRedirectTo: dashboardRedirectUrl }
+          options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
         });
         if(error) throw error;
         await subscribeToAuthChannel('info@mediradar.gr');
@@ -2110,12 +2108,12 @@ By submitting a request:
       const hasAccess = userHasPharmacyAccess(authSession);
       if(proAccessRequested && hasAccess){
         proAccessRequested = false;
-        window.location.href = DASHBOARD_URL;
+        window.location.href = PHARMACY_URL;
         return;
       }
 
       if(user && hasAccess){
-        window.location.href = DASHBOARD_URL;
+        window.location.href = PHARMACY_URL;
         return;
       }
 
@@ -2149,7 +2147,7 @@ By submitting a request:
     authRoots.forEach(root => {
       const role = root.dataset.authRole || 'users';
       const copy = resolveCopy(role);
-      const redirectUrl = role === 'pharmacies' ? dashboardRedirectUrl : window.location.origin;
+      const redirectUrl = role === 'pharmacies' ? pharmacyRedirectUrl : window.location.origin;
       const form = root.querySelector('[data-auth-form]');
       const emailInput = root.querySelector('input[type="email"]');
       const emailButton = root.querySelector('[data-auth-email-button]');

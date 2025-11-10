@@ -145,7 +145,7 @@ export default function AuthPortal() {
       try {
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: 'https://mediradar.gr/' }
+          options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
         });
 
         if (error) throw error;
@@ -171,7 +171,7 @@ export default function AuthPortal() {
       try {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: 'https://mediradar.gr/' }
+          options: { redirectTo: window.location.origin + '/pharmacy.html' }
         });
 
         if (error) throw error;

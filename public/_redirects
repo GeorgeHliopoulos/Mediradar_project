@@ -1,0 +1,10 @@
+# Keep SPA fallback but do not rewrite static assets under /js, /css, /images, etc.
+# Let static files resolve normally; everything else -> index.html
+
+# Static assets pass-through
+/js/*      /js/:splat      200
+/css/*     /css/:splat     200
+/images/*  /images/:splat  200
+
+# SPA fallback
+/*  /index.html  200
