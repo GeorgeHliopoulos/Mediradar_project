@@ -848,7 +848,7 @@
             <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
             <p id="auth-pharm-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
           </div>
-          <div data-auth-session class="hidden">
+          <div data-auth-session class="hidden space-y-4">
             <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
               <div class="flex items-center gap-3">
                 <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
@@ -858,6 +858,12 @@
                 </div>
               </div>
               <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
+            </div>
+            <div class="flex flex-col gap-3">
+              <button type="button" data-auth-open-dashboard class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+                Άνοιγμα Dashboard
+              </button>
+              <p data-auth-dashboard-info class="hidden text-xs text-center text-slate-600 dark:text-slate-300"></p>
             </div>
           </div>
           <p id="auth-pharm-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
@@ -1799,6 +1805,7 @@ By submitting a request:
       pharmacies: document.getElementById('auth-modal-pharmacies')
     };
     const authRoots = Array.from(document.querySelectorAll('[data-auth-root]'));
+    const pharmacyDashboardInfoElements = [];
     const authOpenButtons = Array.from(document.querySelectorAll('[data-auth-open]'));
     const authCloseButtons = Array.from(document.querySelectorAll('[data-auth-close]'));
     const authHeader = document.querySelector('[data-auth-header]');
@@ -1815,7 +1822,10 @@ By submitting a request:
     let proAccessRequested = false;
     const PHARMACY_URL = '/pharmacy.html';
     const pharmacyRedirectUrl = window.location.origin + '/pharmacy.html';
-    const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
+    const pharmacyAccessInfoMessage = 'Ο λογαριασμός φαρμακείου δεν έχει ενεργοποιηθεί ακόμα. Μπορείς να συνεχίσεις στο δοκιμαστικό περιβάλλον.';
+    const pharmacyAccessActiveMessage = 'Ο λογαριασμός φαρμακείου είναι ενεργός.';
+    const pharmacyProfilePromises = new Map();
+    let pharmacyProfileUserId = null;
 
     function addRoleCandidate(target, value){
       if(!target || value === undefined || value === null) return;
@@ -1883,12 +1893,64 @@ By submitting a request:
       return false;
     }
 
-    function showPharmacyAccessDenied(modal){
-      if(!modal) return;
-      const globalStatus = modal.querySelector('[data-auth-status-global]');
-      if(globalStatus){
-        globalStatus.textContent = pharmacyAccessDeniedMessage;
-        globalStatus.classList.remove('hidden');
+    function updatePharmacyInfoMessage(message){
+      pharmacyDashboardInfoElements.forEach(infoEl => {
+        if(!infoEl) return;
+        if(message){
+          infoEl.textContent = message;
+          infoEl.classList.remove('hidden');
+        } else {
+          infoEl.textContent = '';
+          infoEl.classList.add('hidden');
+        }
+      });
+    }
+
+    function loadPharmacyProfile(userId){
+      if(!supabase || !userId) return Promise.resolve(null);
+      if(pharmacyProfilePromises.has(userId)){
+        return pharmacyProfilePromises.get(userId);
+      }
+      const promise = (async () => {
+        try {
+          const { data, error } = await supabase
+            .from('pharmacies')
+            .select('is_pro_active')
+            .eq('owner_id', userId)
+            .maybeSingle();
+          if(error && error.code !== 'PGRST116'){
+            throw error;
+          }
+          return data || null;
+        } catch (err) {
+          console.warn('[auth] Failed to load pharmacy profile', err);
+          return null;
+        }
+      })();
+      pharmacyProfilePromises.set(userId, promise);
+      return promise;
+    }
+
+    async function updatePharmacySessionInfo(session){
+      const user = session?.user || null;
+      if(!supabase){
+        updatePharmacyInfoMessage('');
+        return;
+      }
+      if(!user){
+        pharmacyProfileUserId = null;
+        pharmacyProfilePromises.clear();
+        updatePharmacyInfoMessage('');
+        return;
+      }
+      pharmacyProfileUserId = user.id;
+      updatePharmacyInfoMessage('');
+      const profile = await loadPharmacyProfile(user.id);
+      if(pharmacyProfileUserId !== user.id) return;
+      if(profile && profile.is_pro_active){
+        updatePharmacyInfoMessage(pharmacyAccessActiveMessage);
+      } else {
+        updatePharmacyInfoMessage(pharmacyAccessInfoMessage);
       }
     }
 
@@ -2016,9 +2078,7 @@ By submitting a request:
             return;
           }
           openAuthModal('pharmacies');
-          if(authSession?.user && !userHasPharmacyAccess(authSession)){
-            showPharmacyAccessDenied(authModals.pharmacies);
-          }
+          updatePharmacySessionInfo(authSession);
           return;
         }
         openAuthModal(target);
@@ -2101,6 +2161,7 @@ By submitting a request:
       const user = authSession?.user || null;
       updateAuthHeaderUI(user);
       toggleSessionViews(user);
+      updatePharmacySessionInfo(authSession);
       if(user){
         broadcastAuthSuccess(user).catch(err => console.warn('[auth] Failed to signal auth success', err));
       }
@@ -2119,11 +2180,12 @@ By submitting a request:
 
       if(user && activeAuthModal){
         if(proAccessRequested && !hasAccess){
-          showPharmacyAccessDenied(activeAuthModal || authModals.pharmacies);
           proAccessRequested = false;
-          return;
         }
-        setTimeout(()=> closeAuthModal(), 2000);
+        const isPharmacyModal = activeAuthModal?.dataset?.authModal === 'pharmacies';
+        if(!isPharmacyModal){
+          setTimeout(()=> closeAuthModal(), 2000);
+        }
       }
     }
 
@@ -2157,8 +2219,21 @@ By submitting a request:
       const formsWrapper = root.querySelector('[data-auth-forms]');
       const successView = root.querySelector('[data-auth-success]');
       const logoutBtn = root.querySelector('[data-auth-logout]');
+      const dashboardButton = root.querySelector('[data-auth-open-dashboard]');
+      const dashboardInfo = root.querySelector('[data-auth-dashboard-info]');
 
       logoutBtn?.addEventListener('click', signOutSafely);
+
+      if(role === 'pharmacies'){
+        if(dashboardButton){
+          dashboardButton.addEventListener('click', () => {
+            window.location.href = PHARMACY_URL;
+          });
+        }
+        if(dashboardInfo){
+          pharmacyDashboardInfoElements.push(dashboardInfo);
+        }
+      }
 
       if(!supabase && statusEl){
         setStatusMessage(statusEl, missingSupabaseMessage, 'error');
