@@ -1,343 +1,322 @@
 <!DOCTYPE html>
 <html lang="el">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pharmacy Portal</title>
-  <style>
-    :root {
-      color-scheme: light;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
-    body {
-      margin: 0;
-      background: #f5f7fa;
-      color: #1f2933;
-    }
-    header, section {
-      margin-bottom: 2rem;
-    }
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
-    }
-    #auth-card {
-      max-width: 420px;
-      margin: 8vh auto;
-      padding: 2rem;
-      border-radius: 12px;
-      background: #ffffff;
-      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
-    }
-    .card-title {
-      margin-top: 0;
-      margin-bottom: 1.5rem;
-      font-size: 1.4rem;
-      font-weight: 600;
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.25rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    input {
-      width: 100%;
-      padding: 0.6rem 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #c3ccd5;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      padding: 0.6rem 1.1rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      background: #2563eb;
-      color: #ffffff;
-      transition: background 0.2s ease;
-    }
-    button.secondary {
-      background: #1f2933;
-    }
-    button.outline {
-      background: transparent;
-      border: 1px solid #2563eb;
-      color: #2563eb;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .auth-note {
-      margin-top: 1rem;
-      font-size: 0.85rem;
-      color: #4b5563;
-      text-align: center;
-    }
-    #portal {
-      display: none;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 1.75rem;
-      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
-    }
-    .card + .card {
-      margin-top: 1.75rem;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-    .calendar-container {
-      margin-top: 1rem;
-    }
-    #calendar {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 0.6rem;
-    }
-    .weekday {
-      text-align: center;
-      font-weight: 600;
-      color: #1f2933;
-      font-size: 0.85rem;
-    }
-    .day-cell {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 0.75rem;
-      min-height: 96px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border: 1px solid transparent;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      cursor: pointer;
-    }
-    .day-cell:hover {
-      border-color: #93c5fd;
-      box-shadow: 0 12px 20px rgba(37, 99, 235, 0.12);
-    }
-    .day-number {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .day-hours {
-      font-size: 0.85rem;
-      color: #334155;
-    }
-    .badge {
-      display: inline-block;
-      padding: 0.1rem 0.4rem;
-      border-radius: 999px;
-      background: #2563eb;
-      color: #fff;
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-    }
-    .badge.success {
-      background: #0f9d58;
-    }
-    #day-editor {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-    }
-    #day-editor.active {
-      display: flex;
-    }
-    .day-editor-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 1.5rem;
-      width: min(420px, calc(100% - 2rem));
-      box-shadow: 0 22px 44px rgba(15, 23, 42, 0.16);
-    }
-    .day-editor-card h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-    }
-    .time-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-    .dialog-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    .requests-list {
-      display: grid;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-    .request-card {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 1.25rem;
-      border: 1px solid #e2e8f0;
-      display: grid;
-      gap: 0.5rem;
-    }
-    .request-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .toast {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      background: #1f2933;
-      color: #ffffff;
-      font-weight: 600;
-      box-shadow: 0 16px 28px rgba(15, 23, 42, 0.25);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 30;
-      pointer-events: none;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .toast.success { background: #0f9d58; }
-    .toast.error { background: #dc2626; }
-
-    @media (max-width: 640px) {
-      .form-grid {
-        grid-template-columns: 1fr;
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MediRadar Pharmacy Portal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
       }
-      .request-actions {
-        flex-direction: column;
-        align-items: stretch;
+      body {
+        margin: 0;
+        background: #f2f4f8;
+        color: #1f2937;
+      }
+      h1,
+      h2 {
+        margin: 0 0 1rem;
+        font-weight: 600;
+      }
+      a {
+        color: inherit;
+      }
+      .page-shell {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        padding: 2rem;
+      }
+      .card + .card {
+        margin-top: 2rem;
+      }
+      #auth-card {
+        max-width: 420px;
+        margin: 12vh auto;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+      input[type='email'],
+      input[type='password'],
+      input[type='text'],
+      input[type='time'] {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      input[type='time'] {
+        font-variant-numeric: tabular-nums;
       }
       button {
-        width: 100%;
+        cursor: pointer;
+        border: none;
+        border-radius: 999px;
+        padding: 0.65rem 1.4rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: #2563eb;
+        color: #ffffff;
+        transition: background 0.2s ease;
       }
-    }
-  </style>
-</head>
-<body>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <div id="auth-card">
-    <h1 class="card-title">Σύνδεση Φαρμακείου</h1>
-    <div class="form-group">
-      <label for="auth-email">Email</label>
-      <input type="email" id="auth-email" placeholder="name@example.com" autocomplete="email" />
-    </div>
-    <div style="margin-top: 1.25rem; display: grid; gap: 0.75rem;">
-      <button id="magic-link-btn">Αποστολή magic link</button>
-      <button id="google-btn" class="secondary">Σύνδεση με Google</button>
-    </div>
-    <p class="auth-note">Ελέγξτε το inbox σας για τον σύνδεσμο επιβεβαίωσης.</p>
-  </div>
-
-  <div id="portal" class="container">
-    <header style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
-      <div>
-        <h1 style="margin: 0; font-size: 1.75rem;">Pharmacy Portal</h1>
-        <p style="margin: 0; color: #475569;">Συνδεδεμένος ως <strong id="user-email">-</strong></p>
-      </div>
-      <button id="sign-out">Αποσύνδεση</button>
-    </header>
-
-    <section class="card" aria-labelledby="pharmacy-info-title">
-      <h2 id="pharmacy-info-title" style="margin-top: 0;">Τα στοιχεία του φαρμακείου μου</h2>
-      <div class="form-grid">
-        <div>
-          <label for="ph-name">Όνομα</label>
-          <input id="ph-name" type="text" placeholder="Φαρμακείο" />
+      button:hover {
+        background: #1d4ed8;
+      }
+      button.secondary {
+        background: #0f172a;
+      }
+      button + button {
+        margin-left: 0.5rem;
+      }
+      .hidden {
+        display: none !important;
+      }
+      #portal {
+        display: none;
+      }
+      .card-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+      .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      #requests-list {
+        display: grid;
+        gap: 1rem;
+      }
+      .request-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        background: #f8fafc;
+      }
+      .request-card header {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .request-meta {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 0.75rem;
+      }
+      .request-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      #requests-error {
+        color: #b91c1c;
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+      }
+      #hours-form {
+        display: grid;
+        gap: 0.75rem;
+      }
+      .day-row {
+        display: grid;
+        grid-template-columns: minmax(0, 150px) repeat(2, minmax(0, 1fr)) auto;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .day-row label {
+        margin: 0;
+        font-weight: 500;
+      }
+      .day-row input[type='checkbox'] {
+        transform: scale(1.2);
+        margin-right: 0.5rem;
+      }
+      .day-row .day-name {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .hours-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-end;
+      }
+      .auth-actions {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+      }
+      @media (max-width: 640px) {
+        .day-row {
+          grid-template-columns: 1fr 1fr;
+          grid-template-areas:
+            'name name'
+            'open close'
+            'flag flag';
+        }
+        .day-row .day-name {
+          grid-area: name;
+        }
+        .day-row .open-input {
+          grid-area: open;
+        }
+        .day-row .close-input {
+          grid-area: close;
+        }
+        .day-row .flag-input {
+          grid-area: flag;
+          justify-content: flex-start;
+        }
+        .hours-actions {
+          justify-content: flex-start;
+        }
+        button + button {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section id="auth-card" class="card">
+        <h1>Φαρμακείο MediRadar</h1>
+        <p>Συνδεθείτε με τον λογαριασμό Supabase σας.</p>
+        <label for="auth-email">Email</label>
+        <input id="auth-email" type="email" autocomplete="email" />
+        <label for="auth-password">Κωδικός (προαιρετικά)</label>
+        <input id="auth-password" type="password" autocomplete="current-password" />
+        <div class="auth-actions">
+          <button id="btn-login-password">Σύνδεση με κωδικό</button>
+          <button id="btn-login-magic">Magic Link</button>
+          <button id="btn-login-google" class="secondary">Google</button>
         </div>
-        <div>
-          <label for="ph-address">Διεύθυνση</label>
-          <input id="ph-address" type="text" placeholder="Οδός, αριθμός" />
-        </div>
-        <div>
-          <label for="ph-phone">Τηλέφωνο</label>
-          <input id="ph-phone" type="tel" placeholder="210 0000000" />
-        </div>
-        <div>
-          <label for="ph-lat">Lat</label>
-          <input id="ph-lat" type="number" step="0.000001" placeholder="37.98" />
-        </div>
-        <div>
-          <label for="ph-lng">Lng</label>
-          <input id="ph-lng" type="number" step="0.000001" placeholder="23.72" />
-        </div>
-      </div>
-      <button id="ph-save">Αποθήκευση στοιχείων</button>
-    </section>
+      </section>
 
-    <section class="card" aria-labelledby="hours-title">
-      <h2 id="hours-title" style="margin-top: 0;">Ωράριο λειτουργίας</h2>
-      <div style="display:flex; align-items:center; gap:0.75rem;">
-        <button id="prev-month" class="outline" aria-label="Προηγούμενος μήνας">◀</button>
-        <div id="month-label" style="font-weight:600; font-size:1.05rem;">-</div>
-        <button id="next-month" class="outline" aria-label="Επόμενος μήνας">▶</button>
-      </div>
-      <div class="calendar-container">
-        <div id="calendar"></div>
-      </div>
-      <div style="display:flex; gap:0.75rem; margin-top:1.5rem; flex-wrap:wrap;">
-        <button id="copy-weekday" class="outline">Αντιγραφή σε όλες τις ίδιες ημέρες εβδομάδας</button>
-        <button id="save-hours">Αποθήκευση ωραρίου</button>
-      </div>
-    </section>
+      <section id="portal" class="hidden">
+        <div class="card" id="portal-header">
+          <div class="card-header">
+            <div>
+              <h2>Καλώς ήρθατε</h2>
+              <div id="user-email"></div>
+            </div>
+            <button id="btn-signout" class="secondary">Αποσύνδεση</button>
+          </div>
+        </div>
 
-    <section class="card" aria-labelledby="requests-title">
-      <h2 id="requests-title" style="margin-top: 0;">Αιτήματα πελατών</h2>
-      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-        <input id="city-filter" type="text" placeholder="Πόλη" style="flex:1 1 220px;" />
-        <button id="load-requests">Φόρτωση</button>
-      </div>
-      <div id="requests-list" class="requests-list"></div>
-    </section>
-  </div>
+        <div class="card" id="requests-card">
+          <div class="card-header">
+            <h2>Ενότητα Α: Αιτήματα Πελατών</h2>
+            <div class="card-actions">
+              <button id="btn-refresh">Ανανέωση</button>
+              <button id="btn-demo">Demo</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label for="city-filter">Πόλη</label>
+            <input id="city-filter" type="text" placeholder="π.χ. Αθήνα" />
+            <button id="btn-load">Φόρτωση</button>
+          </div>
+          <div id="requests-error" class="hidden"></div>
+          <div id="requests-list"></div>
+        </div>
 
-  <div id="day-editor" role="dialog" aria-modal="true" aria-labelledby="day-editor-title">
-    <div class="day-editor-card">
-      <h3 id="day-editor-title">Ρυθμίσεις ημέρας</h3>
-      <p id="day-editor-date" style="margin-top:-0.25rem; color:#475569;"></p>
-      <div class="time-grid">
-        <input id="open-1" type="time" />
-        <input id="close-1" type="time" />
-        <input id="open-2" type="time" />
-        <input id="close-2" type="time" />
-      </div>
-      <div class="dialog-actions">
-        <button id="day-clear" class="outline">Καθαρισμός</button>
-        <button id="day-cancel" class="secondary">Άκυρο</button>
-        <button id="day-ok">OK</button>
-      </div>
-    </div>
-  </div>
+        <div class="card" id="hours-card">
+          <div class="card-header">
+            <h2>Ενότητα Β: Ωράριο (εβδομαδιαίο)</h2>
+          </div>
+          <form id="hours-form">
+            <div id="day-mon" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="mon" data-field="openFlag" />
+                <label>Δευτέρα</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="mon" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="mon" data-field="close" />
+            </div>
+            <div id="day-tue" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="tue" data-field="openFlag" />
+                <label>Τρίτη</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="tue" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="tue" data-field="close" />
+            </div>
+            <div id="day-wed" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="wed" data-field="openFlag" />
+                <label>Τετάρτη</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="wed" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="wed" data-field="close" />
+            </div>
+            <div id="day-thu" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="thu" data-field="openFlag" />
+                <label>Πέμπτη</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="thu" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="thu" data-field="close" />
+            </div>
+            <div id="day-fri" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="fri" data-field="openFlag" />
+                <label>Παρασκευή</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="fri" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="fri" data-field="close" />
+            </div>
+            <div id="day-sat" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="sat" data-field="openFlag" />
+                <label>Σάββατο</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="sat" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="sat" data-field="close" />
+            </div>
+            <div id="day-sun" class="day-row">
+              <div class="day-name">
+                <input type="checkbox" data-day="sun" data-field="openFlag" />
+                <label>Κυριακή</label>
+              </div>
+              <input class="open-input" type="time" step="300" placeholder="--:--" data-day="sun" data-field="open" />
+              <input class="close-input" type="time" step="300" placeholder="--:--" data-day="sun" data-field="close" />
+            </div>
+          </form>
+          <div class="hours-actions">
+            <button id="btn-hours-save">Αποθήκευση</button>
+            <button id="btn-hours-reload" class="secondary">Επαναφόρτωση</button>
+          </div>
+        </div>
+      </section>
+    </main>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="/env.js"></script>
-  <script src="/js/supabaseClient.js" type="module"></script>
-  <script type="module" src="/js/pharmacyApp.js"></script>
-</body>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="/env.js"></script>
+    <script type="module" src="/js/pharmacyApp.js?v=2025-11-10-1"></script>
+  </body>
 </html>
