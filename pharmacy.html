@@ -633,8 +633,7 @@
     const supabase = supabaseClient || (hasSupabaseConfig
       ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null);
-    const DASHBOARD_URL = '/dashboard.html';
-    const dashboardRedirectUrl = new URL(DASHBOARD_URL, window.location.origin).href;
+    const pharmacyRedirectUrl = window.location.origin + '/pharmacy.html';
     const supabaseStatus = {
       ready: !!supabase,
       reason: hasSupabaseConfig ? 'client_unavailable' : 'missing_config'
@@ -1594,7 +1593,7 @@
         // Επιλογή Α (ενεργή): Magic Link μέσω Supabase
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: dashboardRedirectUrl }
+          options: { emailRedirectTo: pharmacyRedirectUrl }
         });
         // Επιλογή Β (εναλλακτική): Google OAuth μέσω Supabase
         // const { data, error } = await supabase.auth.signInWithOAuth({
@@ -1633,7 +1632,7 @@
       try{
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: dashboardRedirectUrl }
+          options: { redirectTo: pharmacyRedirectUrl }
         });
         if(error) throw error;
         if(data?.url){

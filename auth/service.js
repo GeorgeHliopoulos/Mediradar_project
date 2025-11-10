@@ -144,7 +144,7 @@ export async function signUp({ email, password, metadata = {} }) {
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
-    options: { data: metadata, emailRedirectTo: window.location.origin }
+    options: { data: metadata, emailRedirectTo: window.location.origin + '/pharmacy.html' }
   });
   if (error) throw new Error(error.message || 'Unable to sign up');
   if (data?.session) {
@@ -212,7 +212,7 @@ export async function sendMagicLink({ email, mode = 'login' }) {
   const { data, error } = await supabaseClient.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: 'https://mediradar.gr/',
+      emailRedirectTo: window.location.origin + '/pharmacy.html',
       shouldCreateUser,
       data: { flow: mode }
     }

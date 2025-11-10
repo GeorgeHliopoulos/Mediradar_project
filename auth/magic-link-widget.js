@@ -6,14 +6,6 @@ const SITE_URL =
     ? ENV.SUPABASE_SITE_URL
     : 'https://mediradar.gr';
 const NORMALIZED_SITE_URL = SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
-const EMAIL_REDIRECT_URL =
-  typeof ENV.SUPABASE_EMAIL_REDIRECT_URL === 'string' && ENV.SUPABASE_EMAIL_REDIRECT_URL.length
-    ? ENV.SUPABASE_EMAIL_REDIRECT_URL
-    : `${NORMALIZED_SITE_URL}/`;
-const OAUTH_REDIRECT_URL =
-  typeof ENV.SUPABASE_REDIRECT_URL === 'string' && ENV.SUPABASE_REDIRECT_URL.length
-    ? ENV.SUPABASE_REDIRECT_URL
-    : `${NORMALIZED_SITE_URL}/auth/v1/callback`;
 const APP_NAME =
   typeof ENV.SUPABASE_APP_NAME === 'string' && ENV.SUPABASE_APP_NAME.length
     ? ENV.SUPABASE_APP_NAME
@@ -191,7 +183,7 @@ async function subscribeToAuthSuccess(email, supabase) {
     channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
       await cleanupAuthChannel(supabase);
       try {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/pharmacy.html';
       } catch (error) {
         console.warn('[auth] Failed to redirect after auth success', error);
       }
@@ -352,7 +344,7 @@ async function handleEmailSubmit(event, supabase) {
     setStatus(statusEl, null, '');
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+      options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
     });
     if (error) throw error;
     await subscribeToAuthSuccess(email, supabase);
@@ -378,7 +370,7 @@ async function handleGoogleClick(form, supabase) {
     setStatus(statusEl, null, '');
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: OAUTH_REDIRECT_URL }
+      options: { redirectTo: window.location.origin + '/pharmacy.html' }
     });
     if (error) throw error;
     if (!data?.url) {
@@ -544,7 +536,7 @@ function initAuthPortal(root) {
           setStatus(statusEl, null, '');
           const { error } = await supabase.auth.signInWithOtp({
             email: DEFAULT_DEMO_EMAIL,
-            options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+            options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
           });
           if (error) throw error;
           await subscribeToAuthSuccess(DEFAULT_DEMO_EMAIL, supabase);
