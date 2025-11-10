@@ -27,6 +27,25 @@ const APP_LOGO =
     ? ENV.SUPABASE_APP_LOGO
     : `${NORMALIZED_SITE_URL}/icons/icon-512.png`;
 
+function getPharmacyRedirectUrl() {
+  if (typeof window === 'undefined' || !window.location) {
+    return `${NORMALIZED_SITE_URL}/pharmacy.html`;
+  }
+  return `${window.location.origin}/pharmacy.html`;
+}
+
+function resolveEmailRedirect(form) {
+  const role =
+    form?.dataset.authRole || form?.closest('[data-auth-root]')?.dataset.authRole || '';
+  return role === 'pharmacies' ? getPharmacyRedirectUrl() : EMAIL_REDIRECT_URL;
+}
+
+function resolveOAuthRedirect(form) {
+  const role =
+    form?.dataset.authRole || form?.closest('[data-auth-root]')?.dataset.authRole || '';
+  return role === 'pharmacies' ? getPharmacyRedirectUrl() : OAUTH_REDIRECT_URL;
+}
+
 const DEFAULT_DEMO_EMAIL = 'info@mediradar.gr';
 
 const AUTH_CHANNEL_PREFIX = 'mediradar_auth_channel_';
@@ -352,7 +371,7 @@ async function handleEmailSubmit(event, supabase) {
     setStatus(statusEl, null, '');
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+      options: { emailRedirectTo: resolveEmailRedirect(form) }
     });
     if (error) throw error;
     await subscribeToAuthSuccess(email, supabase);
@@ -378,7 +397,7 @@ async function handleGoogleClick(form, supabase) {
     setStatus(statusEl, null, '');
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: OAUTH_REDIRECT_URL }
+      options: { redirectTo: resolveOAuthRedirect(form) }
     });
     if (error) throw error;
     if (!data?.url) {
@@ -544,7 +563,7 @@ function initAuthPortal(root) {
           setStatus(statusEl, null, '');
           const { error } = await supabase.auth.signInWithOtp({
             email: DEFAULT_DEMO_EMAIL,
-            options: { emailRedirectTo: EMAIL_REDIRECT_URL }
+            options: { emailRedirectTo: resolveEmailRedirect(form) }
           });
           if (error) throw error;
           await subscribeToAuthSuccess(DEFAULT_DEMO_EMAIL, supabase);

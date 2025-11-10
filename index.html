@@ -1718,7 +1718,7 @@ By submitting a request:
         channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
           await cleanupAuthRealtimeChannel();
           try {
-            window.location.href = '/dashboard.html';
+            window.location.href = DASHBOARD_URL;
           } catch (err) {
             console.warn('[auth] Failed to redirect after auth success', err);
           }
@@ -1815,7 +1815,7 @@ By submitting a request:
     let activeAuthModal = null;
     let authSession = null;
     let proAccessRequested = false;
-    const DASHBOARD_URL = '/dashboard.html';
+    const DASHBOARD_URL = '/pharmacy.html';
     const dashboardRedirectUrl = new URL(DASHBOARD_URL, window.location.origin).href;
     const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
 
