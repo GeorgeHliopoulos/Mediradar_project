@@ -143,9 +143,12 @@ export default function AuthPortal() {
 
       updateForm(tabId, { loading: 'email' });
       try {
-        const { error } = await supabase.auth.signInWithOtp({
+        const { error } = await supabase.auth.signUp({
           email,
-          options: { emailRedirectTo: 'https://mediradar.gr/' }
+          options: {
+            emailRedirectTo: 'https://mediradar.gr/',
+            data: { role: tabId }
+          }
         });
 
         if (error) throw error;
@@ -171,7 +174,10 @@ export default function AuthPortal() {
       try {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: 'https://mediradar.gr/' }
+          options: {
+            redirectTo: 'https://mediradar.gr/',
+            data: { role: tabId }
+          }
         });
 
         if (error) throw error;
