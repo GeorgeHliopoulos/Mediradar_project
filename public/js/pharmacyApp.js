@@ -7,14 +7,19 @@ if (!window.supabase) {
 }
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Supabase configuration missing');
+  throw new Error('Missing Supabase configuration');
 }
 
-const sb = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  { auth: { persistSession: true } }
-);
+const state = {
+  sb: window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true }
+  }),
+  activeUserId: null,
+  pharmacyId: null,
+  hoursMap: null,
+  bootPromises: Object.create(null),
+  subs: []
+};
 
 const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const dayLabels = {
@@ -53,15 +58,73 @@ days.forEach((day) => {
   els[`row_${day}`] = document.getElementById(`day-${day}`);
 });
 
-const state = {
-  session: null,
-  user: null,
-  pharmacyId: null,
-  hoursMap: createEmptyHoursMap(),
-  bootPromise: null
-};
-
 let toastTimer = null;
+
+function resetState() {
+  state.activeUserId = null;
+  state.pharmacyId = null;
+  state.hoursMap = null;
+  state.subs.forEach((unsub) => {
+    try {
+      if (typeof unsub === 'function') {
+        unsub();
+      }
+    } catch (err) {
+      console.warn('Failed to unsubscribe listener', err);
+    }
+  });
+  state.subs.length = 0;
+  state.bootPromises = Object.create(null);
+
+  if (els.userEmail) {
+    els.userEmail.textContent = '';
+  }
+  if (els.requestsList) {
+    els.requestsList.innerHTML = '';
+  }
+  if (els.requestsError) {
+    els.requestsError.textContent = '';
+    els.requestsError.classList.add('hidden');
+  }
+  if (els.hoursForm) {
+    els.hoursForm
+      .querySelectorAll('[data-day][data-field]')
+      .forEach((input) => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+  }
+}
+
+function guarded(userId) {
+  return () => {
+    if (state.activeUserId !== userId) {
+      throw new Error('Session changed');
+    }
+  };
+}
+
+function getBootPromise(user) {
+  const key = user.id;
+  if (!state.bootPromises[key]) {
+    state.bootPromises[key] = (async () => {
+      try {
+        await doBoot(user);
+      } catch (error) {
+        if (error && error.message === 'Session changed') {
+          return;
+        }
+        console.error('Boot failed', error);
+        toast('Αποτυχία φόρτωσης του portal', 'error');
+        delete state.bootPromises[key];
+      }
+    })();
+  }
+  return state.bootPromises[key];
+}
 
 function createEmptyDay() {
   return { openFlag: false, open: '', close: '' };
@@ -75,25 +138,21 @@ function createEmptyHoursMap() {
 }
 
 function normalizeHoursMap(source) {
-  const hours = createEmptyHoursMap();
+  const target = createEmptyHoursMap();
   if (!source || typeof source !== 'object') {
-    return hours;
+    return target;
   }
   days.forEach((day) => {
     const entry = source[day];
     if (entry && typeof entry === 'object') {
-      hours[day] = {
+      target[day] = {
         openFlag: Boolean(entry.openFlag),
         open: entry.open || '',
         close: entry.close || ''
       };
     }
   });
-  return hours;
-}
-
-function cloneHoursMap(map) {
-  return JSON.parse(JSON.stringify(map));
+  return target;
 }
 
 function showAuth() {
@@ -108,6 +167,7 @@ function showAuth() {
 }
 
 function showPortal(user) {
+  state.activeUserId = user?.id || null;
   if (els.authCard) {
     els.authCard.classList.add('hidden');
     els.authCard.style.display = 'none';
@@ -125,7 +185,7 @@ function toast(message, type = 'info') {
   if (!els.toast) return;
   els.toast.textContent = message;
   els.toast.dataset.type = type;
-  els.toast.classList.remove('info', 'success', 'error', 'show');
+  els.toast.classList.remove('show', 'info', 'success', 'error');
   els.toast.classList.add(type);
   void els.toast.offsetWidth;
   els.toast.classList.add('show');
@@ -140,9 +200,7 @@ function toast(message, type = 'info') {
 function relTime(isoString) {
   if (!isoString) return '';
   const date = new Date(isoString);
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
+  if (Number.isNaN(date.getTime())) return '';
   const now = new Date();
   const diffMs = Math.max(0, now.getTime() - date.getTime());
   const diffMinutes = Math.floor(diffMs / 60000);
@@ -152,6 +210,26 @@ function relTime(isoString) {
   if (diffHours < 24) return `πριν ${diffHours} ώρες`;
   const diffDays = Math.floor(diffHours / 24);
   return `πριν ${diffDays} ημέρες`;
+}
+
+function handleAsync(fn) {
+  return (...args) => {
+    Promise.resolve(fn(...args)).catch((error) => {
+      if (error && error.message === 'Session changed') {
+        return;
+      }
+      console.error(error);
+      toast('Παρουσιάστηκε σφάλμα', 'error');
+    });
+  };
+}
+
+function bind(el, event, handler, options) {
+  if (!el) return;
+  el.addEventListener(event, handler, options);
+  state.subs.push(() => {
+    el.removeEventListener(event, handler, options);
+  });
 }
 
 function setRequestsError(message) {
@@ -166,285 +244,231 @@ function setRequestsError(message) {
   }
 }
 
-function clearRequestsList() {
-  if (els.requestsList) {
-    els.requestsList.innerHTML = '';
-  }
+function renderHours(guard) {
+  guard();
+  if (!els.hoursForm) return;
+  const map = state.hoursMap || createEmptyHoursMap();
+  els.hoursForm
+    .querySelectorAll('[data-day][data-field]')
+    .forEach((input) => {
+      const day = input.dataset.day;
+      const field = input.dataset.field;
+      const entry = map[day] || createEmptyDay();
+      if (field === 'openFlag') {
+        input.checked = Boolean(entry.openFlag);
+      } else if (field === 'open') {
+        input.value = entry.open || '';
+      } else if (field === 'close') {
+        input.value = entry.close || '';
+      }
+    });
 }
 
-function renderRequests(rows = []) {
-  clearRequestsList();
-  if (!els.requestsList) return;
-  if (!rows.length) {
-    const empty = document.createElement('p');
-    empty.className = 'text-slate-500';
-    empty.textContent = 'Δεν βρέθηκαν αιτήματα.';
-    els.requestsList.appendChild(empty);
+function validateHours(map) {
+  for (const day of days) {
+    const entry = map[day] || createEmptyDay();
+    if (!entry.openFlag) continue;
+    if (!entry.open || !entry.close) {
+      return `Συμπληρώστε ώρες για ${dayLabels[day]}`;
+    }
+    if (entry.close <= entry.open) {
+      return `Η ώρα κλεισίματος πρέπει να είναι μετά την ώρα ανοίγματος (${dayLabels[day]})`;
+    }
+  }
+  return null;
+}
+
+function attachHoursInputs(guard) {
+  if (!els.hoursForm) return;
+  els.hoursForm
+    .querySelectorAll('[data-day][data-field]')
+    .forEach((input) => {
+      const handler = () => {
+        try {
+          guard();
+        } catch (error) {
+          return;
+        }
+        const day = input.dataset.day;
+        const field = input.dataset.field;
+        if (!state.hoursMap) {
+          state.hoursMap = createEmptyHoursMap();
+        }
+        const entry = { ...(state.hoursMap[day] || createEmptyDay()) };
+        if (field === 'openFlag') {
+          entry.openFlag = input.checked;
+        } else if (field === 'open' || field === 'close') {
+          entry[field] = input.value || '';
+        }
+        state.hoursMap[day] = entry;
+      };
+      bind(input, input.type === 'checkbox' ? 'change' : 'input', handler);
+    });
+}
+
+async function saveHours(guard) {
+  guard();
+  if (!state.pharmacyId) {
+    throw new Error('Missing pharmacy id');
+  }
+  const map = state.hoursMap || createEmptyHoursMap();
+  const validationError = validateHours(map);
+  if (validationError) {
+    toast(validationError, 'error');
     return;
   }
-  rows.forEach((row) => {
-    const card = document.createElement('article');
-    card.className = 'request-card';
-    card.dataset.requestId = row.id;
-
-    const header = document.createElement('header');
-    header.className = 'request-card__header';
-    const title = document.createElement('h3');
-    title.textContent = row.medicine_name || '—';
-    header.appendChild(title);
-
-    const subtitle = document.createElement('p');
-    subtitle.className = 'request-card__subtitle';
-    subtitle.textContent = row.substance ? `${row.substance} • ${row.type || ''}` : (row.type || '');
-
-    const details = document.createElement('ul');
-    details.className = 'request-card__meta';
-    const items = [
-      { label: 'Ποσότητα', value: row.quantity },
-      { label: 'Πόλη', value: row.city },
-      { label: 'Κατάσταση', value: row.status },
-      { label: 'Ημ/νία', value: relTime(row.created_at) }
-    ];
-    items.forEach((item) => {
-      if (item.value === undefined || item.value === null || item.value === '') return;
-      const li = document.createElement('li');
-      li.innerHTML = `<strong>${item.label}:</strong> ${item.value}`;
-      details.appendChild(li);
-    });
-
-    const actions = document.createElement('div');
-    actions.className = 'request-card__actions';
-
-    const btnHave = document.createElement('button');
-    btnHave.type = 'button';
-    btnHave.textContent = 'Το έχω';
-    btnHave.className = 'btn-request btn-positive';
-    btnHave.addEventListener('click', () => respond(row.id, 'available', false, card));
-
-    const btnGeneric = document.createElement('button');
-    btnGeneric.type = 'button';
-    btnGeneric.textContent = 'Μόνο γενόσημο';
-    btnGeneric.className = 'btn-request btn-generic';
-    btnGeneric.addEventListener('click', () => respond(row.id, 'generic', true, card));
-
-    const btnNo = document.createElement('button');
-    btnNo.type = 'button';
-    btnNo.textContent = 'Δεν το έχω';
-    btnNo.className = 'btn-request btn-negative';
-    btnNo.addEventListener('click', () => respond(row.id, 'unavailable', false, card));
-
-    actions.appendChild(btnHave);
-    actions.appendChild(btnGeneric);
-    actions.appendChild(btnNo);
-
-    card.appendChild(header);
-    card.appendChild(subtitle);
-    card.appendChild(details);
-    card.appendChild(actions);
-
-    els.requestsList.appendChild(card);
-  });
+  const { error } = await state.sb
+    .from('pharmacies')
+    .update({ hours: map })
+    .eq('id', state.pharmacyId);
+  guard();
+  if (error) {
+    throw error;
+  }
+  toast('Οι ώρες αποθηκεύτηκαν', 'success');
 }
 
-function markCardAnswered(card, kind) {
-  if (!card) return;
-  card.classList.add('answered');
-  const existing = card.querySelector('.request-card__status');
-  if (existing) {
-    existing.textContent = `Απαντήθηκε: ${kind}`;
-  } else {
-    const status = document.createElement('p');
-    status.className = 'request-card__status';
-    status.textContent = `Απαντήθηκε: ${kind}`;
-    card.appendChild(status);
+async function reloadHoursFromDB(guard) {
+  guard();
+  if (!state.pharmacyId) {
+    throw new Error('Missing pharmacy id');
   }
+  const { data, error } = await state.sb
+    .from('pharmacies')
+    .select('hours')
+    .eq('id', state.pharmacyId)
+    .single();
+  guard();
+  if (error) {
+    throw error;
+  }
+  state.hoursMap = normalizeHoursMap(data?.hours);
+  renderHours(guard);
+  toast('Οι ώρες ενημερώθηκαν', 'success');
+}
+
+function markRequestAnswered(card, kind) {
+  if (!card) return;
+  card.dataset.answered = kind;
+  card.classList.add('answered');
   card.querySelectorAll('button').forEach((btn) => {
     btn.disabled = true;
   });
 }
 
-function getHoursInputs(day) {
-  const row = els[`row_${day}`];
-  if (!row) return {};
-  const selector = `[data-day="${day}"]`;
-  return {
-    openFlag: row.querySelector(`${selector}[data-field="openFlag"]`),
-    open: row.querySelector(`${selector}[data-field="open"]`),
-    close: row.querySelector(`${selector}[data-field="close"]`)
+async function respondToRequest(guard, requestId, kind, genericOnly) {
+  guard();
+  if (!state.pharmacyId) {
+    throw new Error('Missing pharmacy context');
+  }
+  const payload = {
+    request_id: requestId,
+    pharmacy_id: state.pharmacyId,
+    kind,
+    generic_only: genericOnly
   };
-}
-
-function renderHours() {
-  days.forEach((day) => {
-    const entry = state.hoursMap[day] || createEmptyDay();
-    const inputs = getHoursInputs(day);
-    if (!inputs.openFlag || !inputs.open || !inputs.close) {
-      return;
-    }
-    inputs.openFlag.checked = Boolean(entry.openFlag);
-    inputs.open.value = entry.open || '';
-    inputs.close.value = entry.close || '';
-    inputs.open.disabled = !inputs.openFlag.checked;
-    inputs.close.disabled = !inputs.openFlag.checked;
-  });
-}
-
-function handleHoursInput(event) {
-  const target = event.target;
-  if (!target || !target.dataset) return;
-  const day = target.dataset.day;
-  const field = target.dataset.field;
-  if (!day || !field || !state.hoursMap[day]) return;
-
-  const entry = state.hoursMap[day];
-  if (field === 'openFlag') {
-    entry.openFlag = target.checked;
-    const inputs = getHoursInputs(day);
-    if (inputs.open) inputs.open.disabled = !entry.openFlag;
-    if (inputs.close) inputs.close.disabled = !entry.openFlag;
-  } else if (field === 'open' || field === 'close') {
-    entry[field] = target.value || '';
+  let card;
+  if (els.requestsList) {
+    card = els.requestsList.querySelector(`[data-request-id="${requestId}"]`);
   }
-}
-
-function validateHours(map) {
-  for (const day of days) {
-    const entry = map[day];
-    if (!entry || !entry.openFlag) continue;
-    if (!entry.open || !entry.close) {
-      throw new Error(`Συμπληρώστε ώρες για ${dayLabels[day]}.`);
-    }
-    if (entry.close <= entry.open) {
-      throw new Error(`Η ώρα κλεισίματος πρέπει να είναι μετά την ώρα ανοίγματος για ${dayLabels[day]}.`);
-    }
-  }
-}
-
-async function saveHours() {
-  if (!state.pharmacyId) {
-    toast('Δεν βρέθηκε φαρμακείο.', 'error');
-    return;
-  }
-  const payload = cloneHoursMap(state.hoursMap);
-  try {
-    validateHours(payload);
-    const { error } = await sb
-      .from('pharmacies')
-      .update({ hours: payload })
-      .eq('id', state.pharmacyId);
-    if (error) throw error;
-    toast('Το ωράριο αποθηκεύτηκε.', 'success');
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Αποτυχία αποθήκευσης ωραρίου.', 'error');
-  }
-}
-
-async function reloadHoursFromDB() {
-  if (!state.user) return;
-  try {
-    const { data, error } = await sb
-      .from('pharmacies')
-      .select('id,hours')
-      .eq('owner_id', state.user.id)
-      .maybeSingle();
-    if (error) throw error;
-    if (data) {
-      state.pharmacyId = data.id;
-      state.hoursMap = normalizeHoursMap(data.hours);
-      renderHours();
-      toast('Το ωράριο ενημερώθηκε.', 'success');
-    }
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Αποτυχία φόρτωσης ωραρίου.', 'error');
-  }
-}
-
-async function ensurePharmacy(user) {
-  const { data, error } = await sb
-    .from('pharmacies')
-    .select('id,hours,name')
-    .eq('owner_id', user.id)
-    .maybeSingle();
-  if (error) throw error;
-  if (data) return data;
-  const { data: inserted, error: insertError } = await sb
-    .from('pharmacies')
-    .insert({ owner_id: user.id, name: '', hours: {} })
-    .select('id,hours,name')
+  const insertResult = await state.sb
+    .from('responses')
+    .insert(payload)
+    .select()
     .single();
-  if (insertError) throw insertError;
-  return inserted;
-}
-
-async function reloadRequests() {
-  if (!state.user) return;
-  setRequestsError('');
-  clearRequestsList();
-  const city = (els.cityFilter?.value || '').trim();
-  try {
-    let query = sb
-      .from('open_requests_for_pharmacies')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(200);
-    if (city) {
-      query = query.ilike('city', `%${city}%`);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
-    renderRequests(data || []);
-  } catch (error) {
-    console.error(error);
-    setRequestsError(error.message || 'Αποτυχία φόρτωσης αιτημάτων.');
-  }
-}
-
-async function respond(requestId, kind, genericOnly, card) {
-  if (!state.pharmacyId) {
-    toast('Δεν έχει καταχωρηθεί φαρμακείο.', 'error');
-    return;
-  }
-  try {
-    const payload = {
-      request_id: requestId,
-      pharmacy_id: state.pharmacyId,
-      kind,
-      generic_only: genericOnly
-    };
-    const insertResult = await sb
-      .from('responses')
-      .insert(payload)
-      .select()
-      .single();
-    if (insertResult.error && insertResult.error.code !== '23505') {
-      throw insertResult.error;
-    }
-    if (insertResult.error && insertResult.error.code === '23505') {
-      const { error: updateError } = await sb
+  guard();
+  if (insertResult.error) {
+    if (insertResult.error.code === '23505') {
+      const { error: updateError } = await state.sb
         .from('responses')
         .update({ kind, generic_only: genericOnly })
         .eq('request_id', requestId)
         .eq('pharmacy_id', state.pharmacyId);
-      if (updateError) throw updateError;
+      guard();
+      if (updateError) {
+        throw updateError;
+      }
+    } else {
+      throw insertResult.error;
     }
-    toast('Η απάντηση καταχωρήθηκε.', 'success');
-    markCardAnswered(card || document.querySelector(`[data-request-id="${requestId}"]`), kind);
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Αποτυχία καταχώρησης απάντησης.', 'error');
   }
+  markRequestAnswered(card, kind);
+  toast('Η απάντηση καταχωρήθηκε', 'success');
 }
 
-async function insertDemoRequest() {
-  if (!state.user) {
-    toast('Απαιτείται σύνδεση.', 'error');
+function renderRequests(requests, guard) {
+  guard();
+  if (!els.requestsList) return;
+  els.requestsList.innerHTML = '';
+  if (!Array.isArray(requests) || requests.length === 0) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Δεν υπάρχουν αιτήματα.';
+    els.requestsList.appendChild(empty);
     return;
   }
-  try {
-    const payload = {
-      user_id: state.user.id,
+
+  requests.forEach((request) => {
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.dataset.requestId = String(request.id);
+    card.innerHTML = `
+      <h5>${request.medicine_name || ''}</h5>
+      <p><strong>Δραστική:</strong> ${request.substance || '-'}</p>
+      <p><strong>Μορφή:</strong> ${request.type || '-'}</p>
+      <p><strong>Ποσότητα:</strong> ${request.quantity ?? '-'}</p>
+      <p><strong>Πόλη:</strong> ${request.city || '-'}</p>
+      <p><strong>Κατάσταση:</strong> ${request.status || '-'}</p>
+      <p><small>${relTime(request.created_at)}</small></p>
+      <div class="request-actions">
+        <button type="button" class="btn btn-success" data-action="available">Το έχω</button>
+        <button type="button" class="btn btn-warning" data-action="generic">Μόνο γενόσημο</button>
+        <button type="button" class="btn btn-secondary" data-action="unavailable">Δεν το έχω</button>
+      </div>
+    `;
+
+    const buttons = card.querySelectorAll('button[data-action]');
+    buttons.forEach((button) => {
+      const action = button.dataset.action;
+      const handler = handleAsync(async () => {
+        guard();
+        const kind = action === 'available' ? 'available' : action === 'generic' ? 'generic' : 'unavailable';
+        const genericOnly = action === 'generic';
+        await respondToRequest(guard, request.id, kind, genericOnly);
+      });
+      button.addEventListener('click', handler);
+    });
+
+    els.requestsList.appendChild(card);
+  });
+}
+
+async function reloadRequests(guard) {
+  guard();
+  const cityValue = (els.cityFilter?.value || '').trim();
+  let query = state.sb
+    .from('open_requests_for_pharmacies')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (cityValue) {
+    query = query.ilike('city', `%${cityValue}%`);
+  }
+  const { data, error } = await query;
+  guard();
+  if (error) {
+    setRequestsError('Αποτυχία φόρτωσης αιτημάτων');
+    throw error;
+  }
+  setRequestsError('');
+  renderRequests(data || [], guard);
+}
+
+async function insertDemoRequest(guard, userId) {
+  guard();
+  const { error } = await state.sb
+    .from('requests')
+    .insert({
+      user_id: userId,
       city: 'DEMO CITY',
       medicine_name: 'Demozin 500mg tabs',
       substance: 'demo-cillin',
@@ -452,192 +476,197 @@ async function insertDemoRequest() {
       quantity: 1,
       allow_generic: true,
       status: 'pending'
-    };
-    const { error } = await sb
-      .from('requests')
-      .insert(payload);
-    if (error) throw error;
-    toast('Προστέθηκε demo αίτημα.', 'success');
-    await reloadRequests();
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Αποτυχία δημιουργίας demo αιτήματος.', 'error');
-  }
-}
-
-async function boot(user) {
-  if (state.bootPromise) {
-    return state.bootPromise;
-  }
-  state.bootPromise = (async () => {
-    try {
-      const pharmacy = await ensurePharmacy(user);
-      state.pharmacyId = pharmacy.id;
-      state.hoursMap = normalizeHoursMap(pharmacy.hours);
-      renderHours();
-      await reloadRequests();
-    } finally {
-      state.bootPromise = null;
-    }
-  })();
-  return state.bootPromise;
-}
-
-function resetState() {
-  state.session = null;
-  state.user = null;
-  state.pharmacyId = null;
-  state.hoursMap = createEmptyHoursMap();
-  renderHours();
-  clearRequestsList();
-  setRequestsError('');
-}
-
-function bindEvents() {
-  if (els.hoursForm) {
-    els.hoursForm.addEventListener('change', handleHoursInput);
-    els.hoursForm.addEventListener('input', handleHoursInput);
-  }
-  if (els.btnHoursSave) {
-    els.btnHoursSave.addEventListener('click', (event) => {
-      event.preventDefault();
-      saveHours();
     });
+  guard();
+  if (error) {
+    throw error;
   }
-  if (els.btnHoursReload) {
-    els.btnHoursReload.addEventListener('click', (event) => {
-      event.preventDefault();
-      reloadHoursFromDB();
-    });
-  }
+  toast('Δημιουργήθηκε demo αίτημα', 'success');
+  await reloadRequests(guard);
+}
+
+function setupHoursControls(guard) {
+  if (!els.btnHoursSave || !els.btnHoursReload) return;
+  bind(els.btnHoursSave, 'click', handleAsync(() => saveHours(guard)));
+  bind(els.btnHoursReload, 'click', handleAsync(() => reloadHoursFromDB(guard)));
+}
+
+function setupRequestControls(guard, userId) {
   if (els.btnLoad) {
-    els.btnLoad.addEventListener('click', (event) => {
-      event.preventDefault();
-      reloadRequests();
-    });
+    bind(els.btnLoad, 'click', handleAsync(() => reloadRequests(guard)));
   }
   if (els.btnRefresh) {
-    els.btnRefresh.addEventListener('click', (event) => {
-      event.preventDefault();
-      reloadRequests();
-    });
+    bind(els.btnRefresh, 'click', handleAsync(() => reloadRequests(guard)));
   }
   if (els.btnDemo) {
-    els.btnDemo.addEventListener('click', (event) => {
-      event.preventDefault();
-      insertDemoRequest();
-    });
+    bind(els.btnDemo, 'click', handleAsync(() => insertDemoRequest(guard, userId)));
   }
-  if (els.btnSignout) {
-    els.btnSignout.addEventListener('click', async (event) => {
-      event.preventDefault();
-      await sb.auth.signOut();
-    });
+}
+
+async function ensurePharmacy(user, guard) {
+  const { data, error } = await state.sb
+    .from('pharmacies')
+    .select('id,hours')
+    .eq('owner_id', user.id)
+    .maybeSingle();
+  guard();
+  if (error) {
+    throw error;
   }
+  if (data) {
+    return data;
+  }
+  const insertResult = await state.sb
+    .from('pharmacies')
+    .insert({ owner_id: user.id, name: '', hours: {} })
+    .select('id,hours')
+    .single();
+  guard();
+  if (insertResult.error) {
+    throw insertResult.error;
+  }
+  return insertResult.data;
+}
+
+async function doBoot(user) {
+  const guard = guarded(user.id);
+  guard();
+
+  const pharmacyRow = await ensurePharmacy(user, guard);
+  guard();
+
+  state.pharmacyId = pharmacyRow.id;
+  state.hoursMap = normalizeHoursMap(pharmacyRow.hours);
+  renderHours(guard);
+  attachHoursInputs(guard);
+  setupHoursControls(guard);
+  setupRequestControls(guard, user.id);
+
+  await reloadRequests(guard);
+}
+
+function setupAuthHandlers() {
   if (els.btnLoginPassword) {
-    els.btnLoginPassword.addEventListener('click', async (event) => {
+    els.btnLoginPassword.addEventListener('click', handleAsync(async (event) => {
       event.preventDefault();
       const email = els.authEmail?.value?.trim();
       const password = els.authPassword?.value || '';
       if (!email || !password) {
-        toast('Συμπληρώστε email και κωδικό.', 'error');
+        toast('Συμπληρώστε email και κωδικό', 'error');
         return;
       }
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await state.sb.auth.signInWithPassword({ email, password });
       if (error) {
-        console.error(error);
-        toast(error.message || 'Αποτυχία σύνδεσης.', 'error');
+        throw error;
       }
-    });
+      toast('Επιτυχής σύνδεση', 'success');
+    }));
   }
+
   if (els.btnLoginMagic) {
-    els.btnLoginMagic.addEventListener('click', async (event) => {
+    els.btnLoginMagic.addEventListener('click', handleAsync(async (event) => {
       event.preventDefault();
       const email = els.authEmail?.value?.trim();
       if (!email) {
-        toast('Συμπληρώστε email.', 'error');
+        toast('Συμπληρώστε email', 'error');
         return;
       }
-      const { error } = await sb.auth.signInWithOtp({
+      const { error } = await state.sb.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/pharmacy.html`
         }
       });
       if (error) {
-        console.error(error);
-        toast(error.message || 'Αποτυχία αποστολής magic link.', 'error');
-      } else {
-        toast('Στάλθηκε email με σύνδεσμο.', 'success');
+        throw error;
       }
-    });
+      toast('Στάλθηκε σύνδεσμος στο email σας', 'success');
+    }));
   }
+
   if (els.btnLoginGoogle) {
-    els.btnLoginGoogle.addEventListener('click', async (event) => {
+    els.btnLoginGoogle.addEventListener('click', handleAsync(async (event) => {
       event.preventDefault();
-      const { error } = await sb.auth.signInWithOAuth({
+      const { error } = await state.sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/pharmacy.html`
         }
       });
       if (error) {
-        console.error(error);
-        toast(error.message || 'Αποτυχία σύνδεσης με Google.', 'error');
+        throw error;
       }
-    });
+    }));
+  }
+
+  if (els.btnSignout) {
+    els.btnSignout.addEventListener('click', handleAsync(async (event) => {
+      event.preventDefault();
+      const { error } = await state.sb.auth.signOut();
+      if (error) {
+        throw error;
+      }
+    }));
   }
 }
 
-async function exchangeCodeIfPresent() {
-  const url = new URL(window.location.href);
-  const code = url.searchParams.get('code');
-  if (!code) return;
+async function bootstrap() {
+  setupAuthHandlers();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('code')) {
+    try {
+      await state.sb.auth.exchangeCodeForSession({ code: params.get('code') });
+      window.history.replaceState(null, '', window.location.pathname);
+    } catch (error) {
+      console.error('Code exchange failed', error);
+      toast('Αποτυχία σύνδεσης', 'error');
+    }
+  }
+
   try {
-    await sb.auth.exchangeCodeForSession({ code });
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Αποτυχία ολοκλήρωσης σύνδεσης.', 'error');
-  } finally {
-    url.searchParams.delete('code');
-    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
-  }
-}
-
-async function initAuth() {
-  await exchangeCodeIfPresent();
-  const { data } = await sb.auth.getSession();
-  const session = data?.session || null;
-  state.session = session;
-  state.user = session?.user || null;
-  if (state.user) {
-    showPortal(state.user);
-    await boot(state.user);
-  } else {
-    showAuth();
-  }
-  sb.auth.onAuthStateChange(async (event, sessionInfo) => {
-    if (event === 'SIGNED_IN') {
-      state.session = sessionInfo;
-      state.user = sessionInfo?.user || null;
-      if (state.user) {
-        showPortal(state.user);
-        await boot(state.user);
-      }
-    } else if (event === 'SIGNED_OUT') {
-      resetState();
+    const { data, error } = await state.sb.auth.getSession();
+    if (error) {
+      throw error;
+    }
+    const session = data?.session;
+    if (session?.user) {
+      showPortal(session.user);
+      await getBootPromise(session.user);
+    } else {
       showAuth();
+    }
+  } catch (error) {
+    console.error('Session fetch failed', error);
+    showAuth();
+    toast('Δεν ήταν δυνατή η φόρτωση συνεδρίας', 'error');
+  }
+
+  state.sb.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user) {
+      if (state.activeUserId && state.activeUserId !== session.user.id) {
+        resetState();
+      }
+      showPortal(session.user);
+      getBootPromise(session.user);
+      return;
+    }
+    if (event === 'SIGNED_OUT') {
+      showAuth();
+      resetState();
+      return;
+    }
+    if (!session?.user) {
+      showAuth();
+      resetState();
     }
   });
 }
 
-function main() {
-  bindEvents();
-  renderHours();
-  initAuth().catch((error) => {
-    console.error(error);
-    toast(error.message || 'Σφάλμα αρχικοποίησης.', 'error');
-  });
-}
-
-main();
+bootstrap().catch((error) => {
+  if (error && error.message === 'Session changed') {
+    return;
+  }
+  console.error('Bootstrap failure', error);
+  toast('Παρουσιάστηκε σφάλμα εκκίνησης', 'error');
+});
