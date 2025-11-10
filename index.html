@@ -847,7 +847,7 @@
             <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
             <p id="auth-pharm-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
           </div>
-          <div data-auth-session class="hidden">
+          <div data-auth-session class="hidden space-y-4">
             <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
               <div class="flex items-center gap-3">
                 <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
@@ -856,6 +856,12 @@
                   <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
                 </div>
               </div>
+            </div>
+            <div data-pharmacy-pro-warning class="hidden rounded-2xl border border-amber-300/70 bg-amber-50/90 dark:border-amber-400/60 dark:bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+              Η συνδρομή MediRadar Pro δεν είναι ενεργή. Μπορείς να ανοίξεις το Dashboard, αλλά θα χρειαστεί ενεργοποίηση από την ομάδα MediRadar για πλήρη πρόσβαση.
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <button type="button" data-auth-open-dashboard class="flex-1 min-w-[12rem] rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Άνοιγμα Dashboard</button>
               <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
             </div>
           </div>
@@ -1718,7 +1724,7 @@ By submitting a request:
         channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
           await cleanupAuthRealtimeChannel();
           try {
-            window.location.href = '/dashboard.html';
+            window.location.href = DASHBOARD_URL;
           } catch (err) {
             console.warn('[auth] Failed to redirect after auth success', err);
           }
@@ -1815,8 +1821,9 @@ By submitting a request:
     let activeAuthModal = null;
     let authSession = null;
     let proAccessRequested = false;
-    const DASHBOARD_URL = '/dashboard.html';
-    const dashboardRedirectUrl = new URL(DASHBOARD_URL, window.location.origin).href;
+    let pharmacyProCache = { userId: null, isProActive: null };
+    const DASHBOARD_URL = '/pharmacy.html';
+    const dashboardRedirectUrl = window.location.origin + DASHBOARD_URL;
     const pharmacyAccessDeniedMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Επικοινώνησε με την ομάδα MediRadar για να λάβεις πρόσβαση.';
 
     function addRoleCandidate(target, value){
@@ -1891,6 +1898,51 @@ By submitting a request:
       if(globalStatus){
         globalStatus.textContent = pharmacyAccessDeniedMessage;
         globalStatus.classList.remove('hidden');
+      }
+    }
+
+    function updatePharmacyProBanner(isActive){
+      authRoots.forEach(root => {
+        if(root.dataset.authRole !== 'pharmacies') return;
+        const banner = root.querySelector('[data-pharmacy-pro-warning]');
+        if(!banner) return;
+        if(isActive === false){
+          banner.classList.remove('hidden');
+        } else {
+          banner.classList.add('hidden');
+        }
+      });
+    }
+
+    function resetPharmacyProCache(){
+      pharmacyProCache = { userId: null, isProActive: null };
+      updatePharmacyProBanner(null);
+    }
+
+    async function refreshPharmacyProStatus(user){
+      if(!user || !supabase){
+        resetPharmacyProCache();
+        return;
+      }
+      if(pharmacyProCache.userId === user.id){
+        updatePharmacyProBanner(pharmacyProCache.isProActive);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('pharmacies')
+          .select('is_pro_active')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+        if(error && error.code !== 'PGRST116'){
+          throw error;
+        }
+        const isProActive = data?.is_pro_active === true;
+        pharmacyProCache = { userId: user.id, isProActive };
+        updatePharmacyProBanner(isProActive);
+      } catch (err) {
+        console.warn('Αποτυχία ανάκτησης MediRadar Pro status', err);
+        resetPharmacyProCache();
       }
     }
 
@@ -2078,6 +2130,8 @@ By submitting a request:
         const statusEl = root.querySelector('[data-auth-status]');
         const userEmailEl = root.querySelector('[data-auth-user-email]');
         const avatarEl = root.querySelector('[data-auth-avatar]');
+        const openDashboardBtn = root.querySelector('[data-auth-open-dashboard]');
+        const proWarning = root.querySelector('[data-pharmacy-pro-warning]');
         if(loggedIn){
           formsWrapper?.classList.add('hidden');
           successView?.classList.add('hidden');
@@ -2089,10 +2143,24 @@ By submitting a request:
               avatarEl.textContent = initial ? initial.charAt(0).toUpperCase() : 'Μ';
             }
           }
+          if(openDashboardBtn){
+            openDashboardBtn.disabled = false;
+            openDashboardBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+          }
+          if(proWarning && root.dataset.authRole !== 'pharmacies'){
+            proWarning.classList.add('hidden');
+          }
           setStatusMessage(statusEl, '', 'info');
         } else {
           formsWrapper?.classList.remove('hidden');
           sessionWrapper?.classList.add('hidden');
+          if(openDashboardBtn){
+            openDashboardBtn.disabled = true;
+            openDashboardBtn.classList.add('opacity-60', 'cursor-not-allowed');
+          }
+          if(proWarning){
+            proWarning.classList.add('hidden');
+          }
           setStatusMessage(statusEl, '', 'info');
         }
       });
@@ -2105,26 +2173,27 @@ By submitting a request:
       toggleSessionViews(user);
       if(user){
         broadcastAuthSuccess(user).catch(err => console.warn('[auth] Failed to signal auth success', err));
+        refreshPharmacyProStatus(user).catch(err => console.warn('Αποτυχία ενημέρωσης MediRadar Pro banner', err));
+      } else {
+        resetPharmacyProCache();
       }
 
       const hasAccess = userHasPharmacyAccess(authSession);
-      if(proAccessRequested && hasAccess){
-        proAccessRequested = false;
-        window.location.href = DASHBOARD_URL;
-        return;
-      }
-
-      if(user && hasAccess){
-        window.location.href = DASHBOARD_URL;
-        return;
-      }
-
       if(user && activeAuthModal){
         if(proAccessRequested && !hasAccess){
           showPharmacyAccessDenied(activeAuthModal || authModals.pharmacies);
           proAccessRequested = false;
-          return;
         }
+        if(hasAccess){
+          const openBtn = activeAuthModal.querySelector('[data-auth-open-dashboard]');
+          openBtn?.focus();
+          proAccessRequested = false;
+        }
+      } else if(proAccessRequested && user && hasAccess){
+        proAccessRequested = false;
+      }
+
+      if(user && activeAuthModal && activeAuthModal.dataset.authModal !== 'pharmacies'){
         setTimeout(()=> closeAuthModal(), 2000);
       }
     }
@@ -2159,8 +2228,16 @@ By submitting a request:
       const formsWrapper = root.querySelector('[data-auth-forms]');
       const successView = root.querySelector('[data-auth-success]');
       const logoutBtn = root.querySelector('[data-auth-logout]');
+      const openDashboardBtn = root.querySelector('[data-auth-open-dashboard]');
 
       logoutBtn?.addEventListener('click', signOutSafely);
+      if(openDashboardBtn){
+        openDashboardBtn.addEventListener('click', () => {
+          window.location.href = DASHBOARD_URL;
+        });
+        openDashboardBtn.disabled = true;
+        openDashboardBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      }
 
       if(!supabase && statusEl){
         setStatusMessage(statusEl, missingSupabaseMessage, 'error');

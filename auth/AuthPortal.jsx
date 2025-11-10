@@ -143,9 +143,12 @@ export default function AuthPortal() {
 
       updateForm(tabId, { loading: 'email' });
       try {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://mediradar.gr';
+        const redirectTo =
+          tabId === TABS.pharmacies.id ? `${origin}/pharmacy.html` : `${origin}/`;
         const { error } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: 'https://mediradar.gr/' }
+          options: { emailRedirectTo: redirectTo }
         });
 
         if (error) throw error;
@@ -169,9 +172,12 @@ export default function AuthPortal() {
 
       updateForm(tabId, { loading: 'google' });
       try {
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://mediradar.gr';
+        const redirectTo =
+          tabId === TABS.pharmacies.id ? `${origin}/pharmacy.html` : `${origin}/`;
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: 'https://mediradar.gr/' }
+          options: { redirectTo }
         });
 
         if (error) throw error;
