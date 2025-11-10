@@ -5,92 +5,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pharmacy Portal</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 24px; background: #f5f7fa; color: #14213d; }
-    h1 { margin: 0; font-size: 1.4rem; }
-    h2 { margin-top: 0; }
-    button { cursor: pointer; border: none; border-radius: 6px; padding: 6px 12px; background: #1d4ed8; color: #fff; }
-    input, button { font-size: 1rem; }
-    input[type="email"], input[type="password"], input[type="text"] { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5f5; box-sizing: border-box; }
-    .hidden { display: none; }
-    .banner { background: #e6f0ff; border: 1px solid #b3ccff; color: #193366; padding: 10px 12px; border-radius: 8px; margin: 12px 0; }
-    .card { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin: 12px 0; background: #fff; }
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .hours .row label { width: 110px; display: inline-block; }
-    .hours input[type="time"] { width: 110px; }
-    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
-    #requests-error { color: #c0392b; }
-    #requests-list { display: grid; gap: 8px; }
-    .hours .row { margin-bottom: 6px; }
-    #auth-card { max-width: 420px; margin: 48px auto; padding: 16px; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.08); display: grid; gap: 12px; }
-    #auth-card .row { flex-direction: column; align-items: stretch; }
-    #auth-card button { width: 100%; }
-    #toast { position: fixed; right: 24px; bottom: 24px; background: #1f2937; color: #fff; padding: 10px 14px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-    @media (min-width: 1024px) { .grid { grid-template-columns: 3fr 2fr; } }
+    body{font-family:"Segoe UI",sans-serif;margin:0;background:#f5f7fa;color:#14213d}
+    .hidden{display:none}
+    .banner{background:#e6f0ff;border:1px solid #b3ccff;color:#193366;padding:10px 12px;border-radius:8px;margin:12px 0}
+    .wrap{max-width:1100px;margin:0 auto;padding:12px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+    .card{border:1px solid #eee;border-radius:12px;padding:12px;margin:12px 0;background:#fff}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:1024px){.grid{grid-template-columns:3fr 2fr}}
+    .row{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
+    .day-label{width:140px;font-weight:600}
+    .date-tag{font-weight:400;color:#555}
+    .time{width:110px}
+    .hint{color:#777}
+    button{cursor:pointer}
   </style>
 </head>
 <body>
-  <div id="portal" class="grid hidden">
-    <header>
-      <h1>Pharmacy Portal</h1>
-      <div class="row">
-        <span id="user-email"></span>
-        <button id="btn-signout">Αποσύνδεση</button>
-      </div>
-    </header>
-
-    <div style="grid-column: 1 / -1;">
-      <div id="pro-banner" class="banner hidden"></div>
-    </div>
-
-    <div class="card" style="grid-column: 1 / 2;">
-      <h2>Ενότητα Α: Αιτήματα Πελατών</h2>
-      <div class="row" style="margin-bottom: 8px;">
-        <button id="btn-refresh">Ανανέωση</button>
-        <button id="btn-demo">Demo</button>
-        <input id="city-filter" type="text" placeholder="Πόλη" />
-        <button id="btn-load">Φόρτωση</button>
-      </div>
-      <div id="requests-error" class="hidden"></div>
-      <div id="requests-list"></div>
-    </div>
-
-    <div class="card hours" style="grid-column: 2 / 3;">
-      <h2>Ενότητα Β: Ωράριο (εβδομαδιαίο)</h2>
-      <form id="hours-form">
-        <div id="day-mon" class="row"><label>Δευτέρα</label><input type="checkbox" data-day="mon" data-field="openFlag" /><input type="time" data-day="mon" data-field="open" /><input type="time" data-day="mon" data-field="close" /></div>
-        <div id="day-tue" class="row"><label>Τρίτη</label><input type="checkbox" data-day="tue" data-field="openFlag" /><input type="time" data-day="tue" data-field="open" /><input type="time" data-day="tue" data-field="close" /></div>
-        <div id="day-wed" class="row"><label>Τετάρτη</label><input type="checkbox" data-day="wed" data-field="openFlag" /><input type="time" data-day="wed" data-field="open" /><input type="time" data-day="wed" data-field="close" /></div>
-        <div id="day-thu" class="row"><label>Πέμπτη</label><input type="checkbox" data-day="thu" data-field="openFlag" /><input type="time" data-day="thu" data-field="open" /><input type="time" data-day="thu" data-field="close" /></div>
-        <div id="day-fri" class="row"><label>Παρασκευή</label><input type="checkbox" data-day="fri" data-field="openFlag" /><input type="time" data-day="fri" data-field="open" /><input type="time" data-day="fri" data-field="close" /></div>
-        <div id="day-sat" class="row"><label>Σάββατο</label><input type="checkbox" data-day="sat" data-field="openFlag" /><input type="time" data-day="sat" data-field="open" /><input type="time" data-day="sat" data-field="close" /></div>
-        <div id="day-sun" class="row"><label>Κυριακή</label><input type="checkbox" data-day="sun" data-field="openFlag" /><input type="time" data-day="sun" data-field="open" /><input type="time" data-day="sun" data-field="close" /></div>
-        <div class="row" style="justify-content: flex-end;">
-          <button type="button" id="btn-hours-save">Αποθήκευση</button>
-          <button type="button" id="btn-hours-reload">Επαναφόρτωση</button>
+  <div class="wrap">
+    <div id="portal" class="hidden">
+      <div class="topbar">
+        <h1>Pharmacy Portal</h1>
+        <div class="row">
+          <span id="user-email"></span>
+          <button id="btn-signout">Αποσύνδεση</button>
         </div>
-      </form>
+      </div>
+      <div id="pro-banner" class="banner hidden"></div>
+      <div class="grid">
+        <div class="card">
+          <h2>Ενότητα Α: Αιτήματα Πελατών</h2>
+          <div class="row">
+            <button id="btn-refresh">Ανανέωση</button>
+            <button id="btn-demo">Demo</button>
+            <input id="city-filter" type="text" placeholder="Πόλη" />
+            <button id="btn-load">Φόρτωση</button>
+          </div>
+          <div id="requests-error" class="hidden"></div>
+          <div id="requests-list"></div>
+        </div>
+        <div class="card">
+          <h2>Ωράριο</h2>
+          <div class="row" style="justify-content:space-between">
+            <button id="week-prev">« Προηγ. εβδομάδα</button>
+            <span id="week-label"></span>
+            <button id="week-next">Επόμ. εβδομάδα »</button>
+          </div>
+          <p class="hint">Οι ημερομηνίες εμφανίζονται για αναφορά — το ωράριο είναι εβδομαδιαίο πρότυπο.</p>
+          <form id="hours-form">
+            <div id="day-mon" class="row">
+              <label class="day-label">Δευτέρα <span class="date-tag" data-day="mon"></span></label>
+              <input class="time" data-day="mon" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="mon" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="mon" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-tue" class="row">
+              <label class="day-label">Τρίτη <span class="date-tag" data-day="tue"></span></label>
+              <input class="time" data-day="tue" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="tue" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="tue" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-wed" class="row">
+              <label class="day-label">Τετάρτη <span class="date-tag" data-day="wed"></span></label>
+              <input class="time" data-day="wed" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="wed" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="wed" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-thu" class="row">
+              <label class="day-label">Πέμπτη <span class="date-tag" data-day="thu"></span></label>
+              <input class="time" data-day="thu" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="thu" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="thu" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-fri" class="row">
+              <label class="day-label">Παρασκευή <span class="date-tag" data-day="fri"></span></label>
+              <input class="time" data-day="fri" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="fri" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="fri" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-sat" class="row">
+              <label class="day-label">Σάββατο <span class="date-tag" data-day="sat"></span></label>
+              <input class="time" data-day="sat" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="sat" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="sat" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div id="day-sun" class="row">
+              <label class="day-label">Κυριακή <span class="date-tag" data-day="sun"></span></label>
+              <input class="time" data-day="sun" data-field="openFlag" type="checkbox" aria-label="Ανοιχτό" />
+              <input class="time" data-day="sun" data-field="open" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <span>–</span>
+              <input class="time" data-day="sun" data-field="close" type="text" inputmode="numeric" placeholder="HH:MM" />
+              <small class="hint">δέχεται 24ωρη μορφή (π.χ. 08:00, 16:00, 24:00)</small>
+            </div>
+            <div class="row" style="justify-content:flex-end">
+              <button type="button" id="btn-hours-save">Αποθήκευση</button>
+              <button type="button" id="btn-hours-reload">Επαναφόρτωση</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div id="auth-card" class="card">
+      <div class="row">
+        <label for="auth-email">Email</label>
+        <input id="auth-email" type="email" placeholder="name@example.com" />
+      </div>
+      <div class="row">
+        <label for="auth-password">Κωδικός</label>
+        <input id="auth-password" type="password" placeholder="••••••••" />
+      </div>
+      <div class="row">
+        <button id="btn-login-password">Σύνδεση με κωδικό</button>
+        <button id="btn-login-magic">Magic Link</button>
+        <button id="btn-login-google">Google</button>
+      </div>
     </div>
   </div>
-
-  <div id="auth-card">
-    <div class="row">
-      <label for="auth-email">Email</label>
-      <input id="auth-email" type="email" placeholder="name@example.com" />
-    </div>
-    <div class="row">
-      <label for="auth-password">Κωδικός</label>
-      <input id="auth-password" type="password" placeholder="••••••••" />
-    </div>
-    <button id="btn-login-password">Σύνδεση με κωδικό</button>
-    <button id="btn-login-magic">Magic Link</button>
-    <button id="btn-login-google">Google</button>
-  </div>
-
-  <div id="toast" class="hidden"></div>
-
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="/env.js"></script>
-  <script type="module" src="/js/pharmacyApp.js?v=pro-bypass-1"></script>
+  <script type="module" src="/js/pharmacyApp.js?v=hours-24h-weekdates-1"></script>
 </body>
 </html>
