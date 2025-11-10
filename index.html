@@ -1822,7 +1822,7 @@ By submitting a request:
     let proAccessRequested = false;
     const PHARMACY_URL = '/pharmacy.html';
     const pharmacyRedirectUrl = window.location.origin + '/pharmacy.html';
-    const pharmacyAccessInfoMessage = 'Ο λογαριασμός φαρμακείου δεν έχει ενεργοποιηθεί ακόμα. Μπορείς να συνεχίσεις στο δοκιμαστικό περιβάλλον.';
+    const pharmacyAccessInfoMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Μπορείς να περιηγηθείς στο demo περιβάλλον.';
     const pharmacyAccessActiveMessage = 'Ο λογαριασμός φαρμακείου είναι ενεργός.';
     const pharmacyProfilePromises = new Map();
     let pharmacyProfileUserId = null;
@@ -1886,7 +1886,7 @@ By submitting a request:
     }
 
     function tryOpenPharmacyPortal(){
-      if(userHasPharmacyAccess(authSession)){
+      if(authSession?.user){
         window.location.href = PHARMACY_URL;
         return true;
       }
@@ -2167,7 +2167,7 @@ By submitting a request:
       }
 
       const hasAccess = userHasPharmacyAccess(authSession);
-      if(proAccessRequested && hasAccess){
+      if(proAccessRequested && user){
         proAccessRequested = false;
         window.location.href = PHARMACY_URL;
         return;
@@ -2179,9 +2179,7 @@ By submitting a request:
       }
 
       if(user && activeAuthModal){
-        if(proAccessRequested && !hasAccess){
-          proAccessRequested = false;
-        }
+        proAccessRequested = false;
         const isPharmacyModal = activeAuthModal?.dataset?.authModal === 'pharmacies';
         if(!isPharmacyModal){
           setTimeout(()=> closeAuthModal(), 2000);
