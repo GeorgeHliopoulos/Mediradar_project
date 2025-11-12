@@ -2,7 +2,10 @@
 <html lang="el" class="h-full">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10b981" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>MediRadar • Pharmacy</title>
   <meta name="application-name" content="MediRadar" />
   <meta name="apple-mobile-web-app-title" content="MediRadar" />
@@ -11,11 +14,9 @@
   <meta property="og:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
   <meta property="twitter:description" content="Σύνδεση μέσω Google για την πλατφόρμα MediRadar" />
   <link rel="icon" href="/icons/icon-192.png" />
-
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#29a3a3" />
+  <link rel="stylesheet" href="/styles.css" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -168,20 +169,24 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 0.9rem;
-      border-radius: 0.9rem;
+      min-height: var(--tap, 44px);
+      padding: 10px 14px;
+      border-radius: 12px;
       border: 1px solid rgba(51, 65, 85, 0.25);
       font-weight: 600;
+      gap: 0.5rem;
       background: rgba(255, 255, 255, 0.32);
       backdrop-filter: blur(10px);
-      transition: all .2s ease;
+      transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
     }
-    .btn:hover { background: rgba(255, 255, 255, 0.45); }
+    .btn:hover { background: rgba(255, 255, 255, 0.55); }
+    .btn:focus-visible { outline: 2px solid rgba(16, 185, 129, 0.6); outline-offset: 2px; }
     .dark .btn {
       background: rgba(15, 23, 42, 0.45);
       border-color: rgba(148, 163, 184, 0.4);
       color: #e2e8f0;
     }
+    .dark .btn:hover { background: rgba(30, 41, 59, 0.6); }
     /* Ειδικό spinner για την ένδειξη φόρτωσης στα κουμπιά σύνδεσης */
     .btn-loading-indicator {
       width: 1rem;
@@ -282,17 +287,7 @@
   </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
-  <div class="global-emoji-layer" aria-hidden="true">
-    <span>💊</span>
-    <span>💉</span>
-    <span>🩺</span>
-    <span>🩹</span>
-    <span>🧴</span>
-    <span>💚</span>
-    <span>⚕️</span>
-    <span>💠</span>
-  </div>
-
+  <div class="app vh-fallback vh-screen stack" data-app-root>
   <section id="pharmacy-access-gate" class="px-4 py-6 max-w-3xl mx-auto">
     <div class="glass-surface bg-white/85 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 px-6 py-6 rounded-2xl shadow-soft flex flex-col gap-4">
       <div class="space-y-2">
@@ -321,34 +316,43 @@
       </div>
     </div>
 
-    <section class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-5 shadow-soft">
-        <div class="flex items-center justify-between gap-2">
+    <section class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-5 shadow-soft flex flex-col gap-5">
+      <div class="space-y-1">
+        <h3 class="text-lg font-semibold">Διαχείριση MediRadar Pro</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Εναλλαγή μεταξύ αιτημάτων πελατών και ωραρίου φαρμακείου.</p>
+      </div>
+      <div role="tablist" aria-label="Περιεχόμενο φαρμακείου" class="w-full">
+        <div class="row">
+          <button type="button" role="tab" id="tab-requests" class="btn btn-primary flex-1" data-tab-target="requests" aria-controls="requests-panel" aria-selected="true">Εισερχόμενα αιτήματα</button>
+          <button type="button" role="tab" id="tab-hours" class="btn flex-1" data-tab-target="hours" aria-controls="hours-panel" aria-selected="false">Ωράριο φαρμακείου</button>
+        </div>
+      </div>
+      <section id="requests-panel" role="tabpanel" aria-labelledby="tab-requests" data-tab-panel="requests" class="stack">
+        <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 class="text-lg font-semibold">Αιτήματα Πελατών</h3>
+            <h4 class="text-base font-semibold">Αιτήματα Πελατών</h4>
             <p class="text-xs text-slate-500 dark:text-slate-400">Εμφανίζονται μόνο αιτήματα με κατάσταση pending ή has_responses.</p>
           </div>
-          <button id="dashboard-reload" class="btn hover:bg-slate-100 dark:hover:bg-slate-800">↻</button>
+          <button id="dashboard-reload" class="btn hover:bg-slate-100 dark:hover:bg-slate-800" type="button">↻</button>
         </div>
-        <div class="mt-4 space-y-4" id="dashboard-requests"></div>
-        <div id="dashboard-empty" class="hidden mt-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 px-4 py-6 text-sm text-center text-slate-500 dark:text-slate-400">Δεν υπάρχουν αιτήματα που να χρειάζονται απάντηση.</div>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-5 shadow-soft">
-        <div class="flex items-center justify-between gap-2">
+        <div class="space-y-4" id="dashboard-requests"></div>
+        <div id="dashboard-empty" class="hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 px-4 py-6 text-sm text-center text-slate-500 dark:text-slate-400">Δεν υπάρχουν αιτήματα που να χρειάζονται απάντηση.</div>
+      </section>
+      <section id="hours-panel" role="tabpanel" aria-labelledby="tab-hours" data-tab-panel="hours" class="stack" hidden>
+        <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 class="text-lg font-semibold">Ώρες λειτουργίας</h3>
+            <h4 class="text-base font-semibold">Ώρες λειτουργίας</h4>
             <p class="text-xs text-slate-500 dark:text-slate-400">Πρόσθεσε ζώνες ώρας για κάθε ημέρα και αποθήκευσε.</p>
           </div>
-          <button id="opening-hours-add-week" class="btn hover:bg-slate-100 dark:hover:bg-slate-800 text-xs">+ Όλες 09:00-17:00</button>
+          <button id="opening-hours-add-week" class="btn hover:bg-slate-100 dark:hover:bg-slate-800 text-xs" type="button">+ Όλες 09:00-17:00</button>
         </div>
-        <div id="opening-hours-status" class="mt-3 text-xs text-slate-500 dark:text-slate-400"></div>
-        <div id="opening-hours-days" class="mt-4 space-y-3"></div>
-        <div class="mt-5 flex flex-wrap items-center gap-2">
-          <button id="save-opening-hours" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700">Αποθήκευση ωραρίου</button>
-          <button id="reset-opening-hours" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">Επαναφορά</button>
+        <div id="opening-hours-status" class="text-xs text-slate-500 dark:text-slate-400"></div>
+        <div id="opening-hours-days" class="space-y-3"></div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="save-opening-hours" class="btn btn-primary" type="button">Αποθήκευση ωραρίου</button>
+          <button id="reset-opening-hours" class="btn" type="button">Επαναφορά</button>
         </div>
-      </div>
+      </section>
     </section>
   </main>
   <!-- Στοίβα toast ειδοποιήσεων για την εμπειρία σύνδεσης -->
@@ -446,6 +450,7 @@
       <div id="req-list" class="mt-3 grid gap-3"></div>
       <div id="empty-state" class="hidden p-3 rounded-xl border text-sm">Δεν υπάρχουν εκκρεμή αιτήματα αυτή τη στιγμή.</div>
     </section>
+  </div>
   </div>
 
   <!-- USER AUTH MODAL -->
@@ -625,6 +630,15 @@
       saveSchedule
     } from "./pharmacy/schedule.js";
 
+    (function setVh() {
+      const set = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+      set();
+      window.addEventListener('resize', set);
+      window.addEventListener('orientationchange', set);
+    })();
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
     /* ---------- setup ---------- */
     const env = window.ENV || {};
     const SUPABASE_URL = env.SUPABASE_URL || window.SUPABASE_URL || '';
@@ -730,6 +744,33 @@
     const openingHoursSaveBtn = qs('#save-opening-hours');
     const openingHoursResetBtn = qs('#reset-opening-hours');
     const openingHoursFillWeekBtn = qs('#opening-hours-add-week');
+    const dashboardTabButtons = qsa('#pharmacy-dashboard [data-tab-target]');
+    const dashboardTabPanels = qsa('#pharmacy-dashboard [data-tab-panel]');
+
+    function activateDashboardTab(target = 'requests'){
+      dashboardTabButtons.forEach(button => {
+        const isActive = button.dataset.tabTarget === target;
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        button.classList.toggle('btn-primary', isActive);
+      });
+      dashboardTabPanels.forEach(panel => {
+        const isActive = panel.dataset.tabPanel === target;
+        panel.hidden = !isActive;
+      });
+    }
+
+    if(dashboardTabButtons.length){
+      const defaultTab = dashboardTabButtons.find(btn => btn.getAttribute('aria-selected') === 'true')?.dataset.tabTarget || 'requests';
+      activateDashboardTab(defaultTab);
+      dashboardTabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const target = button.dataset.tabTarget;
+          if(target){
+            activateDashboardTab(target);
+          }
+        });
+      });
+    }
 
     const accessGate = qs('#pharmacy-access-gate');
     const accessLoginBtn = qs('#pharmacy-access-login');
@@ -2377,6 +2418,7 @@
 
     /* ---------- init ---------- */
     await loadPharmacies();
+    });
   </script>
   <script type="module" src="/auth/magic-link-widget.js"></script>
 </body>
