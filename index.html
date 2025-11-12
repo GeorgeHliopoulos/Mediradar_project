@@ -2,17 +2,20 @@
 <html lang="el" class="h-full">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10b981" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>MediRadar</title>
   <meta name="application-name" content="MediRadar" />
   <meta name="apple-mobile-web-app-title" content="MediRadar" />
   <meta name="description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
   <meta property="og:site_name" content="MediRadar" />
   <meta property="og:description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
-  <meta name="theme-color" content="#29a3a3" />
   <link rel="icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles.css">
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,11 +31,6 @@
       }
     }
   </script>
-
-  <!-- Supabase CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="/env.js"></script>
-  <script src="/js/afterLoginRedirect.js?v=1"></script>
 
   <style>
     body { position: relative; overflow-x: hidden; }
@@ -188,7 +186,7 @@
     .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
     .ac-item { cursor:pointer }
     #pending-overlay { transition: opacity .25s ease; }
-    #push-toast { transition: transform .25s ease, opacity .25s ease; }
+    #push-toast { transition: transform .25s ease, opacity .25s ease; bottom: calc(16px + env(safe-area-inset-bottom)); }
     #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
     /* Spinner και toast για ορατή ανάδραση στη ροή σύνδεσης */
     .btn-loading-indicator {
@@ -245,17 +243,7 @@
   </style>
 </head>
 <body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
-  <div class="global-emoji-layer" aria-hidden="true">
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f48a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f489/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa7a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa79/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9f4/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f49a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2695_fe0f/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a0/emoji.svg" alt="" loading="lazy" /></span>
-  </div>
-
+  <div class="app vh-fallback vh-screen stack" data-app-root>
   <!-- Στοίβα toast για μηνύματα σύνδεσης -->
   <div id="toast-stack" aria-live="assertive" aria-atomic="true"></div>
 
@@ -961,8 +949,20 @@
     </div>
   </div>
 
+  <script src="/env.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/js/afterLoginRedirect.js?v=1"></script>
+
   <!-- App JS -->
   <script>
+  (function setVh(){
+    const set = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    set();
+    window.addEventListener('resize', set);
+    window.addEventListener('orientationchange', set);
+  })();
+
+  document.addEventListener('DOMContentLoaded', async () => {
   // ==========================
   //  GLOBAL STATE
   // ==========================
@@ -2953,6 +2953,8 @@ By submitting a request:
     stopBtn.addEventListener('click', stop);
   }
 
+
+  });
 
   </script>
 
