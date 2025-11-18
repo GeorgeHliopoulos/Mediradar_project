@@ -279,6 +279,92 @@
     @keyframes authErrorShake { 0%, 100% { transform:translateX(0); box-shadow:0 30px 60px rgba(15,23,42,.18); border-color:rgba(255,255,255,.4); } 20% { transform:translateX(-8px); box-shadow:0 0 0 10px rgba(248,113,113,.15), 0 30px 60px rgba(15,23,42,.2); border-color:rgba(248,113,113,.45); } 40% { transform:translateX(8px); } 60% { transform:translateX(-5px); } 80% { transform:translateX(5px); } }
     .auth-success-active { animation: authSuccessSequence 2s ease forwards; }
     @keyframes authSuccessSequence { 0% { opacity:0; transform:translateY(12px) scale(.95); } 20% { opacity:1; transform:translateY(0) scale(1); } 70% { opacity:1; transform:translateY(0) scale(1.02); } 100% { opacity:0; transform:translateY(-6px) scale(1.02); } }
+    .request-card {
+      border-radius: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dark .request-card {
+      border-color: rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.65);
+    }
+    .request-card.responded-card {
+      border-color: rgba(16, 185, 129, 0.65);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .dark .request-card.responded-card {
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .request-card .respond-btn {
+      flex: 1 1 auto;
+      padding: 0.65rem 0.9rem;
+      border-radius: 0.85rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.25rem;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .request-card .respond-btn:hover { transform: translateY(-1px); }
+    .respond-btn[data-availability="available"] { background: #059669; color: white; border-color: #047857; }
+    .respond-btn[data-availability="generic"] { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+    .dark .respond-btn[data-availability="generic"] { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); }
+    .respond-btn[data-availability="unavailable"] { background: transparent; color: #b91c1c; border-color: rgba(185, 28, 28, 0.4); }
+    .dark .respond-btn[data-availability="unavailable"] { color: #fecaca; border-color: rgba(248, 113, 113, 0.5); }
+    .request-media-thumb {
+      display: inline-flex;
+      border-radius: 0.85rem;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      background: rgba(255, 255, 255, 0.6);
+      max-width: 160px;
+    }
+    .request-media-thumb img {
+      display: block;
+      max-height: 100px;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+    }
+    .dark .request-media-thumb {
+      border-color: rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .barcode-line {
+      font-size: 0.8rem;
+      color: #475569;
+      background: rgba(15, 23, 42, 0.04);
+      padding: 0.35rem 0.6rem;
+      border-radius: 0.6rem;
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+      margin-top: 0.35rem;
+    }
+    .dark .barcode-line {
+      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.1);
+    }
+    .answered-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #047857;
+    }
+    .dark .answered-badge {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
   </style>
 </head>
 <body class="min-h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 font-sans">
@@ -661,6 +747,7 @@
       city: 'Αθήνα',
       address: 'Εικονική διεύθυνση',
       phone: '2100000000',
+      area: 'Κέντρο Αθήνας',
       isDemo: true
     };
 
@@ -955,7 +1042,8 @@
             name: DEMO_PHARMACY.name,
             city: DEMO_PHARMACY.city,
             address: DEMO_PHARMACY.address,
-            phone: DEMO_PHARMACY.phone
+            phone: DEMO_PHARMACY.phone,
+            area: DEMO_PHARMACY.area
           }, { onConflict: 'id' });
         if(upsertError){
           throw upsertError;
@@ -1914,23 +2002,51 @@
     const reqList = qs('#req-list');
     const emptyState = qs('#empty-state');
     const reloadReq = qs('#reload-requests');
+    let requestPollHandle = null;
+    const answeredRequestsByMe = new Set();
+    const DEFAULT_DISTANCE_LABEL = 'Κοντά σου';
+
+    function escapeHtml(value = ''){
+      return value
+        .toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function stopRequestPolling(){
+      if(requestPollHandle){
+        clearInterval(requestPollHandle);
+        requestPollHandle = null;
+      }
+    }
+
+    function startRequestPolling(){
+      stopRequestPolling();
+      if(!supabase || !store.pharmacy?.city) return;
+      requestPollHandle = setInterval(()=>{
+        loadRequests();
+      }, 10000);
+    }
 
     /* ---------- pharmacy CRUD ---------- */
     async function loadPharmacies(){
       if(!selPh){ return; }
       if(!supabase){
         const fallback = [DEMO_PHARMACY];
-        selPh.innerHTML = `<option value="">— Επιλογή —</option>` + fallback.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name} — ${p.city||'—'}</option>`).join('');
+        selPh.innerHTML = `<option value="">— Επιλογή —</option>` + fallback.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}" data-area="${p.area||''}">${p.name} — ${p.city||'—'}</option>`).join('');
         return;
       }
-      const { data, error } = await supabase.from('pharmacies').select('id,name,city,address,phone').order('name');
+      const { data, error } = await supabase.from('pharmacies').select('id,name,city,address,phone,area').order('name');
       if(error){ console.warn(error); return; }
       const list = Array.isArray(data) ? data.slice() : [];
       const hasDemo = list.some(item => item.id === DEMO_PHARMACY.id);
       if(!hasDemo){
         list.unshift({ ...DEMO_PHARMACY });
       }
-      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + list.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}">${p.name}${p.id===DEMO_PHARMACY.id?' (DEMO)':''} — ${p.city||'—'}</option>`).join('');
+      selPh.innerHTML = `<option value="">— Επιλογή —</option>` + list.map(p=>`<option value="${p.id}" data-city="${p.city||''}" data-addr="${p.address||''}" data-phone="${p.phone||''}" data-area="${p.area||''}">${p.name}${p.id===DEMO_PHARMACY.id?' (DEMO)':''} — ${p.city||'—'}</option>`).join('');
     }
 
     async function createPharmacy(){
@@ -1949,10 +2065,16 @@
 
     async function applyPickedFromSelect(){
       const id = selPh.value;
+      stopRequestPolling();
+      answeredRequestsByMe.clear();
       if(!id){
         pickedBox.classList.add('hidden');
         hoursBox.classList.add('hidden');
         reqBox.classList.add('hidden');
+        stopRequestPolling();
+        answeredRequestsByMe.clear();
+        if(reqList){ reqList.innerHTML = ''; }
+        emptyState?.classList.add('hidden');
         store.pharmacy=null;
         scheduleState.draft = createEmptySchedule();
         scheduleState.saved = createEmptySchedule();
@@ -1963,7 +2085,7 @@
         return;
       }
       const opt = selPh.selectedOptions[0];
-      store.pharmacy = { id, name: opt.textContent.split(' — ')[0], city: opt.dataset.city, address: opt.dataset.addr, phone: opt.dataset.phone };
+      store.pharmacy = { id, name: opt.textContent.split(' — ')[0], city: opt.dataset.city, address: opt.dataset.addr, phone: opt.dataset.phone, area: opt.dataset.area };
       pName.textContent = store.pharmacy.name;
       pCity.textContent = store.pharmacy.city || '—';
       pAddr.textContent = store.pharmacy.address || '—';
@@ -1978,7 +2100,8 @@
         setHoursStatus('Φόρτωση ωραρίου…', 'muted');
         await loadScheduleForCurrentPharmacy();
       }
-      loadRequests();
+      await loadRequests();
+      startRequestPolling();
     }
 
     /* ---------- hours ---------- */
@@ -2237,6 +2360,113 @@
     setHoursStatus('', 'muted');
 
     /* ---------- requests feed ---------- */
+    function formatRequestStatus(status){
+      switch(status){
+        case 'reserved':
+          return 'Δεσμευμένο';
+        case 'has_responses':
+          return 'Απαντήσεις σε εξέλιξη';
+        default:
+          return 'Σε αναμονή';
+      }
+    }
+
+    function formatTimestamp(value){
+      if(!value) return '';
+      try {
+        return new Date(value).toLocaleString('el-GR', { hour12: false });
+      } catch {
+        return value;
+      }
+    }
+
+    function markCardAsResponded(reqId){
+      const card = reqList?.querySelector(`[data-id="${reqId}"]`);
+      if(!card) return;
+      card.classList.add('responded-card');
+      card.querySelector('[data-answered-badge]')?.classList.remove('hidden');
+      card.querySelector('[data-response-status]')?.classList.remove('hidden');
+    }
+
+    async function fetchAnsweredRequestSet(requestIds = []){
+      if(!supabase || !store.pharmacy?.id || !requestIds.length){
+        return new Set();
+      }
+      const { data, error } = await supabase
+        .from('responses')
+        .select('request_id')
+        .eq('pharmacy_id', store.pharmacy.id)
+        .in('request_id', requestIds);
+      if(error){
+        console.warn('Responses fetch for highlighting failed', error);
+        return new Set();
+      }
+      return new Set((data || []).map(row => row.request_id));
+    }
+
+    function createRequestCard(row, answeredSet){
+      const answered = answeredSet?.has(row.id) || answeredRequestsByMe.has(row.id);
+      if(answered){
+        answeredRequestsByMe.add(row.id);
+      }
+      const card = document.createElement('div');
+      card.className = `request-card${answered ? ' responded-card' : ''}`;
+      card.dataset.id = row.id;
+      const statusLabel = formatRequestStatus(row.status);
+      const allowGenericText = row.allow_generic ? 'Ναι σε γενόσημο' : 'Μόνο συγκεκριμένο';
+      const safeImageUrl = row.image_url ? escapeHtml(row.image_url) : null;
+      const customerName = escapeHtml(row.customer_name || '—');
+      const phone = escapeHtml(row.phone || '—');
+      const medicineName = escapeHtml(row.medicine_name || row.med_name || '—');
+      const notesSection = row.notes
+        ? `<div class="mt-2 text-sm text-slate-600 dark:text-slate-300">Σημείωση πελάτη: ${escapeHtml(row.notes)}</div>`
+        : '';
+      const imageSection = safeImageUrl
+        ? `
+          <div class="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <div class="font-semibold mb-1">Φωτογραφία / barcode από τον πελάτη</div>
+            <a class="request-media-thumb" href="${safeImageUrl}" target="_blank" rel="noopener">
+              <img src="${safeImageUrl}" alt="Φωτογραφία πελάτη" loading="lazy" />
+            </a>
+          </div>
+        `
+        : '';
+      const barcodeSection = row.barcode_text
+        ? `<div class="barcode-line"><span>Barcode:</span><strong>${escapeHtml(row.barcode_text)}</strong></div>`
+        : '';
+
+      card.innerHTML = `
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Πελάτης</div>
+            <div class="text-lg font-semibold">${customerName}</div>
+            <div class="text-sm text-slate-500 dark:text-slate-400">Τηλ: ${phone}</div>
+          </div>
+          <div class="text-right text-xs text-slate-500 dark:text-slate-400">
+            ${formatTimestamp(row.created_at)}
+            <div class="mt-1 text-[11px]">${statusLabel}</div>
+            <span data-answered-badge class="answered-badge mt-1 ${answered ? '' : 'hidden'}">Έχεις απαντήσει</span>
+          </div>
+        </div>
+        <div class="mt-3 space-y-1 text-sm text-slate-700 dark:text-slate-200">
+          <div><span class="font-semibold">Φάρμακο:</span> ${medicineName}</div>
+          ${row.med_type ? `<div><span class="font-semibold">Μορφή:</span> ${escapeHtml(row.med_type)}</div>` : ''}
+          ${row.active_substance ? `<div><span class="font-semibold">Ουσία:</span> ${escapeHtml(row.active_substance)}</div>` : ''}
+          <div><span class="font-semibold">Ποσότητα:</span> ${row.quantity || 1} • ${allowGenericText}</div>
+        </div>
+        ${notesSection}
+        ${imageSection}
+        ${barcodeSection}
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button type="button" class="respond-btn" data-availability="available">Διαθέσιμο</button>
+          <button type="button" class="respond-btn" data-availability="generic">Γενόσημο</button>
+          <button type="button" class="respond-btn" data-availability="unavailable">Όχι διαθέσιμο</button>
+        </div>
+        <div class="mt-3 text-sm font-semibold text-emerald-600 dark:text-emerald-300 ${answered ? '' : 'hidden'}" data-response-status>Απάντησες σε αυτό το αίτημα ✅</div>
+      `;
+      return card;
+    }
+
     async function loadRequests(){
       reqList.innerHTML = '';
       emptyState.classList.add('hidden');
@@ -2270,50 +2500,50 @@
 
       const { data, error } = await supabase
         .from('requests')
-        .select('id, created_at, med_name, active_substance, med_type, quantity, allow_generic, city, status')
+        .select('id, created_at, medicine_name, med_name, active_substance, med_type, quantity, allow_generic, city, status, customer_name, phone, notes, image_url, barcode_text')
         .eq('city', store.pharmacy.city)
         .in('status', ['pending','has_responses'])
         .order('created_at', { ascending:false })
         .limit(50);
 
       if(error){ console.warn(error); return; }
-      if(!data || !data.length){ emptyState.classList.remove('hidden'); return; }
+      if(!data || !data.length){
+        emptyState.textContent = 'Δεν υπάρχουν εκκρεμή αιτήματα αυτή τη στιγμή.';
+        emptyState.classList.remove('hidden');
+        return;
+      }
 
+      const requestIds = data.map(row => row.id).filter(Boolean);
+      const answeredSet = await fetchAnsweredRequestSet(requestIds);
+      emptyState.classList.add('hidden');
+      reqList.innerHTML = '';
       data.forEach(row=>{
-        const card = document.createElement('div');
-        card.className = 'rounded-xl border p-3 bg-white/80 dark:bg-slate-900/60';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-semibold">${row.med_name}</div>
-            <div class="text-xs text-slate-500">${new Date(row.created_at).toLocaleString()}</div>
-          </div>
-          <div class="text-xs text-slate-600 dark:text-slate-400">
-            ${row.active_substance ? `Ουσία: ${row.active_substance} • ` : ''}Τύπος: ${row.med_type||'—'} • Ποσ: ${row.quantity}
-          </div>
-          <div class="mt-2 flex items-center gap-3">
-            <label class="inline-flex items-center gap-2 text-sm">
-              <input type="checkbox" class="gen-chk size-4 accent-brand-600"> Γενόσημο
-            </label>
-            <button class="avail btn bg-emerald-600 text-white border-emerald-700 hover:opacity-95">Διαθέσιμο</button>
-            <button class="unavail btn hover:bg-slate-100 dark:hover:bg-slate-800">Μη διαθέσιμο</button>
-          </div>
-        `;
-        card.dataset.id = row.id;
+        const card = createRequestCard(row, answeredSet);
         reqList.appendChild(card);
       });
     }
 
-    async function sendResponse(reqId, available, isGeneric){
+    async function sendResponse(reqId, availability, note){
       if(!store.pharmacy?.id){ alert('Διάλεξε φαρμακείο πρώτα.'); return; }
       if(!supabase){
         showToast('Demo λειτουργία: οι απαντήσεις δεν αποθηκεύονται.', 'info');
         return;
       }
-      const payload = { request_id: reqId, pharmacy_id: store.pharmacy.id, available: !!available, is_generic: !!isGeneric };
+      const payload = {
+        request_id: reqId,
+        pharmacy_id: store.pharmacy.id,
+        pharmacy_name: store.pharmacy.name,
+        availability,
+        notes: note || null,
+        area: store.pharmacy.area || store.pharmacy.city || null,
+        distance_label: DEFAULT_DISTANCE_LABEL,
+      };
       const { error } = await supabase.from('responses').insert(payload);
       if(error){ alert('Σφάλμα καταχώρησης απάντησης'); console.warn(error); return; }
-      // Προαιρετικά, ενημέρωσε το request σε has_responses
       await supabase.from('requests').update({ status:'has_responses' }).eq('id', reqId).neq('status','reserved');
+      answeredRequestsByMe.add(reqId);
+      markCardAsResponded(reqId);
+      showToast('Η απάντηση στάλθηκε στο αίτημα.', 'success');
     }
 
     /* ---------- events ---------- */
@@ -2337,16 +2567,19 @@
     openingHoursSaveBtn?.addEventListener('click', saveOpeningHoursForPharmacy);
 
     reqList?.addEventListener('click', async (e)=>{
-      const card = e.target.closest('[data-id]'); if(!card) return;
+      const btn = e.target.closest('[data-availability]');
+      if(!btn) return;
+      const card = btn.closest('[data-id]'); if(!card) return;
       const reqId = card.dataset.id;
-      if(e.target.closest('.avail')){
-        const isGen = card.querySelector('.gen-chk')?.checked || false;
-        await sendResponse(reqId, true, isGen);
-        card.classList.add('opacity-60');
-      }
-      if(e.target.closest('.unavail')){
-        await sendResponse(reqId, false, false);
-        card.classList.add('opacity-60');
+      const availability = btn.dataset.availability;
+      const noteInput = prompt('Προαιρετικά πρόσθεσε μια σημείωση προς τον πελάτη (π.χ. ποσότητες, ώρα παραλαβής):');
+      if(noteInput === null){ return; }
+      const note = noteInput.trim();
+      btn.disabled = true;
+      try {
+        await sendResponse(reqId, availability, note);
+      } finally {
+        btn.disabled = false;
       }
     });
 

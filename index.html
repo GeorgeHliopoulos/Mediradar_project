@@ -1,2960 +1,994 @@
 <!DOCTYPE html>
-<html lang="el" class="h-full">
+<html lang="el">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MediRadar</title>
-  <meta name="application-name" content="MediRadar" />
-  <meta name="apple-mobile-web-app-title" content="MediRadar" />
-  <meta name="description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
-  <meta property="og:site_name" content="MediRadar" />
-  <meta property="og:description" content="Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία." />
-  <meta name="theme-color" content="#29a3a3" />
-  <link rel="icon" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
-          colors: { brand: { 500:'#29a3a3', 600:'#208181', 700:'#196464' } },
-          boxShadow: { soft:'0 16px 40px rgba(2,6,23,.12)' }
-        }
-      }
-    }
-  </script>
-
-  <!-- Supabase CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="/env.js"></script>
-  <script src="/js/afterLoginRedirect.js?v=1"></script>
-
   <style>
-    body { position: relative; overflow-x: hidden; }
-    .glass-surface {
-      background: rgba(255, 255, 255, 0.22);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
-      border-radius: 1rem;
+    :root {
+      font-family: 'Inter', 'Noto Sans', 'Noto Sans Greek', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0f172a;
+      background: #eef6f6;
     }
-    .dark .glass-surface {
-      background: rgba(15, 23, 42, 0.62);
-      border-color: rgba(148, 163, 184, 0.32);
-      box-shadow: 0 22px 48px rgba(2, 6, 23, 0.55);
+    * {
+      box-sizing: border-box;
     }
-    /* 💊 Ενισχυμένη κίνηση 3D Gboard-style φαρμακευτικών emoji για πιο έντονο και γρήγορο υπόβαθρο */
-    .global-emoji-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-    .global-emoji-layer span {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: clamp(3.2rem, 7vw, 4.6rem);
-      height: clamp(3.2rem, 7vw, 4.6rem);
-      opacity: 0.28;
-      animation-iteration-count: infinite;
-      animation-timing-function: linear;
-      filter: drop-shadow(0 18px 32px rgba(8, 47, 73, 0.32));
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 20%, rgba(41,163,163,0.25), transparent 55%),
+                  radial-gradient(circle at 80% 0%, rgba(248,180,180,0.3), transparent 55%),
+                  linear-gradient(180deg, #f4fbfb 0%, #f8fbff 100%);
+      color: #0f172a;
     }
-    .global-emoji-layer span img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    .global-emoji-layer span:nth-child(1) { top: 6%; left: 10%; animation-name: globalEmojiFloatA; animation-duration: 24s; }
-    .global-emoji-layer span:nth-child(2) { top: 18%; right: 12%; animation-name: globalEmojiFloatB; animation-duration: 26s; }
-    .global-emoji-layer span:nth-child(3) { top: 38%; left: 38%; animation-name: globalEmojiFloatC; animation-duration: 28s; opacity: 0.24; }
-    .global-emoji-layer span:nth-child(4) { bottom: 18%; left: 16%; animation-name: globalEmojiFloatD; animation-duration: 25s; }
-    .global-emoji-layer span:nth-child(5) { bottom: 10%; right: 14%; animation-name: globalEmojiFloatE; animation-duration: 27s; }
-    .global-emoji-layer span:nth-child(6) { top: 62%; left: 8%; animation-name: globalEmojiFloatF; animation-duration: 23s; }
-    .global-emoji-layer span:nth-child(7) { top: 12%; right: 34%; animation-name: globalEmojiFloatG; animation-duration: 22s; }
-    .global-emoji-layer span:nth-child(8) { bottom: 28%; right: 32%; animation-name: globalEmojiFloatH; animation-duration: 24s; }
-    .dark .global-emoji-layer span { opacity: 0.32; }
-    @keyframes globalEmojiFloatA { 0% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } 45% { transform: translate3d(36px, -22px, 0) scale(1.08); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; } }
-    @keyframes globalEmojiFloatB { 0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } 50% { transform: translate3d(-32px, 20px, 0) scale(1.1); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; } }
-    @keyframes globalEmojiFloatC { 0% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } 55% { transform: translate3d(28px, 26px, 0) scale(1.12); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.94); opacity: 0.12; } }
-    @keyframes globalEmojiFloatD { 0% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } 48% { transform: translate3d(30px, -24px, 0) scale(1.08); opacity: 0.31; } 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.11; } }
-    @keyframes globalEmojiFloatE { 0% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } 52% { transform: translate3d(-30px, -18px, 0) scale(1.05); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.12; } }
-    @keyframes globalEmojiFloatF { 0% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } 58% { transform: translate3d(34px, -16px, 0) scale(1.08); opacity: 0.3; } 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.1; } }
-    @keyframes globalEmojiFloatG { 0% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } 50% { transform: translate3d(-24px, 28px, 0) scale(1.12); opacity: 0.34; } 100% { transform: translate3d(0, 0, 0) scale(1.04); opacity: 0.1; } }
-    @keyframes globalEmojiFloatH { 0% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } 56% { transform: translate3d(22px, -28px, 0) scale(1.09); opacity: 0.32; } 100% { transform: translate3d(0, 0, 0) scale(0.98); opacity: 0.11; } }
-    .app-bg {
-      background:
-        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.30), transparent 60%),
-        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.22), transparent 58%),
-        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.18), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.20), transparent 60%),
-        linear-gradient(180deg, #f6fbfb 0%, #f8fafc 40%, #fbfcfe 100%);
-    }
-    .dark .app-bg{
-      background:
-        radial-gradient(1100px 600px at 0% -10%, rgba(132,197,244,.16), transparent 60%),
-        radial-gradient(900px 540px at 110% 0%, rgba(199,166,244,.14), transparent 58%),
-        radial-gradient(1000px 600px at 25% 120%, rgba(247,141,167,.12), transparent 62%),
-        radial-gradient(800px 520px at 120% 120%, rgba(157,224,214,.12), transparent 60%),
-        linear-gradient(180deg, #0b1515, #0b1515 45%, #0b1515 100%);
-    }
-    .main-logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: clamp(2.75rem, 7vw, 4.25rem) auto clamp(1.5rem, 4vw, 2.75rem);
-    }
-    .hero-logo-button {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(0.75rem, 2.6vw, 1.15rem);
-      border-radius: clamp(1.9rem, 6vw, 2.9rem);
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      background: radial-gradient(120% 120% at 50% 12%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.08) 62%, rgba(255, 255, 255, 0));
-      box-shadow: 0 26px 54px rgba(15, 23, 42, 0.24), 0 16px 32px rgba(41, 163, 163, 0.16);
-      backdrop-filter: blur(18px);
-      cursor: default;
-      isolation: isolate;
-      overflow: hidden;
-      transition: transform 0.35s ease, box-shadow 0.35s ease;
-    }
-    .hero-logo-button::before {
-      content: '';
-      position: absolute;
-      inset: 2px;
-      border-radius: inherit;
-      background: linear-gradient(140deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0));
-      opacity: 0.55;
-      z-index: 0;
-    }
-    .hero-logo-button::after {
-      content: '';
-      position: absolute;
-      inset: -55% 18% 58%;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.65);
-      filter: blur(0.5px);
-      transform: rotate(-8deg);
-      opacity: 0.55;
-      z-index: 0;
-    }
-    .hero-logo-button:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 32px 64px rgba(15, 23, 42, 0.28), 0 22px 38px rgba(41, 163, 163, 0.22);
-    }
-    .hero-logo-image {
+    .page {
+      width: min(1080px, 96vw);
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
       position: relative;
       z-index: 1;
-      display: block;
-      width: clamp(180px, 45vw, 300px);
-      height: auto;
-      border-radius: clamp(1.6rem, 5vw, 2.4rem);
-      filter: drop-shadow(0 22px 38px rgba(15, 23, 42, 0.25)) saturate(1.05);
-      transform: perspective(900px) rotateX(6deg);
-      transition: transform 0.35s ease, filter 0.35s ease;
     }
-    .hero-logo-button:hover .hero-logo-image {
-      transform: perspective(900px) rotateX(0deg) translateY(-3px);
-      filter: drop-shadow(0 26px 42px rgba(15, 23, 42, 0.28)) saturate(1.1);
+    .hero {
+      text-align: center;
+      margin-bottom: 1.5rem;
     }
-    .dark .hero-logo-button {
-      border-color: rgba(148, 163, 184, 0.4);
-      background: radial-gradient(120% 120% at 50% 12%, rgba(148, 163, 184, 0.32), rgba(15, 23, 42, 0.55) 62%, rgba(15, 23, 42, 0));
-      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.55), 0 18px 38px rgba(76, 194, 193, 0.2);
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin: 0 0 0.75rem;
+      color: #0d9488;
     }
-    .dark .hero-logo-button::before {
-      background: linear-gradient(140deg, rgba(148, 163, 184, 0.4), rgba(15, 23, 42, 0));
-      opacity: 0.6;
+    .hero p {
+      margin: 0;
+      color: #475569;
+      font-size: 1.1rem;
     }
-    .dark .hero-logo-button::after {
-      background: rgba(148, 163, 184, 0.45);
-      opacity: 0.45;
+    .tabs {
+      margin-top: 1.75rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
+    .tab-btn {
+      flex: 1 1 240px;
+      border-radius: 999px;
+      padding: 0.9rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid rgba(14,165,233,0.4);
+      color: #0f172a;
+      background: rgba(255,255,255,0.8);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
     }
-    .ac-list { position:absolute; inset-inline:0; top:100%; z-index:40 }
-    .ac-item { cursor:pointer }
-    #pending-overlay { transition: opacity .25s ease; }
-    #push-toast { transition: transform .25s ease, opacity .25s ease; }
-    #push-toast.hidden { opacity:0; pointer-events:none; transform: translateY(6px); }
-    /* Spinner και toast για ορατή ανάδραση στη ροή σύνδεσης */
-    .btn-loading-indicator {
-      width: 1rem;
-      height: 1rem;
-      border-radius: 9999px;
-      border: 2px solid currentColor;
-      border-right-color: transparent;
-      animation: authSpinner 0.75s linear infinite;
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(14,165,233,0.08);
     }
-    @keyframes authSpinner { to { transform: rotate(360deg); } }
-    #toast-stack {
-      position: fixed;
-      top: 1.5rem;
-      right: 1.5rem;
+    .tab-btn.active {
+      background: linear-gradient(120deg, #0ea5e9, #14b8a6);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 15px 35px rgba(14,165,233,0.25);
+    }
+    .card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 2rem;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(15, 118, 110, 0.08);
+      backdrop-filter: blur(6px);
+      margin-bottom: 2rem;
+    }
+    .how-it-works-card {
+      display: none;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .how-it-works-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: 1.3rem;
+    }
+    .how-it-works-card p {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .how-it-works-list {
+      margin: 0;
+      padding-left: 1.2rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      z-index: 250;
-      pointer-events: none;
+      gap: 0.5rem;
+      color: #0f172a;
     }
-    #toast-stack .toast {
-      pointer-events: auto;
-      min-width: 240px;
-      border-radius: 1rem;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
+    .how-it-works-list li {
+      line-height: 1.45;
+    }
+    form .field-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    @media (min-width: 700px) {
+      form .field-grid.two-cols {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .field {
+      background: rgba(255,255,255,0.75);
+      border-radius: 1.5rem;
+      padding: 1rem 1.25rem 1.25rem;
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+    label span.subtitle {
+      font-weight: 500;
+      color: #94a3b8;
+      margin-left: 0.35rem;
+      font-size: 0.9rem;
+    }
+    label {
       font-weight: 600;
-      color: white;
-      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
-      backdrop-filter: blur(12px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    #toast-stack .toast.toast--success { background: rgba(16, 185, 129, 0.94); }
-    #toast-stack .toast.toast--error { background: rgba(239, 68, 68, 0.94); }
-    #toast-stack .toast.toast--info { background: rgba(59, 130, 246, 0.94); }
-    #toast-stack .toast.toast--hide { opacity: 0; transform: translateY(-6px); }
-    .lang-btn[data-active="true"] {
-      background: linear-gradient(135deg, #29a3a3, #208181);
+    input,
+    textarea,
+    select {
+      width: 100%;
+      margin-top: 0.75rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(148,163,184,0.8);
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #fff;
+      color: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 4px rgba(20,184,166,0.15);
+    }
+    input[type="file"] {
+      padding: 0.6rem;
+      border: 1px dashed rgba(14,165,233,0.6);
+      background: rgba(14,165,233,0.05);
+      cursor: pointer;
+    }
+    .help-text {
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .checkbox-field label {
+      font-weight: 500;
+      gap: 0.75rem;
+    }
+    .checkbox-field input[type="checkbox"] {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+    .primary-btn {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      font-weight: 700;
       color: #fff;
-      box-shadow: 0 12px 24px rgba(32,129,129,.25);
+      cursor: pointer;
+      background: linear-gradient(120deg, #0ea5e9, #14b8a6);
+      box-shadow: 0 15px 30px rgba(14,165,233,0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     }
-    .dark .lang-btn[data-active="true"] {
-      background: linear-gradient(135deg, #7edbd9, #4cc2c1);
-      color: #062322;
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 35px rgba(14,165,233,0.3);
     }
-    .floating-emoji { position:absolute; bottom:-12%; font-size:2.5rem; opacity:0; animation: floatUp 3s ease-in forwards; }
-    @keyframes floatUp { 0%{ transform:translateY(40px) scale(.85); opacity:0; } 15%{ opacity:1; } 70%{ opacity:1; } 100%{ transform:translateY(-120%) scale(1.1); opacity:0; } }
-    #celebration-overlay { transition: opacity .35s ease; opacity:0; }
-    #celebration-overlay.flex { opacity:1; }
-    #celebration-overlay .success-mark.animate-in { animation: successPop .6s ease forwards, successFade .5s ease forwards 2.4s; }
-    @keyframes successPop { to { transform:scale(1); opacity:1; } }
-    @keyframes successFade { to { transform:scale(.92); opacity:0; } }
+    .primary-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .status-section {
+      scroll-margin-top: 2rem;
+    }
+    .status-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 2rem;
+      padding: clamp(1.75rem, 4vw, 2.5rem);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
+    }
+    .status-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      background: rgba(14,165,233,0.12);
+      color: #0369a1;
+      font-weight: 600;
+      border: 1px solid rgba(14,165,233,0.25);
+    }
+    .status-chip.chip-success {
+      background: rgba(134,239,172,0.35);
+      color: #166534;
+      border-color: transparent;
+    }
+    .response-count {
+      margin: 0;
+      font-weight: 600;
+      color: #475569;
+    }
+    .waiting-message {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      background: rgba(14,165,233,0.08);
+      border: 1px solid rgba(14,165,233,0.2);
+      margin-bottom: 1.25rem;
+    }
+    .waiting-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 1rem;
+      background: #0ea5e9;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    .waiting-title {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    .waiting-subtitle {
+      margin: 0.1rem 0 0;
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+    .media-preview {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.85rem;
+      border-radius: 1.25rem;
+      border: 1px solid rgba(15,23,42,0.1);
+      background: rgba(241,245,249,0.8);
+      margin-bottom: 0.75rem;
+    }
+    .media-preview img {
+      width: auto;
+      max-height: 80px;
+      border-radius: 0.85rem;
+      object-fit: cover;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    }
+    .media-caption {
+      margin: 0;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .barcode-line {
+      font-size: 0.9rem;
+      color: #475569;
+      margin-bottom: 1rem;
+    }
+    .barcode-line span {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      background: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 0.1rem 0.5rem;
+    }
+    .placeholder-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.95rem 1.1rem;
+      border-radius: 1.5rem;
+      border: 1px dashed rgba(148,163,184,0.7);
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+    .response-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .response-card {
+      border-radius: 1.5rem;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 1.2rem;
+      background: #f8fafc;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+    }
+    .response-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+    .pharmacy-name {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .response-meta {
+      margin: 0.15rem 0 0;
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+    .availability-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .availability-available {
+      background: rgba(134,239,172,0.5);
+      color: #166534;
+    }
+    .availability-generic {
+      background: rgba(253,230,138,0.7);
+      color: #92400e;
+    }
+    .availability-unavailable {
+      background: rgba(248,180,180,0.65);
+      color: #b91c1c;
+    }
+    .response-notes {
+      margin: 0.85rem 0 0.5rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.4;
+    }
+    .reserve-btn {
+      width: 100%;
+      border: none;
+      border-radius: 1rem;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: linear-gradient(120deg, #10b981, #0ea5e9);
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .reserve-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .reservation-box {
+      margin-top: 1.5rem;
+      border-radius: 1.75rem;
+      border: 1px solid rgba(16,185,129,0.35);
+      background: rgba(209,250,229,0.7);
+      padding: 1.25rem 1.5rem;
+    }
+    .reservation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .reservation-label {
+      margin: 0;
+      font-weight: 600;
+      color: #047857;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+    }
+    .reservation-name {
+      margin: 0.2rem 0 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .countdown {
+      font-weight: 700;
+      font-size: 2.5rem;
+      color: #065f46;
+    }
+    .reservation-meta {
+      margin: 0.75rem 0 0;
+      color: #065f46;
+      font-size: 0.95rem;
+    }
+    .reservation-expired {
+      margin: 0.5rem 0 0;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+    .reservation-actions {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .extend-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.65rem 1.3rem;
+      font-weight: 600;
+      background: #0f766e;
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .extend-btn:disabled,
+    .extend-btn.used {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .hidden {
+      display: none !important;
+    }
+    @media (max-width: 600px) {
+      .tabs {
+        flex-direction: column;
+      }
+      .tab-btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
-<body class="min-h-full app-bg text-slate-900 dark:text-slate-200 font-sans">
-  <div class="global-emoji-layer" aria-hidden="true">
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f48a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f489/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa7a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1fa79/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9f4/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f49a/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2695_fe0f/emoji.svg" alt="" loading="lazy" /></span>
-    <span><img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4a0/emoji.svg" alt="" loading="lazy" /></span>
-  </div>
-
-  <!-- Στοίβα toast για μηνύματα σύνδεσης -->
-  <div id="toast-stack" aria-live="assertive" aria-atomic="true"></div>
-
-  <!-- Celebration overlay -->
-  <div id="celebration-overlay" class="fixed inset-0 hidden pointer-events-none z-[60] items-center justify-center">
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-transparent dark:via-slate-900/60"></div>
-    <div data-emoji-container class="absolute inset-0 overflow-hidden"></div>
-    <div class="relative flex flex-col items-center gap-4 pointer-events-auto" role="status" aria-live="assertive">
-      <div class="success-mark w-28 h-28 rounded-full bg-white/95 dark:bg-slate-900/90 border-4 border-emerald-400/70 shadow-2xl flex items-center justify-center text-emerald-500">
-        <svg viewBox="0 0 48 48" class="w-16 h-16" aria-hidden="true">
-          <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="4" />
-          <path d="M16 24l6 6 12-12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" />
-        </svg>
-      </div>
-      <p id="celebration-message" class="text-lg font-semibold text-slate-700 dark:text-slate-100 drop-shadow">Η αίτηση στάλθηκε!</p>
-    </div>
-  </div>
-
-  <!-- Top bar -->
-  <div class="absolute top-3 left-3 right-3 z-50">
-    <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-      <button id="pro-trigger" data-auth-open data-auth-target="pharmacies" type="button" class="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-2xl bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm hover:bg-white dark:hover:bg-white/20">
-        <span aria-hidden="true">💼</span>
-        <span id="t-pro">Για φαρμακεία</span>
-      </button>
-
-      <div class="flex items-center gap-2 rounded-2xl glass-surface bg-white/80 dark:bg-white/10 border border-slate-200 dark:border-slate-700 backdrop-blur px-2 py-1 shadow-sm">
-        <div class="flex items-center gap-1">
-          <button id="lang-el" type="button" class="lang-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 bg-white/60 dark:bg-white/10 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-white/20">
-            <span aria-hidden="true" class="flag-icon">
-              <svg viewBox="0 0 28 20" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
-                <rect width="28" height="20" fill="#0d5eaf"></rect>
-                <g fill="#ffffff">
-                  <rect y="2" width="28" height="2"></rect>
-                  <rect y="6" width="28" height="2"></rect>
-                  <rect y="10" width="28" height="2"></rect>
-                  <rect y="14" width="28" height="2"></rect>
-                  <rect y="18" width="28" height="2"></rect>
-                </g>
-                <rect width="10" height="10" fill="#0d5eaf"></rect>
-                <rect x="4" width="2" height="10" fill="#ffffff"></rect>
-                <rect y="4" width="10" height="2" fill="#ffffff"></rect>
-              </svg>
-            </span>
-            <span id="t-langElLabel" class="hidden sm:inline">Ελληνικά</span>
-            <span class="sm:hidden">EL</span>
-          </button>
-          <button id="lang-en" type="button" class="lang-btn px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl flex items-center gap-2 bg-white/60 dark:bg-white/10 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-white/20">
-            <span aria-hidden="true" class="flag-icon">
-              <svg viewBox="0 0 30 20" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
-                <rect width="30" height="20" fill="#012169"></rect>
-                <path d="M0 0L30 20M30 0L0 20" stroke="#ffffff" stroke-width="6" stroke-linecap="square"></path>
-                <path d="M0 0L30 20M30 0L0 20" stroke="#c8102e" stroke-width="2.5" stroke-linecap="square"></path>
-                <rect x="13" width="4" height="20" fill="#ffffff"></rect>
-                <rect y="8" width="30" height="4" fill="#ffffff"></rect>
-                <rect x="14" width="2" height="20" fill="#c8102e"></rect>
-                <rect y="9" width="30" height="2" fill="#c8102e"></rect>
-              </svg>
-            </span>
-            <span id="t-langEnLabel" class="hidden sm:inline">Αγγλικά</span>
-            <span class="sm:hidden">EN</span>
-          </button>
-        </div>
-
-        <button id="theme-toggle" type="button" class="px-2.5 py-1.5 rounded-xl hover:bg-white dark:hover:bg-white/20">
-          <span id="icon-sun" class="hidden">🌞</span><span id="icon-moon">🌙</span>
-        </button>
-
-        <div class="hidden h-6 w-px bg-slate-200/80 dark:bg-slate-700/70 sm:block"></div>
-
-        <div class="flex items-center gap-2" data-auth-header>
-          <button type="button" data-auth-open data-auth-target="users" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-white/10 text-sm font-semibold hover:bg-white dark:hover:bg-white/20">
-            <span id="t-signinBTN">Σύνδεση</span>
-          </button>
-          <div data-auth-header-session class="hidden items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/80 dark:bg-white/10 px-2 py-1.5">
-            <div data-auth-header-avatar class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm font-semibold uppercase shadow-sm"></div>
-            <span data-auth-header-email class="text-sm font-semibold text-slate-700 dark:text-slate-200"></span>
-            <button type="button" data-auth-header-logout class="px-2 py-1 text-xs font-semibold rounded-lg border border-brand-500 text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Pending overlay -->
-  <div id="pending-overlay" class="fixed inset-0 hidden z-[70] items-center justify-center px-4">
-    <div class="w-full max-w-2xl">
-      <div class="relative overflow-hidden rounded-3xl border border-amber-400/70 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white shadow-soft">
-        <div class="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute -left-16 bottom-[-60px] h-56 w-56 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="relative flex flex-col items-center gap-6 px-8 py-10 text-center sm:px-10">
-          <div class="grid h-20 w-20 place-items-center rounded-full bg-white/15 text-4xl" aria-hidden="true">⏳</div>
-          <div class="space-y-3">
-            <h3 id="pending-overlay-headline" class="text-2xl font-bold leading-tight sm:text-3xl">Τα φαρμακεία ενημερώθηκαν!</h3>
-            <p id="pending-overlay-message" class="text-sm text-white/90 sm:text-base">Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.</p>
-          </div>
-          <div id="pending-overlay-status" class="flex items-center gap-2 rounded-full bg-black/25 px-4 py-2 text-xs font-semibold uppercase tracking-wide sm:text-sm" role="status" aria-live="polite">
-            <span id="pending-overlay-status-text">Αναμονή απαντήσεων</span>
-            <span id="pending-overlay-elapsed" class="text-white/80">0s</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Push toast -->
-  <div id="push-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[min(680px,94vw)]">
-    <div class="rounded-2xl p-4 border border-sky-300/70 bg-sky-50 text-sky-900 dark:bg-sky-900/30 dark:text-sky-100 dark:border-sky-800 shadow-soft flex items-center justify-between gap-3">
-      <div class="text-sm" id="t-pushText">
-        🔔 Θες να λαμβάνεις ειδοποίηση όταν απαντά ένα φαρμακείο;
-      </div>
-      <div class="flex gap-2">
-        <button id="push-deny" class="px-3 py-1.5 rounded-xl border hover:bg-white/70 dark:hover:bg-white/10 text-sm"><span id="t-pushNo">Όχι τώρα</span></button>
-        <button id="push-allow" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white font-semibold text-sm"><span id="t-pushYes">Ενεργοποίηση</span></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Splash -->
-  <section id="splash" class="min-h-[100svh] grid place-items-center relative px-4">
-    <div class="w-full max-w-4xl text-center">
-      <div class="main-logo-container">
-        <div class="hero-logo-button" role="img" aria-labelledby="t-heroLogoLabel">
-          <span id="t-heroLogoLabel" class="sr-only">Λογότυπο MediRadar</span>
-          <img src="./mediradar_logo.png" alt="" aria-hidden="true" class="hero-logo-image" />
-        </div>
-      </div>
-      <div class="mt-8 flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <button id="cta-search" type="button" class="w-full sm:max-w-xl px-6 py-4 sm:py-5 sm:px-7 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95 transform scale-[1.03] sm:scale-[1.08] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-searchBTN">Αναζήτηση Φαρμάκου</span>
-        </button>
-        <button id="cta-how" type="button" class="w-full sm:max-w-lg px-6 py-4 rounded-2xl bg-white/85 backdrop-blur border border-slate-200 hover:bg-white font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span id="t-howBTN">Πώς λειτουργεί</span>
-        </button>
-      </div>
-      <button id="cta-install" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-600 text-brand-700 font-semibold bg-white/80 backdrop-blur hover:bg-white hidden">
-        📲 <span id="t-installBTN">Εγκατάσταση</span>
-      </button>
-    </div>
-  </section>
-
-  <!-- APP -->
-  <main id="app" class="hidden mx-auto max-w-3xl px-4 pb-16">
-    <header class="sticky top-0 z-30 -mt-3 mb-4">
-      <div class="flex items-center justify-between px-2 py-3 rounded-2xl glass-surface bg-white/80 dark:bg-slate-900/70 backdrop-blur border border-slate-200 dark:border-slate-800">
-        <div class="flex items-center gap-2">
-          <button id="backHome" type="button" data-go-home class="px-3 py-1.5 rounded-lg border text-sm hover:bg-slate-50 dark:hover:bg-slate-800">← <span id="t-home">Αρχική</span></button>
-          <span id="t-searchTitle" class="font-semibold">Αναζήτηση Φαρμάκου</span>
-        </div>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>🔍 MediRadar</h1>
+      <p>Βρες γρήγορα ποια φαρμακεία έχουν το φάρμακό σου διαθέσιμο.</p>
+      <div class="tabs">
+        <button id="tab-search" type="button" class="tab-btn active">Αναζήτηση φαρμάκου</button>
+        <button id="tab-how" type="button" class="tab-btn">Πώς λειτουργεί</button>
       </div>
     </header>
 
-    <section class="grid grid-cols-1 gap-4 sm:gap-5">
-      <!-- City dropdown -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="text-sm font-semibold flex items-center gap-2" for="city">
-          <span class="w-6 h-6 grid place-items-center">📍</span>
-          <span id="t-city">Πόλη</span>
-        </label>
-        <div class="mt-2">
-          <div class="flex gap-2">
-            <div class="relative flex-1" data-city-autocomplete>
-              <input id="city-input" type="text" autocomplete="off"
-                     class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
-                     placeholder="— Επιλογή πόλης —" />
-              <div id="ac-city" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg max-h-64 overflow-auto"></div>
-            </div>
-            <button id="geolocate-button" type="button"
-                    class="px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap">
-              📍 Κοντά Μου
-            </button>
+    <section id="how-it-works-card" class="card how-it-works-card">
+      <h3>Πώς λειτουργεί το MediRadar</h3>
+      <p>Το MediRadar στέλνει το αίτημά σου σε κοντινά συνεργαζόμενα φαρμακεία ώστε να κάνεις self pickup χωρίς αναμονές.</p>
+      <ol class="how-it-works-list">
+        <li>💊 Περιγράφεις το φάρμακο ή τραβάς μια φωτογραφία του κουτιού / barcode.</li>
+        <li>🏪 Στέλνουμε το αίτημα σε κοντινά φαρμακεία που συνεργάζονται με το MediRadar.</li>
+        <li>✅ Βλέπεις ποια φαρμακεία το έχουν διαθέσιμο ή με ισοδύναμο (γενόσημο).</li>
+        <li>⏱️ Κάνεις κράτηση για self pickup μέσα σε 60' στο φαρμακείο που σε βολεύει.</li>
+      </ol>
+    </section>
+
+    <section id="search-card">
+      <div class="card">
+        <form id="request-form">
+        <div class="field-grid two-cols">
+          <div class="field">
+            <label for="full-name">👤 Ονοματεπώνυμο</label>
+            <input id="full-name" type="text" autocomplete="name" placeholder="π.χ. Μαρία Παπαδοπούλου" required />
+          </div>
+          <div class="field">
+            <label for="phone">📞 Τηλέφωνο επικοινωνίας</label>
+            <input id="phone" type="tel" autocomplete="tel" placeholder="69XXXXXXXX" required />
+          </div>
+          <div class="field">
+            <label for="city">📍 Πόλη ή περιοχή</label>
+            <input id="city" type="text" placeholder="π.χ. Θεσσαλονίκη" required />
+          </div>
+          <div class="field">
+            <label for="medicine">💊 Φάρμακο</label>
+            <input id="medicine" type="text" placeholder="π.χ. Augmentin 875mg" required />
+          </div>
+          <div class="field">
+            <label for="quantity">📦 Ποσότητα</label>
+            <input id="quantity" type="number" min="1" value="1" required />
+          </div>
+          <div class="field">
+            <label for="active-substance">🧪 Δραστική ουσία <span class="subtitle">(προαιρετικά)</span></label>
+            <input id="active-substance" type="text" placeholder="π.χ. Παρακεταμόλη" />
           </div>
         </div>
+        <div class="field">
+          <label for="notes">📝 Σημειώσεις προς τον φαρμακοποιό <span class="subtitle">(προαιρετικά)</span></label>
+          <textarea id="notes" placeholder="Γράψε επιπλέον οδηγίες, ώρες παράδοσης κ.ά."></textarea>
+        </div>
+        <div class="field checkbox-field">
+          <label>
+            <input id="allow-generic" type="checkbox" checked />
+            <span>Δέχομαι να μου προτείνουν ισοδύναμο (γενόσημο) εφόσον χρειαστεί.</span>
+          </label>
+        </div>
+        <div class="field">
+          <label for="request-image">📷 Φωτογραφία ή barcode <span class="subtitle">(προαιρετικά)</span></label>
+          <input id="request-image" type="file" accept="image/*" />
+          <p class="help-text">Τράβα μια καθαρή φωτογραφία του κουτιού ή του barcode για πιο γρήγορη ταυτοποίηση.</p>
+          <input id="barcode-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Πληκτρολόγησε τον κωδικό barcode (προαιρετικά)" />
+        </div>
+        <div class="field checkbox-field">
+          <label>
+            <input id="consent" type="checkbox" required />
+            <span>Αποδέχομαι την επεξεργασία των στοιχείων μου για να ολοκληρωθεί η αναζήτηση.</span>
+          </label>
+        </div>
+        <button id="submit-btn" type="submit" class="primary-btn">Ζήτα από τα φαρμακεία</button>
+        </form>
       </div>
 
-      <!-- Medicine -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="text-sm font-semibold flex items-center gap-2">
-          <span class="w-6 h-6 grid place-items-center">🔎</span>
-          <span id="t-medname">Όνομα Φαρμάκου</span>
-        </label>
-        <div class="mt-2 relative">
-          <input id="medicine-name" type="text" autocomplete="off"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
-                 placeholder="π.χ. Augmentin 875mg" />
-          <div id="ac-medicine" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
-        </div>
-        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-formatTip">Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).</p>
-        <div class="mt-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-4">
-          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div class="space-y-1">
-              <div class="text-sm font-semibold flex items-center gap-2">
-                <span class="w-6 h-6 grid place-items-center">📷</span>
-                <span id="t-barcodeTitle">Σάρωση barcode συνταγής ή κουτιού</span>
-                <span id="t-barcodeOptional" class="text-xs font-normal text-slate-400">(προαιρετικά)</span>
+      <section id="status-section" class="status-section hidden">
+        <div class="status-card">
+          <div class="status-header">
+            <span id="waiting-chip" class="status-chip">Αναμονή απαντήσεων από φαρμακεία ⏳</span>
+            <p id="response-count" class="response-count">0 απαντήσεις</p>
+          </div>
+          <div id="waiting-message" class="waiting-message">
+            <div class="waiting-icon">💬</div>
+            <div>
+              <p class="waiting-title">Ενημερώνουμε τα φαρμακεία στην περιοχή σου…</p>
+              <p class="waiting-subtitle">Θα εμφανιστούν εδώ μόλις απαντήσουν.</p>
+            </div>
+          </div>
+          <div id="status-media" class="media-preview hidden">
+            <img id="status-image" alt="Φωτογραφία που έστειλες" />
+            <div>
+              <p class="media-caption">Φωτογραφία που έστειλες</p>
+            </div>
+          </div>
+          <div id="status-barcode-line" class="barcode-line hidden">
+            Barcode: <span id="status-barcode-value"></span>
+          </div>
+          <div id="demo-placeholder" class="placeholder-card">
+            <span>💠</span>
+            <p>Περιμένουμε τις πρώτες απαντήσεις…</p>
+          </div>
+          <div id="response-list" class="response-list hidden"></div>
+          <div id="reservation-box" class="reservation-box hidden">
+            <div class="reservation-head">
+              <div>
+                <p class="reservation-label">Κράτηση φαρμακείου</p>
+                <p id="reservation-name" class="reservation-name"></p>
               </div>
-              <p id="t-barcodeHelp" class="text-xs text-slate-500 dark:text-slate-400">Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.</p>
+              <div class="countdown" id="countdown-timer">60:00</div>
             </div>
-            <button id="barcode-start" type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-soft hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
-              <span aria-hidden="true">📸</span>
-              <span id="t-barcodeStart">Άνοιγμα κάμερας</span>
-            </button>
-          </div>
-          <input id="barcode-value" type="text" inputmode="numeric" pattern="[0-9]*" class="mt-3 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/95 dark:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400" placeholder="Ο κωδικός θα εμφανιστεί εδώ" autocomplete="off" />
-        </div>
-      </div>
-
-      <!-- Quantity + Type -->
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-          <label class="text-sm font-semibold flex items-center gap-2">
-            <span class="w-6 h-6 grid place-items-center">📦</span>
-            <span id="t-qty">Ποσότητα (τεμάχια/κουτιά)</span>
-          </label>
-          <input id="quantity" type="number" min="1" value="1" required
-                 class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30" />
-        </div>
-
-        <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-          <label class="text-sm font-semibold flex items-center gap-2">
-            <span class="w-6 h-6 grid place-items-center">💊</span>
-            <span id="t-type">Τύπος Φαρμάκου</span>
-          </label>
-          <select id="medicine-type"
-                  class="mt-2 w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30">
-            <option value="">— Επιλογή —</option>
-            <option>Χάπι</option>
-            <option>Κάψουλα</option>
-            <option>Σκόνη</option>
-            <option>Υγρό</option>
-            <option>Σιρόπι</option>
-            <option>Σταγόνες</option>
-            <option>Εισπνεόμενο</option>
-            <option>Σπρέι</option>
-            <option>Ρινικό σπρέι</option>
-            <option>Οφθαλμικές σταγόνες</option>
-            <option>Αλοιφή</option>
-            <option>Δερματική Κρέμα</option>
-            <option>Ζελέ</option>
-            <option>Επίθεμα</option>
-            <option>Υπόθετο</option>
-            <option>Πένα (προγεμισμένη)</option>
-            <option>Διάλυμα έγχυσης</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Substance -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="text-sm font-semibold flex items-center gap-2">
-          <span class="w-6 h-6 grid place-items-center">🧪</span>
-          <span id="t-substance">Δραστική Ουσία</span> <span class="text-slate-400 ml-1" id="t-optional">(προαιρετικά)</span>
-        </label>
-        <div class="mt-2 relative">
-          <input id="active-substance" type="text" autocomplete="off"
-                 class="w-full px-3 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-brand-500/30 placeholder:text-slate-400"
-                 placeholder="π.χ. Παρακεταμόλη" />
-          <div id="ac-substance" class="ac-list hidden rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg"></div>
-        </div>
-        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" id="t-doseEx">Παράδειγμα δοσολογίας: Paracetamol 500mg.</p>
-      </div>
-
-      <!-- Generic -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <p class="text-sm font-semibold flex items-center gap-2">
-          <span class="w-6 h-6 grid place-items-center">✅</span>
-          <span id="t-genericQ">Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);</span>
-        </p>
-        <div class="mt-3 flex gap-4">
-          <label class="inline-flex items-center gap-2"><input type="radio" name="allow-generic" value="YES" class="size-4 accent-brand-600" checked><span id="t-yes">ΝΑΙ</span></label>
-          <label class="inline-flex items-center gap-2"><input type="radio" name="allow-generic" value="NO" class="size-4 accent-brand-600"><span id="t-no">ΟΧΙ</span></label>
-        </div>
-      </div>
-
-      <!-- GDPR + Submit -->
-      <div class="rounded-2xl glass-surface bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 p-4 shadow-soft">
-        <label class="inline-flex items-start gap-3">
-          <input id="gdpr-checkbox" type="checkbox" required class="mt-0.5 size-5 accent-brand-600">
-          <span class="text-sm"><span id="t-accept">Αποδέχομαι τους</span> <button type="button" id="gdpr-open" class="underline text-brand-700"><span id="t-gdprLink">Όρους Αναζήτησης & GDPR</span></button>.</span>
-        </label>
-        <div class="mt-4 flex justify-end">
-          <button id="submitBtn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold shadow-soft hover:opacity-95">
-            <span id="t-submit">Υποβολή Αναζήτησης</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results -->
-    <section id="results" class="hidden mt-6">
-      <div class="rounded-3xl bg-white/90 dark:bg-slate-900/60 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
-        <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-          <button type="button" data-go-home class="flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
-            ← <span id="t-statusHome">Αρχική</span>
-          </button>
-          <h3 id="t-statusHeading" class="flex-1 text-center text-base sm:text-lg font-semibold">Κατάσταση αιτήματος</h3>
-        </div>
-        <div class="p-6 space-y-8">
-          <div id="results-pending" class="flex flex-col items-center gap-4 text-center py-10">
-            <div class="relative">
-              <div class="h-16 w-16 rounded-full border-4 border-brand-500/30 border-t-brand-600 animate-spin"></div>
-            </div>
-            <div class="space-y-2">
-              <h4 id="t-statusPendingTitle" class="text-xl font-bold tracking-tight">Αναζητούμε το φαρμακό σου…</h4>
-              <p id="t-statusPendingDesc" class="text-sm text-slate-500 dark:text-slate-400">Θα ειδοποιηθείς μόλις απαντήσει ένα φαρμακείο.</p>
+            <p id="reservation-meta" class="reservation-meta"></p>
+            <p id="reservation-expired" class="reservation-expired hidden">Έληξε ⏰</p>
+            <div class="reservation-actions">
+              <button id="extend-btn" type="button" class="extend-btn" disabled>+15' παράταση</button>
             </div>
           </div>
-
-          <div id="results-list" class="hidden space-y-4">
-            <div class="space-y-1">
-              <h4 id="t-statusListTitle" class="text-lg font-semibold">Φαρμακεία με διαθεσιμότητα</h4>
-              <p id="t-statusListDesc" class="text-sm text-slate-500 dark:text-slate-400">Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.</p>
-            </div>
-            <div id="resultsList" class="space-y-3"></div>
-          </div>
-
-          <div id="pickup-box" class="hidden flex flex-col items-center gap-5 text-center py-8 px-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-800">
-            <div id="t-statusReservedTitle" class="text-sm font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-200">Το φαρμακείο σε περιμένει</div>
-            <div class="space-y-2">
-              <h4 id="status-reserved-name" class="text-2xl sm:text-3xl font-bold tracking-tight">City Pharmacy</h4>
-              <p id="status-reserved-address" class="text-sm text-slate-600 dark:text-slate-300">Ιπποκράτους 12, Αθήνα</p>
-              <div id="status-reserved-hours" class="hidden text-xs text-slate-600 dark:text-slate-300 space-y-0.5"></div>
-            </div>
-            <div class="flex items-baseline gap-3">
-              <span id="pickup-timer" class="text-5xl font-extrabold tracking-tight">60:00</span>
-              <span id="t-statusReservedHint" class="text-sm text-emerald-700 dark:text-emerald-200">Χρόνος κράτησης</span>
-            </div>
-            <div id="status-reserved-generic" class="hidden px-3 py-1 rounded-full bg-emerald-100/70 dark:bg-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-200">🧬 <span id="t-statusGenericBadge">Διαθέσιμο γενόσημο</span></div>
-            <div class="flex flex-wrap justify-center gap-3">
-              <button id="extend-btn" class="px-4 py-2 rounded-xl border border-emerald-500 text-emerald-700 dark:text-emerald-200 hover:bg-emerald-100/70 dark:hover:bg-emerald-800/40 text-sm font-semibold flex flex-col items-center leading-tight">
-                <span id="t-statusExtendMain">+15 λεπτά</span>
-                <span id="t-statusExtendNote" class="text-xs font-normal text-emerald-600 dark:text-emerald-200/80">1 φορά/ημέρα</span>
-              </button>
-              <a id="status-directions" class="px-4 py-2 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 opacity-60 pointer-events-none" href="#" target="_blank" rel="noopener">
-                🧭 <span id="t-statusDirections">Οδηγίες</span>
-              </a>
-            </div>
-            <button id="status-done" data-go-home type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 text-sm font-semibold">
-              <span id="t-statusBackHome">Επιστροφή στην αρχική</span>
-            </button>
-          </div>
-
-          <div id="results-empty" class="hidden flex flex-col items-center gap-4 text-center py-10 px-4">
-            <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 grid place-items-center text-2xl">⚠️</div>
-            <h4 id="t-statusEmptyTitle" class="text-xl font-bold tracking-tight">Δεν βρέθηκαν φαρμακεία</h4>
-            <p id="t-statusEmptyBody" class="text-sm text-slate-500 dark:text-slate-400 max-w-md">Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.</p>
-            <button id="status-empty-btn" type="button" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-semibold">
-              <span id="t-statusEmptyCta">Δοκίμασε ξανά</span>
-            </button>
-          </div>
         </div>
-        <div class="px-6 pb-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-          <button id="newSearch" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <span id="t-newSearch">Νέα αναζήτηση</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="mt-16 px-6 pb-16">
-      <div class="max-w-4xl mx-auto rounded-3xl bg-white/85 dark:bg-slate-900/50 backdrop-blur border border-slate-200 dark:border-slate-800 shadow-soft p-6 sm:p-10">
-        <div class="space-y-3 text-center mb-6">
-          <p id="t-faqLabel" class="text-sm font-semibold text-brand-700 dark:text-brand-200 tracking-wide uppercase">FAQ</p>
-          <h2 id="t-faqTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Συχνές ερωτήσεις</h2>
-          <p id="t-faqIntro" class="text-sm sm:text-base text-slate-600 dark:text-slate-300">Βρες γρήγορα απαντήσεις για τη MediRadar.</p>
-        </div>
-        <div class="space-y-4" role="list">
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ1" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Πώς λειτουργεί η αναζήτηση διαθεσιμότητας;
-            </summary>
-            <p id="t-faqA1" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Συμπληρώνεις τα στοιχεία του φαρμάκου και ειδοποιούμε άμεσα τα κοντινά φαρμακεία. Μόλις υπάρξει διαθέσιμη απάντηση, λαμβάνεις ενημέρωση μέσα στην εφαρμογή.</p>
-          </details>
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ2" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Χρειάζεται να δημιουργήσω λογαριασμό;
-            </summary>
-            <p id="t-faqA2" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Μπορείς να ξεκινήσεις ως επισκέπτης. Για δέσμευση φαρμάκου ή παρακολούθηση ιστορικού, μπορείς να συνδεθείς με SMS, email ή SSO.</p>
-          </details>
-          <details class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/60 p-4" role="listitem">
-            <summary id="t-faqQ3" class="text-base sm:text-lg font-semibold cursor-pointer flex items-center justify-between gap-3">
-              Πώς προστατεύονται τα δεδομένα μου;
-            </summary>
-            <p id="t-faqA3" class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">Χρησιμοποιούμε τα στοιχεία μόνο για την ολοκλήρωση του αιτήματός σου και εφαρμόζουμε μέτρα ασφαλείας σύμφωνα με τον GDPR. Μπορείς να διαβάσεις περισσότερα στην ενότητα Όροι &amp; GDPR.</p>
-          </details>
-        </div>
-      </div>
+      </section>
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-200/70 dark:border-slate-800/60 bg-white/40 dark:bg-slate-950/20">
-    <div class="max-w-5xl mx-auto px-6 py-8">
-      <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-        <div class="space-y-2">
-          <h3 id="t-footerTitle" class="text-base font-semibold text-slate-800 dark:text-slate-100">MediRadar</h3>
-          <p id="t-footerDescription" class="text-sm text-slate-500 dark:text-slate-400 max-w-sm">Δες τη διαθεσιμότητα φαρμάκων
-με λίγα κλικ και ενημερώσου σε πραγματικό χρόνο.</p>
-        </div>
-        <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          <button type="button" data-contact-open class="footer-link inline-flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">✉️</span>
-            <span id="t-footerNavContact">Επικοινωνία</span>
-          </button>
-          <a href="#faq" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">❓</span>
-            <span id="t-footerNavFaq">FAQ</span>
-          </a>
-          <a href="#share" class="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-            <span aria-hidden="true">🔗</span>
-            <span id="t-footerNavShare">Κοινοποίηση</span>
-          </a>
-        </nav>
-      </div>
-      <div id="share" class="mt-6">
-        <h4 id="t-shareHeading" class="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide mb-3">Μοίρασου τη MediRadar</h4>
-        <div class="share-buttons flex gap-2 flex-wrap text-sm text-slate-500 dark:text-slate-300">
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook">
-            <span aria-hidden="true">📘</span><span>Facebook</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="twitter" href="#" target="_blank" rel="noopener" aria-label="Twitter / X">
-            <span aria-hidden="true">🐦</span><span>Twitter</span>
-          </a>
-          <a class="share-btn inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/60 dark:hover:bg-slate-800/60" data-share-target="linkedin" href="#" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <span aria-hidden="true">💼</span><span>LinkedIn</span>
-          </a>
-        </div>
-      </div>
-      <p class="mt-8 text-xs text-slate-400 dark:text-slate-500">© <span id="footer-year"></span> MediRadar. <span id="t-footerRights">Όλα τα δικαιώματα διατηρούνται.</span></p>
-    </div>
-  </footer>
-
-  <!-- CONTACT MODAL -->
-  <div id="contact-modal" class="fixed inset-0 z-[85] hidden px-4 items-center justify-center">
-    <div class="absolute inset-0 bg-slate-950/60" data-contact-close></div>
-    <div class="relative w-full max-w-lg mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft p-6 sm:p-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h3 id="t-contactTitle" class="text-xl font-bold text-slate-900 dark:text-white">Επικοινωνία</h3>
-          <p id="t-contactIntro" class="mt-1 text-sm text-slate-600 dark:text-slate-300">Είμαστε εδώ για να βοηθήσουμε με απορίες και συνεργασίες.</p>
-        </div>
-        <button id="contact-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500" data-contact-close aria-label="Κλείσιμο">✕</button>
-      </div>
-      <div class="mt-6 space-y-4 text-sm text-slate-700 dark:text-slate-300">
-        <p id="t-contactGeneral">Στείλε email στο <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="mailto:hello@mediradar.gr">hello@mediradar.gr</a> για γενικές πληροφορίες ή συνεργασίες.</p>
-        <p id="t-contactPrivacy">Για θέματα προστασίας δεδομένων επικοινώνησε στο <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="mailto:privacy@mediradar.gr">privacy@mediradar.gr</a>.</p>
-        <p id="t-contactPhone">Τηλέφωνο υποστήριξης: <a class="text-brand-700 dark:text-brand-200 font-semibold hover:underline" href="tel:+302101234567">+30 210 123 4567</a> (Δευτέρα–Παρασκευή 09:00-17:00).</p>
-      </div>
-      <div class="mt-6 flex flex-wrap gap-3" role="list">
-        <a href="https://maps.app.goo.gl/" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" target="_blank" rel="noopener" role="listitem">
-          📍 <span id="t-contactLocation">Έδρα MediRadar</span>
-        </a>
-        <a href="https://www.linkedin.com/company/" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800" target="_blank" rel="noopener" role="listitem">
-          💼 <span id="t-contactLinkedIn">LinkedIn</span>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- RESULTS DRAWER -->
-  <div id="results-modal" class="fixed inset-0 hidden z-[80] items-center justify-center md:items-end">
-    <div class="absolute inset-0 bg-slate-950/50" data-results-close="true"></div>
-    <div class="relative w-full max-w-3xl md:w-[min(720px,92vw)] mx-auto md:mb-6 rounded-3xl md:rounded-t-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft max-h-[92svh] overflow-hidden flex flex-col">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h3 id="results-modal-title" class="text-lg font-bold">Διαθέσιμα φαρμακεία</h3>
-          <p id="results-modal-subtitle" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Επίλεξε φαρμακείο για παραλαβή.</p>
-        </div>
-        <button id="results-modal-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-          <span class="sr-only">Κλείσιμο</span>✕
-        </button>
-      </div>
-      <div id="results-location-alert" class="hidden px-5 py-3 text-sm flex items-center gap-2 border-b border-slate-200 dark:border-slate-800" aria-live="polite">
-        <span aria-hidden="true">📍</span>
-        <span id="results-location-text">Υπολογίζουμε αποστάσεις…</span>
-      </div>
-      <div id="results-modal-body" class="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-        <div id="results-loading" class="flex items-center justify-center py-8 text-sm text-slate-500 dark:text-slate-400">
-          <span id="results-loading-text">Φόρτωση…</span>
-        </div>
-        <div id="results-empty-modal" class="hidden text-center py-8 text-sm text-slate-500 dark:text-slate-400">
-          <p id="results-empty-text">Δεν υπάρχουν διαθέσιμα φαρμακεία αυτή τη στιγμή.</p>
-        </div>
-        <div id="results-error" class="hidden text-center py-8 text-sm text-rose-500">
-          <p id="results-error-text">Παρουσιάστηκε σφάλμα. Δοκίμασε ξανά.</p>
-        </div>
-        <div id="results-modal-list" class="space-y-4" role="list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- USER AUTH MODAL -->
-  <div data-auth-modal="users" id="auth-modal-users" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-user-title">
-    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
-    <div class="relative w-full max-w-xl mx-auto">
-      <div class="relative overflow-hidden rounded-3xl glass-surface border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
-          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
-        </div>
-        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
-        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="users">
-          <div class="flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
-              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
-                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
-              </svg>
-            </div>
-            <div class="space-y-2">
-              <h2 id="auth-user-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Σύνδεση στην πλατφόρμα MediRadar</h2>
-              <p id="auth-user-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Συνέχισε με magic link ή Google για να προχωρήσεις στη δέσμευση.</p>
-            </div>
-          </div>
-          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
-          <div data-auth-forms class="space-y-5">
-            <form data-auth-form="users" class="space-y-4" novalidate>
-              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <span id="auth-users-email-label">Email</span>
-                <input id="auth-users-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="name@email.com">
-              </label>
-              <button type="submit" id="auth-users-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Σύνδεση / Εγγραφή με Email</button>
-              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
-                <span id="auth-users-google-cta">Σύνδεση με Google</span>
-              </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
-            </form>
-          </div>
-          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
-            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
-            <p id="auth-user-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
-          </div>
-          <div data-auth-session class="hidden">
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
-              <div class="flex items-center gap-3">
-                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
-                <div class="text-left">
-                  <p id="auth-session-welcome" class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
-                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
-                </div>
-              </div>
-              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
-            </div>
-          </div>
-          <p id="auth-user-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PHARMACY AUTH MODAL -->
-  <div data-auth-modal="pharmacies" id="auth-modal-pharmacies" class="fixed inset-0 hidden z-[100] items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-labelledby="auth-pharm-title">
-    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-auth-close></div>
-    <div class="relative w-full max-w-xl mx-auto">
-      <div class="relative overflow-hidden rounded-3xl glass-surface border border-white/40 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_30px_60px_rgba(15,23,42,0.18)] auth-portal-card" data-auth-card>
-        <div class="absolute inset-0 pointer-events-none">
-          <div class="absolute -top-24 right-[-60px] h-56 w-56 rounded-full bg-sky-400/20 blur-3xl"></div>
-          <div class="absolute -bottom-28 left-[-40px] h-60 w-60 rounded-full bg-brand-500/25 blur-3xl"></div>
-        </div>
-        <button type="button" class="absolute top-4 right-4 z-10 p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700 text-slate-600 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700" data-auth-close aria-label="Κλείσιμο">✕</button>
-        <div class="relative p-6 sm:p-8 space-y-6" data-auth-root data-auth-role="pharmacies">
-          <div class="flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white grid place-items-center shadow-lg">
-              <svg viewBox="0 0 24 24" class="w-9 h-9" aria-hidden="true">
-                <path fill="currentColor" d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" />
-              </svg>
-            </div>
-            <div class="space-y-2">
-              <h2 id="auth-pharm-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard Φαρμακείου (MediRadar Pro)</h2>
-              <p id="auth-pharm-subtitle" class="text-sm text-slate-600 dark:text-slate-300">Απαντήστε σε Αιτήματα Πελατών &amp; Διαχειριστείτε το Ωράριο σας</p>
-            </div>
-          </div>
-          <p data-auth-status-global class="hidden text-sm text-center text-rose-600"></p>
-          <div data-auth-forms class="space-y-5">
-            <form data-auth-form="pharmacies" class="space-y-4" novalidate>
-              <label class="flex flex-col gap-2 text-left text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <span id="auth-pharm-email-label">Email φαρμακείου</span>
-                <input id="auth-pharm-email-input" type="email" required autocomplete="email" class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 px-3 py-3 text-base focus:outline-none focus:ring-4 focus:ring-brand-500/30" placeholder="pharmacy@example.gr">
-              </label>
-              <button type="submit" id="auth-pharm-email-cta" data-auth-email-button class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Συνέχεια με Magic Link (Email)</button>
-              <button type="button" data-auth-google class="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white/90 dark:bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-white">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="w-5 h-5" />
-                <span id="auth-pharm-google-cta">Σύνδεση με Google</span>
-              </button>
-              <p data-auth-status class="min-h-[1.25rem] text-center text-sm text-slate-600 dark:text-slate-300"></p>
-            </form>
-          </div>
-          <div data-auth-success class="hidden flex-col items-center gap-3 text-center">
-            <div class="w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-500 grid place-items-center text-2xl shadow-inner">✅</div>
-            <p id="auth-pharm-success-text" class="text-sm font-semibold text-emerald-600 dark:text-emerald-300">Επιτυχής Σύνδεση</p>
-          </div>
-          <div data-auth-session class="hidden space-y-4">
-            <div class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/85 dark:bg-slate-900/70 px-4 py-4 shadow-inner">
-              <div class="flex items-center gap-3">
-                <div data-auth-avatar class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white text-lg font-semibold grid place-items-center shadow-lg"></div>
-                <div class="text-left">
-                  <p class="text-sm text-slate-500 dark:text-slate-300">Καλωσήρθες</p>
-                  <p data-auth-user-email class="text-sm font-semibold text-slate-900 dark:text-white"></p>
-                </div>
-              </div>
-              <button type="button" data-auth-logout class="rounded-xl border border-brand-500 px-4 py-2 text-sm font-semibold text-brand-700 dark:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-900/30">Αποσύνδεση</button>
-            </div>
-            <div class="flex flex-col gap-3">
-              <button type="button" data-auth-open-dashboard class="w-full rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
-                Άνοιγμα Dashboard
-              </button>
-              <p data-auth-dashboard-info class="hidden text-xs text-center text-slate-600 dark:text-slate-300"></p>
-            </div>
-          </div>
-          <p id="auth-pharm-footer" class="text-xs text-slate-500 dark:text-slate-400 text-center">Η πρόσβαση είναι δωρεάν για χρήστες. Οι φαρμακοποιοί χρειάζονται ενεργή συνδρομή MediRadar Pro.</p>
-          <button type="button" id="auth-pro-info-link" data-pro-info-toggle aria-expanded="false" class="mx-auto block text-xs font-semibold text-brand-700 underline decoration-dotted underline-offset-4 hover:text-brand-600 dark:text-brand-200 dark:hover:text-brand-100">Μάθετε περισσότερα για το MediRadar Pro</button>
-          <a id="demo-login-link" href="#" class="mx-auto block text-[11px] font-semibold text-slate-500 hover:text-brand-600 dark:text-slate-300 dark:hover:text-brand-200">Δοκιμάστε το Dashboard (Demo)</a>
-          <div data-pro-info-panel class="pro-info-panel glass-surface hidden text-left text-sm text-slate-700 dark:text-slate-200" role="region" aria-label="Πληροφορίες MediRadar Pro">
-            <h3>Γιατί να επιλέξετε το MediRadar Pro</h3>
-            <p>Το MediRadar Pro προσφέρει στους φαρμακοποιούς ένα εύχρηστο και γρήγορο σύστημα για να απαντούν άμεσα στα αιτήματα διαθεσιμότητας φαρμάκων των πελατών τους, χωρίς τηλεφωνήματα και καθυστερήσεις.</p>
-            <p>Με τη συνδρομή Pro:</p>
-            <ul>
-              <li><span aria-hidden="true">📱</span><span>Εξυπηρετείτε τους πελάτες σας σε πραγματικό χρόνο.</span></li>
-              <li><span aria-hidden="true">💬</span><span>Μειώνετε τα τηλεφωνήματα και την απασχόληση του προσωπικού.</span></li>
-              <li><span aria-hidden="true">⚡</span><span>Κερδίζετε νέους πελάτες που βλέπουν τη διαθεσιμότητά σας άμεσα.</span></li>
-              <li><span aria-hidden="true">💶</span><span>Εξοικονομείτε χρόνο και αυξάνετε τα κέρδη από γρήγορες πωλήσεις.</span></li>
-              <li><span aria-hidden="true">☁️</span><span>Δεν χρειάζεται εγκατάσταση — λειτουργεί 100% μέσω cloud.</span></li>
-            </ul>
-            <p>Η ετήσια συνδρομή ανέρχεται σε μόλις <b>€365/έτος</b> — λιγότερο από €1 την ημέρα, για να ενισχύσετε την εξυπηρέτηση και την εικόνα του φαρμακείου σας.</p>
-            <p><em>Επιλέξτε MediRadar Pro και κάντε το φαρμακείο σας μέρος της νέας ψηφιακής εποχής.</em></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- HOW MODAL -->
-  <div id="modal-how" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-lg font-bold" id="t-howTitle">Πώς λειτουργεί το MediRadar</h3>
-        <button id="how-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
-      </div>
-      <div id="how-body" class="p-5 leading-relaxed text-slate-700 dark:text-slate-300"></div>
-      <div class="px-5 pb-5 flex justify-end">
-        <button id="how-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-continue">Συνέχεια</span></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- GDPR MODAL -->
-  <div id="gdpr-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-3xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
-      <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-bold" id="t-gdprTitle">Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης</h3>
-        <button id="gdpr-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
-      </div>
-      <div id="gdpr-body" class="p-5 text-sm text-slate-700 dark:text-slate-300 space-y-3" style="max-height:62vh; overflow:auto"></div>
-      <div class="px-5 pb-5 flex justify-end">
-        <button id="gdpr-ok" class="px-4 py-2 rounded-xl bg-brand-600 text-white font-semibold hover:opacity-95"><span id="t-gdprAccept">OK</span></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Pharmacy details modal -->
-  <div id="pharm-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft">
-      <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-bold" id="pm-title">Φαρμακείο</h3>
-        <button id="pm-close" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">✕</button>
-      </div>
-      <div class="p-5 space-y-4 text-sm">
-        <div id="pm-address">Διεύθυνση:</div>
-        <div id="pm-hours-section" class="hidden">
-          <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ωράριο</div>
-          <div id="pm-hours" class="mt-1 grid gap-1 text-xs text-slate-600 dark:text-slate-300"></div>
-        </div>
-      </div>
-      <div id="pm-auth-message" class="px-5 pb-3 text-xs text-slate-500 dark:text-slate-400">Η δέσμευση απαιτεί ταυτοποίηση.</div>
-      <div class="px-5 pb-5 flex gap-2 justify-between flex-wrap items-center">
-        <div class="flex gap-2 flex-wrap">
-          <a id="pm-maps" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-sky-600 text-white font-semibold hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500" aria-label="Προβολή σε χάρτη">Άνοιγμα σε Χάρτες</a>
-        </div>
-        <button id="pm-confirm" class="px-4 py-2 rounded-2xl bg-brand-600 text-white font-semibold hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Επιβεβαίωση & Έναρξη 60’</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BARCODE MODAL -->
-  <div id="barcode-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-6 z-[70]">
-    <div class="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-        <h3 id="t-barcodeModalTitle" class="text-lg font-bold">Σάρωση barcode</h3>
-        <button id="barcode-close" type="button" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Κλείσιμο">✕</button>
-      </div>
-      <div class="p-5 space-y-4">
-        <div id="barcode-status" class="text-sm text-slate-600 dark:text-slate-300">Στόχευσε τον γραμμωτό κωδικό μέσα στο πλαίσιο.</div>
-        <div class="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-black">
-          <video id="barcode-video" class="w-full aspect-video" autoplay muted playsinline></video>
-        </div>
-        <div class="flex justify-end">
-          <button id="barcode-stop" type="button" class="hidden px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
-            <span id="t-barcodeStop">Διακοπή</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- App JS -->
+  <script src="/env.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script>
-  // ==========================
-  //  GLOBAL STATE
-  // ==========================
-  const state = {
-    lang: localStorage.getItem('mediradar-lang') || 'el',
-    currentRequestId: null,
-    pollingTimer: null,
-    pollingStartedAt: null,
-    lastResponses: [],
-    reservation: {
-      active: false,
-      expiresAt: null,
-      extendUsed: false,
-      pharmacy: null
-    },
-    user: {
-      email: null,
-      role: null   // 'user' ή 'pharmacy'
-    },
-    cities: [],
-    userLocation: null,
-    supabase: null,
-    pendingSeconds: 0,
-    pendingInterval: null,
-    deferredPrompt: null
-  };
+    const tabSearch = document.getElementById('tab-search');
+    const tabHow = document.getElementById('tab-how');
+    const searchCard = document.getElementById('search-card');
+    const howCard = document.getElementById('how-it-works-card');
 
-  // ==========================
-  //  i18n STRINGS
-  // ==========================
-  const strings = {
-    el: {
-      't-pro':'Για φαρμακεία',
-      't-langElLabel':'Ελληνικά',
-      't-langEnLabel':'Αγγλικά',
-      't-signinBTN':'Σύνδεση',
-      't-hero':'Άμεση εύρεση διαθεσιμότητας φαρμάκων σε κοντινά φαρμακεία.',
-      't-heroLogoLabel':'Λογότυπο MediRadar',
-      't-searchBTN':'Αναζήτηση Φαρμάκου',
-      't-howBTN':'Πώς λειτουργεί',
-      't-installBTN':'Εγκατάσταση',
-      't-home':'Αρχική',
-      't-searchTitle':'Αναζήτηση Φαρμάκου',
-      't-city':'Πόλη',
-      't-cityPlaceholder':'Πληκτρολόγησε πόλη',
-      't-nearMe':'📍 Κοντά Μου',
-      't-currentLocation':'Τρέχουσα Τοποθεσία',
-      't-geolocateUnsupported':'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.',
-      't-geolocateDenied':'Η πρόσβαση στην τοποθεσία απορρίφθηκε.',
-      't-geolocateUnavailable':'Η τοποθεσία δεν είναι διαθέσιμη.',
-      't-geolocateTimeout':'Λήξη χρόνου για τον εντοπισμό τοποθεσίας.',
-      't-geolocateError':'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.',
-      't-geolocateLoading':'Εντοπισμός…',
-      't-cityInvalid':'Επίλεξε μια έγκυρη πόλη από τη λίστα.',
-      't-medname':'Όνομα Φαρμάκου',
-      't-formatTip':'Συμβουλή: Εμπορική ονομασία + δοσολογία (π.χ. “500mg”).',
-      't-barcodeTitle':'Σάρωση barcode συνταγής ή κουτιού',
-      't-barcodeOptional':'(προαιρετικά)',
-      't-barcodeHelp':'Σάρωσε τον γραμμωτό κωδικό για να συμπληρωθεί αυτόματα.',
-      't-barcodeStart':'Άνοιγμα κάμερας',
-      't-qty':'Ποσότητα (τεμάχια/κουτιά)',
-      't-type':'Τύπος Φαρμάκου',
-      't-substance':'Δραστική Ουσία',
-      't-optional':'(προαιρετικά)',
-      't-doseEx':'Παράδειγμα δοσολογίας: Paracetamol 500mg.',
-      't-genericQ':'Αν δεν είναι διαθέσιμο το συγκεκριμένο εμπορικό, επιτρέπεις να σου προτείνουμε ισοδύναμο (γενόσημο);',
-      't-yes':'ΝΑΙ',
-      't-no':'ΟΧΙ',
-      't-accept':'Αποδέχομαι τους',
-      't-gdprLink':'Όρους Αναζήτησης & GDPR',
-      't-submit':'Υποβολή Αναζήτησης',
-      't-statusHome':'Αρχική',
-      't-statusHeading':'Κατάσταση αιτήματος',
-      't-statusPendingTitle':'Αναζητούμε το φαρμακό σου…',
-      't-statusPendingDesc':'Θα ειδοποιηθείς μόλις απαντήσει ένα φαρμακείο.',
-      't-statusListTitle':'Φαρμακεία με διαθεσιμότητα',
-      't-statusListDesc':'Επίλεξε το φαρμακείο που σε εξυπηρετεί για self pick-up.',
-      't-statusReservedTitle':'Το φαρμακείο σε περιμένει',
-      't-statusReservedHint':'Χρόνος κράτησης',
-      't-statusGenericBadge':'Διαθέσιμο γενόσημο',
-      't-statusExtendMain':'+15 λεπτά',
-      't-statusExtendNote':'1 φορά/ημέρα',
-      't-statusDirections':'Οδηγίες',
-      't-statusBackHome':'Επιστροφή στην αρχική',
-      't-statusEmptyTitle':'Δεν βρέθηκαν φαρμακεία',
-      't-statusEmptyBody':'Δεν εντοπίσαμε διαθέσιμα φαρμακεία αυτή τη στιγμή. Δοκίμασε ξανά σε λίγο ή άλλαξε τα στοιχεία της αναζήτησης.',
-      't-statusEmptyCta':'Δοκίμασε ξανά',
-      't-newSearch':'Νέα αναζήτηση',
-      't-faqLabel':'FAQ',
-      't-faqTitle':'Συχνές ερωτήσεις',
-      't-faqIntro':'Βρες γρήγορα απαντήσεις για τη MediRadar.',
-      't-faqQ1':'Πώς λειτουργεί η αναζήτηση διαθεσιμότητας;',
-      't-faqA1':'Συμπληρώνεις τα στοιχεία του φαρμάκου και ειδοποιούμε άμεσα τα κοντινά φαρμακεία. Μόλις υπάρξει διαθέσιμη απάντηση, λαμβάνεις ενημέρωση μέσα στην εφαρμογή.',
-      't-faqQ2':'Χρειάζεται να δημιουργήσω λογαριασμό;',
-      't-faqA2':'Μπορείς να ξεκινήσεις ως επισκέπτης. Για δέσμευση φαρμάκου ή παρακολούθηση ιστορικού, μπορείς να συνδεθείς με SMS, email ή SSO.',
-      't-faqQ3':'Πώς προστατεύονται τα δεδομένα μου;',
-      't-faqA3':'Χρησιμοποιούμε τα στοιχεία μόνο για την ολοκλήρωση του αιτήματός σου και εφαρμόζουμε μέτρα ασφαλείας σύμφωνα με τον GDPR. Μπορείς να διαβάσεις περισσότερα στην ενότητα Όροι & GDPR.',
-      't-footerTitle':'MediRadar',
-      't-footerDescription':'Δες τη διαθεσιμότητα φαρμάκων με λίγα κλικ και ενημερώσου σε πραγματικό χρόνο.',
-      't-footerNavFaq':'FAQ',
-      't-footerNavContact':'Επικοινωνία',
-      't-footerNavShare':'Κοινοποίηση',
-      't-shareHeading':'Μοιράσου τη MediRadar',
-      't-footerRights':'Όλα τα δικαιώματα διατηρούνται.',
-      't-contactTitle':'Επικοινωνία',
-      't-contactIntro':'Είμαστε εδώ για να βοηθήσουμε με απορίες και συνεργασίες.',
-      't-contactGeneral':'Στείλε email στο hello@mediradar.gr για γενικές πληροφορίες ή συνεργασίες.',
-      't-contactPrivacy':'Για θέματα προστασίας δεδομένων επικοινώνησε στο privacy@mediradar.gr.',
-      't-contactPhone':'Τηλέφωνο υποστήριξης: +30 210 123 4567 (Δευτέρα–Παρασκευή 09:00-17:00).',
-      't-contactLocation':'Έδρα MediRadar',
-      't-contactLinkedIn':'LinkedIn',
-      't-howTitle':'Πώς λειτουργεί το MediRadar',
-      't-continue':'Συνέχεια',
-      't-gdprTitle':'Πολιτική Προστασίας Δεδομένων & Όροι Αναζήτησης',
-      't-gdprAccept':'OK',
-      't-barcodeModalTitle':'Σάρωση barcode',
-      't-barcodeStop':'Διακοπή',
-      't-pushText':'🔔 Θες να λαμβάνεις ειδοποίηση όταν απαντά ένα φαρμακείο;',
-      't-pushNo':'Όχι τώρα',
-      't-pushYes':'Ενεργοποίηση',
-      'pending-overlay-headline':'Τα φαρμακεία ενημερώθηκαν!',
-      'pending-overlay-message':'Οι συνεργάτες μας ξεκινούν την αναζήτηση και θα ενημερώσουν σύντομα.',
-      'pending-overlay-status-text':'Αναμονή απαντήσεων',
-      'how-body':`
-1️⃣ Επιλέγεις τοποθεσία ή πόλη και φάρμακο
-2️⃣ Ειδοποιούμε άμεσα τα φαρμακεία που είναι κοντά σου
-3️⃣ Μόλις κάποιο απαντήσει, το βλέπεις στην οθόνη «Κατάσταση αιτήματος»
-4️⃣ Επιλέγεις φαρμακείο → κρατά το φάρμακο για 60’ να πας να το πάρεις
-5️⃣ Έχεις και +15’ παράταση μία φορά/ημέρα
-
-▶️ Η υπηρεσία για τον πολίτη είναι δωρεάν.
-▶️ Τα φαρμακεία το χρησιμοποιούν για να απαντούν χωρίς τηλέφωνα.
-`,
-      'gdpr-body':`
-Χρησιμοποιούμε τα στοιχεία που καταχωρείς (τοποθεσία/πόλη, όνομα φαρμάκου, προαιρετικό email) αποκλειστικά για να ειδοποιήσουμε φαρμακεία και να σου εμφανίσουμε τις απαντήσεις τους. Τα δεδομένα αποθηκεύονται με ασφαλή τρόπο σε υποδομή cloud (Supabase) και δεν διαβιβάζονται σε τρίτους εκτός από τα φαρμακεία που απαντούν στο αίτημά σου.
-
-Με την υποβολή αίτησης:
-• αποδέχεσαι ότι τα στοιχεία θα διαβιβαστούν στα φαρμακεία που θα απαντήσουν
-• αποδέχεσαι ότι αν δεσμεύσεις φαρμακείο, θα κρατήσει το φάρμακο για 60’ με βάση τη διαθεσιμότητα
-• μπορείς να ζητήσεις διαγραφή των δεδομένων σου στέλνοντας email στο privacy@mediradar.gr
-
-Για κάθε απορία, επικοινώνησε μαζί μας.
-`
-    },
-    en: {
-      't-pro':'For pharmacies',
-      't-langElLabel':'Greek',
-      't-langEnLabel':'English',
-      't-signinBTN':'Sign in',
-      't-hero':'Instantly check medicine availability in nearby pharmacies.',
-      't-heroLogoLabel':'MediRadar logo',
-      't-searchBTN':'Find Medicine',
-      't-howBTN':'How it works',
-      't-installBTN':'Install',
-      't-home':'Home',
-      't-searchTitle':'Medicine search',
-      't-city':'City',
-      't-cityPlaceholder':'Type a city',
-      't-nearMe':'📍 Near Me',
-      't-currentLocation':'Current Location',
-      't-geolocateUnsupported':'Geolocation is not supported on this device.',
-      't-geolocateDenied':'Location access was denied.',
-      't-geolocateUnavailable':'Location information is unavailable.',
-      't-geolocateTimeout':'Timed out while retrieving location.',
-      't-geolocateError':'Unable to retrieve location.',
-      't-geolocateLoading':'Locating…',
-      't-cityInvalid':'Please pick a valid city from the list.',
-      't-medname':'Medicine name',
-      't-formatTip':'Tip: Brand + dosage (e.g. “500mg”).',
-      't-barcodeTitle':'Scan prescription/box barcode',
-      't-barcodeOptional':'(optional)',
-      't-barcodeHelp':'Scan the barcode to auto-fill.',
-      't-barcodeStart':'Open camera',
-      't-qty':'Quantity (packs)',
-      't-type':'Medicine type',
-      't-substance':'Active substance',
-      't-optional':'(optional)',
-      't-doseEx':'Example dosage: Paracetamol 500mg.',
-      't-genericQ':'If this exact brand is not available, allow an equivalent (generic)?',
-      't-yes':'YES',
-      't-no':'NO',
-      't-accept':'I accept the',
-      't-gdprLink':'Search Terms & GDPR',
-      't-submit':'Send request',
-      't-statusHome':'Home',
-      't-statusHeading':'Request status',
-      't-statusPendingTitle':'We are contacting pharmacies…',
-      't-statusPendingDesc':'You will be notified as soon as a pharmacy responds.',
-      't-statusListTitle':'Pharmacies with availability',
-      't-statusListDesc':'Pick the pharmacy that suits you best.',
-      't-statusReservedTitle':'The pharmacy is waiting for you',
-      't-statusReservedHint':'Reservation time',
-      't-statusGenericBadge':'Generic available',
-      't-statusExtendMain':'+15 minutes',
-      't-statusExtendNote':'1 time/day',
-      't-statusDirections':'Directions',
-      't-statusBackHome':'Back to home',
-      't-statusEmptyTitle':'No pharmacies found',
-      't-statusEmptyBody':'We couldn’t find available pharmacies right now. Try again later or change your search details.',
-      't-statusEmptyCta':'Try again',
-      't-newSearch':'New search',
-      't-faqLabel':'FAQ',
-      't-faqTitle':'Frequently asked questions',
-      't-faqIntro':'Quick answers about MediRadar.',
-      't-faqQ1':'How does availability search work?',
-      't-faqA1':'You fill the medicine details and we notify nearby pharmacies. As soon as there is an answer, you see it in the app.',
-      't-faqQ2':'Do I need an account?',
-      't-faqA2':'You can start as a guest. For reservation or history, sign in with Email / SMS / SSO.',
-      't-faqQ3':'How is my data protected?',
-      't-faqA3':'We use your data only to complete your request and we apply GDPR measures.',
-      't-footerTitle':'MediRadar',
-      't-footerDescription':'Check medicine availability in a few clicks and get real-time updates.',
-      't-footerNavFaq':'FAQ',
-      't-footerNavContact':'Contact',
-      't-footerNavShare':'Share',
-      't-shareHeading':'Share MediRadar',
-      't-footerRights':'All rights reserved.',
-      't-contactTitle':'Contact',
-      't-contactIntro':'We’re here for questions and partnerships.',
-      't-contactGeneral':'Send an email to hello@mediradar.gr for general info or partnerships.',
-      't-contactPrivacy':'For privacy/GDPR please contact privacy@mediradar.gr.',
-      't-contactPhone':'Support phone: +30 210 123 4567 (Mon–Fri 09:00-17:00).',
-      't-contactLocation':'MediRadar HQ',
-      't-contactLinkedIn':'LinkedIn',
-      't-howTitle':'How MediRadar works',
-      't-continue':'Continue',
-      't-gdprTitle':'Data Protection Policy & Search Terms',
-      't-gdprAccept':'OK',
-      't-barcodeModalTitle':'Barcode scan',
-      't-barcodeStop':'Stop',
-      't-pushText':'🔔 Do you want a notification when a pharmacy responds?',
-      't-pushNo':'Not now',
-      't-pushYes':'Enable',
-      'pending-overlay-headline':'Pharmacies have been notified!',
-      'pending-overlay-message':'They are checking their stock and will reply shortly.',
-      'pending-overlay-status-text':'Waiting for responses',
-      'how-body':`
-1️⃣ Select location or city and medicine
-2️⃣ We instantly ping nearby pharmacies
-3️⃣ When one of them responds, you see it in “Request status”
-4️⃣ Choose pharmacy → it reserves the medicine for 60’
-5️⃣ You may extend by +15’ once/day
-
-▶️ Free for citizens.
-▶️ Pharmacies use it to answer without phone calls.
-`,
-      'gdpr-body':`
-We use the details you submit (location/city, medicine, optional email) only to notify pharmacies and to show you their answers. Data is stored securely in cloud infrastructure (Supabase) and is not shared with third parties apart from the pharmacies that respond.
-
-By submitting a request:
-• you accept that the data will be sent to responding pharmacies
-• you accept that if you reserve a pharmacy, it will keep the medicine for 60’
-• you can request deletion at privacy@mediradar.gr
-`
+    function showSearchView() {
+      if (!tabSearch || !tabHow || !searchCard || !howCard) return;
+      tabSearch.classList.add('active');
+      tabHow.classList.remove('active');
+      searchCard.style.display = 'block';
+      howCard.style.display = 'none';
     }
-  };
 
-  // ==========================
-  //  CITY LIST & LOCATION HELPERS
-  // ==========================
-  const LOCATION_STORAGE_KEY = 'mediradar-user-location';
-  const CITY_JSON_URL = './greek_cities.json';
-  const cityData = {
-    list: [],
-    normalizedMap: new Map()
-  };
-
-  function normalizeForSearch(value = '') {
-    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  }
-
-  function buildCityData(list) {
-    cityData.list = list;
-    cityData.normalizedMap = new Map();
-    list.forEach(city => {
-      const key = normalizeForSearch(city);
-      if (!cityData.normalizedMap.has(key)) {
-        cityData.normalizedMap.set(key, city);
-      }
-    });
-    state.cities = list;
-    return list;
-  }
-
-  async function ensureCityDataLoaded() {
-    if (cityData.list.length) return cityData.list;
-    try {
-      const response = await fetch(CITY_JSON_URL);
-      if (!response.ok) throw new Error(`Failed to load ${CITY_JSON_URL}`);
-      const json = await response.json();
-      const rawList = Array.isArray(json) ? json : Array.isArray(json?.cities) ? json.cities : [];
-      const sanitized = Array.from(new Set(rawList
-        .filter(item => typeof item === 'string')
-        .map(item => item.trim())
-        .filter(Boolean)))
-        .sort((a, b) => a.localeCompare(b, 'el', { sensitivity: 'base' }));
-      return buildCityData(sanitized);
-    } catch (error) {
-      console.error('Failed to load city suggestions', error);
-      return buildCityData([]);
+    function showHowView() {
+      if (!tabSearch || !tabHow || !searchCard || !howCard) return;
+      tabHow.classList.add('active');
+      tabSearch.classList.remove('active');
+      howCard.style.display = 'block';
+      searchCard.style.display = 'none';
     }
-  }
 
-  function findCityMatch(value) {
-    if (!value) return null;
-    const normalized = normalizeForSearch(value);
-    return cityData.normalizedMap.get(normalized) || null;
-  }
+    tabSearch?.addEventListener('click', showSearchView);
+    tabHow?.addEventListener('click', showHowView);
 
-  function loadStoredUserLocation() {
-    try {
-      const stored = localStorage.getItem(LOCATION_STORAGE_KEY);
-      if (!stored) return null;
-      const parsed = JSON.parse(stored);
-      if (parsed && typeof parsed.latitude === 'number' && typeof parsed.longitude === 'number') {
-        return {
-          latitude: Number(parsed.latitude),
-          longitude: Number(parsed.longitude),
-          accuracy: typeof parsed.accuracy === 'number' ? Number(parsed.accuracy) : undefined,
-          timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now()
-        };
-      }
-    } catch (error) {
-      console.warn('Failed to restore stored location', error);
-    }
-    return null;
-  }
+    showSearchView();
 
-  function persistUserLocation(coords) {
-    if (!coords) return null;
-    const location = {
-      latitude: Number(coords.latitude),
-      longitude: Number(coords.longitude),
-      accuracy: typeof coords.accuracy === 'number' ? Number(coords.accuracy) : undefined,
-      timestamp: Date.now()
-    };
-    state.userLocation = location;
-    window.userLocation = { ...location };
-    try {
-      localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(location));
-    } catch (error) {
-      console.warn('Failed to persist user location', error);
-    }
-    return location;
-  }
+    (() => {
+      const state = {
+        supabase: null,
+        currentRequestId: null,
+        pollingTimer: null,
+        responses: [],
+        reservation: { active: false, extendUsed: false, expiresAt: null, pharmacy: null },
+        uploadedMedia: { imageUrl: null, barcodeText: null }
+      };
+      let countdownInterval = null;
+      const form = document.getElementById('request-form');
+      const submitBtn = document.getElementById('submit-btn');
+      const extendBtn = document.getElementById('extend-btn');
 
-  function clearStoredUserLocation() {
-    state.userLocation = null;
-    delete window.userLocation;
-    try {
-      localStorage.removeItem(LOCATION_STORAGE_KEY);
-    } catch (error) {
-      console.warn('Failed to clear stored location', error);
-    }
-    const input = document.getElementById('city-input');
-    if (input) {
-      delete input.dataset.usingLocation;
-      delete input.dataset.locationLabel;
-      input.classList.remove('italic');
-    }
-  }
-
-  function getCurrentLocationLabel() {
-    return strings[state.lang]?.['t-currentLocation'] || 'Τρέχουσα Τοποθεσία';
-  }
-
-  function updateCityInputUi() {
-    const input = document.getElementById('city-input');
-    if (input) {
-      const placeholder = strings[state.lang]?.['t-cityPlaceholder'] || 'Πληκτρολόγησε πόλη';
-      input.placeholder = placeholder;
-      if (input.dataset.usingLocation === 'true') {
-        const label = getCurrentLocationLabel();
-        input.value = label;
-        input.dataset.locationLabel = label;
-        input.classList.add('italic');
+      if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
+        state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
       } else {
-        input.classList.remove('italic');
+        console.warn('Supabase configuration missing. Check env.js.');
       }
-    }
-    const geolocateButton = document.getElementById('geolocate-button');
-    if (geolocateButton) {
-      geolocateButton.textContent = strings[state.lang]?.['t-nearMe'] || '📍 Near Me';
-    }
-  }
 
-  function markCityInputAsLocation() {
-    const input = document.getElementById('city-input');
-    if (!input) return;
-    input.dataset.usingLocation = 'true';
-    updateCityInputUi();
-  }
+      form.addEventListener('submit', handleSubmit);
+      extendBtn.addEventListener('click', extendReservation);
 
-  function getGeolocationErrorMessage(error) {
-    if (!error || typeof error.code !== 'number') {
-      return strings[state.lang]?.['t-geolocateError'] || 'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.';
-    }
-    const messages = {
-      1: strings[state.lang]?.['t-geolocateDenied'] || 'Η πρόσβαση στην τοποθεσία απορρίφθηκε.',
-      2: strings[state.lang]?.['t-geolocateUnavailable'] || 'Η τοποθεσία δεν είναι διαθέσιμη.',
-      3: strings[state.lang]?.['t-geolocateTimeout'] || 'Λήξη χρόνου για τον εντοπισμό τοποθεσίας.'
-    };
-    return messages[error.code] || strings[state.lang]?.['t-geolocateError'] || 'Δεν ήταν δυνατός ο εντοπισμός τοποθεσίας.';
-  }
-
-  function resolveCitySelection() {
-    const input = document.getElementById('city-input');
-    const rawValue = input?.value?.trim() || '';
-    if (state.userLocation) {
-      return { type: 'location', label: getCurrentLocationLabel(), location: state.userLocation };
-    }
-    if (!rawValue) {
-      return { type: 'empty' };
-    }
-    const match = findCityMatch(rawValue);
-    if (match) {
-      if (input) input.value = match;
-      return { type: 'city', label: match };
-    }
-    return { type: 'invalid', attempted: rawValue };
-  }
-
-  async function initCityAutocomplete(options = {}) {
-    const { setButtonLoading } = options;
-    const input = document.getElementById('city-input');
-    const list = document.getElementById('ac-city');
-    const wrapper = input?.closest('[data-city-autocomplete]');
-    const geolocateButton = document.getElementById('geolocate-button');
-    if (!input || !list || !wrapper) {
-      return;
-    }
-
-    await ensureCityDataLoaded();
-    updateCityInputUi();
-
-    let suggestions = [];
-    let activeIndex = -1;
-
-    function hideSuggestions() {
-      list.classList.add('hidden');
-      list.innerHTML = '';
-      suggestions = [];
-      activeIndex = -1;
-    }
-
-    function highlightActive() {
-      Array.from(list.children).forEach((item, index) => {
-        item.classList.toggle('bg-slate-100', index === activeIndex);
-        item.classList.toggle('dark:bg-slate-700', index === activeIndex);
-      });
-    }
-
-    function showSuggestions(items) {
-      list.innerHTML = '';
-      if (!items.length) {
-        hideSuggestions();
-        return;
-      }
-      const frag = document.createDocumentFragment();
-      items.forEach(city => {
-        const option = document.createElement('div');
-        option.className = 'ac-item px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700';
-        option.textContent = city;
-        option.dataset.value = city;
-        option.addEventListener('mousedown', (event) => {
-          event.preventDefault();
-          clearStoredUserLocation();
-          input.value = city;
-          hideSuggestions();
-        });
-        frag.appendChild(option);
-      });
-      list.appendChild(frag);
-      list.classList.remove('hidden');
-      suggestions = items;
-      activeIndex = -1;
-    }
-
-    function filterSuggestions(query) {
-      const normalizedQuery = normalizeForSearch(query);
-      if (!normalizedQuery) {
-        return cityData.list.slice(0, 10);
-      }
-      return cityData.list.filter(city => normalizeForSearch(city).includes(normalizedQuery)).slice(0, 10);
-    }
-
-    input.addEventListener('input', () => {
-      const value = input.value || '';
-      if (input.dataset.usingLocation === 'true' && input.dataset.locationLabel !== value.trim()) {
-        clearStoredUserLocation();
-      }
-      const filtered = filterSuggestions(value);
-      if (filtered.length) {
-        showSuggestions(filtered);
-      } else {
-        hideSuggestions();
-      }
-    });
-
-    input.addEventListener('focus', () => {
-      if (input.dataset.usingLocation === 'true') {
-        input.select();
-        return;
-      }
-      const filtered = filterSuggestions(input.value || '');
-      if (filtered.length) {
-        showSuggestions(filtered);
-      }
-    });
-
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowDown') {
+      async function handleSubmit(event) {
         event.preventDefault();
-        if (!suggestions.length) {
-          const filtered = filterSuggestions(input.value || '');
-          if (filtered.length) showSuggestions(filtered);
-        }
-        if (suggestions.length) {
-          activeIndex = Math.min(activeIndex + 1, suggestions.length - 1);
-          highlightActive();
-        }
-      } else if (event.key === 'ArrowUp') {
-        if (suggestions.length) {
-          event.preventDefault();
-          activeIndex = Math.max(activeIndex - 1, 0);
-          highlightActive();
-        }
-      } else if (event.key === 'Enter') {
-        if (suggestions.length && activeIndex >= 0) {
-          event.preventDefault();
-          const city = suggestions[activeIndex];
-          clearStoredUserLocation();
-          input.value = city;
-          hideSuggestions();
-        } else {
-          const match = findCityMatch(input.value);
-          if (match) {
-            input.value = match;
-          }
-        }
-      } else if (event.key === 'Escape') {
-        hideSuggestions();
-      }
-    });
-
-    input.addEventListener('blur', () => {
-      setTimeout(() => {
-        hideSuggestions();
-        const match = findCityMatch(input.value);
-        if (match) {
-          input.value = match;
-        }
-      }, 120);
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!wrapper.contains(event.target)) {
-        hideSuggestions();
-      }
-    });
-
-    if (geolocateButton) {
-      geolocateButton.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-          alert(strings[state.lang]?.['t-geolocateUnsupported'] || 'Η συσκευή δεν υποστηρίζει γεωεντοπισμό.');
+        if (!state.supabase) {
+          alert('Δεν υπάρχει σύνδεση με τη βάση. Έλεγξε το env.js.');
           return;
         }
-        const loadingLabel = strings[state.lang]?.['t-geolocateLoading'] || 'Εντοπισμός…';
-        if (typeof setButtonLoading === 'function') {
-          setButtonLoading(geolocateButton, true, loadingLabel);
-        } else {
-          geolocateButton.disabled = true;
+
+        const fullName = document.getElementById('full-name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const city = document.getElementById('city').value.trim();
+        const medicine = document.getElementById('medicine').value.trim();
+        const quantity = Number(document.getElementById('quantity').value) || 1;
+        const notes = document.getElementById('notes').value.trim();
+        const allowGeneric = document.getElementById('allow-generic').checked;
+        const consent = document.getElementById('consent').checked;
+        const activeSubstance = document.getElementById('active-substance').value.trim();
+        const barcodeText = document.getElementById('barcode-input').value.trim();
+        const imageInput = document.getElementById('request-image');
+        const file = imageInput.files[0];
+
+        if (!fullName || !phone || !city || !medicine) {
+          alert('Συμπλήρωσε όλα τα υποχρεωτικά πεδία.');
+          return;
         }
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            if (typeof setButtonLoading === 'function') {
-              setButtonLoading(geolocateButton, false);
-            } else {
-              geolocateButton.disabled = false;
-            }
-            persistUserLocation(position.coords);
-            markCityInputAsLocation();
-            hideSuggestions();
-            input.blur();
-          },
-          (error) => {
-            if (typeof setButtonLoading === 'function') {
-              setButtonLoading(geolocateButton, false);
-            } else {
-              geolocateButton.disabled = false;
-            }
-            alert(getGeolocationErrorMessage(error));
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-        );
-      });
-    }
-  }
-
-  // ==========================
-  //  INIT
-  // ==========================
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Προστασία από διπλή εκτέλεση σε περίπτωση πολλαπλών script blocks
-    if(window.__mediradarInitDone__){
-      return;
-    }
-    window.__mediradarInitDone__ = true;
-    // theme
-    const html = document.documentElement;
-    const themeBtn = document.getElementById('theme-toggle');
-    const iconSun = document.getElementById('icon-sun');
-    const iconMoon = document.getElementById('icon-moon');
-    const pushToast = document.getElementById('push-toast');
-    const toastStack = document.getElementById('toast-stack');
-    const statusBaseClasses = ['text-slate-600','dark:text-slate-300'];
-    const statusSuccessClasses = ['text-emerald-600','dark:text-emerald-300'];
-    const statusErrorClasses = ['text-rose-600','dark:text-rose-300'];
-
-    /* Βοηθητικά για εμφανή μηνύματα κατά τη σύνδεση */
-    function showToast(message, tone='info'){
-      if(!toastStack){
-        alert(message);
-        return;
-      }
-      const resolvedTone = ['success','error','info'].includes(tone) ? tone : 'info';
-      const toast = document.createElement('div');
-      toast.classList.add('toast', `toast--${resolvedTone}`, 'toast--hide');
-      toast.textContent = message;
-      toastStack.appendChild(toast);
-      requestAnimationFrame(()=> toast.classList.remove('toast--hide'));
-      setTimeout(()=>{
-        toast.classList.add('toast--hide');
-        toast.addEventListener('transitionend', ()=> toast.remove(), { once: true });
-      }, 4200);
-    }
-
-    function setButtonLoading(button, isLoading, label='Φόρτωση…'){
-      if(!button) return;
-      if(isLoading){
-        if(!button.dataset.originalHtml){
-          button.dataset.originalHtml = button.innerHTML;
+        if (!consent) {
+          alert('Χρειάζεται να αποδεχτείς την επεξεργασία των στοιχείων.');
+          return;
         }
-        button.disabled = true;
-        button.setAttribute('aria-busy', 'true');
-        button.classList.add('opacity-60','pointer-events-none');
-        button.innerHTML = `<span class="flex items-center justify-center gap-2"><span class="btn-loading-indicator" aria-hidden="true"></span>${label}</span>`;
-      } else {
-        button.disabled = false;
-        button.setAttribute('aria-busy', 'false');
-        button.classList.remove('opacity-60','pointer-events-none');
-        if(button.dataset.originalHtml){
-          button.innerHTML = button.dataset.originalHtml;
-          delete button.dataset.originalHtml;
-        }
-      }
-    }
 
-    function setStatusMessage(element, message, tone='info'){
-      if(!element) return;
-      element.textContent = message || '';
-      element.classList.remove(...statusBaseClasses, ...statusSuccessClasses, ...statusErrorClasses);
-      if(tone === 'success'){
-        element.classList.add(...statusSuccessClasses);
-      } else if(tone === 'error'){
-        element.classList.add(...statusErrorClasses);
-      } else {
-        element.classList.add(...statusBaseClasses);
-      }
-    }
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Στέλνουμε το αίτημα…';
 
-    const AUTH_CHANNEL_PREFIX = 'mediradar_auth_channel_';
-    const AUTH_CHANNEL_EVENT = 'AUTH_SUCCESS';
-    const AUTH_CHANNEL_STORAGE_KEY = 'mediradar.auth.channel';
+        stopPolling();
+        clearCountdown();
+        resetStatusCard();
 
-    function detectAuthRedirect(){
-      try {
-        const hash = typeof window.location?.hash === 'string' ? window.location.hash : '';
-        const search = typeof window.location?.search === 'string' ? window.location.search : '';
-        const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
-        const searchParams = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
-        searchParams.forEach((value, key) => {
-          if(!params.has(key)) params.set(key, value);
-        });
-        const hasToken = params.has('access_token');
-        const type = (params.get('type') || '').toLowerCase();
-        const validTypes = ['magiclink', 'signup', 'recovery', 'invite'];
-        return hasToken || validTypes.includes(type);
-      } catch (err) {
-        console.warn('[auth] Failed to detect auth redirect', err);
-        return false;
-      }
-    }
+        const requestId = crypto.randomUUID();
+        let imageUrl = null;
 
-    function normalizeEmail(value){
-      return typeof value === 'string' ? value.trim().toLowerCase() : '';
-    }
-
-    function getAuthChannelName(identifier){
-      const normalized = normalizeEmail(identifier);
-      if(!normalized) return null;
-      const safe = normalized.replace(/[^a-z0-9]/g, '_');
-      return `${AUTH_CHANNEL_PREFIX}${safe}`;
-    }
-
-    function storeAuthChannelName(channelName){
-      try {
-        if(channelName){
-          localStorage.setItem(AUTH_CHANNEL_STORAGE_KEY, channelName);
-        }
-      } catch (err) {
-        console.warn('[auth] Failed to store auth channel name', err);
-      }
-    }
-
-    function clearStoredAuthChannelName(){
-      try {
-        localStorage.removeItem(AUTH_CHANNEL_STORAGE_KEY);
-      } catch (err) {
-        console.warn('[auth] Failed to clear stored auth channel name', err);
-      }
-    }
-
-    let authRealtimeChannel = null;
-    let authRealtimeChannelName = null;
-    let authBroadcastSent = false;
-    let authCleanupRegistered = false;
-    const authRedirectDetected = detectAuthRedirect();
-
-    async function cleanupAuthRealtimeChannel(){
-      if(authRealtimeChannel){
         try {
-          await authRealtimeChannel.unsubscribe();
-        } catch (err) {
-          console.warn('[auth] Failed to unsubscribe auth channel', err);
+          if (file) {
+            imageUrl = await uploadRequestImage(file, requestId);
+          }
+        } catch (error) {
+          console.error('Image upload failed', error);
+          alert('Δεν ήταν δυνατή η αποστολή της φωτογραφίας. Μπορείς να υποβάλεις το αίτημα χωρίς εικόνα.');
         }
+
+        const payload = {
+          id: requestId,
+          customer_name: fullName,
+          phone,
+          city,
+          medicine_name: medicine,
+          quantity,
+          notes: notes || null,
+          allow_generic: allowGeneric,
+          active_substance: activeSubstance || null,
+          image_url: imageUrl,
+          barcode_text: barcodeText || null,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        };
+
         try {
-          supabase?.removeChannel?.(authRealtimeChannel);
-        } catch (err) {
-          console.warn('[auth] Failed to remove auth channel', err);
+          const { data, error } = await state.supabase.from('requests').insert(payload).select().single();
+          if (error) throw error;
+          state.currentRequestId = data?.id || requestId;
+          state.uploadedMedia = { imageUrl, barcodeText: barcodeText || null };
+          updateMediaPreview();
+          updateResponseCount(0);
+          showStatusSection();
+          startPolling(state.currentRequestId);
+          fireConfetti();
+          form.reset();
+          imageInput.value = '';
+        } catch (error) {
+          console.error('Request insert failed', error);
+          alert('Κάτι πήγε στραβά. Δοκίμασε ξανά σε λίγο.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Ζήτα από τα φαρμακεία';
         }
       }
-      authRealtimeChannel = null;
-      authRealtimeChannelName = null;
-      clearStoredAuthChannelName();
-    }
 
-    async function subscribeToAuthChannel(email){
-      if(!supabase) return;
-      const channelName = getAuthChannelName(email);
-      if(!channelName) return;
-      await cleanupAuthRealtimeChannel();
-      storeAuthChannelName(channelName);
-      let channel;
-      try {
-        channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
-        channel.on('broadcast', { event: AUTH_CHANNEL_EVENT }, async () => {
-          await cleanupAuthRealtimeChannel();
-          try {
-            window.location.href = '/pharmacy.html';
-          } catch (err) {
-            console.warn('[auth] Failed to redirect after auth success', err);
-          }
+      async function uploadRequestImage(file, requestId) {
+        const safeName = (file.name || 'photo.jpg').toLowerCase().replace(/[^a-z0-9.\-_]/g, '-');
+        const path = `requests/${requestId}/${Date.now()}-${safeName}`;
+        const storage = state.supabase.storage.from('request-images');
+        const { error } = await storage.upload(path, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type || 'image/jpeg'
         });
-        authRealtimeChannel = channel;
-        authRealtimeChannelName = channelName;
-        await channel.subscribe(status => {
-          if(status === 'CHANNEL_ERROR' || status === 'CLOSED'){
-            cleanupAuthRealtimeChannel();
-          }
-        });
-      } catch (err) {
-        console.warn('[auth] Failed to subscribe to auth channel', err);
+        if (error) throw error;
+        const { data } = storage.getPublicUrl(path);
+        return data?.publicUrl || null;
       }
-    }
 
-    async function broadcastAuthSuccess(user){
-      if(!supabase || !user?.email || !authRedirectDetected || authBroadcastSent) return;
-      const channelName = getAuthChannelName(user.email);
-      if(!channelName) return;
-      let channel = null;
-      try {
-        channel = supabase.channel(channelName, { config: { broadcast: { ack: true } } });
-        await channel.subscribe();
-        await channel.send({
-          type: 'broadcast',
-          event: AUTH_CHANNEL_EVENT,
-          payload: {
-            email: user.email,
-            timestamp: new Date().toISOString()
-          }
-        });
-        authBroadcastSent = true;
-      } catch (err) {
-        console.warn('[auth] Failed to broadcast auth success', err);
-      } finally {
-        if(channel){
-          try {
-            await channel.unsubscribe();
-          } catch (unsubscribeErr) {
-            console.warn('[auth] Failed to unsubscribe auth broadcast channel', unsubscribeErr);
-          }
-          try {
-            supabase?.removeChannel?.(channel);
-          } catch (removeErr) {
-            console.warn('[auth] Failed to remove auth broadcast channel', removeErr);
-          }
+      function startPolling(requestId) {
+        stopPolling();
+        if (!requestId || !state.supabase) return;
+        fetchResponses();
+        state.pollingTimer = setInterval(fetchResponses, 5000);
+      }
+
+      function stopPolling() {
+        if (state.pollingTimer) {
+          clearInterval(state.pollingTimer);
+          state.pollingTimer = null;
         }
       }
-    }
 
-    function ensureAuthCleanupRegistered(){
-      if(authCleanupRegistered) return;
-      authCleanupRegistered = true;
-      window.addEventListener('beforeunload', () => {
-        cleanupAuthRealtimeChannel();
-      });
-    }
-
-    const supabaseUrl = window.SUPABASE_URL || window.ENV?.SUPABASE_URL;
-    const supabaseKey = window.SUPABASE_ANON_KEY || window.ENV?.SUPABASE_ANON_KEY;
-    const missingSupabaseMessage = 'Λείπουν τα στοιχεία Supabase (URL ή anon key). Ελέγξτε το env.js.';
-    let supabase = window.mediradarSupabase || null;
-    if(!supabase && window.supabase && supabaseUrl && supabaseKey){
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-      window.mediradarSupabase = supabase;
-    }
-    if(!supabase){
-      console.warn(`${missingSupabaseMessage} (url:${supabaseUrl?'ok':'—'}, anonKey:${supabaseKey?'ok':'—'}, supabaseJs:${window.supabase?'ok':'—'})`);
-    }
-    if(!state.supabase && supabase){
-      state.supabase = supabase;
-    }
-    if(supabase){
-      ensureAuthCleanupRegistered();
-    }
-
-    const authModals = {
-      users: document.getElementById('auth-modal-users'),
-      pharmacies: document.getElementById('auth-modal-pharmacies')
-    };
-    const authRoots = Array.from(document.querySelectorAll('[data-auth-root]'));
-    const pharmacyDashboardInfoElements = [];
-    const authOpenButtons = Array.from(document.querySelectorAll('[data-auth-open]'));
-    const authCloseButtons = Array.from(document.querySelectorAll('[data-auth-close]'));
-    const authHeader = document.querySelector('[data-auth-header]');
-    const headerOpenButtons = authHeader ? Array.from(authHeader.querySelectorAll('[data-auth-open]')) : [];
-    const authHeaderSession = document.querySelector('[data-auth-header-session]');
-    const authHeaderAvatar = document.querySelector('[data-auth-header-avatar]');
-    const authHeaderEmail = document.querySelector('[data-auth-header-email]');
-    const authHeaderLogout = document.querySelector('[data-auth-header-logout]');
-    const proInfoToggles = Array.from(document.querySelectorAll('[data-pro-info-toggle]'));
-    const demoLoginLink = document.getElementById('demo-login-link');
-
-    let activeAuthModal = null;
-    let authSession = null;
-    let proAccessRequested = false;
-    const PHARMACY_URL = '/pharmacy.html';
-    const pharmacyRedirectUrl = window.location.origin + '/pharmacy.html';
-    const pharmacyAccessInfoMessage = 'Ο λογαριασμός σου δεν έχει ενεργοποιηθεί για MediRadar Pro. Μπορείς να περιηγηθείς στο demo περιβάλλον.';
-    const pharmacyAccessActiveMessage = 'Ο λογαριασμός φαρμακείου είναι ενεργός.';
-    const pharmacyProfilePromises = new Map();
-    let pharmacyProfileUserId = null;
-
-    function addRoleCandidate(target, value){
-      if(!target || value === undefined || value === null) return;
-      if(Array.isArray(value)){
-        value.forEach(item => addRoleCandidate(target, item));
-        return;
-      }
-      if(typeof value === 'object'){
-        Object.values(value).forEach(item => addRoleCandidate(target, item));
-        return;
-      }
-      const normalized = value.toString().trim().toLowerCase();
-      if(normalized){
-        target.add(normalized);
-      }
-    }
-
-    function isTruthyFlag(value){
-      if(value === true || value === false) return value;
-      if(typeof value === 'number'){
-        return !Number.isNaN(value) && value !== 0;
-      }
-      if(typeof value === 'string'){
-        const normalized = value.trim().toLowerCase();
-        return normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'y' || normalized === 'enabled';
-      }
-      return false;
-    }
-
-    function userHasPharmacyAccess(session){
-      const user = session?.user;
-      if(!user) return false;
-      const roles = new Set();
-      [
-        user.role,
-        user.app_metadata?.role,
-        user.app_metadata?.roles,
-        user.user_metadata?.role,
-        user.user_metadata?.roles
-      ].forEach(source => addRoleCandidate(roles, source));
-      if(roles.has('pharmacy') || roles.has('pharmacy_admin')) return true;
-
-      const meta = user.user_metadata || {};
-      const appMeta = user.app_metadata || {};
-      const accessFlags = [
-        meta.pharmacy_access,
-        meta.pharmacyAccess,
-        meta.hasPharmacyAccess,
-        appMeta.pharmacy_access,
-        appMeta.pharmacyAccess
-      ];
-      if(accessFlags.some(isTruthyFlag)) return true;
-
-      if(meta.pharmacy_id || meta.pharmacyId || appMeta.pharmacy_id || appMeta.pharmacyId) return true;
-      if(isTruthyFlag(meta.demo) || isTruthyFlag(appMeta.demo_access)) return true;
-
-      return false;
-    }
-
-    function tryOpenPharmacyPortal(){
-      if(authSession?.user){
-        window.location.href = PHARMACY_URL;
-        return true;
-      }
-      return false;
-    }
-
-    function updatePharmacyInfoMessage(message){
-      pharmacyDashboardInfoElements.forEach(infoEl => {
-        if(!infoEl) return;
-        if(message){
-          infoEl.textContent = message;
-          infoEl.classList.remove('hidden');
-        } else {
-          infoEl.textContent = '';
-          infoEl.classList.add('hidden');
+      async function fetchResponses() {
+        if (!state.supabase || !state.currentRequestId || state.reservation.active) return;
+        const { data, error } = await state.supabase
+          .from('responses')
+          .select('*')
+          .eq('request_id', state.currentRequestId)
+          .order('created_at', { ascending: true });
+        if (error) {
+          console.error('Responses fetch error', error);
+          return;
         }
-      });
-    }
-
-    function loadPharmacyProfile(userId){
-      if(!supabase || !userId) return Promise.resolve(null);
-      if(pharmacyProfilePromises.has(userId)){
-        return pharmacyProfilePromises.get(userId);
+        state.responses = data || [];
+        renderResponses();
       }
-      const promise = (async () => {
+
+      function renderResponses() {
+        const list = document.getElementById('response-list');
+        list.innerHTML = '';
+        const hasResponses = state.responses.length > 0;
+        document.getElementById('waiting-message').classList.toggle('hidden', hasResponses);
+        document.getElementById('demo-placeholder').classList.toggle('hidden', hasResponses);
+        updateResponseCount(state.responses.length);
+        list.classList.toggle('hidden', !hasResponses);
+        if (!hasResponses) {
+          updateChipState();
+          return;
+        }
+        state.responses.forEach(resp => list.appendChild(createResponseCard(resp)));
+        updateChipState();
+      }
+
+      function createResponseCard(resp) {
+        const card = document.createElement('article');
+        card.className = 'response-card';
+        const availability = formatAvailability(resp.availability);
+        const meta = formatMetaLine(resp);
+        const notes = resp.notes?.trim() ? resp.notes.trim() : 'Χωρίς επιπλέον σημειώσεις.';
+        card.innerHTML = `
+          <div class="response-header">
+            <div>
+              <p class="pharmacy-name">${resp.pharmacy_name || 'Φαρμακείο'}</p>
+              ${meta ? `<p class="response-meta">${meta}</p>` : ''}
+            </div>
+            <span class="availability-pill ${availability.className}">${availability.label}</span>
+          </div>
+          <p class="response-notes">${notes}</p>
+          <button type="button" class="reserve-btn">Κράτηση σε αυτό το φαρμακείο</button>
+        `;
+        card.querySelector('.reserve-btn').addEventListener('click', () => handleReservation(resp));
+        return card;
+      }
+
+      async function handleReservation(resp) {
+        const confirmed = confirm(`Θέλεις να ολοκληρώσουμε την κράτηση στο ${resp.pharmacy_name || 'φαρμακείο'};`);
+        if (!confirmed) return;
+        stopPolling();
+        const pickupUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        state.reservation = { active: true, extendUsed: false, expiresAt: pickupUntil, pharmacy: resp };
         try {
-          const { data, error } = await supabase
-            .from('pharmacies')
-            .select('is_pro_active')
-            .eq('owner_id', userId)
-            .maybeSingle();
-          if(error && error.code !== 'PGRST116'){
-            throw error;
+          if (state.supabase) {
+            await state.supabase
+              .from('requests')
+              .update({
+                status: 'reserved',
+                chosen_pharmacy_id: resp.pharmacy_id ?? resp.id ?? null,
+                chosen_pharmacy_name: resp.pharmacy_name ?? null,
+                pickup_until: pickupUntil
+              })
+              .eq('id', state.currentRequestId);
           }
-          return data || null;
-        } catch (err) {
-          console.warn('[auth] Failed to load pharmacy profile', err);
-          return null;
+        } catch (error) {
+          console.warn('Reservation update failed', error);
         }
-      })();
-      pharmacyProfilePromises.set(userId, promise);
-      return promise;
-    }
-
-    async function updatePharmacySessionInfo(session){
-      const user = session?.user || null;
-      if(!supabase){
-        updatePharmacyInfoMessage('');
-        return;
+        showReservationBox(resp, pickupUntil);
       }
-      if(!user){
-        pharmacyProfileUserId = null;
-        pharmacyProfilePromises.clear();
-        updatePharmacyInfoMessage('');
-        return;
-      }
-      pharmacyProfileUserId = user.id;
-      updatePharmacyInfoMessage('');
-      const profile = await loadPharmacyProfile(user.id);
-      if(pharmacyProfileUserId !== user.id) return;
-      if(profile && profile.is_pro_active){
-        updatePharmacyInfoMessage(pharmacyAccessActiveMessage);
-      } else {
-        updatePharmacyInfoMessage(pharmacyAccessInfoMessage);
-      }
-    }
 
-
-    function getAuthUserLabel(user){
-      if(!user) return '';
-      return user.email || user.user_metadata?.name || user.phone || '';
-    }
-
-    function hideProInfoPanel(panel, toggle){
-      if(!panel) return;
-      const finalize = () => {
-        panel.classList.add('hidden');
-        panel.classList.remove('is-visible');
-        panel.removeEventListener('transitionend', finalize);
-      };
-      panel.addEventListener('transitionend', finalize, { once: true });
-      panel.classList.remove('is-visible');
-      toggle?.setAttribute('aria-expanded', 'false');
-    }
-
-    proInfoToggles.forEach(toggle => {
-      const root = toggle.closest('[data-auth-root]');
-      const panel = root?.querySelector('[data-pro-info-panel]');
-      if(!panel) return;
-      toggle.addEventListener('click', () => {
-        const isVisible = panel.classList.contains('is-visible') && !panel.classList.contains('hidden');
-        if(isVisible){
-          hideProInfoPanel(panel, toggle);
+      function showReservationBox(resp, pickupUntil) {
+        const box = document.getElementById('reservation-box');
+        document.getElementById('reservation-name').textContent = resp.pharmacy_name || 'Φαρμακείο';
+        const meta = formatMetaLine(resp);
+        const metaEl = document.getElementById('reservation-meta');
+        if (meta) {
+          metaEl.textContent = meta;
+          metaEl.classList.remove('hidden');
         } else {
-          panel.classList.remove('hidden');
-          requestAnimationFrame(()=> panel.classList.add('is-visible'));
-          toggle.setAttribute('aria-expanded', 'true');
+          metaEl.textContent = '';
+          metaEl.classList.add('hidden');
         }
-      });
-    });
+        document.getElementById('reservation-expired').classList.add('hidden');
+        document.getElementById('response-list').classList.add('hidden');
+        document.getElementById('demo-placeholder').classList.add('hidden');
+        document.getElementById('waiting-message').classList.add('hidden');
+        box.classList.remove('hidden');
+        extendBtn.disabled = false;
+        extendBtn.classList.remove('used');
+        startCountdown(pickupUntil);
+        updateChipState();
+      }
 
-    function openAuthModal(target='pharmacies'){
-      const modal = authModals[target] || authModals.pharmacies || authModals.users;
-      if(!modal) return;
-      activeAuthModal = modal;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.classList.add('overflow-hidden');
-      const globalStatus = modal.querySelector('[data-auth-status-global]');
-      if(globalStatus){
-        globalStatus.classList.add('hidden');
-        globalStatus.textContent = '';
-      }
-      setStatusMessage(modal.querySelector('[data-auth-status]'), '', 'info');
-    }
-
-    function closeAuthModal(modal = activeAuthModal){
-      if(!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      if(modal === activeAuthModal){
-        activeAuthModal = null;
-      }
-      const panel = modal.querySelector('[data-pro-info-panel]');
-      const toggle = modal.querySelector('[data-pro-info-toggle]');
-      hideProInfoPanel(panel, toggle);
-      if(modal.dataset && modal.dataset.authModal === 'pharmacies'){
-        proAccessRequested = false;
-      }
-      if(!document.querySelector('[data-auth-modal].flex')){
-        document.body.classList.remove('overflow-hidden');
-      }
-    }
-
-    function closeAuthModals(){
-      Object.values(authModals).forEach(closeAuthModal);
-    }
-
-    async function handleDemoLogin(event){
-      event?.preventDefault?.();
-      const modal = authModals.pharmacies || null;
-      if(modal){
-        openAuthModal('pharmacies');
-      }
-      const statusEl = modal?.querySelector('[data-auth-status]') || null;
-      const globalStatus = modal?.querySelector('[data-auth-status-global]') || null;
-      const emailInput = modal?.querySelector('#auth-pharm-email-input') || null;
-      const emailButton = modal?.querySelector('#auth-pharm-email-cta') || null;
-      if(globalStatus){
-        globalStatus.classList.add('hidden');
-        globalStatus.textContent = '';
-      }
-      if(emailInput){
-        emailInput.value = 'info@mediradar.gr';
-      }
-      if(!supabase){
-        showToast(missingSupabaseMessage, 'error');
-        setStatusMessage(statusEl, missingSupabaseMessage, 'error');
-        return;
-      }
-      setStatusMessage(statusEl, 'Γίνεται αποστολή demo magic link…', 'info');
-      setButtonLoading(emailButton, true, 'Αποστολή demo…');
-      try {
-        const { error } = await supabase.auth.signInWithOtp({
-          email: 'info@mediradar.gr',
-          options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
-        });
-        if(error) throw error;
-        await subscribeToAuthChannel('info@mediradar.gr');
-        const message = 'Στείλαμε demo magic link στο info@mediradar.gr';
-        showToast(message, 'success');
-        setStatusMessage(statusEl, message, 'success');
-      } catch (err) {
-        const message = `Αποτυχία demo σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
-        showToast(message, 'error');
-        setStatusMessage(statusEl, message, 'error');
-      } finally {
-        setButtonLoading(emailButton, false);
-      }
-    }
-
-    authOpenButtons.forEach(btn => {
-      btn.addEventListener('click', event => {
-        event.preventDefault();
-        const target = btn.dataset.authTarget || 'pharmacies';
-        if(target === 'pharmacies'){
-          proAccessRequested = true;
-          if(tryOpenPharmacyPortal()){
+      function startCountdown(isoString) {
+        clearCountdown();
+        const timerEl = document.getElementById('countdown-timer');
+        const expiredEl = document.getElementById('reservation-expired');
+        function tick() {
+          const diff = new Date(isoString).getTime() - Date.now();
+          if (diff <= 0) {
+            timerEl.textContent = '00:00';
+            expiredEl.classList.remove('hidden');
+            clearCountdown();
             return;
           }
-          openAuthModal('pharmacies');
-          updatePharmacySessionInfo(authSession);
-          return;
+          const mins = Math.floor(diff / 1000 / 60);
+          const secs = Math.floor((diff / 1000) % 60);
+          timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
-        openAuthModal(target);
-      });
-    });
-
-    authCloseButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const modal = btn.closest('[data-auth-modal]');
-        closeAuthModal(modal || undefined);
-      });
-    });
-
-    demoLoginLink?.addEventListener('click', handleDemoLogin);
-
-    document.addEventListener('keydown', event => {
-      if(event.key === 'Escape'){
-        closeAuthModal();
-      }
-    });
-
-    function updateAuthHeaderUI(user){
-      const loggedIn = !!user;
-      headerOpenButtons.forEach(btn => btn.classList.toggle('hidden', loggedIn));
-      if(authHeaderSession){
-        authHeaderSession.classList.toggle('hidden', !loggedIn);
-      }
-      if(authHeaderEmail){
-        authHeaderEmail.textContent = getAuthUserLabel(user);
-      }
-      if(authHeaderAvatar){
-        const label = (getAuthUserLabel(user) || 'Μ').trim();
-        authHeaderAvatar.textContent = label ? label.charAt(0).toUpperCase() : 'Μ';
-      }
-    }
-
-    async function signOutSafely(){
-      if(!supabase) return;
-      try {
-        await supabase.auth.signOut();
-        await cleanupAuthRealtimeChannel();
-      } catch (err) {
-        console.warn('signout error', err);
-      }
-    }
-
-    authHeaderLogout?.addEventListener('click', signOutSafely);
-
-    function toggleSessionViews(user){
-      const loggedIn = !!user;
-      authRoots.forEach(root => {
-        const formsWrapper = root.querySelector('[data-auth-forms]');
-        const successView = root.querySelector('[data-auth-success]');
-        const sessionWrapper = root.querySelector('[data-auth-session]');
-        const statusEl = root.querySelector('[data-auth-status]');
-        const userEmailEl = root.querySelector('[data-auth-user-email]');
-        const avatarEl = root.querySelector('[data-auth-avatar]');
-        if(loggedIn){
-          formsWrapper?.classList.add('hidden');
-          successView?.classList.add('hidden');
-          if(sessionWrapper){
-            sessionWrapper.classList.remove('hidden');
-            if(userEmailEl){ userEmailEl.textContent = getAuthUserLabel(user); }
-            if(avatarEl){
-              const initial = (getAuthUserLabel(user) || 'Μ').trim();
-              avatarEl.textContent = initial ? initial.charAt(0).toUpperCase() : 'Μ';
-            }
-          }
-          setStatusMessage(statusEl, '', 'info');
-        } else {
-          formsWrapper?.classList.remove('hidden');
-          sessionWrapper?.classList.add('hidden');
-          setStatusMessage(statusEl, '', 'info');
-        }
-      });
-    }
-
-    function applyAuthSession(session){
-      authSession = session || null;
-      const user = authSession?.user || null;
-      updateAuthHeaderUI(user);
-      toggleSessionViews(user);
-      updatePharmacySessionInfo(authSession);
-      if(user){
-        broadcastAuthSuccess(user).catch(err => console.warn('[auth] Failed to signal auth success', err));
+        tick();
+        countdownInterval = setInterval(tick, 1000);
       }
 
-      const hasAccess = userHasPharmacyAccess(authSession);
-      if(proAccessRequested && user){
-        proAccessRequested = false;
-        window.location.href = PHARMACY_URL;
-        return;
-      }
-
-      if(user && hasAccess){
-        window.location.href = PHARMACY_URL;
-        return;
-      }
-
-      if(user && activeAuthModal){
-        proAccessRequested = false;
-        const isPharmacyModal = activeAuthModal?.dataset?.authModal === 'pharmacies';
-        if(!isPharmacyModal){
-          setTimeout(()=> closeAuthModal(), 2000);
-        }
-      }
-    }
-
-    function resolveCopy(role){
-      if(role === 'pharmacies'){
-        return {
-          missingEmail: 'Αποτυχία σύνδεσης: συμπλήρωσε email φαρμακείου.',
-          sending: 'Γίνεται αποστολή magic link…',
-          success: 'Σου στείλαμε email σύνδεσης.',
-          google: 'Άνοιγμα Google για σύνδεση…'
-        };
-      }
-      return {
-        missingEmail: 'Αποτυχία σύνδεσης: συμπλήρωσε email.',
-        sending: 'Γίνεται αποστολή magic link…',
-        success: 'Σου στείλαμε email σύνδεσης.',
-        google: 'Άνοιγμα Google για σύνδεση…'
-      };
-    }
-
-    authRoots.forEach(root => {
-      const role = root.dataset.authRole || 'users';
-      const copy = resolveCopy(role);
-      const redirectUrl = role === 'pharmacies' ? pharmacyRedirectUrl : window.location.origin;
-      const form = root.querySelector('[data-auth-form]');
-      const emailInput = root.querySelector('input[type="email"]');
-      const emailButton = root.querySelector('[data-auth-email-button]');
-      const googleButton = root.querySelector('[data-auth-google]');
-      const statusEl = root.querySelector('[data-auth-status]');
-      const globalStatus = root.querySelector('[data-auth-status-global]');
-      const formsWrapper = root.querySelector('[data-auth-forms]');
-      const successView = root.querySelector('[data-auth-success]');
-      const logoutBtn = root.querySelector('[data-auth-logout]');
-      const dashboardButton = root.querySelector('[data-auth-open-dashboard]');
-      const dashboardInfo = root.querySelector('[data-auth-dashboard-info]');
-
-      logoutBtn?.addEventListener('click', signOutSafely);
-
-      if(role === 'pharmacies'){
-        if(dashboardButton){
-          dashboardButton.addEventListener('click', () => {
-            window.location.href = PHARMACY_URL;
-          });
-        }
-        if(dashboardInfo){
-          pharmacyDashboardInfoElements.push(dashboardInfo);
+      function clearCountdown() {
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
         }
       }
 
-      if(!supabase && statusEl){
-        setStatusMessage(statusEl, missingSupabaseMessage, 'error');
-      }
-
-      form?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const email = emailInput?.value?.trim();
-        if(!email){
-          showToast(copy.missingEmail, 'error');
-          setStatusMessage(statusEl, copy.missingEmail, 'error');
-          return;
-        }
-        if(!supabase){
-          const message = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
-          showToast(message, 'error');
-          setStatusMessage(statusEl, missingSupabaseMessage, 'error');
-          return;
-        }
-        if(globalStatus){
-          globalStatus.classList.add('hidden');
-          globalStatus.textContent = '';
-        }
-        setStatusMessage(statusEl, copy.sending, 'info');
-        setButtonLoading(emailButton, true, 'Αποστολή…');
+      async function extendReservation() {
+        if (!state.reservation.active || state.reservation.extendUsed) return;
+        const newIso = new Date(new Date(state.reservation.expiresAt).getTime() + 15 * 60 * 1000).toISOString();
+        state.reservation.extendUsed = true;
+        state.reservation.expiresAt = newIso;
+        extendBtn.disabled = true;
+        extendBtn.classList.add('used');
+        startCountdown(newIso);
         try {
-          // Επιλογή Α (ενεργή): Magic Link μέσω Supabase
-          const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: { emailRedirectTo: redirectUrl }
-          });
-          // Επιλογή Β (εναλλακτική): Google OAuth μέσω Supabase
-          // const { data, error } = await supabase.auth.signInWithOAuth({
-          //   provider: 'google',
-          //   options: { redirectTo: redirectUrl }
-          // });
-          if(error) throw error;
-          await subscribeToAuthChannel(email);
-          const successMessage = copy.success;
-          showToast(successMessage, 'success');
-          setStatusMessage(statusEl, successMessage, 'success');
-          if(emailInput){ emailInput.value = ''; }
-          if(formsWrapper && successView){
-            successView.classList.remove('hidden');
-            formsWrapper.classList.add('hidden');
-            setTimeout(()=>{
-              successView.classList.add('hidden');
-              formsWrapper.classList.remove('hidden');
-            }, 4200);
+          if (state.supabase && state.currentRequestId) {
+            await state.supabase
+              .from('requests')
+              .update({ pickup_until: newIso })
+              .eq('id', state.currentRequestId);
           }
-        } catch (err) {
-          const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
-          showToast(message, 'error');
-          setStatusMessage(statusEl, message, 'error');
-        } finally {
-          setButtonLoading(emailButton, false);
-        }
-      });
-
-      googleButton?.addEventListener('click', async event => {
-        event.preventDefault();
-        if(!supabase){
-          const message = 'Αποτυχία σύνδεσης: δεν υπάρχει ρύθμιση Supabase.';
-          showToast(message, 'error');
-          setStatusMessage(statusEl, missingSupabaseMessage, 'error');
-          return;
-        }
-        if(globalStatus){
-          globalStatus.classList.add('hidden');
-          globalStatus.textContent = '';
-        }
-        setStatusMessage(statusEl, copy.google, 'info');
-        setButtonLoading(googleButton, true, 'Σύνδεση…');
-        try {
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: redirectUrl }
-          });
-          if(error) throw error;
-          if(data?.url){
-            window.location.assign(data.url);
-          } else {
-            showToast('Άνοιξε νέο παράθυρο Google για να συνεχίσεις.', 'info');
-          }
-        } catch (err) {
-          const message = `Αποτυχία σύνδεσης: ${err?.message || 'Άγνωστο σφάλμα.'}`;
-          showToast(message, 'error');
-          setStatusMessage(statusEl, message, 'error');
-        } finally {
-          setButtonLoading(googleButton, false);
-        }
-      });
-    });
-
-    if(supabase){
-      supabase.auth.getSession()
-        .then(({ data }) => applyAuthSession(data?.session || null))
-        .catch(()=> applyAuthSession(null));
-      supabase.auth.onAuthStateChange((_event, session) => {
-        applyAuthSession(session || null);
-      });
-    } else {
-      applyAuthSession(null);
-    }
-    function setTheme(mode){
-      const dark = mode==='dark';
-      html.classList.toggle('dark', dark);
-      iconSun.classList.toggle('hidden', !dark);
-      iconMoon.classList.toggle('hidden', dark);
-      localStorage.setItem('mediradar-theme', dark?'dark':'light');
-    }
-
-    // fill footer year
-    const fy = document.getElementById('footer-year');
-    if (fy) fy.textContent = new Date().getFullYear();
-
-    state.userLocation = loadStoredUserLocation();
-    if (state.userLocation) {
-      window.userLocation = { ...state.userLocation };
-    }
-
-    await initCityAutocomplete({ setButtonLoading });
-    if (state.userLocation) {
-      markCityInputAsLocation();
-    } else {
-      updateCityInputUi();
-    }
-
-    // Lang buttons
-    const langEl = document.getElementById('lang-el');
-    const langEn = document.getElementById('lang-en');
-    langEl.addEventListener('click', ()=>{ state.lang='el'; localStorage.setItem('mediradar-lang','el'); applyLang(); });
-    langEn.addEventListener('click', ()=>{ state.lang='en'; localStorage.setItem('mediradar-lang','en'); applyLang(); });
-    applyLang();
-
-    // CTA
-    const ctaSearch = document.getElementById('cta-search');
-    const splash = document.getElementById('splash');
-    const app = document.getElementById('app');
-    const backBtns = document.querySelectorAll('[data-go-home]');
-
-    const openSearchExperience = () => {
-      if (splash && app) {
-        splash.classList.add('hidden');
-        app.classList.remove('hidden');
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    if (ctaSearch) {
-      ctaSearch.addEventListener('click', openSearchExperience);
-    }
-    backBtns.forEach(btn=> btn.addEventListener('click', ()=>{
-      app.classList.add('hidden');
-      splash.classList.remove('hidden');
-      document.getElementById('results').classList.add('hidden');
-      history.replaceState(null,'',location.pathname);
-    }));
-
-    // contact modal
-    const contactModal = document.getElementById('contact-modal');
-    document.querySelectorAll('[data-contact-open]').forEach(b=> b.addEventListener('click', ()=>{
-      contactModal.classList.remove('hidden');
-      contactModal.classList.add('flex');
-    }));
-    document.querySelectorAll('[data-contact-close]').forEach(b=> b.addEventListener('click', ()=>{
-      contactModal.classList.add('hidden');
-      contactModal.classList.remove('flex');
-    }));
-
-    // how modal
-    const howModal = document.getElementById('modal-how');
-    document.getElementById('cta-how').addEventListener('click', ()=>{
-      howModal.classList.remove('hidden');
-      howModal.classList.add('flex');
-      document.getElementById('how-body').textContent = strings[state.lang]['how-body'];
-    });
-    document.getElementById('how-close').addEventListener('click', ()=>{ howModal.classList.add('hidden'); howModal.classList.remove('flex'); });
-    document.getElementById('how-ok').addEventListener('click', ()=>{ howModal.classList.add('hidden'); howModal.classList.remove('flex'); });
-
-    // gdpr
-    const gdprModal = document.getElementById('gdpr-modal');
-    document.getElementById('gdpr-open').addEventListener('click', ()=>{
-      gdprModal.classList.remove('hidden');
-      gdprModal.classList.add('flex');
-      document.getElementById('gdpr-body').textContent = strings[state.lang]['gdpr-body'];
-    });
-    document.getElementById('gdpr-close').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
-    document.getElementById('gdpr-ok').addEventListener('click', ()=>{ gdprModal.classList.add('hidden'); gdprModal.classList.remove('flex'); });
-
-    /* ========== Barcode scanning ========== */
-    const barcodeModal = document.getElementById('barcode-modal');
-    const barcodeStartBtn = document.getElementById('barcode-start');
-    const barcodeCloseBtn = document.getElementById('barcode-close');
-    const barcodeStopBtn = document.getElementById('barcode-stop');
-    const barcodeStatus = document.getElementById('barcode-status');
-    const barcodeVideo = document.getElementById('barcode-video');
-    const barcodeInput = document.getElementById('barcode-value');
-    let barcodeStream = null;
-    let barcodeDetector = null;
-    let barcodeActive = false;
-    const barcodeFormats = ['ean_13','ean_8','code_128','code_39','qr_code','upc_a','upc_e','itf','data_matrix','pdf417'];
-
-    function setBarcodeStatus(key, value){
-      if(!barcodeStatus) return;
-      const txt = t(key);
-      barcodeStatus.textContent = (value !== undefined && txt.includes('%s')) ? txt.replace('%s', value) : txt;
-    }
-    pushDeny.addEventListener('click', ()=>{
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-    });
-    pushAllow.addEventListener('click', async ()=>{
-      // απλή επίδειξη
-      pushToast.classList.add('hidden');
-      localStorage.setItem('mediradar-push-dismissed','1');
-      if ('Notification' in window) {
-        const perm = await Notification.requestPermission();
-        if (perm === 'granted') {
-          new Notification('Θα σε ενημερώσουμε όταν απαντήσει φαρμακείο.');
+        } catch (error) {
+          console.warn('Extend update failed', error);
         }
       }
-    });
 
-    // barcode modal
-    initBarcode();
-
-    // Supabase
-    if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
-      state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    }
-
-    // Submit
-    document.getElementById('submitBtn').addEventListener('click', onSubmitRequest);
-
-    // Results actions
-    document.getElementById('newSearch').addEventListener('click', resetToSearch);
-    document.getElementById('status-empty-btn').addEventListener('click', ()=> {
-      document.getElementById('results-empty').classList.add('hidden');
-      document.getElementById('results-pending').classList.remove('hidden');
-      if (state.currentRequestId) startPolling(state.currentRequestId);
-    });
-    document.getElementById('pm-confirm').addEventListener('click', confirmReservationFromModal);
-
-    // Install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      state.deferredPrompt = e;
-      const btn = document.getElementById('cta-install');
-      btn.classList.remove('hidden');
-      btn.addEventListener('click', async () => {
-        state.deferredPrompt.prompt();
-        const { outcome } = await state.deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          btn.classList.add('hidden');
-          state.deferredPrompt = null;
-        }
-      });
-    });
-
-    // Extend button
-    document.getElementById('extend-btn').addEventListener('click', extendReservation);
-
-    // Close results modal
-    document.getElementById('results-modal-close').addEventListener('click', closeResultsModal);
-    document.querySelectorAll('[data-results-close]').forEach(e=>e.addEventListener('click', closeResultsModal));
-
-    // pharmacy modal close
-    document.getElementById('pm-close').addEventListener('click', ()=>{
-      document.getElementById('pharm-modal').classList.add('hidden');
-      document.getElementById('pharm-modal').classList.remove('flex');
-    });
-
-  });
-
-  function applyLang() {
-    const all = document.querySelectorAll('[id^="t-"], #pending-overlay-headline, #pending-overlay-message, #pending-overlay-status-text');
-    all.forEach(el=>{
-      const id = el.id;
-      const val = strings[state.lang][id];
-      if (val) el.textContent = val;
-    });
-    // how / gdpr bodies
-    const howBody = document.getElementById('how-body');
-    if (howBody && !howBody.classList.contains('hidden')) howBody.textContent = strings[state.lang]['how-body'];
-    const gdprBody = document.getElementById('gdpr-body');
-    if (gdprBody && !gdprBody.classList.contains('hidden')) gdprBody.textContent = strings[state.lang]['gdpr-body'];
-
-    // lang buttons active
-    document.getElementById('lang-el').setAttribute('data-active', state.lang==='el');
-    document.getElementById('lang-en').setAttribute('data-active', state.lang==='en');
-
-    updateCityInputUi();
-  }
-
-  // ==========================
-  //  SUBMIT REQUEST
-  // ==========================
-  async function onSubmitRequest() {
-    const cityInput = document.getElementById('city-input');
-    const citySelection = resolveCitySelection();
-    const name = document.getElementById('medicine-name').value.trim();
-    const qty = parseInt(document.getElementById('quantity').value,10) || 1;
-    const type = document.getElementById('medicine-type').value.trim();
-    const substance = document.getElementById('active-substance').value.trim();
-    const barcode = document.getElementById('barcode-value').value.trim();
-    const allowGeneric = document.querySelector('input[name="allow-generic"]:checked')?.value === 'YES';
-    const gdpr = document.getElementById('gdpr-checkbox').checked;
-
-    if (citySelection.type === 'invalid') {
-      alert(strings[state.lang]?.['t-cityInvalid'] || (state.lang==='el' ? 'Επίλεξε μια έγκυρη πόλη από τη λίστα.' : 'Select a valid city from the list.'));
-      cityInput?.focus();
-      return;
-    }
-
-    if (citySelection.type === 'empty' || !name || !gdpr) {
-      alert(state.lang==='el' ? 'Επίλεξε τοποθεσία ή πόλη, συμπλήρωσε φάρμακο και αποδέξου τους όρους.' : 'Select location or city, add the medicine and accept the terms.');
-      if (citySelection.type === 'empty') {
-        cityInput?.focus();
+      function resetStatusCard() {
+        state.responses = [];
+        state.reservation = { active: false, extendUsed: false, expiresAt: null, pharmacy: null };
+        document.getElementById('response-list').innerHTML = '';
+        document.getElementById('response-list').classList.add('hidden');
+        document.getElementById('reservation-box').classList.add('hidden');
+        document.getElementById('waiting-message').classList.remove('hidden');
+        document.getElementById('demo-placeholder').classList.remove('hidden');
+        document.getElementById('waiting-chip').classList.remove('chip-success');
+        document.getElementById('waiting-chip').textContent = 'Αναμονή απαντήσεων από φαρμακεία ⏳';
+        document.getElementById('reservation-expired').classList.add('hidden');
+        extendBtn.disabled = true;
+        extendBtn.classList.remove('used');
+        state.uploadedMedia = { imageUrl: null, barcodeText: null };
+        updateMediaPreview();
       }
-      return;
-    }
 
-    // show pending
-    showPendingOverlay();
-
-    // insert to supabase
-    let reqId = crypto.randomUUID();
-    const payload = {
-      id: reqId,
-      city: citySelection.label,
-      medicine_name: name,
-      quantity: qty,
-      medicine_type: type || null,
-      active_substance: substance || null,
-      barcode: barcode || null,
-      allow_generic: allowGeneric,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    };
-
-    if (state.supabase) {
-      const { error } = await state.supabase.from('requests').insert(payload);
-      if (error) {
-        console.error(error);
-      }
-    }
-
-    state.currentRequestId = reqId;
-    state.lastResponses = [];
-    startPolling(reqId);
-
-    document.getElementById('results').classList.remove('hidden');
-    document.getElementById('results-pending').classList.remove('hidden');
-    document.getElementById('results-list').classList.add('hidden');
-    document.getElementById('results-empty').classList.add('hidden');
-  }
-
-  function showPendingOverlay() {
-    const overlay = document.getElementById('pending-overlay');
-    overlay.classList.remove('hidden');
-    overlay.classList.add('flex');
-    state.pendingSeconds = 0;
-    if (state.pendingInterval) clearInterval(state.pendingInterval);
-    state.pendingInterval = setInterval(()=>{
-      state.pendingSeconds++;
-      document.getElementById('pending-overlay-elapsed').textContent = state.pendingSeconds + 's';
-    },1000);
-  }
-  function hidePendingOverlay() {
-    const overlay = document.getElementById('pending-overlay');
-    overlay.classList.add('hidden');
-    overlay.classList.remove('flex');
-    if (state.pendingInterval) {
-      clearInterval(state.pendingInterval);
-      state.pendingInterval = null;
-    }
-  }
-
-  // ==========================
-  //  POLLING
-  // ==========================
-  function startPolling(requestId) {
-    if (!requestId || !state.supabase) return;
-    if (state.pollingTimer) clearInterval(state.pollingTimer);
-    state.pollingStartedAt = Date.now();
-    pollOnce(requestId);
-    state.pollingTimer = setInterval(()=> pollOnce(requestId), 5000);
-  }
-
-  async function pollOnce(requestId) {
-    if (!state.supabase) return;
-    const { data, error } = await state.supabase.from('responses').select('*').eq('request_id', requestId).order('created_at', { ascending: true });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    if (data && data.length) {
-      state.lastResponses = data;
-      renderResponses(data);
-    } else {
-      // after X seconds show empty
-      const elapsed = (Date.now() - state.pollingStartedAt)/1000;
-      if (elapsed > 30) {
-        hidePendingOverlay();
-        document.getElementById('results-pending').classList.add('hidden');
-        document.getElementById('results-empty').classList.remove('hidden');
-      }
-    }
-
-    function fmt(s){const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`;}
-    function stopPickupTimer(){ if(pInt){clearInterval(pInt); pInt=null;} pickupBox?.classList.add('hidden'); }
-    function startPickupTimer(sec){
-      setResultsState('reserved');
-      remaining=sec; pickupTimerEl.textContent=fmt(remaining);
-      const last=localStorage.getItem('pickup-extend-date'); const today=new Date().toISOString().slice(0,10);
-      extendBtn.disabled=(last===today); extendBtn.classList.toggle('opacity-50',extendBtn.disabled);
-      if(pInt) clearInterval(pInt);
-      pInt=setInterval(()=>{remaining--; if(remaining<=0){stopPickupTimer(); return;} pickupTimerEl.textContent=fmt(remaining)},1000);
-    }
-    if(extendBtn){
-      extendBtn.onclick=async ()=>{
-        if(!canUseExtend()){
-          updateExtendAvailability();
-          return;
-        }
-        remaining+=15*60; pickupTimerEl.textContent=fmt(remaining);
-        writeExtendTimestamp(Date.now());
-        updateExtendAvailability();
-        if(hasSupabase() && window.currentRequest?.id){
-          const newUntil = new Date(Date.now()+remaining*1000).toISOString();
-          await sb().from('requests').update({ pickup_until: newUntil }).eq('id', window.currentRequest.id);
-        }
-      };
-    }
-
-    statusEmptyBtn?.addEventListener('click', ()=>{
-      hidePending();
-      results.classList.add('hidden');
-      resultsPending?.classList.remove('hidden');
-      resultsListWrap?.classList.add('hidden');
-      resultsEmpty?.classList.add('hidden');
-      pickupBox?.classList.add('hidden');
-      selectedPharmacy = null;
-      window.scrollTo({ top: 0, behavior:'smooth' });
-    });
-  }
-
-  // ==========================
-  //  PHARMACY MODAL / RESERVE
-  // ==========================
-  function openPharmacyModal(resp) {
-    state.reservation.pharmacy = resp;
-    const modal = document.getElementById('pharm-modal');
-    document.getElementById('pm-title').textContent = resp.pharmacy_name || 'Φαρμακείο';
-    document.getElementById('pm-address').textContent = (state.lang==='el'?'Διεύθυνση: ':'Address: ') + (resp.pharmacy_address || '-');
-    const mapsBtn = document.getElementById('pm-maps');
-    if (resp.latitude && resp.longitude) {
-      mapsBtn.href = `https://maps.google.com/?q=${resp.latitude},${resp.longitude}`;
-      mapsBtn.classList.remove('opacity-50','pointer-events-none');
-    } else if (resp.pharmacy_address) {
-      const q = encodeURIComponent(resp.pharmacy_address);
-      mapsBtn.href = `https://maps.google.com/?q=${q}`;
-      mapsBtn.classList.remove('opacity-50','pointer-events-none');
-    } else {
-      mapsBtn.href = '#';
-      mapsBtn.classList.add('opacity-50','pointer-events-none');
-    }
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-
-  async function confirmReservationFromModal() {
-    const resp = state.reservation.pharmacy;
-    if (!resp) return;
-    const modal = document.getElementById('pharm-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-
-    // update request to reserved
-    if (state.supabase && state.currentRequestId) {
-      const pickupUntil = new Date(Date.now() + 60*60*1000).toISOString();
-      const { error } = await state.supabase.from('requests').update({
-        status: 'reserved',
-        chosen_pharmacy: resp.pharmacy_id || resp.id || null,
-        pickup_until: pickupUntil
-      }).eq('id', state.currentRequestId);
-      if (error) console.error(error);
-      startCountdown(pickupUntil);
-      showReservationBox(resp, pickupUntil);
-      showCelebration();
-    } else {
-      const pickupUntil = new Date(Date.now() + 60*60*1000).toISOString();
-      startCountdown(pickupUntil);
-      showReservationBox(resp, pickupUntil);
-      showCelebration();
-    }
-  }
-
-  function showReservationBox(resp, pickupUntil) {
-    document.getElementById('pickup-box').classList.remove('hidden');
-    document.getElementById('results-list').classList.add('hidden');
-    document.getElementById('status-reserved-name').textContent = resp.pharmacy_name || 'Pharmacy';
-    document.getElementById('status-reserved-address').textContent = resp.pharmacy_address || '';
-    if (resp.has_generic) {
-      document.getElementById('status-reserved-generic').classList.remove('hidden');
-    } else {
-      document.getElementById('status-reserved-generic').classList.add('hidden');
-    }
-
-    async function renderResults(items){
-      resultsList.innerHTML='';
-      items.forEach(item=>{
-        const ph=item.pharmacy || {};
-        const card = document.createElement('article');
-        card.className = 'result-card flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/50 px-4 py-4 shadow-soft';
-        card.innerHTML = `
-          <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-600 grid place-items-center shrink-0">
-            <span aria-hidden="true">💊</span>
-          </div>
-          <div class="flex flex-col flex-1 min-w-0 text-left">
-            <p class="font-semibold text-slate-900 dark:text-slate-100 truncate">${ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy')}</p>
-            <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${ph.address || '—'}</p>
-          </div>
-          <div class="flex flex-col items-end gap-2 shrink-0">
-            ${item.is_generic ? `<span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 text-xs font-semibold status-generic-label-wrapper"><span class="status-generic-label">${t('statusGenericShort')}</span></span>` : ''}
-            <button class="select-pharm status-accept px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition">
-              <span class="status-accept-label">${t('statusAccept')}</span>
-            </button>
-          </div>`;
-        card.dataset.name = ph.name || (state.lang==='el'?'Φαρμακείο':'Pharmacy');
-        card.dataset.addr = ph.address || '';
-        card.dataset.tel  = ph.phone || '';
-        card.dataset.lat  = ph.lat || '';
-        card.dataset.lng  = ph.lng || '';
-        card.dataset.generic = item.is_generic ? 'true' : 'false';
-        resultsList.appendChild(card);
-      });
-      if(items.length){
-        setResultsState('list');
-      }else{
-        setResultsState('empty');
-      }
-    }
-    state.reservation.active = true;
-    state.reservation.expiresAt = pickupUntil;
-    state.reservation.extendUsed = false;
-  }
-
-  let countdownInterval = null;
-  function startCountdown(iso) {
-    if (countdownInterval) clearInterval(countdownInterval);
-    function update(){
-      const now = Date.now();
-      const diff = new Date(iso).getTime() - now;
-      if (diff <= 0) {
-        clearInterval(countdownInterval);
-        document.getElementById('pickup-timer').textContent = '00:00';
-        return;
-      }
-      const mins = Math.floor(diff/1000/60);
-      const secs = Math.floor((diff/1000)%60);
-      document.getElementById('pickup-timer').textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-    }
-    update();
-    countdownInterval = setInterval(update, 1000);
-  }
-
-  async function extendReservation() {
-    if (!state.reservation.active || state.reservation.extendUsed) return;
-    const newIso = new Date(new Date(state.reservation.expiresAt).getTime() + 15*60*1000).toISOString();
-    state.reservation.expiresAt = newIso;
-    state.reservation.extendUsed = true;
-    startCountdown(newIso);
-    if (state.supabase && state.currentRequestId) {
-      await state.supabase.from('requests').update({
-        pickup_until: newIso
-      }).eq('id', state.currentRequestId);
-    }
-    alert(state.lang==='el' ? 'Η κράτηση παρατάθηκε για 15 λεπτά.' : 'Reservation extended by 15 minutes.');
-  }
-
-  function resetToSearch() {
-    document.getElementById('results').classList.add('hidden');
-    document.getElementById('results-pending').classList.add('hidden');
-    document.getElementById('results-list').classList.add('hidden');
-    document.getElementById('results-empty').classList.add('hidden');
-    document.getElementById('pickup-box').classList.add('hidden');
-    state.currentRequestId = null;
-    if (state.pollingTimer) { clearInterval(state.pollingTimer); state.pollingTimer=null; }
-  }
-
-  function showCelebration() {
-    const ov = document.getElementById('celebration-overlay');
-    ov.classList.remove('hidden');
-    ov.classList.add('flex');
-    const emojiContainer = ov.querySelector('[data-emoji-container]');
-    emojiContainer.innerHTML = '';
-    for (let i=0;i<9;i++){
-      const span = document.createElement('span');
-      span.className = 'floating-emoji';
-      span.textContent = ['🎉','🎊','💊','💚','✅'][Math.floor(Math.random()*5)];
-      span.style.left = (10 + Math.random()*80) + '%';
-      span.style.animationDelay = (Math.random()*0.5) + 's';
-      emojiContainer.appendChild(span);
-    }
-    const mark = ov.querySelector('.success-mark');
-    mark.classList.add('animate-in');
-    setTimeout(()=>{
-      mark.classList.remove('animate-in');
-      ov.classList.add('hidden');
-      ov.classList.remove('flex');
-    }, 3000);
-  }
-
-  function closeResultsModal() {
-    const m = document.getElementById('results-modal');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
-  }
-
-  // ==========================
-  //  BARCODE CAMERA
-  // ==========================
-  function initBarcode() {
-    const modal = document.getElementById('barcode-modal');
-    const startBtn = document.getElementById('barcode-start');
-    const closeBtn = document.getElementById('barcode-close');
-    const stopBtn = document.getElementById('barcode-stop');
-    const video = document.getElementById('barcode-video');
-    let stream = null;
-
-    startBtn.addEventListener('click', async ()=>{
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      try {
-        let inserted = null;
-        if(hasSupabase()){
-          inserted = await createRequest({ med_name, active_substance, med_type, quantity, allow_generic, city, barcode });
-          window.currentRequest = inserted;
-          localStorage.setItem(LS_REQ, JSON.stringify({ id: inserted.id, created_at: inserted.created_at }));
-        }
-
-        if(hasSupabase() && inserted?.id){
-          if(pollInt) clearInterval(pollInt);
-          const startPoll = Date.now();
-          pollInt = setInterval(async ()=>{
-            try{
-              const items = await fetchResponses(inserted.id);
-              if(items.length){
-                hidePending();
-                await renderResults(items);
-                clearInterval(pollInt); pollInt=null;
-              }else if(Date.now()-startPoll > 120000){
-                hidePending();
-                setResultsState('empty');
-                clearInterval(pollInt); pollInt=null;
-              }
-            }catch(err){ console.warn('poll error', err); }
-          }, 3000);
+      function updateMediaPreview() {
+        const wrapper = document.getElementById('status-media');
+        const barcodeLine = document.getElementById('status-barcode-line');
+        const barcodeValue = document.getElementById('status-barcode-value');
+        const img = document.getElementById('status-image');
+        if (state.uploadedMedia.imageUrl) {
+          wrapper.classList.remove('hidden');
+          img.src = state.uploadedMedia.imageUrl;
         } else {
-          setTimeout(()=>{
-            hidePending();
-          const items = [
-            { pharmacy:{ name:'Φαρμακείο Ιάκωβος', address:'Ιπποκράτους 12, Αθήνα', phone:'+30 210 1234567', lat:37.984, lng:23.735 }, is_generic: allow_generic },
-            { pharmacy:{ name:'Φαρμακείο Νίκη', address:'Σόλωνος 90, Αθήνα', phone:'+30 210 7654321', lat:37.983, lng:23.732 }, is_generic: false }
-          ];
-          if(barcode){
-            console.info('Submitted barcode:', barcode);
-          }
-          renderResults(items);
-        }, 4500);
+          wrapper.classList.add('hidden');
+          img.removeAttribute('src');
         }
-      } catch(err){
-        console.error(err);
-        window.currentRequest = null;
-        localStorage.removeItem(LS_REQ);
-        scheduleDemoResults(allow_generic, barcode);
-        alert(state.lang==='el'
-          ? 'Δεν ήταν δυνατή η σύνδεση με τη βάση. Εμφανίζονται ενδεικτικά αποτελέσματα.'
-          : 'We could not connect to the database. Showing demo results instead.');
+        if (state.uploadedMedia.barcodeText) {
+          barcodeLine.classList.remove('hidden');
+          barcodeValue.textContent = state.uploadedMedia.barcodeText;
+        } else {
+          barcodeLine.classList.add('hidden');
+          barcodeValue.textContent = '';
+        }
       }
-    });
 
-    /* ===================== Web Push (3c) ===================== */
-    const btnPushAllow = document.getElementById('push-allow');
-    const btnPushDeny  = document.getElementById('push-deny');
+      function updateResponseCount(count) {
+        const label = count === 1 ? '1 απάντηση' : `${count} απαντήσεις`;
+        document.getElementById('response-count').textContent = label;
+      }
 
-    statusNotifyBtn?.addEventListener('click', ()=>{
-      pushToast?.classList.remove('hidden');
-      pushToast?.scrollIntoView({ behavior:'smooth', block:'end' });
-    });
+      function showStatusSection() {
+        const section = document.getElementById('status-section');
+        section.classList.remove('hidden');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
-      return outputArray;
-    }
+      function updateChipState() {
+        const chip = document.getElementById('waiting-chip');
+        if (state.reservation.active) {
+          chip.textContent = 'Κράτηση φαρμακείου ✅';
+          chip.classList.add('chip-success');
+        } else if (state.responses.length) {
+          chip.textContent = 'Λάβαμε απαντήσεις από φαρμακεία ✅';
+          chip.classList.add('chip-success');
+        } else {
+          chip.textContent = 'Αναμονή απαντήσεων από φαρμακεία ⏳';
+          chip.classList.remove('chip-success');
+        }
+      }
 
-    async function saveSubscriptionToSupabase(sub) {
-      if (!hasSupabase()) return;
-      // Συμβατότητα: πάρε τα keys από toJSON()
-      const raw = (typeof sub.toJSON === 'function') ? sub.toJSON() : {};
-      const keys = raw.keys || {};
-      const row = {
-        endpoint: sub.endpoint,
-        p256dh: keys.p256dh || '',
-        auth: keys.auth || '',
-        user_agent: navigator.userAgent
-      };
-      // upsert με onConflict:endpoint
-      const { error } = await sb().from('push_subscriptions').upsert(row, { onConflict: 'endpoint' });
-      if (error) console.warn('save sub error', error);
-    }
-    closeBtn.addEventListener('click', stop);
-    stopBtn.addEventListener('click', stop);
-  }
+      function formatAvailability(value) {
+        switch (value) {
+          case 'available':
+            return { label: 'Διαθέσιμο', className: 'availability-available' };
+          case 'generic':
+            return { label: 'Γενόσημο', className: 'availability-generic' };
+          case 'unavailable':
+            return { label: 'Όχι διαθέσιμο', className: 'availability-unavailable' };
+          default:
+            return { label: 'Ενημέρωση', className: 'availability-available' };
+        }
+      }
 
+      function formatMetaLine(resp) {
+        const parts = [];
+        if (resp.area) parts.push(resp.area);
+        if (resp.distance_label) parts.push(resp.distance_label);
+        return parts.join(' • ');
+      }
 
+      function fireConfetti() {
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            origin: { y: 0.6 }
+          });
+        }
+      }
+    })();
   </script>
-
 </body>
 </html>
