@@ -42,40 +42,34 @@
       color: #475569;
       font-size: 1.1rem;
     }
-    .hero-actions {
+    .tabs {
       margin-top: 1.75rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
       justify-content: center;
     }
-    .hero-btn {
-      border: none;
+    .tab-btn {
+      flex: 1 1 240px;
       border-radius: 999px;
       padding: 0.9rem 1.5rem;
       font-weight: 600;
       font-size: 1rem;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      border: 1px solid rgba(14,165,233,0.4);
+      color: #0f172a;
+      background: rgba(255,255,255,0.8);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
     }
-    .hero-btn-primary {
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(14,165,233,0.08);
+    }
+    .tab-btn.active {
       background: linear-gradient(120deg, #0ea5e9, #14b8a6);
       color: #fff;
-      box-shadow: 0 10px 25px rgba(14,165,233,0.25);
-    }
-    .hero-btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 15px 35px rgba(14,165,233,0.3);
-    }
-    .hero-btn-secondary {
-      background: transparent;
-      color: #0f172a;
-      border: 1px solid rgba(14,165,233,0.4);
-      backdrop-filter: blur(4px);
-    }
-    .hero-btn-secondary:hover {
-      transform: translateY(-1px);
-      background: rgba(14,165,233,0.1);
+      border-color: transparent;
+      box-shadow: 0 15px 35px rgba(14,165,233,0.25);
     }
     .card {
       background: rgba(255,255,255,0.9);
@@ -88,12 +82,6 @@
     }
     .how-it-works-card {
       display: none;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-    .how-it-works-card.visible {
-      display: block;
       opacity: 1;
       transform: translateY(0);
     }
@@ -464,10 +452,10 @@
       display: none !important;
     }
     @media (max-width: 600px) {
-      .hero-actions {
+      .tabs {
         flex-direction: column;
       }
-      .hero-btn {
+      .tab-btn {
         width: 100%;
       }
     }
@@ -478,9 +466,9 @@
     <header class="hero">
       <h1>🔍 MediRadar</h1>
       <p>Βρες γρήγορα ποια φαρμακεία έχουν το φάρμακό σου διαθέσιμο.</p>
-      <div class="hero-actions">
-        <button id="start-search-btn" type="button" class="hero-btn hero-btn-primary">Ξεκίνα αναζήτηση φαρμάκου</button>
-        <button id="how-it-works-btn" type="button" class="hero-btn hero-btn-secondary">Πώς λειτουργεί</button>
+      <div class="tabs">
+        <button id="tab-search" type="button" class="tab-btn active">Αναζήτηση φαρμάκου</button>
+        <button id="tab-how" type="button" class="tab-btn">Πώς λειτουργεί</button>
       </div>
     </header>
 
@@ -495,8 +483,9 @@
       </ol>
     </section>
 
-    <section id="search-card" class="card">
-      <form id="request-form">
+    <section id="search-card">
+      <div class="card">
+        <form id="request-form">
         <div class="field-grid two-cols">
           <div class="field">
             <label for="full-name">👤 Ονοματεπώνυμο</label>
@@ -546,51 +535,52 @@
           </label>
         </div>
         <button id="submit-btn" type="submit" class="primary-btn">Ζήτα από τα φαρμακεία</button>
-      </form>
-    </section>
-
-    <section id="status-section" class="status-section hidden">
-      <div class="status-card">
-        <div class="status-header">
-          <span id="waiting-chip" class="status-chip">Αναμονή απαντήσεων από φαρμακεία ⏳</span>
-          <p id="response-count" class="response-count">0 απαντήσεις</p>
-        </div>
-        <div id="waiting-message" class="waiting-message">
-          <div class="waiting-icon">💬</div>
-          <div>
-            <p class="waiting-title">Ενημερώνουμε τα φαρμακεία στην περιοχή σου…</p>
-            <p class="waiting-subtitle">Θα εμφανιστούν εδώ μόλις απαντήσουν.</p>
-          </div>
-        </div>
-        <div id="status-media" class="media-preview hidden">
-          <img id="status-image" alt="Φωτογραφία που έστειλες" />
-          <div>
-            <p class="media-caption">Φωτογραφία που έστειλες</p>
-          </div>
-        </div>
-        <div id="status-barcode-line" class="barcode-line hidden">
-          Barcode: <span id="status-barcode-value"></span>
-        </div>
-        <div id="demo-placeholder" class="placeholder-card">
-          <span>💠</span>
-          <p>Περιμένουμε τις πρώτες απαντήσεις…</p>
-        </div>
-        <div id="response-list" class="response-list hidden"></div>
-        <div id="reservation-box" class="reservation-box hidden">
-          <div class="reservation-head">
-            <div>
-              <p class="reservation-label">Κράτηση φαρμακείου</p>
-              <p id="reservation-name" class="reservation-name"></p>
-            </div>
-            <div class="countdown" id="countdown-timer">60:00</div>
-          </div>
-          <p id="reservation-meta" class="reservation-meta"></p>
-          <p id="reservation-expired" class="reservation-expired hidden">Έληξε ⏰</p>
-          <div class="reservation-actions">
-            <button id="extend-btn" type="button" class="extend-btn" disabled>+15' παράταση</button>
-          </div>
-        </div>
+        </form>
       </div>
+
+      <section id="status-section" class="status-section hidden">
+        <div class="status-card">
+          <div class="status-header">
+            <span id="waiting-chip" class="status-chip">Αναμονή απαντήσεων από φαρμακεία ⏳</span>
+            <p id="response-count" class="response-count">0 απαντήσεις</p>
+          </div>
+          <div id="waiting-message" class="waiting-message">
+            <div class="waiting-icon">💬</div>
+            <div>
+              <p class="waiting-title">Ενημερώνουμε τα φαρμακεία στην περιοχή σου…</p>
+              <p class="waiting-subtitle">Θα εμφανιστούν εδώ μόλις απαντήσουν.</p>
+            </div>
+          </div>
+          <div id="status-media" class="media-preview hidden">
+            <img id="status-image" alt="Φωτογραφία που έστειλες" />
+            <div>
+              <p class="media-caption">Φωτογραφία που έστειλες</p>
+            </div>
+          </div>
+          <div id="status-barcode-line" class="barcode-line hidden">
+            Barcode: <span id="status-barcode-value"></span>
+          </div>
+          <div id="demo-placeholder" class="placeholder-card">
+            <span>💠</span>
+            <p>Περιμένουμε τις πρώτες απαντήσεις…</p>
+          </div>
+          <div id="response-list" class="response-list hidden"></div>
+          <div id="reservation-box" class="reservation-box hidden">
+            <div class="reservation-head">
+              <div>
+                <p class="reservation-label">Κράτηση φαρμακείου</p>
+                <p id="reservation-name" class="reservation-name"></p>
+              </div>
+              <div class="countdown" id="countdown-timer">60:00</div>
+            </div>
+            <p id="reservation-meta" class="reservation-meta"></p>
+            <p id="reservation-expired" class="reservation-expired hidden">Έληξε ⏰</p>
+            <div class="reservation-actions">
+              <button id="extend-btn" type="button" class="extend-btn" disabled>+15' παράταση</button>
+            </div>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -598,17 +588,31 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script>
-    const howItWorksCard = document.getElementById('how-it-works-card');
-    const startSearchBtn = document.getElementById('start-search-btn');
-    const howItWorksBtn = document.getElementById('how-it-works-btn');
+    const tabSearch = document.getElementById('tab-search');
+    const tabHow = document.getElementById('tab-how');
+    const searchCard = document.getElementById('search-card');
+    const howCard = document.getElementById('how-it-works-card');
 
-    startSearchBtn?.addEventListener('click', () => {
-      document.getElementById('search-card')?.scrollIntoView({ behavior: 'smooth' });
-    });
+    function showSearchView() {
+      if (!tabSearch || !tabHow || !searchCard || !howCard) return;
+      tabSearch.classList.add('active');
+      tabHow.classList.remove('active');
+      searchCard.style.display = 'block';
+      howCard.style.display = 'none';
+    }
 
-    howItWorksBtn?.addEventListener('click', () => {
-      howItWorksCard?.classList.toggle('visible');
-    });
+    function showHowView() {
+      if (!tabSearch || !tabHow || !searchCard || !howCard) return;
+      tabHow.classList.add('active');
+      tabSearch.classList.remove('active');
+      howCard.style.display = 'block';
+      searchCard.style.display = 'none';
+    }
+
+    tabSearch?.addEventListener('click', showSearchView);
+    tabHow?.addEventListener('click', showHowView);
+
+    showSearchView();
 
     (() => {
       const state = {
