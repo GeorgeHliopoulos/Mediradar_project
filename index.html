@@ -8,7 +8,13 @@
     :root {
       font-family: 'Inter', 'Noto Sans', 'Noto Sans Greek', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color: #0f172a;
-      background: #eef6f6;
+      background: #f8fafc;
+      --teal: #0d9488;
+      --teal-strong: #0f766e;
+      --muted: #475569;
+      --surface: #ffffff;
+      --shadow-soft: 0 18px 45px rgba(13, 148, 136, 0.14);
+      --shadow-card: 0 30px 60px rgba(15, 23, 42, 0.1);
     }
     * {
       box-sizing: border-box;
@@ -16,15 +22,15 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at 20% 20%, rgba(41,163,163,0.25), transparent 55%),
-                  radial-gradient(circle at 80% 0%, rgba(248,180,180,0.3), transparent 55%),
-                  linear-gradient(180deg, #f4fbfb 0%, #f8fbff 100%);
+      background: radial-gradient(circle at 20% 20%, rgba(13, 148, 136, 0.12), transparent 40%),
+                  radial-gradient(circle at 80% 10%, rgba(13, 148, 136, 0.08), transparent 35%),
+                  linear-gradient(180deg, #f8fafc 0%, #f0fdfa 100%);
       color: #0f172a;
     }
     .page {
       width: min(1080px, 96vw);
       margin: 0 auto;
-      padding: 3rem 1.5rem 4rem;
+      padding: 2.5rem 1.25rem 5rem;
       position: relative;
       z-index: 1;
     }
@@ -33,17 +39,19 @@
       margin-bottom: 1.5rem;
     }
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
+      font-size: clamp(2rem, 6vw, 2.8rem);
       margin: 0 0 0.75rem;
-      color: #0d9488;
+      color: var(--teal);
+      letter-spacing: -0.01em;
     }
     .hero p {
       margin: 0;
-      color: #475569;
-      font-size: 1.1rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
     }
     .tabs {
-      margin-top: 1.75rem;
+      margin-top: 1.5rem;
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
@@ -52,33 +60,36 @@
     .tab-btn {
       flex: 1 1 240px;
       border-radius: 999px;
-      padding: 0.9rem 1.5rem;
-      font-weight: 600;
+      padding: 1rem 1.4rem;
+      font-weight: 700;
       font-size: 1rem;
+      letter-spacing: 0.01em;
       cursor: pointer;
-      border: 1px solid rgba(14,165,233,0.4);
+      border: 1px solid rgba(13, 148, 136, 0.18);
       color: #0f172a;
-      background: rgba(255,255,255,0.8);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+      background: #fff;
+      box-shadow: 0 12px 25px rgba(13, 148, 136, 0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
     }
     .tab-btn:hover {
       transform: translateY(-1px);
-      background: rgba(14,165,233,0.08);
+      background: #f1fcfa;
+      box-shadow: 0 14px 28px rgba(13, 148, 136, 0.12);
     }
     .tab-btn.active {
-      background: linear-gradient(120deg, #0ea5e9, #14b8a6);
+      background: linear-gradient(135deg, var(--teal), #14b8a6);
       color: #fff;
       border-color: transparent;
-      box-shadow: 0 15px 35px rgba(14,165,233,0.25);
+      box-shadow: 0 18px 35px rgba(13, 148, 136, 0.25);
     }
     .card {
-      background: rgba(255,255,255,0.9);
-      border-radius: 2rem;
-      padding: clamp(1.5rem, 4vw, 2.5rem);
-      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
-      border: 1px solid rgba(15, 118, 110, 0.08);
-      backdrop-filter: blur(6px);
-      margin-bottom: 2rem;
+      background: var(--surface);
+      border-radius: 1.75rem;
+      padding: clamp(1.4rem, 4vw, 2.25rem);
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(13, 148, 136, 0.08);
+      backdrop-filter: blur(8px);
+      margin-bottom: 1.75rem;
     }
     .how-it-works-card {
       display: none;
@@ -88,13 +99,13 @@
     .how-it-works-card h3 {
       margin-top: 0;
       margin-bottom: 0.75rem;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
     }
     .how-it-works-card p {
       margin-top: 0;
       margin-bottom: 1rem;
-      color: #475569;
-      line-height: 1.5;
+      color: var(--muted);
+      line-height: 1.55;
     }
     .how-it-works-list {
       margin: 0;
@@ -117,10 +128,11 @@
       }
     }
     .field {
-      background: rgba(255,255,255,0.75);
-      border-radius: 1.5rem;
-      padding: 1rem 1.25rem 1.25rem;
-      border: 1px solid rgba(148,163,184,0.4);
+      background: #f8fafc;
+      border-radius: 1.25rem;
+      padding: 1.05rem 1.2rem 1.2rem;
+      border: 1px solid rgba(148,163,184,0.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
     }
     label span.subtitle {
       font-weight: 500;
@@ -129,11 +141,12 @@
       font-size: 0.9rem;
     }
     label {
-      font-weight: 600;
-      font-size: 0.95rem;
+      font-weight: 700;
+      font-size: 0.97rem;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      color: #0f172a;
     }
     input,
     textarea,
@@ -141,9 +154,9 @@
       width: 100%;
       margin-top: 0.75rem;
       border-radius: 1rem;
-      border: 1px solid rgba(148,163,184,0.8);
-      padding: 0.85rem 1rem;
-      font-size: 1rem;
+      border: 1px solid rgba(148,163,184,0.6);
+      padding: 1rem 1.05rem;
+      font-size: 1.02rem;
       font-family: inherit;
       background: #fff;
       color: inherit;
@@ -157,8 +170,8 @@
     textarea:focus,
     select:focus {
       outline: none;
-      border-color: #14b8a6;
-      box-shadow: 0 0 0 4px rgba(20,184,166,0.15);
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(13,148,136,0.14);
     }
     input[type="file"] {
       padding: 0.6rem;
@@ -168,8 +181,9 @@
     }
     .help-text {
       margin: 0.5rem 0 0;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #64748b;
+      line-height: 1.5;
     }
     .checkbox-field label {
       font-weight: 500;
@@ -182,34 +196,56 @@
     .primary-btn {
       margin-top: 1.5rem;
       width: 100%;
-      padding: 1rem 1.5rem;
+      padding: 1.05rem 1.6rem;
       border: none;
       border-radius: 999px;
-      font-size: 1.05rem;
-      font-weight: 700;
+      font-size: 1.07rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
       color: #fff;
       cursor: pointer;
-      background: linear-gradient(120deg, #0ea5e9, #14b8a6);
-      box-shadow: 0 15px 30px rgba(14,165,233,0.25);
+      background: linear-gradient(135deg, var(--teal), #14b8a6);
+      box-shadow: 0 18px 40px rgba(13, 148, 136, 0.25);
       transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      position: sticky;
+      bottom: max(1rem, env(safe-area-inset-bottom));
+      z-index: 2;
+    }
+    .secondary-btn {
+      border: none;
+      border-radius: 0.9rem;
+      padding: 0.95rem 1.1rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 12px 28px rgba(14,165,233,0.16);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+    .secondary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 14px 32px rgba(14,165,233,0.2);
+    }
+    .secondary-btn:active {
+      transform: translateY(0);
+      opacity: 0.9;
     }
     .primary-btn:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 20px 35px rgba(14,165,233,0.3);
+      box-shadow: 0 22px 45px rgba(13, 148, 136, 0.3);
     }
     .primary-btn:disabled {
-      opacity: 0.6;
+      opacity: 0.65;
       cursor: not-allowed;
     }
     .status-section {
       scroll-margin-top: 2rem;
     }
     .status-card {
-      background: rgba(255,255,255,0.95);
-      border-radius: 2rem;
-      padding: clamp(1.75rem, 4vw, 2.5rem);
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
+      background: rgba(255,255,255,0.96);
+      border-radius: 1.75rem;
+      padding: clamp(1.6rem, 4vw, 2.4rem);
+      border: 1px solid rgba(13, 148, 136, 0.08);
+      box-shadow: var(--shadow-card);
     }
     .status-header {
       display: flex;
@@ -244,21 +280,34 @@
       display: flex;
       gap: 1rem;
       align-items: center;
-      padding: 1rem;
+      padding: 1.1rem;
       border-radius: 1.5rem;
-      background: rgba(14,165,233,0.08);
-      border: 1px solid rgba(14,165,233,0.2);
+      background: linear-gradient(120deg, rgba(13,148,136,0.06), rgba(20,184,166,0.1));
+      border: 1px solid rgba(13,148,136,0.18);
       margin-bottom: 1.25rem;
+      box-shadow: 0 16px 30px rgba(13, 148, 136, 0.12);
     }
     .waiting-icon {
-      width: 3rem;
-      height: 3rem;
+      width: 3.25rem;
+      height: 3.25rem;
       border-radius: 1rem;
-      background: #0ea5e9;
+      background: var(--teal);
       display: grid;
       place-items: center;
       font-size: 1.5rem;
       color: #fff;
+      position: relative;
+      overflow: hidden;
+      animation: pulseGlow 1.8s ease-in-out infinite;
+    }
+    .waiting-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle, rgba(255,255,255,0.45) 0%, transparent 55%);
+      animation: ripple 1.8s ease-in-out infinite;
+      opacity: 0.8;
     }
     .waiting-title {
       margin: 0;
@@ -274,11 +323,12 @@
       display: flex;
       gap: 1rem;
       align-items: center;
-      padding: 0.85rem;
+      padding: 0.95rem;
       border-radius: 1.25rem;
-      border: 1px solid rgba(15,23,42,0.1);
-      background: rgba(241,245,249,0.8);
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #f1f5f9;
       margin-bottom: 0.75rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
     }
     .media-preview img {
       width: auto;
@@ -321,10 +371,10 @@
     }
     .response-card {
       border-radius: 1.5rem;
-      border: 1px solid rgba(148,163,184,0.35);
+      border: 1px solid rgba(148,163,184,0.3);
       padding: 1.2rem;
       background: #f8fafc;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 10px 25px rgba(13, 148, 136, 0.06);
     }
     .response-header {
       display: flex;
@@ -374,12 +424,13 @@
       width: 100%;
       border: none;
       border-radius: 1rem;
-      padding: 0.85rem 1rem;
+      padding: 0.95rem 1rem;
       font-size: 1rem;
-      font-weight: 600;
-      background: linear-gradient(120deg, #10b981, #0ea5e9);
+      font-weight: 700;
+      background: linear-gradient(120deg, var(--teal), #14b8a6);
       color: #fff;
       cursor: pointer;
+      box-shadow: 0 14px 30px rgba(13, 148, 136, 0.2);
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .reserve-btn:hover {
@@ -388,10 +439,11 @@
     }
     .reservation-box {
       margin-top: 1.5rem;
-      border-radius: 1.75rem;
-      border: 1px solid rgba(16,185,129,0.35);
-      background: rgba(209,250,229,0.7);
+      border-radius: 1.6rem;
+      border: 1px solid rgba(13,148,136,0.3);
+      background: linear-gradient(135deg, rgba(13,148,136,0.1), rgba(16,185,129,0.15));
       padding: 1.25rem 1.5rem;
+      box-shadow: 0 18px 35px rgba(13, 148, 136, 0.15);
     }
     .reservation-head {
       display: flex;
@@ -451,12 +503,30 @@
     .hidden {
       display: none !important;
     }
-    @media (max-width: 600px) {
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13,148,136,0.35); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(13,148,136,0.12); }
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.9); opacity: 0.9; }
+      70% { transform: scale(1.15); opacity: 0.2; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+    @media (max-width: 720px) {
       .tabs {
         flex-direction: column;
       }
       .tab-btn {
         width: 100%;
+      }
+      .page {
+        padding: 2rem 1rem 5.5rem;
+      }
+      .card {
+        border-radius: 1.4rem;
+      }
+      form {
+        gap: 1rem;
       }
     }
   </style>
@@ -526,7 +596,17 @@
           <label for="request-image">📷 Φωτογραφία ή barcode <span class="subtitle">(προαιρετικά)</span></label>
           <input id="request-image" type="file" accept="image/*" />
           <p class="help-text">Τράβα μια καθαρή φωτογραφία του κουτιού ή του barcode για πιο γρήγορη ταυτοποίηση.</p>
-          <input id="barcode-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Πληκτρολόγησε τον κωδικό barcode (προαιρετικά)" />
+        </div>
+        <div class="field">
+          <label for="barcode-input">🔢 Barcode</label>
+          
+          <button type="button" id="scan-btn" class="secondary-btn" style="margin-bottom: 1rem; width: 100%; background: #e0f2fe; color: #0369a1; border: 1px dashed #0ea5e9;">
+            📷 Σάρωση με κάμερα
+          </button>
+
+          <div id="reader" style="width: 100%; display: none; margin-bottom: 1rem;"></div>
+
+          <input id="barcode-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="ή πληκτρολόγησε τον κωδικό" />
         </div>
         <div class="field checkbox-field">
           <label>
@@ -584,6 +664,7 @@
     </section>
   </main>
 
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="/env.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -988,6 +1069,59 @@
           });
         }
       }
+
+      // Κώδικας για το Barcode Scanner
+      const scanBtn = document.getElementById('scan-btn');
+      const readerElement = document.getElementById('reader');
+      let html5QrcodeScanner = null;
+
+      if (scanBtn && readerElement) {
+        scanBtn.addEventListener('click', () => {
+          readerElement.style.display = 'block';
+
+          if (html5QrcodeScanner) return;
+
+          if (!window.Html5Qrcode) {
+            alert('Δεν ήταν δυνατή η φόρτωση του scanner. Δοκίμασε ξανά.');
+            readerElement.style.display = 'none';
+            return;
+          }
+
+          html5QrcodeScanner = new Html5Qrcode('reader');
+
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+          html5QrcodeScanner
+            .start({ facingMode: 'environment' }, config, onScanSuccess, onScanFailure)
+            .catch(err => {
+              console.error('Error starting scanner', err);
+              alert('Δεν βρέθηκε κάμερα ή δεν δόθηκε άδεια.');
+              readerElement.style.display = 'none';
+            });
+        });
+      }
+
+      function onScanSuccess(decodedText) {
+        const barcodeInput = document.getElementById('barcode-input');
+        if (barcodeInput) {
+          barcodeInput.value = decodedText;
+        }
+
+        if (navigator.vibrate) navigator.vibrate(200);
+
+        if (html5QrcodeScanner) {
+          html5QrcodeScanner
+            .stop()
+            .then(() => {
+              readerElement.style.display = 'none';
+              html5QrcodeScanner.clear();
+              html5QrcodeScanner = null;
+            })
+            .catch(err => console.error('Failed to stop scanner', err));
+        }
+      }
+
+      function onScanFailure() {}
     })();
   </script>
 </body>
