@@ -360,7 +360,7 @@
                         <label class="flex items-start gap-3 px-3 cursor-pointer group">
                             <input type="checkbox" id="gdpr-check" class="mt-0.5 w-4 h-4 text-primary rounded focus:ring-primary border-gray-300" required>
                             <span class="text-xs text-slate-500 dark:text-slate-400 leading-tight group-hover:text-primary transition-colors">
-                                Έχω διαβάσει και αποδέχομαι τους <a href="#" class="underline text-primary font-semibold">Όρους Χρήσης</a> και την <a href="#" class="underline text-primary font-semibold">Πολιτική Απορρήτου (GDPR)</a>.
+                                Έχω διαβάσει και αποδέχομαι τους <a href="#" data-open-modal="terms" class="underline text-primary font-semibold">Όρους Χρήσης</a> και την <a href="#" data-open-modal="gdpr" class="underline text-primary font-semibold">Πολιτική Απορρήτου (GDPR)</a>.
                             </span>
                         </label>
                     </div>
@@ -463,8 +463,8 @@
                 </a>
             </div>
             <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-500 dark:text-slate-400 font-medium mb-4">
-                <a href="#" class="hover:text-primary transition-colors">Όροι Χρήσης</a>
-                <a href="#" class="hover:text-primary transition-colors">Πολιτική Απορρήτου (GDPR)</a>
+                <a href="#" data-open-modal="terms" class="hover:text-primary transition-colors">Όροι Χρήσης</a>
+                <a href="#" data-open-modal="gdpr" class="hover:text-primary transition-colors">Πολιτική Απορρήτου (GDPR)</a>
                 <a href="#" class="hover:text-primary transition-colors">FAQ</a>
                 <a href="#" class="hover:text-primary transition-colors">Επικοινωνία</a>
             </div>
@@ -478,6 +478,113 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Terms of Use Modal -->
+    <div id="modal-terms" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 relative glass-card !opacity-100 !transform-none max-h-[80vh] overflow-y-auto text-left space-y-4">
+            <button onclick="closeModal('terms')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
+            <div class="space-y-2">
+                <p class="text-xs uppercase tracking-wide text-primary font-semibold">Όροι Χρήσης</p>
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Εφαρμογή Mediradar</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-300">Τελευταία ενημέρωση: 21 Νοεμβρίου 2025</p>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p><strong>1. Αποδοχή των Όρων</strong><br>Καλώς ήλθατε στο Mediradar. Αυτοί οι Όροι Χρήσης ("Όροι") διέπουν τη χρήση της εφαρμογής Mediradar ("Εφαρμογή"), η οποία παρέχεται από [Ονομασία Εταιρείας/Ιδιοκτήτη]. Με τη λήψη, την εγκατάσταση ή τη χρήση της Εφαρμογής, αποδέχεστε και συμφωνείτε να δεσμεύεστε από αυτούς τους Όρους. Εάν δεν συμφωνείτε με οποιοδήποτε μέρος αυτών των Όρων, δεν πρέπει να χρησιμοποιήσετε την Εφαρμογή.</p>
+
+                <p><strong>2. Σκοπός της Εφαρμογής Mediradar</strong><br>Η εφαρμογή Mediradar έχει σχεδιαστεί για να παρέχει [Περιγραφή του σκοπού, π.χ., πληροφορίες σχετικά με φαρμακευτικά σκευάσματα, υπενθυμίσεις λήψης φαρμάκων, παρακολούθηση συμπτωμάτων].</p>
+
+                <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-700">
+                    <p class="font-bold text-amber-800 dark:text-amber-200">ΣΗΜΑΝΤΙΚΗ ΑΠΟΠΟΙΗΣΗ ΕΥΘΥΝΗΣ (NON-MEDICAL ADVICE)</p>
+                    <p class="mt-1 text-amber-800 dark:text-amber-100">Η Εφαρμογή Mediradar ΔΕΝ παρέχει ιατρικές συμβουλές. Οι πληροφορίες που παρέχονται ΔΕΝ προορίζονται να υποκαταστήσουν την επαγγελματική ιατρική διάγνωση, θεραπεία ή συμβουλή. ΠΑΝΤΑ να ζητάτε τη συμβουλή γιατρού ή άλλου εξειδικευμένου επαγγελματία υγείας για οποιεσδήποτε ερωτήσεις μπορεί να έχετε σχετικά με μια ιατρική κατάσταση.</p>
+                </div>
+
+                <p><strong>3. Δικαιώματα Πνευματικής Ιδιοκτησίας</strong><br>Όλο το περιεχόμενο, τα γραφικά, το λογισμικό και οι υπηρεσίες που περιέχονται στην Εφαρμογή αποτελούν ιδιοκτησία του [Ονομασία Εταιρείας/Ιδιοκτήτη] ή των δικαιοπαρόχων του και προστατεύονται από τη νομοθεσία περί πνευματικής ιδιοκτησίας. Σας παραχωρείται περιορισμένη, μη αποκλειστική, μη μεταβιβάσιμη άδεια χρήσης της Εφαρμογής για προσωπική, μη εμπορική χρήση.</p>
+
+                <div class="space-y-2">
+                    <p class="font-bold">4. Υποχρεώσεις Χρήστη</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>Να παρέχει ακριβείς και πλήρεις πληροφορίες κατά την εγγραφή.</li>
+                        <li>Να μην χρησιμοποιεί την Εφαρμογή για οποιονδήποτε παράνομο σκοπό ή με τρόπο που παραβιάζει τους παρόντες Όρους.</li>
+                        <li>Να μην επιχειρήσει να αποκτήσει μη εξουσιοδοτημένη πρόσβαση σε οποιοδήποτε μέρος της Εφαρμογής ή των συστημάτων της.</li>
+                        <li>Να είναι αποκλειστικά υπεύθυνος για την ασφάλεια του κωδικού πρόσβασης και του λογαριασμού του.</li>
+                    </ul>
+                </div>
+
+                <p><strong>5. Περιορισμός Ευθύνης</strong><br>Στο μέγιστο βαθμό που επιτρέπεται από την ισχύουσα νομοθεσία, το [Ονομασία Εταιρείας/Ιδιοκτήτη] δεν φέρει ευθύνη για οποιεσδήποτε άμεσες, έμμεσες, τυχαίες, ειδικές ή αποθετικές ζημίες που προκύπτουν από τη χρήση ή την αδυναμία χρήσης της Εφαρμογής, συμπεριλαμβανομένης οποιασδήποτε εξάρτησης από τις πληροφορίες που παρέχονται από αυτήν.</p>
+
+                <p><strong>6. Τροποποιήσεις των Όρων</strong><br>Διατηρούμε το δικαίωμα να τροποποιήσουμε αυτούς τους Όρους ανά πάσα στιγμή. Οι αλλαγές θα αναρτώνται εντός της Εφαρμογής ή στον ιστότοπό μας και η συνέχιση της χρήσης της Εφαρμογής από εσάς μετά την ανάρτηση των αλλαγών συνιστά αποδοχή των αναθεωρημένων Όρων.</p>
+
+                <p><strong>7. Επικοινωνία</strong><br>Για οποιεσδήποτε ερωτήσεις σχετικά με τους παρόντες Όρους, παρακαλούμε επικοινωνήστε μαζί μας στη διεύθυνση: <a href="mailto:info@mediradar.com" class="text-primary font-semibold">info@mediradar.com</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- GDPR Modal -->
+    <div id="modal-gdpr" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 relative glass-card !opacity-100 !transform-none max-h-[80vh] overflow-y-auto text-left space-y-4">
+            <button onclick="closeModal('gdpr')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
+            <div class="space-y-2">
+                <p class="text-xs uppercase tracking-wide text-primary font-semibold">Πολιτική Απορρήτου &amp; GDPR</p>
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Mediradar</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-300">Τελευταία ενημέρωση: 21 Νοεμβρίου 2025</p>
+            </div>
+
+            <div class="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p><strong>1. Εισαγωγή και Υπεύθυνος Επεξεργασίας</strong><br>Η παρούσα Πολιτική Απορρήτου περιγράφει τον τρόπο με τον οποίο η εφαρμογή Mediradar ("εμείς", "μας") συλλέγει, χρησιμοποιεί και προστατεύει τα προσωπικά σας δεδομένα σύμφωνα με τον Γενικό Κανονισμό Προστασίας Δεδομένων (GDPR - Κανονισμός (ΕΕ) 2016/679).<br><br>Υπεύθυνος Επεξεργασίας: [Ονομασία Εταιρείας/Ιδιοκτήτη], [Διεύθυνση], [Στοιχεία Επικοινωνίας/Email].</p>
+
+                <div class="space-y-2">
+                    <p class="font-bold">2. Δεδομένα που Συλλέγουμε</p>
+                    <p class="font-semibold">Α. Δεδομένα Χρήσης (Μη Προσωπικά)</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>Πληροφορίες συσκευής (τύπος συσκευής, λειτουργικό σύστημα).</li>
+                        <li>Δεδομένα αρχείων καταγραφής (logs), συμπεριλαμβανομένων σφαλμάτων και χρόνου χρήσης.</li>
+                    </ul>
+                    <p class="font-semibold">Β. Δεδομένα Εγγραφής και Επικοινωνίας</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>Email, όνομα χρήστη (εάν παρέχονται).</li>
+                    </ul>
+                    <p class="font-semibold">Γ. Ειδικές Κατηγορίες Προσωπικών Δεδομένων (Δεδομένα Υγείας)</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>Στοιχεία φαρμάκων (ονομασία, δόση, συχνότητα).</li>
+                        <li>Στοιχεία ιατρικών καταστάσεων ή συμπτωμάτων που καταχωρεί ο χρήστης.</li>
+                        <li>Ιστορικό υπενθυμίσεων και συμμόρφωσης στη θεραπεία.</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="font-bold">3. Νομική Βάση Επεξεργασίας (GDPR Άρθρο 6 &amp; 9)</p>
+                    <p><strong>Δεδομένα Υγείας (Ευαίσθητα):</strong> Ρητή Συγκατάθεση (Άρθρο 9(2)(α)) του χρήστη για τον συγκεκριμένο σκοπό παροχής της υπηρεσίας. Σκοπός: Παροχή της βασικής λειτουργικότητας της Εφαρμογής (π.χ. υπενθυμίσεις, παρακολούθηση).</p>
+                    <p><strong>Δεδομένα Εγγραφής:</strong> Εκτέλεση σύμβασης (Όροι Χρήσης) (Άρθρο 6(1)(β)). Σκοπός: Διαχείριση λογαριασμού και επικοινωνία σχετικά με την υπηρεσία.</p>
+                    <p><strong>Δεδομένα Χρήσης:</strong> Έννομο Συμφέρον (Άρθρο 6(1)(στ)). Σκοπός: Βελτίωση, συντήρηση και ασφάλεια της Εφαρμογής.</p>
+                    <p class="text-amber-700 dark:text-amber-200"><strong>Σημαντικό για Δεδομένα Υγείας:</strong> Η επεξεργασία των δεδομένων υγείας πραγματοποιείται ΜΟΝΟ εφόσον έχετε δώσει τη ρητή και ενημερωμένη συγκατάθεσή σας. Μπορείτε να ανακαλέσετε αυτή τη συγκατάθεση ανά πάσα στιγμή.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="font-bold">4. Ασφάλεια και Αποθήκευση Δεδομένων</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li><strong>Κρυπτογράφηση:</strong> Τα δεδομένα υγείας κρυπτογραφούνται τόσο κατά τη μεταφορά (SSL/TLS) όσο και κατά την αποθήκευση (εντός των βάσεων δεδομένων).</li>
+                        <li><strong>Πρόσβαση:</strong> Η πρόσβαση στα δεδομένα περιορίζεται μόνο στο απολύτως απαραίτητο προσωπικό μας.</li>
+                        <li><strong>Διατήρηση:</strong> Διατηρούμε τα προσωπικά δεδομένα μόνο για όσο διάστημα είναι απαραίτητο για την εκπλήρωση των σκοπών για τους οποίους συλλέχθηκαν, εκτός εάν απαιτείται μεγαλύτερη περίοδος διατήρησης από τη νομοθεσία. Εάν διαγράψετε τον λογαριασμό σας, τα δεδομένα υγείας σας θα διαγραφούν οριστικά εντός [Προθεσμία, π.χ., 30 ημερών], με την επιφύλαξη τυχόν νόμιμων υποχρεώσεων διατήρησης.</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <p class="font-bold">5. Τα Δικαιώματά σας (GDPR)</p>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li><strong>Δικαίωμα Πρόσβασης (Άρθρο 15):</strong> Να ζητήσετε αντίγραφο των προσωπικών δεδομένων που διατηρούμε για εσάς.</li>
+                        <li><strong>Δικαίωμα Διόρθωσης (Άρθρο 16):</strong> Να ζητήσετε τη διόρθωση ανακριβών ή ελλιπών δεδομένων.</li>
+                        <li><strong>Δικαίωμα Διαγραφής ("Δικαίωμα στη Λήθη") (Άρθρο 17):</strong> Να ζητήσετε τη διαγραφή των δεδομένων σας, υπό ορισμένες προϋποθέσεις.</li>
+                        <li><strong>Δικαίωμα Περιορισμού της Επεξεργασίας (Άρθρο 18).</strong></li>
+                        <li><strong>Δικαίωμα Φορητότητας Δεδομένων (Άρθρο 20):</strong> Να λάβετε τα δεδομένα σας σε δομημένο, κοινώς χρησιμοποιούμενο και αναγνώσιμο από μηχανές μορφότυπο.</li>
+                        <li><strong>Δικαίωμα Εναντίωσης (Άρθρο 21):</strong> Να εναντιωθείτε στην επεξεργασία των δεδομένων σας.</li>
+                        <li><strong>Δικαίωμα Υποβολής Καταγγελίας:</strong> Να υποβάλετε καταγγελία στην αρμόδια Εποπτική Αρχή (στην Ελλάδα, την Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα).</li>
+                    </ul>
+                    <p>Για να ασκήσετε οποιοδήποτε από τα παραπάνω δικαιώματα, παρακαλούμε επικοινωνήστε μαζί μας μέσω email: <a href="mailto:info@mediradar.com" class="text-primary font-semibold">info@mediradar.com</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- User Login Modal -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
@@ -630,6 +737,15 @@
         function closeModal(type) {
             document.getElementById(`modal-${type}`).classList.remove('active');
         }
+
+        // Open Terms / GDPR modals
+        document.querySelectorAll('[data-open-modal]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const type = link.getAttribute('data-open-modal');
+                openModal(type);
+            });
+        });
 
         // Close modal on backdrop click
         document.querySelectorAll('.modal-backdrop').forEach(bg => {
