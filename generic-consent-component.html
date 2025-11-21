@@ -1,42 +1,70 @@
 <div class="max-w-xl mx-auto rounded-2xl bg-white/80 backdrop-blur shadow-xl border border-slate-200 p-6 text-slate-900 relative">
   <div class="flex items-start gap-3">
-    <input id="accept-generics" type="checkbox" class="mt-1 h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+    <input id="accept-generics" type="checkbox" class="mt-1 h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary" />
     <label for="accept-generics" class="text-sm leading-relaxed text-slate-800">
       Συμφωνώ στην αντικατάσταση συνταγογραφούμενων φαρμάκων με
-      <button type="button" id="generic-info-button" class="font-semibold text-indigo-700 underline underline-offset-4 decoration-2 decoration-indigo-400 hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded" aria-expanded="false" aria-controls="generic-info">
+      <button type="button" id="generic-info-button" class="font-semibold underline text-primary underline-offset-4 decoration-2 hover:text-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded" aria-expanded="false" aria-controls="generic-modal">
         γενοσήμα
       </button>, όπου αυτό είναι δυνατό.
     </label>
   </div>
 
-  <div id="generic-info" role="tooltip" class="hidden absolute left-6 right-6 mt-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-slate-800 shadow-lg">
-    <div class="flex items-start gap-3">
-      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold">i</span>
-      <p class="leading-relaxed">
-        Το Γενόσημο (Generic) είναι ένα φάρμακο που περιέχει την ίδια ακριβώς δραστική ουσία με το πρωτότυπο (το φάρμακο αναφοράς), αφού λήξει η πατέντα του. Λειτουργεί στον οργανισμό με τον ίδιο τρόπο, έχει την ίδια δόση, ασφάλεια και αποτελεσματικότητα με το πρωτότυπο. Η μόνη σημαντική διαφορά είναι ότι το γενόσημο πωλείται με διαφορετικό (μη εμπορικό) όνομα και συνήθως είναι πολύ πιο οικονομικό. Όταν επιλέγετε ένα γενόσημο, λαμβάνετε την ίδια θεραπευτική αγωγή.
-      </p>
-      <button type="button" id="close-generic-info" class="ml-auto text-slate-500 hover:text-slate-700 focus:outline-none">✕</button>
+  <!-- Modal -->
+  <div id="generic-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
+    <div class="w-full max-w-xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="flex items-start justify-between gap-4 px-6 pt-6">
+        <h2 class="text-lg font-bold text-slate-900">Τι είναι το Γενόσημο;</h2>
+        <button type="button" class="text-slate-400 hover:text-slate-700 focus:outline-none" data-close-generic-modal>
+          ✕
+        </button>
+      </div>
+      <div class="px-6 pb-6 pt-4 space-y-3 text-sm text-slate-700 leading-relaxed">
+        <p>
+          Το <strong>Γενόσημο</strong> (Generic) είναι ένα φάρμακο που περιέχει την <strong>ίδια ακριβώς δραστική ουσία</strong> με το πρωτότυπο (το φάρμακο αναφοράς), αφού λήξει η πατέντα του.
+        </p>
+        <p>
+          Λειτουργεί στον οργανισμό με τον <strong>ίδιο τρόπο</strong>, έχει την <strong>ίδια δόση, ασφάλεια και αποτελεσματικότητα</strong> με το πρωτότυπο. Η μόνη σημαντική διαφορά είναι ότι το γενόσημο πωλείται με διαφορετικό (μη εμπορικό) όνομα και συνήθως είναι πολύ πιο οικονομικό.
+        </p>
+        <p>
+          Όταν επιλέγετε ένα γενόσημο, λαμβάνετε την ίδια θεραπευτική αγωγή.
+        </p>
+        <div class="pt-2">
+          <button type="button" class="w-full inline-flex justify-center items-center gap-2 rounded-xl bg-primary text-white font-semibold py-3 shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition" data-close-generic-modal>
+            Κατάλαβα
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   const infoButton = document.getElementById('generic-info-button');
-  const infoPanel = document.getElementById('generic-info');
-  const closeButton = document.getElementById('close-generic-info');
+  const modal = document.getElementById('generic-modal');
+  const closeControls = document.querySelectorAll('[data-close-generic-modal]');
 
-  function toggleInfo(show) {
-    const isHidden = infoPanel.classList.contains('hidden');
+  function toggleModal(show) {
+    const isHidden = modal.classList.contains('hidden');
     const shouldShow = typeof show === 'boolean' ? show : isHidden;
-    infoPanel.classList.toggle('hidden', !shouldShow);
+    modal.classList.toggle('hidden', !shouldShow);
     infoButton.setAttribute('aria-expanded', shouldShow.toString());
   }
 
-  infoButton.addEventListener('click', () => toggleInfo());
-  closeButton.addEventListener('click', () => toggleInfo(false));
-  document.addEventListener('click', (event) => {
-    if (!infoPanel.contains(event.target) && !infoButton.contains(event.target)) {
-      toggleInfo(false);
+  infoButton.addEventListener('click', () => toggleModal(true));
+
+  closeControls.forEach((ctrl) => {
+    ctrl.addEventListener('click', () => toggleModal(false));
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      toggleModal(false);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      toggleModal(false);
     }
   });
 </script>
