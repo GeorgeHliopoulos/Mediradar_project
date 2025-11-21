@@ -1,0 +1,42 @@
+<div class="max-w-xl mx-auto rounded-2xl bg-white/80 backdrop-blur shadow-xl border border-slate-200 p-6 text-slate-900 relative">
+  <div class="flex items-start gap-3">
+    <input id="accept-generics" type="checkbox" class="mt-1 h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+    <label for="accept-generics" class="text-sm leading-relaxed text-slate-800">
+      Συμφωνώ στην αντικατάσταση συνταγογραφούμενων φαρμάκων με
+      <button type="button" id="generic-info-button" class="font-semibold text-indigo-700 underline underline-offset-4 decoration-2 decoration-indigo-400 hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded" aria-expanded="false" aria-controls="generic-info">
+        γενοσήμα
+      </button>, όπου αυτό είναι δυνατό.
+    </label>
+  </div>
+
+  <div id="generic-info" role="tooltip" class="hidden absolute left-6 right-6 mt-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-slate-800 shadow-lg">
+    <div class="flex items-start gap-3">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-semibold">i</span>
+      <p class="leading-relaxed">
+        Το Γενόσημο (Generic) είναι ένα φάρμακο που περιέχει την ίδια ακριβώς δραστική ουσία με το πρωτότυπο (το φάρμακο αναφοράς), αφού λήξει η πατέντα του. Λειτουργεί στον οργανισμό με τον ίδιο τρόπο, έχει την ίδια δόση, ασφάλεια και αποτελεσματικότητα με το πρωτότυπο. Η μόνη σημαντική διαφορά είναι ότι το γενόσημο πωλείται με διαφορετικό (μη εμπορικό) όνομα και συνήθως είναι πολύ πιο οικονομικό. Όταν επιλέγετε ένα γενόσημο, λαμβάνετε την ίδια θεραπευτική αγωγή.
+      </p>
+      <button type="button" id="close-generic-info" class="ml-auto text-slate-500 hover:text-slate-700 focus:outline-none">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const infoButton = document.getElementById('generic-info-button');
+  const infoPanel = document.getElementById('generic-info');
+  const closeButton = document.getElementById('close-generic-info');
+
+  function toggleInfo(show) {
+    const isHidden = infoPanel.classList.contains('hidden');
+    const shouldShow = typeof show === 'boolean' ? show : isHidden;
+    infoPanel.classList.toggle('hidden', !shouldShow);
+    infoButton.setAttribute('aria-expanded', shouldShow.toString());
+  }
+
+  infoButton.addEventListener('click', () => toggleInfo());
+  closeButton.addEventListener('click', () => toggleInfo(false));
+  document.addEventListener('click', (event) => {
+    if (!infoPanel.contains(event.target) && !infoButton.contains(event.target)) {
+      toggleInfo(false);
+    }
+  });
+</script>
