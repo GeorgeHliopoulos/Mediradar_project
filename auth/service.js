@@ -1,9 +1,4 @@
-import {
-  supabaseClient,
-  firebaseAuth,
-  googleProvider,
-  signInWithPopup
-} from '../firebase.js';
+import { supabaseClient } from '../supabase.js';
 
 const STORAGE_KEY = 'mr:bookingAuthSession';
 const subscribers = new Set();
@@ -84,34 +79,6 @@ function normalizeSupabaseSession(session, meta = {}) {
   };
 }
 
-function normalizeFirebaseSession(result, provider) {
-  if (!result) return null;
-  const credential = result.credential || null;
-  return {
-    type: 'firebase',
-    provider,
-    access_token: credential?.accessToken || null,
-    id_token: typeof result.user?.getIdToken === 'function' ? undefined : null,
-    user: result.user ? {
-      uid: result.user.uid,
-      email: result.user.email || null,
-      phone: result.user.phoneNumber || null,
-      name: result.user.displayName || null,
-      photoURL: result.user.photoURL || null
-    } : null,
-    metadata: {},
-    raw: null
-  };
-}
-
-async function enrichFirebaseSession(result, provider) {
-  const session = normalizeFirebaseSession(result, provider);
-  if (result?.user && typeof result.user.getIdToken === 'function') {
-    session.id_token = await result.user.getIdToken(true);
-  }
-  return session;
-}
-
 export const bookingAuthContext = {
   getSession: () => currentSession,
   setSession(session) {
@@ -155,13 +122,6 @@ export async function signUp({ email, password, metadata = {} }) {
 
 export async function signInWithProvider(providerName) {
   const provider = (providerName || '').toLowerCase();
-  if (provider === 'google' && firebaseAuth && googleProvider && signInWithPopup) {
-    const result = await signInWithPopup(firebaseAuth, googleProvider);
-    const session = await enrichFirebaseSession(result, provider);
-    setSessionInternal(session);
-    return { session, user: session.user };
-  }
-
   ensureSupabase('Supabase OAuth is not configured');
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
     provider,

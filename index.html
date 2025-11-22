@@ -20,25 +20,8 @@
     <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-    <!-- Supabase Client (Placeholder, though we use Firebase for persistence) -->
+    <!-- Supabase Client -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <!-- Firebase Imports (Required for persistent 24h extension limit) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        
-        // Set Debug logging for Firebase
-        setLogLevel('Debug');
-
-        // Global Firebase variables for use in <script> below
-        window.firebase = {
-            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged,
-            getFirestore, doc, getDoc, setDoc, onSnapshot
-        };
-    </script>
     
     <script>
         tailwind.config = {
@@ -689,53 +672,69 @@
     <script src="/env.js"></script>
     
     <script>
-        // --- 0. Global Variables & Firebase Init ---
+        // --- 0. Global Variables & Persistence ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isListening = false;
         let timerInterval = null;
         let pickupDeadline = null; // Stored as Unix Timestamp
-        
-        let app = null;
-        let db = null;
-        let auth = null;
-        let userId = null;
-        
+        const STATUS_STORAGE_KEY = 'mr:pickupStatus';
+        const USER_STORAGE_KEY = 'mr:pickupUserId';
+
         const EXTENSION_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-        
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        async function initializeFirebase() {
-            if (typeof firebase === 'undefined') {
-                console.error("Firebase library not loaded.");
-                return;
-            }
-            
+        const userId = (() => {
+            const existing = localStorage.getItem(USER_STORAGE_KEY);
+            if (existing) return existing;
+            const generated = crypto.randomUUID();
+            localStorage.setItem(USER_STORAGE_KEY, generated);
+            return generated;
+        })();
+
+        let pickupStatus = loadPickupStatus();
+
+        function loadPickupStatus() {
             try {
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                app = firebase.initializeApp(firebaseConfig);
-                db = firebase.getFirestore(app);
-                auth = firebase.getAuth(app);
-
-                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
-                
-                if (token) {
-                    await firebase.signInWithCustomToken(auth, token);
-                } else {
-                    await firebase.signInAnonymously(auth);
-                }
-                
-                userId = auth.currentUser?.uid || crypto.randomUUID();
-                console.log("Firebase initialized. User ID:", userId);
-
-                // Start listening to the pickup status for this user
-                startPickupStatusListener();
-
+                const raw = localStorage.getItem(STATUS_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : null;
             } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                showToast("Σφάλμα σύνδεσης με τη βάση δεδομένων.", 'error');
+                console.warn('Failed to load pickup status', e);
+                return null;
             }
         }
+
+        function savePickupStatus(status) {
+            try {
+                if (status) {
+                    localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(status));
+                } else {
+                    localStorage.removeItem(STATUS_STORAGE_KEY);
+                }
+            } catch (e) {
+                console.warn('Failed to persist pickup status', e);
+            }
+        }
+
+        function updatePickupStatus(patch) {
+            pickupStatus = { ...(pickupStatus || {}), ...patch };
+            savePickupStatus(pickupStatus);
+        }
+
+        function clearPickupStatus() {
+            pickupStatus = null;
+            savePickupStatus(null);
+        }
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === STATUS_STORAGE_KEY) {
+                pickupStatus = loadPickupStatus();
+                if (pickupStatus?.deadlineTimestamp) {
+                    pickupDeadline = pickupStatus.deadlineTimestamp;
+                    updateTimerDisplay(pickupDeadline, pickupStatus.lastExtendedTimestamp || 0);
+                }
+            }
+        });
         
         // --- 1. UI Toggles & Modals ---
         function toggleTheme() {
@@ -1063,39 +1062,7 @@
             }
         }
         
-        // --- 10. Timer and Extension Logic (Firestore Dependent) ---
-        function getStatusDocRef() {
-             if (!db || !userId) {
-                console.error("Firestore or UserID not ready.");
-                return null;
-            }
-            // Private data path: /artifacts/{appId}/users/{userId}/pickup_settings/status
-            return firebase.doc(db, `artifacts/${appId}/users/${userId}/pickup_settings/status`);
-        }
-
-        function startPickupStatusListener() {
-            const docRef = getStatusDocRef();
-            if (!docRef) return;
-
-            firebase.onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    pickupDeadline = data.deadlineTimestamp;
-                    updateTimerDisplay(pickupDeadline, data.lastExtendedTimestamp);
-                } else {
-                    // No active request, stop timer and show search tab
-                    stopTimer();
-                    if(!document.getElementById('pickup-view').classList.contains('hidden')) {
-                         document.getElementById('pickup-view').classList.add('hidden');
-                         document.getElementById('tab-search').classList.add('active');
-                    }
-                }
-            }, (error) => {
-                console.error("Error listening to status:", error);
-                // Optionally show a toast error
-            });
-        }
-        
+        // --- 10. Timer and Extension Logic (local persistence) ---
         function updateTimerDisplay(deadline, lastExtendedTimestamp) {
             stopTimer(); // Clear existing interval if any
             
@@ -1160,29 +1127,27 @@
         }
         
         async function extendPickupTime() {
-            const docRef = getStatusDocRef();
-            if (!docRef) return;
-            
             const extendBtn = document.getElementById('extend-btn');
             if (extendBtn.disabled) {
                 showToast("Μπορείτε να χρησιμοποιήσετε την παράταση μόνο μία φορά κάθε 24 ώρες.", 'warning');
                 return;
             }
-            
+
             extendBtn.disabled = true; // Disable immediately
-            
+
             try {
                 const now = Date.now();
                 const currentDeadline = pickupDeadline || now;
-                
-                // Add 15 minutes (900,000 milliseconds)
-                const newDeadline = currentDeadline + (15 * 60 * 1000); 
 
-                // Update Firestore: new deadline and set lastExtendedTimestamp
-                await firebase.setDoc(docRef, {
+                // Add 15 minutes (900,000 milliseconds)
+                const newDeadline = currentDeadline + (15 * 60 * 1000);
+
+                updatePickupStatus({
                     deadlineTimestamp: newDeadline,
                     lastExtendedTimestamp: now,
-                }, { merge: true });
+                    appId,
+                    userId,
+                });
 
                 pickupDeadline = newDeadline; // Update local state immediately
                 updateTimerDisplay(pickupDeadline, now); // Refresh timer and button state
@@ -1206,30 +1171,28 @@
                 return;
             }
 
-            if (!db || !userId) {
-                showToast("Η εφαρμογή δεν είναι έτοιμη. Παρακαλώ περιμένετε 1 δευτερόλεπτο.", 'warning');
-                return;
-            }
-
-            saveUserData(); 
+            saveUserData();
 
             // Calculate new deadline: 60 minutes from now
             const initialDeadline = Date.now() + (60 * 60 * 1000);
-            
-            // Set initial pickup status in Firestore
+
+            // Set initial pickup status locally
             try {
-                const docRef = getStatusDocRef();
-                await firebase.setDoc(docRef, {
+                updatePickupStatus({
                     deadlineTimestamp: initialDeadline,
-                    lastExtendedTimestamp: 0, // Reset extension for a new request
+                    lastExtendedTimestamp: 0,
                     medicineName: document.getElementById('medicine').value,
                     requestTime: Date.now(),
                     city: document.getElementById('city').value,
-                }, { merge: true });
-                
-                // Firestore listener will automatically update the UI (pickup-view)
+                    appId,
+                    userId,
+                });
+
+                pickupDeadline = initialDeadline;
+                updateTimerDisplay(pickupDeadline, 0);
+
                 document.getElementById('tab-search').classList.remove('active');
-                
+
                 confetti({
                     particleCount: 100,
                     spread: 70,
@@ -1246,19 +1209,7 @@
 
         async function resetApp() {
             stopTimer();
-            // Clear status in Firestore (simulating completion/cancellation)
-            try {
-                const docRef = getStatusDocRef();
-                 await firebase.setDoc(docRef, {
-                    deadlineTimestamp: 0,
-                    lastExtendedTimestamp: 0,
-                }, { merge: true });
-
-                // UI will be reset by the onSnapshot listener
-
-            } catch (e) {
-                console.error("Error resetting request status:", e);
-            }
+            clearPickupStatus();
             document.getElementById('pickup-view').classList.add('hidden');
             document.getElementById('tab-search').classList.add('active');
             clearMedia();
@@ -1268,7 +1219,10 @@
         // --- 12. Initialization ---
         window.onload = function() {
             loadUserData();
-            initializeFirebase(); // Start Firebase initialization and listener
+            if (pickupStatus?.deadlineTimestamp) {
+                pickupDeadline = pickupStatus.deadlineTimestamp;
+                updateTimerDisplay(pickupDeadline, pickupStatus.lastExtendedTimestamp || 0);
+            }
         };
     </script>
 </body>

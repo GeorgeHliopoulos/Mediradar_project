@@ -1,4 +1,4 @@
-import { supabaseClient } from '../firebase.js';
+import { supabaseClient } from '../supabase.js';
 
 const ENV = window.ENV || {};
 const SITE_URL =

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabaseClient } from '../firebase.js';
+import { supabaseClient } from '../supabase.js';
 
 const TABS = {
   users: {
