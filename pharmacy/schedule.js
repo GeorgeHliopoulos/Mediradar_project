@@ -1,4 +1,4 @@
-import { supabaseClient } from '../firebase.js';
+import { supabaseClient } from '../supabase.js';
 
 export const WEEK_DAYS = [
   { index: 0, key: 'sun', labels: { el: 'Κυριακή', en: 'Sunday' }, short: { el: 'Κυρ', en: 'Sun' } },

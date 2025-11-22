@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/+esm';
-import { supabaseClient as sharedSupabase } from './firebase.js';
+import { supabaseClient as sharedSupabase } from './supabase.js';
 import { ScheduleManager } from './schedule.js';
 
 const env = window.ENV || {};
