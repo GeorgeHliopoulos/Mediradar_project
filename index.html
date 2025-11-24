@@ -434,13 +434,20 @@
 
             const pharmacyName = resp.pharmacy_id && resp.pharmacy_id.length > 5 ? '#' + resp.pharmacy_id.substr(0,4) : 'Φαρμακείο';
 
+            // SHOW CLOSING TIME if available
+            const closingInfo = resp.closing_time 
+                ? `<span class="text-red-500 font-bold text-xs ml-2">⚠️ Κλείνει στις ${resp.closing_time}</span>` 
+                : '';
+
             const div = document.createElement('div');
             div.className = "bg-white dark:bg-slate-700 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 animate-slide-up";
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         <h4 class="font-bold text-slate-800 dark:text-white text-lg">${pharmacyName}</h4>
-                        <p class="text-xs text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist} χλμ από εσάς</p>
+                        <p class="text-xs text-slate-500 flex items-center gap-1">
+                            <i class="ph ph-map-pin"></i> ${dist} χλμ ${closingInfo}
+                        </p>
                     </div>
                     ${badge}
                 </div>
