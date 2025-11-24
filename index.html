@@ -623,8 +623,8 @@
                     <i class="ph ph-magic-wand text-lg"></i> Σύνδεση με Magic Link
                 </button>
             </form>
-            
-            <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all mt-3">
+
+            <button onclick="handleGoogleLogin(event)" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all mt-3">
                 <i class="ph ph-google-logo text-lg text-red-500"></i> Συνέχεια με Google
             </button>
             
@@ -833,31 +833,95 @@
         }
 
         // --- 3. Login Logic ---
+        let supabaseClient = null;
+
+        function getSupabaseClient() {
+            if (supabaseClient) return supabaseClient;
+
+            if (window.mediradarSupabase) {
+                supabaseClient = window.mediradarSupabase;
+                return supabaseClient;
+            }
+
+            if (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+                supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                return supabaseClient;
+            }
+
+            console.warn('Supabase client is not configured.');
+            showToast('Η σύνδεση με τον διακομιστή απέτυχε. Ελέγξτε τα κλειδιά Supabase.', 'error');
+            return null;
+        }
+
         async function handleMagicLink(e) {
             e.preventDefault(); // Prevent form submission
-            // ... (Supabase/Auth logic implementation skipped for brevity, keeping the demo toast)
             const email = document.getElementById('user-email').value;
-            
+
             if(!email) {
                 showToast("Παρακαλώ εισάγετε το email σας.", 'warning');
                 return;
             }
-            showToast("Demo: Ο σύνδεσμος εισόδου στάλθηκε στο " + email, 'success');
+
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { error } = await client.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: window.location.origin }
+            });
+
+            if (error) {
+                showToast(error.message || 'Αποτυχία αποστολής συνδέσμου.', 'error');
+                return;
+            }
+
+            showToast("Ο σύνδεσμος εισόδου στάλθηκε στο " + email, 'success');
             closeModal('user');
         }
-        
-        function handleProLogin(e) {
+
+        async function handleProLogin(e) {
             e.preventDefault(); // Prevent form submission
-            // ... (Auth logic implementation skipped for brevity, keeping the demo toast)
             const email = document.getElementById('pro-email').value;
             const password = document.getElementById('pro-password').value;
-            
+
             if(!email || !password) {
                 showToast("Παρακαλώ συμπληρώστε όλα τα πεδία.", 'warning');
                 return;
             }
-            showToast(`Demo: Προσπάθεια σύνδεσης ως φαρμακοποιός (${email}).`, 'info');
+
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                showToast(error.message || 'Αποτυχία σύνδεσης. Δοκιμάστε ξανά.', 'error');
+                return;
+            }
+
+            const userEmail = data?.user?.email || email;
+            showToast(`Καλώς ήρθες, ${userEmail}!`, 'success');
             closeModal('pro');
+        }
+
+        async function handleGoogleLogin(e) {
+            e.preventDefault();
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { data, error } = await client.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin }
+            });
+
+            if (error) {
+                showToast(error.message || 'Η σύνδεση με Google απέτυχε.', 'error');
+                return;
+            }
+
+            if (data?.url) {
+                window.location.href = data.url;
+            }
         }
 
 
