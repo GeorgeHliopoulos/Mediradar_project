@@ -11,14 +11,36 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200">
-  <div class="w-full max-w-xl mx-auto">
-    <div class="bg-white shadow-2xl rounded-3xl border border-slate-200 p-8 space-y-6">
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 py-10">
+  <div class="max-w-5xl mx-auto px-4 space-y-6">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-3xl p-6">
       <div class="flex items-center gap-3">
         <div class="w-12 h-12 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-2xl font-bold">MR</div>
         <div>
           <p class="text-xs uppercase tracking-[0.2em] font-semibold text-slate-400">Pro Platform</p>
           <h1 class="text-2xl font-bold text-slate-800">MediRadar Συνεργάτες</h1>
+          <p class="text-sm text-slate-500">Πίνακας αιτημάτων από χρήστες</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <p id="pro-user-email" class="text-sm font-semibold text-slate-800">—</p>
+          <p class="text-xs text-slate-500">Σύνδεση μέσω Supabase</p>
+        </div>
+        <button id="logout-btn" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold shadow hover:bg-slate-950 disabled:opacity-60 disabled:cursor-not-allowed">Αποσύνδεση</button>
+      </div>
+    </header>
+
+    <section class="bg-white border border-slate-200 shadow-xl shadow-slate-200/70 rounded-3xl p-6 space-y-5">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p class="text-xs uppercase tracking-[0.14em] font-semibold text-teal-600">Εισερχόμενα Αιτήματα</p>
+          <h2 class="text-xl font-bold text-slate-900">Αιτήματα από απλούς χρήστες</h2>
+          <p class="text-sm text-slate-500">Προβάλετε τα αιτήματα που υποβλήθηκαν από το κοινό. Η λίστα ενημερώνεται αυτόματα.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="refresh-btn" class="px-4 py-2 rounded-xl bg-teal-600 text-white font-semibold shadow hover:bg-teal-700 disabled:opacity-60 disabled:cursor-not-allowed">Ανανέωση</button>
+          <span id="status-pill" class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold bg-slate-100 text-slate-600 border border-slate-200">• Αναμονή ελέγχου</span>
         </div>
       </div>
 
@@ -26,11 +48,9 @@
         <p class="text-sm text-slate-500">Φορτώνουμε τα στοιχεία σύνδεσης...</p>
       </div>
 
-      <div class="flex items-center justify-between">
-        <a href="/" class="text-sm text-teal-600 font-semibold hover:underline">← Επιστροφή στην αρχική</a>
-        <button id="logout-btn" class="px-4 py-2 rounded-xl bg-slate-800 text-white font-semibold shadow hover:bg-slate-900 disabled:opacity-60 disabled:cursor-not-allowed">Αποσύνδεση</button>
-      </div>
-    </div>
+      <div id="requests-empty" class="hidden text-center text-slate-500 text-sm py-10 border border-dashed border-slate-200 rounded-2xl bg-slate-50">Δεν υπάρχουν αιτήματα προς το παρόν.</div>
+      <div id="requests-grid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
   </div>
 
   <script src="/env.js"></script>
@@ -55,6 +75,58 @@
       card.innerHTML = content;
     }
 
+    function setStatusPill(text, tone = 'info') {
+      const pill = document.getElementById('status-pill');
+      if (!pill) return;
+      const colors = {
+        info: 'bg-slate-100 text-slate-700 border border-slate-200',
+        success: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+        warning: 'bg-amber-50 text-amber-700 border border-amber-100',
+        error: 'bg-rose-50 text-rose-700 border border-rose-100'
+      };
+      pill.className = `inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold ${colors[tone] || colors.info}`;
+      pill.textContent = text;
+    }
+
+    function renderRequests(requests) {
+      const grid = document.getElementById('requests-grid');
+      const empty = document.getElementById('requests-empty');
+      if (!grid || !empty) return;
+
+      grid.innerHTML = '';
+      if (!requests.length) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      requests.forEach((req) => {
+        const created = req.created_at ? new Date(req.created_at) : null;
+        const card = document.createElement('article');
+        card.className = 'rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50 p-4 space-y-3';
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <p class="text-xs uppercase tracking-[0.12em] font-semibold text-slate-400">Αίτημα</p>
+              <h3 class="text-lg font-bold text-slate-900">${req.medicine_name || 'Μη ορισμένο'}</h3>
+              <p class="text-sm text-slate-600">${req.substance || 'Χωρίς δραστική ουσία'}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white">${req.status || 'pending'}</span>
+          </div>
+          <div class="text-sm text-slate-600 space-y-1">
+            <p><strong>Πόλη:</strong> ${req.city || '—'}</p>
+            <p><strong>Ποσότητα:</strong> ${req.quantity || '—'} | <strong>Είδος:</strong> ${req.type || '—'}</p>
+            <p><strong>Γενόσημο:</strong> ${req.allow_generic ? 'Ναι' : 'Όχι'}</p>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>${created ? created.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</span>
+            <span class="font-semibold text-slate-700">#${req.id || '—'}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
     async function loadSession() {
       const client = getClient();
       if (!client) {
@@ -71,11 +143,56 @@
 
       const { user } = data.session;
       localStorage.removeItem('mr:proAuthRedirect');
+      document.getElementById('pro-user-email').textContent = user.email || 'Pro χρήστης';
       updateStatus(`
         <p class="text-xs uppercase tracking-[0.18em] font-semibold text-teal-500">Συνδεδεμένος</p>
         <h2 class="text-xl font-bold text-slate-800">Καλώς ήρθες, ${user.email || 'Pro χρήστης'}!</h2>
-        <p class="text-sm text-slate-600">Επιβεβαιώσαμε τη σύνδεσή σας στην πλατφόρμα Pro. Μπορείτε να συνεχίσετε με τις επαγγελματικές λειτουργίες όταν είναι διαθέσιμες.</p>
+        <p class="text-sm text-slate-600">Παρακολουθείτε τα αιτήματα που στέλνουν οι χρήστες στην πλατφόρμα MediRadar.</p>
       `);
+      await loadRequests();
+      subscribeToChanges();
+    }
+
+    async function loadRequests() {
+      const client = getClient();
+      const grid = document.getElementById('requests-grid');
+      const empty = document.getElementById('requests-empty');
+      if (!client || !grid || !empty) return;
+
+      setStatusPill('Φόρτωση αιτημάτων…', 'info');
+      document.getElementById('refresh-btn').disabled = true;
+      updateStatus('<p class="text-sm text-slate-500">Σύνδεση επιβεβαιώθηκε. Φορτώνουμε τα αιτήματα...</p>');
+
+      const { data, error } = await client
+        .from('requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      document.getElementById('refresh-btn').disabled = false;
+
+      if (error) {
+        console.warn('[pro-dashboard] Failed to load requests', error);
+        updateStatus('<p class="text-sm text-red-600">Σφάλμα φόρτωσης αιτημάτων.</p>');
+        setStatusPill('Αποτυχία φόρτωσης', 'error');
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      renderRequests(Array.isArray(data) ? data : []);
+      setStatusPill(`Συνολικά ${data?.length || 0} αιτήματα`, data?.length ? 'success' : 'info');
+    }
+
+    function subscribeToChanges() {
+      const client = getClient();
+      if (!client) return;
+      client
+        .channel('requests-updates')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, () => {
+          loadRequests();
+        })
+        .subscribe();
     }
 
     async function handleLogout() {
@@ -86,6 +203,7 @@
       window.location.href = '/';
     }
 
+    document.getElementById('refresh-btn').addEventListener('click', loadRequests);
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
     loadSession();
   </script>
