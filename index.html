@@ -456,9 +456,9 @@
     <footer class="mt-auto py-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-10">
         <div class="max-w-lg mx-auto px-4 text-center">
             <div class="flex justify-center mb-4">
-                <button onclick="openModal('pro')" class="pro-footer-btn" aria-label="Πρόσβαση Pro">
+                <button onclick="handleProAccess()" class="pro-footer-btn" aria-label="Πρόσβαση Pro">
                     <i class="ph ph-briefcase text-lg"></i>
-                    <span class="text-xs font-semibold tracking-wide uppercase">Pro</span>
+                    <span id="pro-button-label" class="text-xs font-semibold tracking-wide uppercase">Pro</span>
                 </button>
             </div>
             <div class="flex justify-center gap-4 mb-4">
@@ -646,25 +646,37 @@
             <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος Pro</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών & Συνεργατών.</p>
 
-            <form class="space-y-4 text-left">
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase ml-1">Professional Email</label>
-                    <input id="pro-email" type="email" placeholder="pharmacy@example.com" required
-                           class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-white placeholder-slate-400 font-medium shadow-sm">
+            <div class="space-y-5 text-left">
+                <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Επιλέξτε τον τρόπο σύνδεσης ή εγγραφής στην πλατφόρμα Pro. Θα μεταφερθείτε αυτόματα στο περιβάλλον συνεργατών μόλις ολοκληρωθεί η πιστοποίηση.
                 </div>
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase ml-1">Password</label>
-                    <input id="pro-password" type="password" placeholder="••••••••" required
-                           class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-white placeholder-slate-400 font-medium shadow-sm">
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase ml-1">Email για Magic Link</label>
+                    <div class="flex gap-2">
+                        <input id="pro-email" type="email" placeholder="pharmacy@example.com" required
+                               class="flex-1 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-white placeholder-slate-400 font-medium shadow-sm">
+                        <button onclick="handleProMagicLink(event)" class="px-4 py-3.5 rounded-xl bg-primary text-white font-semibold shadow hover:shadow-md transition-all whitespace-nowrap">
+                            Magic Link
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Στείλτε έναν ασφαλή σύνδεσμο για είσοδο ή εγγραφή στο email σας.</p>
                 </div>
-                <button type="submit" onclick="handleProLogin(event)" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg mt-2">
-                    Σύνδεση
+
+                <div class="relative flex items-center justify-center">
+                    <div class="w-full border-t border-dashed border-slate-200 dark:border-slate-700"></div>
+                    <span class="absolute px-3 text-[11px] uppercase tracking-[0.08em] font-semibold text-slate-400 bg-white dark:bg-slate-800">ή</span>
+                </div>
+
+                <button onclick="handleProGoogleLogin(event)" class="w-full bg-white dark:bg-slate-900 text-slate-700 dark:text-white font-bold py-3 rounded-xl transition-all shadow border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="ph ph-google-logo text-lg"></i>
+                    Σύνδεση με Google
                 </button>
-            </form>
-            <p class="mt-4 text-xs text-slate-400">
-                Δεν έχετε λογαριασμό; <a href="#" class="underline text-slate-600 dark:text-slate-300 font-semibold">Εγγραφή Φαρμακείου</a>.<br>
-                **Οδηγίες:** Η εγγραφή απαιτεί έλεγχο ταυτοπροσωπίας και έγκριση.
-            </p>
+
+                <p class="mt-2 text-xs text-slate-400">
+                    Η πρόσβαση είναι διαθέσιμη για συνεργαζόμενα φαρμακεία και επαγγελματίες. Εάν αντιμετωπίσετε πρόβλημα, επικοινωνήστε μαζί μας.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -834,6 +846,8 @@
 
         // --- 3. Login Logic ---
         let supabaseClient = null;
+        const proRedirectUrl = `${window.location.origin}/pro-dashboard.html`;
+        const PRO_REDIRECT_FLAG = 'mr:proAuthRedirect';
 
         function getSupabaseClient() {
             if (supabaseClient) return supabaseClient;
@@ -879,39 +893,42 @@
             closeModal('user');
         }
 
-        async function handleProLogin(e) {
-            e.preventDefault(); // Prevent form submission
+        async function handleProMagicLink(e) {
+            e.preventDefault();
             const email = document.getElementById('pro-email').value;
-            const password = document.getElementById('pro-password').value;
 
-            if(!email || !password) {
-                showToast("Παρακαλώ συμπληρώστε όλα τα πεδία.", 'warning');
+            if (!email) {
+                showToast("Παρακαλώ εισάγετε το επαγγελματικό email.", 'warning');
                 return;
             }
 
             const client = getSupabaseClient();
             if (!client) return;
 
-            const { data, error } = await client.auth.signInWithPassword({ email, password });
+            localStorage.setItem(PRO_REDIRECT_FLAG, '1');
+
+            const { error } = await client.auth.signInWithOtp({
+                email,
+                options: { emailRedirectTo: proRedirectUrl }
+            });
 
             if (error) {
-                showToast(error.message || 'Αποτυχία σύνδεσης. Δοκιμάστε ξανά.', 'error');
+                showToast(error.message || 'Αποτυχία αποστολής magic link.', 'error');
                 return;
             }
 
-            const userEmail = data?.user?.email || email;
-            showToast(`Καλώς ήρθες, ${userEmail}!`, 'success');
+            showToast(`Στείλαμε ασφαλή σύνδεσμο στο ${email}.`, 'success');
             closeModal('pro');
         }
 
-        async function handleGoogleLogin(e) {
+        async function handleGoogleLogin(e, redirectOverride = null) {
             e.preventDefault();
             const client = getSupabaseClient();
             if (!client) return;
 
             const { data, error } = await client.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.origin }
+                options: { redirectTo: redirectOverride || window.location.origin }
             });
 
             if (error) {
@@ -922,6 +939,78 @@
             if (data?.url) {
                 window.location.href = data.url;
             }
+        }
+
+        async function handleProGoogleLogin(e) {
+            localStorage.setItem(PRO_REDIRECT_FLAG, '1');
+            return handleGoogleLogin(e, proRedirectUrl);
+        }
+
+        async function handleProAccess() {
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { data, error } = await client.auth.getSession();
+            if (error) {
+                showToast('Αποτυχία ελέγχου συνεδρίας. Προσπαθήστε ξανά.', 'error');
+                return;
+            }
+
+            if (data?.session) {
+                showToast('Βρέθηκε ενεργή σύνδεση. Μεταφέρεστε στην πλατφόρμα.', 'info');
+                window.location.href = proRedirectUrl;
+                return;
+            }
+
+            openModal('pro');
+        }
+
+        async function refreshProButtonState(sessionOverride = null) {
+            const label = document.getElementById('pro-button-label');
+            if (!label) return;
+
+            const activeSession = sessionOverride;
+            if (activeSession?.user?.email) {
+                label.textContent = 'Pro (Συνδεδεμένος)';
+                return;
+            }
+
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { data, error } = await client.auth.getSession();
+            if (error) {
+                console.warn('Δεν ήταν δυνατός ο έλεγχος σύνδεσης Pro', error);
+                return;
+            }
+
+            if (data?.session?.user?.email) {
+                label.textContent = 'Pro (Συνδεδεμένος)';
+            } else {
+                label.textContent = 'Pro';
+            }
+        }
+
+        function watchAuthChanges() {
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            client.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    const wantsProRedirect = localStorage.getItem(PRO_REDIRECT_FLAG) === '1';
+                    if (wantsProRedirect) {
+                        localStorage.removeItem(PRO_REDIRECT_FLAG);
+                        window.location.href = proRedirectUrl;
+                        return;
+                    }
+                }
+
+                if (event === 'SIGNED_OUT') {
+                    localStorage.removeItem(PRO_REDIRECT_FLAG);
+                }
+
+                refreshProButtonState(session);
+            });
         }
 
 
@@ -1287,6 +1376,8 @@
                 pickupDeadline = pickupStatus.deadlineTimestamp;
                 updateTimerDisplay(pickupDeadline, pickupStatus.lastExtendedTimestamp || 0);
             }
+            refreshProButtonState();
+            watchAuthChanges();
         };
     </script>
 </body>

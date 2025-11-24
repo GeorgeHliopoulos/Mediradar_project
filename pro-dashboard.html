@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="el" class="bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediRadar Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200">
+  <div class="w-full max-w-xl mx-auto">
+    <div class="bg-white shadow-2xl rounded-3xl border border-slate-200 p-8 space-y-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-2xl font-bold">MR</div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] font-semibold text-slate-400">Pro Platform</p>
+          <h1 class="text-2xl font-bold text-slate-800">MediRadar Συνεργάτες</h1>
+        </div>
+      </div>
+
+      <div id="status-card" class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 space-y-2">
+        <p class="text-sm text-slate-500">Φορτώνουμε τα στοιχεία σύνδεσης...</p>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <a href="/" class="text-sm text-teal-600 font-semibold hover:underline">← Επιστροφή στην αρχική</a>
+        <button id="logout-btn" class="px-4 py-2 rounded-xl bg-slate-800 text-white font-semibold shadow hover:bg-slate-900 disabled:opacity-60 disabled:cursor-not-allowed">Αποσύνδεση</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/env.js"></script>
+  <script>
+    let supabaseClient = null;
+
+    function getClient() {
+      if (supabaseClient) return supabaseClient;
+      if (window.mediradarSupabase) {
+        supabaseClient = window.mediradarSupabase;
+        return supabaseClient;
+      }
+      if (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        return supabaseClient;
+      }
+      return null;
+    }
+
+    function updateStatus(content) {
+      const card = document.getElementById('status-card');
+      card.innerHTML = content;
+    }
+
+    async function loadSession() {
+      const client = getClient();
+      if (!client) {
+        updateStatus('<p class="text-sm text-red-600">Δεν βρέθηκε σύνδεση με Supabase.</p>');
+        return;
+      }
+
+      const { data, error } = await client.auth.getSession();
+      if (error || !data?.session) {
+        updateStatus('<p class="text-sm text-red-600">Δεν εντοπίστηκε σύνδεση. Θα μεταφερθείτε στην αρχική σελίδα.</p>');
+        setTimeout(() => window.location.href = '/', 1800);
+        return;
+      }
+
+      const { user } = data.session;
+      localStorage.removeItem('mr:proAuthRedirect');
+      updateStatus(`
+        <p class="text-xs uppercase tracking-[0.18em] font-semibold text-teal-500">Συνδεδεμένος</p>
+        <h2 class="text-xl font-bold text-slate-800">Καλώς ήρθες, ${user.email || 'Pro χρήστης'}!</h2>
+        <p class="text-sm text-slate-600">Επιβεβαιώσαμε τη σύνδεσή σας στην πλατφόρμα Pro. Μπορείτε να συνεχίσετε με τις επαγγελματικές λειτουργίες όταν είναι διαθέσιμες.</p>
+      `);
+    }
+
+    async function handleLogout() {
+      const client = getClient();
+      if (!client) return;
+      document.getElementById('logout-btn').disabled = true;
+      await client.auth.signOut();
+      window.location.href = '/';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    loadSession();
+  </script>
+</body>
+</html>
