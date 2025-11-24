@@ -37,16 +37,16 @@
     </div>
 
     <div id="schedule-modal" class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-2xl w-full border border-slate-700 h-[80vh] flex flex-col">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-3xl w-full border border-slate-700 h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-clock text-secondary"></i> Ωράριο Λειτουργίας</h2>
-                    <p class="text-xs text-red-500 font-bold mt-1">⚠️ Υποχρεωτικό για να λαμβάνετε αιτήματα.</p>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-clock text-secondary"></i> Ωράριο Λειτουργίας (24ωρο)</h2>
+                    <p class="text-xs text-slate-500 mt-1">Επιλέξτε ώρες έναρξης και λήξης για κάθε μέρα.</p>
                 </div>
                 <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-white"><i class="ph ph-x text-xl"></i></button>
             </div>
             
-            <div class="flex-1 overflow-y-auto pr-2 space-y-3" id="schedule-form">
+            <div class="flex-1 overflow-y-auto pr-2 space-y-2" id="schedule-form">
                 </div>
 
             <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -75,123 +75,134 @@
 
     <script>
         let currentUser = null;
-        let mySchedule = null; // Stores the loaded schedule
+        let mySchedule = null;
         const DAYS = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
         const DB_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        // Helper to generate Hour options (00-23)
+        function getHourOptions(selected) {
+            let opts = '';
+            for(let i=0; i<24; i++) {
+                const val = i.toString().padStart(2, '0');
+                opts += `<option value="${val}" ${val === selected ? 'selected' : ''}>${val}</option>`;
+            }
+            return opts;
+        }
+        // Helper for Minutes (00, 15, 30, 45)
+        function getMinOptions(selected) {
+            return ['00','15','30','45'].map(m => `<option value="${m}" ${m === selected ? 'selected' : ''}>${m}</option>`).join('');
+        }
 
         window.onload = async function() {
             if(!window.db) return;
             const { data: { session } } = await window.db.auth.getSession();
             if (session) { handleLoginSuccess(session.user); } else { document.getElementById('login-overlay').classList.remove('hidden'); }
             
-            // Init Schedule Form
+            // BUILD FORM (Dropdowns)
             const formContainer = document.getElementById('schedule-form');
             DAYS.forEach((day, index) => {
                 formContainer.innerHTML += `
-                    <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl">
-                        <div class="w-24 font-bold text-sm text-slate-700 dark:text-slate-300">${day}</div>
-                        <input type="time" id="open-${index}" class="p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm outline-none focus:border-secondary" value="08:00">
-                        <span class="text-slate-400">-</span>
-                        <input type="time" id="close-${index}" class="p-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm outline-none focus:border-secondary" value="21:00">
-                        <label class="flex items-center gap-2 cursor-pointer ml-auto">
-                            <input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4" checked>
-                            <span class="text-xs text-slate-500">Ανοιχτό</span>
-                        </label>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="w-full sm:w-24 font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                            <input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4" checked onchange="toggleDay(${index})">
+                            ${day}
+                        </div>
+                        <div id="times-${index}" class="flex items-center gap-2 flex-1">
+                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2">
+                                <select id="open-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('08')}</select>
+                                <span class="text-slate-400">:</span>
+                                <select id="open-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select>
+                            </div>
+                            <span class="text-slate-400 text-xs">έως</span>
+                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2">
+                                <select id="close-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('21')}</select>
+                                <span class="text-slate-400">:</span>
+                                <select id="close-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
         };
 
+        function toggleDay(index) {
+            const isActive = document.getElementById(`active-${index}`).checked;
+            const container = document.getElementById(`times-${index}`);
+            container.style.opacity = isActive ? '1' : '0.3';
+            container.style.pointerEvents = isActive ? 'auto' : 'none';
+        }
+
         function handleLoginSuccess(user) {
             currentUser = user;
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('auth-section').innerHTML = `<span class="text-xs font-medium mr-2">${user.email}</span><button onclick="handleLogout()" class="text-xs bg-slate-200 dark:bg-slate-700 px-3 py-1 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`;
-            
-            fetchSchedule(); // Check if schedule exists
+            fetchSchedule();
             fetchRequests();
             subscribeToRequests();
         }
 
-        // --- SCHEDULE LOGIC ---
         async function fetchSchedule() {
             const { data, error } = await window.db.from('schedules').select('data').eq('pharmacist_id', currentUser.id).single();
-            
             if (!data || error) {
-                // No schedule found! Force open modal.
                 document.getElementById('schedule-modal').classList.remove('hidden');
             } else {
                 mySchedule = data.data;
-                // Populate form just in case they want to edit
-                // (Code skipped for brevity, assuming they set it once)
+                // Optional: Populate form here if needed
             }
         }
 
         async function saveSchedule() {
             const scheduleData = {};
             for(let i=0; i<7; i++) {
-                scheduleData[DB_DAYS[i]] = {
-                    open: document.getElementById(`open-${i}`).value,
-                    close: document.getElementById(`close-${i}`).value,
-                    isActive: document.getElementById(`active-${i}`).checked
-                };
+                const isActive = document.getElementById(`active-${i}`).checked;
+                const open = `${document.getElementById(`open-h-${i}`).value}:${document.getElementById(`open-m-${i}`).value}`;
+                const close = `${document.getElementById(`close-h-${i}`).value}:${document.getElementById(`close-m-${i}`).value}`;
+                
+                scheduleData[DB_DAYS[i]] = { open, close, isActive };
             }
 
-            const { error } = await window.db.from('schedules').upsert({ 
-                pharmacist_id: currentUser.id, 
-                data: scheduleData 
-            });
-
-            if (error) {
-                showToast("Σφάλμα αποθήκευσης: " + error.message, 'error');
-            } else {
-                mySchedule = scheduleData;
-                document.getElementById('schedule-modal').classList.add('hidden');
-                showToast("Το ωράριο αποθηκεύτηκε!", 'success');
-            }
+            const { error } = await window.db.from('schedules').upsert({ pharmacist_id: currentUser.id, data: scheduleData });
+            if (error) { showToast("Σφάλμα: " + error.message, 'error'); } 
+            else { mySchedule = scheduleData; document.getElementById('schedule-modal').classList.add('hidden'); showToast("Το ωράριο αποθηκεύτηκε!", 'success'); }
         }
 
         function openScheduleModal() { document.getElementById('schedule-modal').classList.remove('hidden'); }
         function closeScheduleModal() { 
-            if(!mySchedule) { alert("Πρέπει να αποθηκεύσετε ωράριο για να συνεχίσετε!"); return; }
+            if(!mySchedule) { alert("Απαιτείται αποθήκευση ωραρίου!"); return; }
             document.getElementById('schedule-modal').classList.add('hidden'); 
         }
 
-        // --- CHECK IF OPEN LOGIC ---
+        // --- LOGIC: Can we accept? ---
         function getClosingTimeToday() {
             if (!mySchedule) return null;
-            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // e.g. "Monday"
-            const todaySched = mySchedule[today];
-            
-            if (!todaySched || !todaySched.isActive) return null; // Closed today
-            return todaySched.close; // "21:00"
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            const sched = mySchedule[today];
+            if (!sched || !sched.isActive) return null;
+            return sched.close;
         }
 
         function canAcceptOrder() {
             const closingTime = getClosingTimeToday();
-            if (!closingTime) return { allowed: false, reason: "Το φαρμακείο είναι κλειστό σήμερα!" };
+            if (!closingTime) return { allowed: false, reason: "Είστε κλειστά σήμερα!" };
 
             const now = new Date();
-            const [closeH, closeM] = closingTime.split(':').map(Number);
+            const [cH, cM] = closingTime.split(':').map(Number);
             const closeDate = new Date();
-            closeDate.setHours(closeH, closeM, 0);
+            closeDate.setHours(cH, cM, 0);
 
-            // Add 60 mins to NOW
+            // Logic: Client needs 60 mins to pick up
             const arrivalTime = new Date(now.getTime() + 60 * 60000);
 
             if (arrivalTime > closeDate) {
-                return { allowed: false, reason: `Κλείνετε στις ${closingTime}. Ο πελάτης δεν προλαβαίνει (θέλει 60').` };
+                return { allowed: false, reason: `Κλείνετε στις ${closingTime}. Δεν υπάρχει περιθώριο 60'.` };
             }
             return { allowed: true, closingTime };
         }
 
-        // --- RESPONSE LOGIC ---
+        // --- SEND RESPONSE ---
         async function sendResponse(requestId, type) {
-            // 1. SAFETY CHECK
             const check = canAcceptOrder();
-            if (!check.allowed) {
-                alert("⛔ ΔΕΝ ΜΠΟΡΕΙΤΕ ΝΑ ΑΠΑΝΤΗΣΕΤΕ:\n" + check.reason);
-                return;
-            }
+            if (!check.allowed) { alert("⛔ ΠΡΟΣΟΧΗ:\n" + check.reason); return; }
 
             const btn = document.querySelector(`#card-${requestId} button`); if(btn) btn.innerText = '...';
             
@@ -201,27 +212,26 @@
                 response_type: type, 
                 message: type === 'original' ? 'Διαθέσιμο (Πρωτότυπο)' : 'Διαθέσιμο (Γενόσημο)', 
                 price: '0.00',
-                closing_time: check.closingTime // Send closing time to user
+                closing_time: check.closingTime
             });
 
             if (!error) { showToast('Η απάντηση στάλθηκε!', 'success'); removeCard(requestId); } 
             else { showToast('Σφάλμα: ' + error.message, 'error'); }
         }
 
-        // --- (Rest of the code remains same: fetchRequests, createRequestCard, etc) ---
-        document.getElementById('login-form').addEventListener('submit', async (e) => { e.preventDefault(); const { data, error } = await window.db.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value }); if (error) showToast('Σφάλμα: ' + error.message, 'error'); else handleLoginSuccess(data.user); });
+        // ... Rest of standard functions ...
+        document.getElementById('login-form').addEventListener('submit', async (e) => { e.preventDefault(); const { data, error } = await window.db.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value }); if (error) showToast(error.message, 'error'); else handleLoginSuccess(data.user); });
         async function demoLogin() { const { data, error } = await window.db.auth.signInAnonymously(); if (error) { currentUser = { id: 'demo_pharmacist', email: 'demo@pharmacy.gr' }; handleLoginSuccess(currentUser); showToast('Demo Mode', 'success'); } else { handleLoginSuccess(data.user); } }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
         async function fetchRequests() {
             const spinner = document.getElementById('loading-spinner'); const container = document.getElementById('requests-container'); spinner.classList.remove('hidden');
             const { data, error } = await window.db.from('requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
             spinner.classList.add('hidden');
-            if (error) { showToast('Σφάλμα φόρτωσης', 'error'); return; }
-            container.innerHTML = '';
+            if(error) return; container.innerHTML = '';
             if(data && data.length > 0) { data.forEach(req => container.innerHTML += createRequestCard(req)); } else { container.innerHTML = `<div class="text-center py-16 bg-white/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700"><p class="text-slate-500">Κανένα νέο αίτημα.</p></div>`; }
         }
         function createRequestCard(req) {
-            const timeAgo = new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const timeAgo = new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
             const typeBadge = req.med_type ? `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded uppercase">${req.med_type}</span>` : '';
             const mediaButton = req.media_url ? `<a href="${req.media_url}" target="_blank" class="text-blue-500 text-xs font-bold flex items-center gap-1 bg-blue-50 px-2 py-1 rounded"><i class="ph ph-image"></i> Φωτό</a>` : '';
             return `<div id="card-${req.id}" class="glass-panel p-5 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-secondary relative group"><div class="flex justify-between items-start mb-3"><div class="flex flex-wrap items-center gap-2"><span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1"><i class="ph ph-clock"></i> ${timeAgo}</span>${typeBadge}<span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${req.location || 'Τοποθεσία'}</span></div></div><div class="flex justify-between items-start"><div><h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">${req.medicine_name} <span class="text-sm font-normal text-slate-500">x${req.quantity || 1}</span></h3><p class="text-sm text-slate-500 dark:text-slate-400 mb-2">${req.substance || ''}</p></div><div class="flex flex-col items-end gap-2">${mediaButton}</div></div>${req.notes ? `<div class="bg-slate-50 p-3 rounded-lg text-xs italic border mb-4">" ${req.notes} "</div>` : ''}<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4"><button onclick="sendResponse('${req.id}', 'original')" class="col-span-1 bg-secondary hover:bg-teal-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2"><i class="ph ph-check-circle text-lg"></i> Πρωτότυπο</button><button onclick="sendResponse('${req.id}', 'generic')" class="col-span-1 bg-white border border-secondary text-secondary hover:bg-teal-50 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-pill text-lg"></i> Γενόσημο</button><button onclick="dismissRequest('${req.id}')" class="col-span-2 sm:col-span-1 bg-slate-100 text-slate-500 hover:bg-slate-200 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-x text-lg"></i> Απόρριψη</button></div></div>`;
