@@ -10,6 +10,12 @@
   const SUPABASE_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
 
+  window.ENV = {
+    ...(window.ENV || {}),
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+  };
+
   // διαθέσιμα global
   window.SUPABASE_URL = SUPABASE_URL;
   window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
