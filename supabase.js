@@ -1,23 +1,30 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.5/+esm";
-
-const ENV = window.ENV || {};
-
-let supabaseClient = null;
-
-if (ENV.SUPABASE_URL && ENV.SUPABASE_ANON_KEY) {
-  supabaseClient = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+// supabase.js
+(function() {
+    // 1. Έλεγχος αν υπάρχει η βιβλιοθήκη Supabase (από το CDN στο index.html)
+    if (!window.supabase) {
+        console.error("❌ CRITICAL: Supabase library not found! Make sure you have the script tag in your HTML head.");
+        return;
     }
-  });
-} else {
-  console.warn('[supabase] Missing SUPABASE_URL or SUPABASE_ANON_KEY.');
-}
 
-export { supabaseClient };
+    // 2. Έλεγχος αν υπάρχουν τα κλειδιά (από το env.js)
+    if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+        console.error("❌ CRITICAL: Missing Supabase keys in window.ENV. Make sure env.js is loaded first.");
+        return;
+    }
 
-export function isSupabaseReady() {
-  return !!supabaseClient;
-}
+    // 3. Δημιουργία του Client
+    console.log("🔵 Initializing Supabase Client...");
+    
+    const client = window.supabase.createClient(window.ENV.SUPABASE_URL, window.ENV.SUPABASE_ANON_KEY, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    });
+
+    // 4. Αποθήκευση σε global μεταβλητή για χρήση σε όλα τα αρχεία (index.html, pharmacy.html, κλπ)
+    window.db = client;
+    
+    console.log("✅ Supabase Connected! You can now use 'window.db' to make queries.");
+})();
