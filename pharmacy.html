@@ -21,7 +21,7 @@
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3"><div class="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-white shadow-lg"><i class="ph ph-first-aid-kit text-2xl"></i></div><div><h1 class="font-bold text-lg leading-tight">MediRadar <span class="text-secondary">Pro</span></h1><p class="text-xs text-slate-500 dark:text-slate-400">Κέντρο Διαχείρισης</p></div></div>
             <div class="flex gap-3 items-center">
-                <button onclick="openScheduleModal()" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 transition flex items-center gap-1"><i class="ph ph-clock"></i> Ωράριο</button>
+                <button onclick="openScheduleModal()" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 transition flex items-center gap-1"><i class="ph ph-calendar-check"></i> Ωράριο</button>
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"><i class="ph ph-moon-stars text-xl"></i></button>
                 <div id="auth-section"></div>
             </div>
@@ -42,8 +42,8 @@
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-3xl w-full border border-slate-700 h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-clock text-secondary"></i> Ωράριο Λειτουργίας (24ωρο)</h2>
-                    <p class="text-xs text-slate-500 mt-1">Επιλέξτε ώρες έναρξης και λήξης για κάθε μέρα.</p>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-calendar-check text-secondary"></i> Εβδομαδιαίο Πρόγραμμα</h2>
+                    <p class="text-xs text-slate-500 mt-1">Ορίστε τις ώρες λειτουργίας για τις επόμενες 7 ημέρες.</p>
                 </div>
                 <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-white"><i class="ph ph-x text-xl"></i></button>
             </div>
@@ -78,52 +78,60 @@
     <script>
         let currentUser = null;
         let mySchedule = null;
-        const DAYS = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
+        // Generate next 7 days starting from today
         const DB_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const GREEK_DAYS = {'Monday':'Δευτέρα', 'Tuesday':'Τρίτη', 'Wednesday':'Τετάρτη', 'Thursday':'Πέμπτη', 'Friday':'Παρασκευή', 'Saturday':'Σάββατο', 'Sunday':'Κυριακή'};
 
-        // Helper to generate Hour options (00-23)
-        function getHourOptions(selected) {
-            let opts = '';
-            for(let i=0; i<24; i++) {
-                const val = i.toString().padStart(2, '0');
-                opts += `<option value="${val}" ${val === selected ? 'selected' : ''}>${val}</option>`;
+        function getNext7Days() {
+            const days = [];
+            const today = new Date();
+            for(let i=0; i<7; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() + i);
+                const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+                const dateStr = d.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
+                days.push({
+                    dbName: dayName,
+                    label: GREEK_DAYS[dayName],
+                    date: dateStr,
+                    isToday: i === 0
+                });
             }
-            return opts;
+            return days;
         }
-        // Helper for Minutes (00, 15, 30, 45)
-        function getMinOptions(selected) {
-            return ['00','15','30','45'].map(m => `<option value="${m}" ${m === selected ? 'selected' : ''}>${m}</option>`).join('');
-        }
+
+        function getHourOptions(selected) { let opts=''; for(let i=0;i<24;i++){const val=i.toString().padStart(2,'0');opts+=`<option value="${val}" ${val===selected?'selected':''}>${val}</option>`;} return opts; }
+        function getMinOptions(selected) { return ['00','15','30','45'].map(m=>`<option value="${m}" ${m===selected?'selected':''}>${m}</option>`).join(''); }
 
         window.onload = async function() {
             if(!window.db) return;
             const { data: { session } } = await window.db.auth.getSession();
             if (session) { handleLoginSuccess(session.user); } else { document.getElementById('login-overlay').classList.remove('hidden'); }
             
-            // BUILD FORM (Dropdowns)
+            // BUILD FORM (With Dates)
             const formContainer = document.getElementById('schedule-form');
-            DAYS.forEach((day, index) => {
+            const weekDays = getNext7Days();
+            
+            weekDays.forEach((day, index) => {
+                const todayBadge = day.isToday ? '<span class="bg-secondary text-white text-[10px] px-2 py-0.5 rounded-full ml-2">ΣΗΜΕΡΑ</span>' : '';
+                const borderClass = day.isToday ? 'border-secondary ring-1 ring-secondary/30' : 'border-slate-200 dark:border-slate-700';
+                
                 formContainer.innerHTML += `
-                    <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <div class="w-full sm:w-24 font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                            <input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4" checked onchange="toggleDay(${index})">
-                            ${day}
-                        </div>
-                        <div id="times-${index}" class="flex items-center gap-2 flex-1">
-                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2">
-                                <select id="open-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('08')}</select>
-                                <span class="text-slate-400">:</span>
-                                <select id="open-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border ${borderClass}" data-day="${day.dbName}">
+                        <div class="w-full sm:w-32 flex flex-col">
+                            <div class="font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center">
+                                <input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4 mr-2" checked onchange="toggleDay(${index})">
+                                ${day.label}
+                                ${todayBadge}
                             </div>
+                            <div class="text-xs text-slate-500 ml-6">${day.date}</div>
+                        </div>
+                        <div id="times-${index}" class="flex items-center gap-2 flex-1 w-full">
+                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2 flex-1 justify-center"><select id="open-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('08')}</select><span class="text-slate-400">:</span><select id="open-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div>
                             <span class="text-slate-400 text-xs">έως</span>
-                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2">
-                                <select id="close-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('21')}</select>
-                                <span class="text-slate-400">:</span>
-                                <select id="close-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select>
-                            </div>
+                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2 flex-1 justify-center"><select id="close-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('21')}</select><span class="text-slate-400">:</span><select id="close-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         };
 
@@ -144,24 +152,26 @@
         }
 
         async function fetchSchedule() {
+            // Convert id to text to avoid uuid error for demo users
             const { data, error } = await window.db.from('schedules').select('data').eq('pharmacist_id', currentUser.id).single();
             if (!data || error) {
                 document.getElementById('schedule-modal').classList.remove('hidden');
             } else {
                 mySchedule = data.data;
-                // Optional: Populate form here if needed
             }
         }
 
         async function saveSchedule() {
             const scheduleData = {};
-            for(let i=0; i<7; i++) {
-                const isActive = document.getElementById(`active-${i}`).checked;
-                const open = `${document.getElementById(`open-h-${i}`).value}:${document.getElementById(`open-m-${i}`).value}`;
-                const close = `${document.getElementById(`close-h-${i}`).value}:${document.getElementById(`close-m-${i}`).value}`;
-                
-                scheduleData[DB_DAYS[i]] = { open, close, isActive };
-            }
+            const weekDays = getNext7Days();
+            
+            weekDays.forEach((day, index) => {
+                scheduleData[day.dbName] = {
+                    open: `${document.getElementById(`open-h-${index}`).value}:${document.getElementById(`open-m-${index}`).value}`,
+                    close: `${document.getElementById(`close-h-${index}`).value}:${document.getElementById(`close-m-${index}`).value}`,
+                    isActive: document.getElementById(`active-${index}`).checked
+                };
+            });
 
             const { error } = await window.db.from('schedules').upsert({ pharmacist_id: currentUser.id, data: scheduleData });
             if (error) { showToast("Σφάλμα: " + error.message, 'error'); } 
@@ -174,7 +184,6 @@
             document.getElementById('schedule-modal').classList.add('hidden'); 
         }
 
-        // --- LOGIC: Can we accept? ---
         function getClosingTimeToday() {
             if (!mySchedule) return null;
             const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
@@ -185,23 +194,22 @@
 
         function canAcceptOrder() {
             const closingTime = getClosingTimeToday();
-            if (!closingTime) return { allowed: false, reason: "Είστε κλειστά σήμερα!" };
+            if (!closingTime) return { allowed: false, reason: "Το φαρμακείο φαίνεται κλειστό για σήμερα στο πρόγραμμα." };
 
             const now = new Date();
             const [cH, cM] = closingTime.split(':').map(Number);
             const closeDate = new Date();
             closeDate.setHours(cH, cM, 0);
 
-            // Logic: Client needs 60 mins to pick up
-            const arrivalTime = new Date(now.getTime() + 60 * 60000);
+            if (now > closeDate) return { allowed: false, reason: "Το φαρμακείο έχει κλείσει ήδη." };
 
+            const arrivalTime = new Date(now.getTime() + 60 * 60000);
             if (arrivalTime > closeDate) {
                 return { allowed: false, reason: `Κλείνετε στις ${closingTime}. Δεν υπάρχει περιθώριο 60'.` };
             }
             return { allowed: true, closingTime };
         }
 
-        // --- SEND RESPONSE ---
         async function sendResponse(requestId, type) {
             const check = canAcceptOrder();
             if (!check.allowed) { alert("⛔ ΠΡΟΣΟΧΗ:\n" + check.reason); return; }
@@ -221,7 +229,6 @@
             else { showToast('Σφάλμα: ' + error.message, 'error'); }
         }
 
-        // ... Rest of standard functions ...
         document.getElementById('login-form').addEventListener('submit', async (e) => { e.preventDefault(); const { data, error } = await window.db.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value }); if (error) showToast(error.message, 'error'); else handleLoginSuccess(data.user); });
         async function demoLogin() { const { data, error } = await window.db.auth.signInAnonymously(); if (error) { currentUser = { id: 'demo_pharmacist', email: 'demo@pharmacy.gr' }; handleLoginSuccess(currentUser); showToast('Demo Mode', 'success'); } else { handleLoginSuccess(data.user); } }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
