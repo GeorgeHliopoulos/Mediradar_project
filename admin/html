@@ -9,12 +9,12 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { admin: '#6366f1' } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { admin: '#4f46e5' } } } }
     </script>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen">
 
-    <nav class="bg-indigo-900 text-white p-4 shadow-lg sticky top-0 z-30">
+    <nav class="bg-admin text-white p-4 shadow-lg sticky top-0 z-30">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <i class="ph ph-shield-check text-2xl text-yellow-400"></i>
@@ -67,10 +67,10 @@
                                 <th class="p-3">Φάρμακο</th>
                                 <th class="p-3">Περιοχή</th>
                                 <th class="p-3">Status</th>
+                                <th class="p-3 text-right">Act</th>
                             </tr>
                         </thead>
-                        <tbody id="requests-table" class="divide-y divide-slate-100 dark:divide-slate-700">
-                            </tbody>
+                        <tbody id="requests-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
                     </table>
                 </div>
             </div>
@@ -85,83 +85,110 @@
                             <tr>
                                 <th class="p-3">Φαρμακοποιός ID</th>
                                 <th class="p-3">Update</th>
-                                <th class="p-3">Data</th>
                             </tr>
                         </thead>
-                        <tbody id="schedules-table" class="divide-y divide-slate-100 dark:divide-slate-700">
-                            </tbody>
+                        <tbody id="schedules-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </main>
 
     <script src="env.js"></script>
     <script src="supabase.js"></script>
     <script>
         // --- ADMIN LOGIC ---
-        // ΣΗΜΕΙΩΣΗ: Σε παραγωγή, αυτό πρέπει να γίνει με Row Level Security (RLS) "Admin" role.
-        // Εδώ κάνουμε απλό login check για το Demo.
+        
+        window.onload = async function() {
+            if(!window.db) return;
+
+            // Έλεγχος Σύνδεσης
+            const { data: { session } } = await window.db.auth.getSession();
+            
+            // ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Αν είναι Guest (Anonymous), τον πετάμε έξω για να ζητήσουμε Admin login
+            if (session && session.user && !session.user.is_anonymous) {
+                // Είναι κανονικός χρήστης (ελπίζουμε Admin), τον αφήνουμε να μπει
+                initDashboard(session.user);
+            } else {
+                // Είναι Guest ή δεν είναι συνδεδεμένος -> Δείξε Login
+                document.getElementById('admin-login').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
+                
+                // Αν ήταν guest, κάνε logout για να καθαρίσει
+                if(session) window.db.auth.signOut();
+            }
+        };
 
         document.getElementById('admin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('a-email').value;
             const pass = document.getElementById('a-pass').value;
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Checking...";
 
-            // Χρησιμοποιούμε το κανονικό Supabase Auth
             const { data, error } = await window.db.auth.signInWithPassword({ email, password: pass });
 
             if (error) {
                 alert("Access Denied: " + error.message);
+                btn.innerText = "Είσοδος";
             } else {
-                // Επιτυχία
-                document.getElementById('admin-login').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadData();
+                initDashboard(data.user);
             }
         });
 
+        function initDashboard(user) {
+            document.getElementById('admin-login').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadData();
+            setInterval(loadData, 30000); // Auto refresh
+        }
+
         async function loadData() {
-            // 1. Load Stats & Requests
-            const { data: reqs } = await window.db.from('requests').select('*').order('created_at', { ascending: false }).limit(50);
-            const { data: resps } = await window.db.from('responses').select('id');
-            const { data: scheds } = await window.db.from('schedules').select('*');
+            // Fetch Data
+            const { data: reqs, count: reqCount } = await window.db.from('requests').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(50);
+            const { count: respCount } = await window.db.from('responses').select('*', { count: 'exact', head: true });
+            const { count: schedCount, data: scheds } = await window.db.from('schedules').select('*', { count: 'exact' });
 
-            // Update Stats
-            document.getElementById('stat-requests').innerText = reqs?.length || 0;
-            document.getElementById('stat-responses').innerText = resps?.length || 0;
-            document.getElementById('stat-pharmacies').innerText = scheds?.length || 0;
+            // Stats
+            document.getElementById('stat-requests').innerText = reqCount || 0;
+            document.getElementById('stat-responses').innerText = respCount || 0;
+            document.getElementById('stat-pharmacies').innerText = schedCount || 0;
 
-            // Populate Requests Table
+            // Requests Table
             const reqTable = document.getElementById('requests-table');
             reqTable.innerHTML = '';
             reqs?.forEach(r => {
                 const time = new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 const statusColor = r.status === 'pending' ? 'text-yellow-600 bg-yellow-100' : 'text-green-600 bg-green-100';
                 reqTable.innerHTML += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="p-3 text-slate-500 text-xs">${time}</td>
-                        <td class="p-3 font-medium text-slate-800 dark:text-white">${r.medicine_name}</td>
-                        <td class="p-3 text-slate-500">${r.location || '-'}</td>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700">
+                        <td class="p-3 text-slate-500 text-xs font-mono">${time}</td>
+                        <td class="p-3 font-bold text-slate-800 dark:text-white">${r.medicine_name}</td>
+                        <td class="p-3 text-slate-500 text-xs">${r.location || '-'}</td>
                         <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">${r.status}</span></td>
+                        <td class="p-3 text-right"><button onclick="deleteItem('requests', '${r.id}')" class="text-red-400 hover:text-red-600"><i class="ph ph-trash"></i></button></td>
                     </tr>
                 `;
             });
 
-            // Populate Schedules Table
+            // Schedules Table
             const schedTable = document.getElementById('schedules-table');
             schedTable.innerHTML = '';
             scheds?.forEach(s => {
                 const updated = new Date(s.updated_at).toLocaleDateString();
                 schedTable.innerHTML += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                        <td class="p-3 font-mono text-xs text-indigo-600 truncate max-w-[100px]">${s.pharmacist_id}</td>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700">
+                        <td class="p-3 font-mono text-xs text-indigo-600 truncate max-w-[150px]">${s.pharmacist_id}</td>
                         <td class="p-3 text-xs text-slate-500">${updated}</td>
-                        <td class="p-3 text-xs text-slate-400">JSON Data...</td>
                     </tr>
                 `;
             });
+        }
+
+        async function deleteItem(table, id) {
+            if(!confirm('Διαγραφή;')) return;
+            await window.db.from(table).delete().eq('id', id);
+            loadData();
         }
 
         async function logout() {
