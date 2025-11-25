@@ -43,7 +43,7 @@
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
         
         /* Glassmorphism */
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
 
         /* Modals & Toasts */
@@ -224,9 +224,10 @@
             <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user text-3xl"></i></div>
             <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος Χρήστη</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Συνδέσου για να βλέπεις το ιστορικό σου.</p>
-            <form id="magic-link-form" class="space-y-4">
+            
+            <form id="magic-link-form" class="space-y-4" onsubmit="handleMagicLink(event)">
                 <input id="user-email" type="email" placeholder="example@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white">
-                <button type="submit" onclick="handleMagicLink(event)" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-md"><i class="ph ph-magic-wand text-lg"></i> Σύνδεση με Magic Link</button>
+                <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-md"><i class="ph ph-magic-wand text-lg"></i> Σύνδεση με Magic Link</button>
             </form>
             <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all mt-3"><i class="ph ph-google-logo text-lg text-red-500"></i> Συνέχεια με Google</button>
             <p class="text-xs text-slate-400 mt-3">Αν είναι η πρώτη σας φορά, θα δημιουργηθεί αυτόματα λογαριασμός.</p>
@@ -241,6 +242,7 @@
     <script src="supabase.js"></script>
     
     <script>
+        // --- Global State ---
         let userLocation = { lat: null, lon: null };
         let pickupDeadline = null;
         let selectedResponseId = null;
@@ -252,29 +254,16 @@
         window.onload = async function() {
             loadUserData();
             createEmojis();
-            
-            if(navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((p) => {
-                    userLocation = { lat: p.coords.latitude, lon: p.coords.longitude };
-                });
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; });
             }
-            
-            // Auth State Change Listener
+            // Auth Listener
             if(window.db) {
                 const { data: { session } } = await window.db.auth.getSession();
-                if (session) {
-                    currentUser = session.user;
-                    updateNavForUser(currentUser);
-                }
-
+                if (session) { currentUser = session.user; updateNavForUser(currentUser); }
                 window.db.auth.onAuthStateChange((event, session) => {
-                    if (session) {
-                        currentUser = session.user;
-                        updateNavForUser(currentUser);
-                    } else {
-                        currentUser = null;
-                        resetNavToGuest();
-                    }
+                    if (session) { currentUser = session.user; updateNavForUser(currentUser); } 
+                    else { currentUser = null; resetNavToGuest(); }
                 });
             }
         };
@@ -282,45 +271,38 @@
         function updateNavForUser(user) {
             const navContainer = document.getElementById('user-nav-container');
             const name = user.user_metadata.full_name || user.email.split('@')[0];
-            
-            navContainer.innerHTML = `
-                <button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2 transition-all">
-                    <div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div>
-                    <span>${name}</span>
-                </button>
-                <button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Αποσύνδεση">
-                    <i class="ph ph-sign-out text-lg"></i>
-                </button>
-            `;
+            navContainer.innerHTML = `<button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2 transition-all"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Αποσύνδεση"><i class="ph ph-sign-out text-lg"></i></button>`;
         }
 
         function resetNavToGuest() {
             const navContainer = document.getElementById('user-nav-container');
-            navContainer.innerHTML = `
-                <button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all">
-                    <i class="ph ph-user text-lg"></i> Είσοδος
-                </button>
-            `;
+            navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> Είσοδος</button>`;
         }
 
-        // --- 2. Login Logic ---
+        // --- 2. Login Logic (FIXED) ---
         async function handleMagicLink(e) {
             e.preventDefault();
             const email = document.getElementById('user-email').value;
             if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; }
 
-            const btn = e.target.querySelector('button');
-            const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Στέλνουμε...';
-            btn.disabled = true;
+            // Robust button finding
+            const btn = document.querySelector('#magic-link-form button[type="submit"]');
+            let oldText = 'Σύνδεση';
+            if(btn) {
+                oldText = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Στέλνουμε...';
+                btn.disabled = true;
+            }
 
             const { error } = await window.db.auth.signInWithOtp({
                 email: email,
                 options: { emailRedirectTo: window.location.href }
             });
 
-            btn.innerHTML = oldText;
-            btn.disabled = false;
+            if(btn) {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
 
             if (error) {
                 showToast("Σφάλμα: " + error.message, 'error');
@@ -330,10 +312,7 @@
             }
         }
 
-        async function handleLogout() {
-            await window.db.auth.signOut();
-            showToast("Αποσυνδεθήκατε.", 'info');
-        }
+        async function handleLogout() { await window.db.auth.signOut(); showToast("Αποσυνδεθήκατε.", 'info'); }
 
         function getLocation() {
             const c = document.getElementById('city'); c.value = "Εντοπισμός...";
@@ -421,6 +400,8 @@
         function promptSelection(id) { selectedResponseId = id; openModal('safety'); }
         document.getElementById('confirm-pickup-btn').addEventListener('click', () => { closeModal('safety'); startPickupTimer(); });
         function startPickupTimer() { document.getElementById('results-view').classList.add('hidden'); document.getElementById('pickup-view').classList.remove('hidden'); pickupDeadline = Date.now() + (60 * 60 * 1000); updateTimerDisplay(pickupDeadline, 0); showToast("Η κράτηση ολοκληρώθηκε.", 'success'); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+        
+        // Helpers
         function resetApp() { document.getElementById('pickup-view').classList.add('hidden'); document.getElementById('results-view').classList.add('hidden'); document.getElementById('tab-search').classList.add('active'); document.getElementById('request-form').reset(); clearMedia(); currentRequestId = null; }
         let timerInterval; function updateTimerDisplay(d) { clearInterval(timerInterval); timerInterval = setInterval(() => { const diff = d - Date.now(); if(diff <= 0) { clearInterval(timerInterval); document.getElementById('timer-display').innerText = "00:00"; return; } const min = Math.floor(diff/60000); const sec = Math.floor((diff%60000)/1000); document.getElementById('timer-display').innerText = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }, 1000); }
         function extendPickupTime() { pickupDeadline += 15 * 60000; document.getElementById('extend-btn').disabled = true; document.getElementById('extend-btn').innerText = "Επεκτάθηκε (+15')"; showToast("Προστέθηκαν 15 λεπτά!", 'success'); }
