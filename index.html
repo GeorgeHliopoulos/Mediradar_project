@@ -46,10 +46,10 @@
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
 
-        /* Modals & Toasts */
-        .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
+        /* Modals & Toasts - Z-Index Fixes */
+        .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
         .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
-        .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: scale(0.95); opacity: 0; }
+        .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: scale(0.95); opacity: 0; position: relative; z-index: 101; }
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
         .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
         .toast-exit { animation: slideOutDown 0.3s ease-in forwards; }
@@ -110,6 +110,7 @@
                             <input id="phone" type="tel" placeholder="69..." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-primary/50 outline-none" required>
                         </div>
                     </div>
+
                     <div class="space-y-2 relative">
                         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Περιοχη</label>
                         <div class="relative">
@@ -124,7 +125,9 @@
                             <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-200 flex items-center gap-1"><i class="ph ph-navigation-arrow text-sm"></i> Κοντά μου</button>
                         </div>
                     </div>
+
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
+                    
                     <div class="space-y-4">
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ονομα Φαρμακου</label>
@@ -134,10 +137,12 @@
                                 <button type="button" onclick="startVoiceInput()" id="voice-btn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 flex items-center justify-center text-xl text-slate-500 hover:text-primary"><i id="mic-icon" class="ph ph-microphone"></i></button>
                             </div>
                         </div>
+                        
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Δραστικη</label><input id="substance" type="text" placeholder="Προαιρετικά" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 outline-none"></div>
                             <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ποσοτητα</label><input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 text-center font-bold outline-none"></div>
                         </div>
+
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Είδος / Μορφή</label>
                             <div class="relative">
@@ -147,27 +152,52 @@
                                 <i class="ph ph-caret-down absolute right-4 top-4 text-slate-500 pointer-events-none text-lg"></i>
                             </div>
                         </div>
+
                         <div class="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 border-2 border-dashed border-slate-300 hover:border-primary/50 transition-colors">
                             <label class="text-xs font-bold text-slate-600 uppercase mb-3 block text-center">📸 Φωτο / Barcode</label>
                             <div class="grid grid-cols-2 gap-3">
-                                <input id="request-image" type="file" accept="image/*" class="hidden" onchange="handleFileSelect(this)">
-                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-camera text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Φωτογραφία</span></button>
-                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-barcode text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Scan Barcode</span></button>
+                                <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
+                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md">
+                                    <i class="ph ph-camera text-3xl text-slate-600 dark:text-slate-300 mb-1"></i>
+                                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Φωτογραφία</span>
+                                </button>
+                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md">
+                                    <i class="ph ph-barcode text-3xl text-slate-600 dark:text-slate-300 mb-1"></i>
+                                    <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Scan Barcode</span>
+                                </button>
                             </div>
-                            <div id="scanner-container" class="hidden mt-4 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-64"><div id="reader"></div></div>
-                            <div id="media-preview" class="hidden mt-3 p-3 bg-teal-50 dark:bg-teal-900/30 border border-teal-100 rounded-xl flex items-center gap-3"><i class="ph ph-check-circle text-teal-600 text-xl"></i><p id="preview-text" class="text-xs text-teal-600 truncate flex-1">Uploaded</p><button type="button" onclick="clearMedia()"><i class="ph ph-trash text-teal-400"></i></button></div>
+                            
+                            <div id="scanner-container" class="hidden mt-4 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-64">
+                                <div id="reader" style="width: 100%; height: 100%;"></div>
+                            </div>
+                            
+                            <div id="media-preview" class="hidden mt-3 p-3 bg-teal-50 dark:bg-teal-900/30 border border-teal-100 rounded-xl flex items-center gap-3">
+                                <i class="ph ph-check-circle text-teal-600 text-xl"></i>
+                                <p id="preview-text" class="text-xs text-teal-600 truncate flex-1">Uploaded</p>
+                                <button type="button" onclick="clearMedia()"><i class="ph ph-trash text-teal-400"></i></button>
+                            </div>
                             <input id="barcode-value" type="hidden">
                         </div>
+
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Σημειωσεις</label>
                             <textarea id="notes" rows="2" placeholder="Π.χ. Προτιμώ συγκεκριμένη εταιρεία..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 resize-none focus:ring-2 focus:ring-primary/50 outline-none"></textarea>
                         </div>
                     </div>
+                    
                     <div class="space-y-3 pt-2">
-                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" class="mt-1 w-4 h-4 text-primary rounded border-gray-300" checked><span class="text-xs text-slate-600 dark:text-slate-300">Δέχομαι να μου προτείνουν <strong>γενόσημο</strong>.</span></label>
-                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" id="gdpr-check" class="mt-0.5 w-4 h-4 text-primary rounded border-gray-300" required><span class="text-xs text-slate-500">Αποδέχομαι τους <a href="#" data-open-modal="terms" class="underline text-primary">Όρους</a> και <a href="#" data-open-modal="gdpr" class="underline text-primary">GDPR</a>.</span></label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer">
+                            <input type="checkbox" class="mt-1 w-4 h-4 text-primary rounded border-gray-300" checked>
+                            <span class="text-xs text-slate-600 dark:text-slate-300">Δέχομαι να μου προτείνουν <strong>γενόσημο</strong>.</span>
+                        </label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer">
+                            <input type="checkbox" id="gdpr-check" class="mt-0.5 w-4 h-4 text-primary rounded border-gray-300" required>
+                            <span class="text-xs text-slate-500">Αποδέχομαι τους <a href="#" data-open-modal="terms" class="underline text-primary">Όρους</a> και <a href="#" data-open-modal="gdpr" class="underline text-primary">GDPR</a>.</span>
+                        </label>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-lg font-bold py-4 rounded-2xl shadow-lg transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right text-xl"></i> Αποστολή Αιτήματος</button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-lg font-bold py-4 rounded-2xl shadow-lg transform active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <i class="ph ph-paper-plane-right text-xl"></i> Αποστολή Αιτήματος
+                    </button>
                 </form>
             </div>
         </div>
@@ -235,7 +265,7 @@
             <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Σημαντική Ενημέρωση</h3>
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 p-4 rounded-xl mb-4 text-left">
                 <p class="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed"><strong>Αποποίηση Ευθύνης:</strong> Το MediRadar ενημερώνει μόνο για τη διαθεσιμότητα. Δεν φέρουμε ευθύνη για ιατρικές συμβουλές ή παρενέργειες.</p>
-                <p class="text-xs text-red-800 dark:text-red-200 font-bold mt-2 leading-relaxed">⚠️ Είστε αποκλειστικά υπεύθυνοι να ενημερώσετε τον φαρμακοποιό για τυχόν ΑΛΛΕΡΓΙΕΣ ή άλλα φάρμακα που λαμβάνετε κατά την παραλαβή (Self Pickup).</p>
+                <p class="text-xs text-red-800 dark:text-red-200 font-bold mt-2 leading-relaxed">⚠️ Είστε αποκλειστικά υπεύθυνοι να ενημερώσετε τον φαρμακοποιό για τυχόν ΑΛΛΕΡΓΙΕΣ.</p>
             </div>
             <button id="confirm-pickup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg">Έχω ενημερωθεί & Συνεχίζω</button>
             <button onclick="closeModal('safety')" class="mt-3 text-sm text-slate-500 font-medium">Ακύρωση</button>
@@ -278,8 +308,9 @@
         let currentUser = null;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let requestPollInterval = null; // Polling Handle
+        let html5QrcodeScanner = null;
 
-        // --- 1. Init & Auth ---
+        // --- 1. Init & Auth Listener ---
         window.onload = async function() {
             loadUserData();
             createEmojis();
@@ -289,11 +320,11 @@
             
             if(window.db) {
                 const { data: { session } } = await window.db.auth.getSession();
+                
                 if (session) {
                     currentUser = session.user;
                     if (!session.user.is_anonymous) updateNavForUser(currentUser);
                 } else {
-                    // Auto-Guest
                     const { data: guestData, error } = await window.db.auth.signInAnonymously();
                     if (!error && guestData.user) currentUser = guestData.user;
                 }
@@ -321,22 +352,102 @@
             navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> Είσοδος</button>`;
         }
 
-        // --- 2. Login Logic (REAL) ---
+        // --- 2. Login Logic ---
         async function handleMagicLink(e) {
             e.preventDefault();
             const email = document.getElementById('user-email').value;
             if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; }
+
             const btn = document.querySelector('#magic-link-form button[type="submit"]');
             let oldText = 'Σύνδεση';
             if(btn) { oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Στέλνουμε...'; btn.disabled = true; }
-            const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } });
+
+            const { error } = await window.db.auth.signInWithOtp({
+                email: email,
+                options: { emailRedirectTo: window.location.href }
+            });
+
             if(btn) { btn.innerHTML = oldText; btn.disabled = false; }
-            if (error) { showToast("Σφάλμα: " + error.message, 'error'); } 
-            else { showToast("✅ Ελέγξτε το email σας!", 'success'); closeModal('user'); }
+
+            if (error) {
+                showToast("Σφάλμα: " + error.message, 'error');
+            } else {
+                showToast("✅ Ελέγξτε το email σας!", 'success');
+                closeModal('user');
+            }
         }
+
         async function handleLogout() { await window.db.auth.signOut(); showToast("Αποσυνδεθήκατε.", 'info'); }
 
-        // --- 3. Submit (Updated with Name/Phone) ---
+        // --- 3. Location & API ---
+        async function getLocation() {
+            const c = document.getElementById('city');
+            c.value = "Εντοπισμός...";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (p) => {
+                    const lat = p.coords.latitude;
+                    const lon = p.coords.longitude;
+                    userLocation = { lat, lon };
+                    
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await response.json();
+                        const address = data.address;
+                        const city = address.city || address.town || address.village || address.suburb || "";
+                        const street = address.road || "";
+                        c.value = street ? `${street}, ${city}` : `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                    } catch(e) {
+                        c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                    }
+                    
+                    saveUserData(); showToast("Τοποθεσία βρέθηκε!", 'success');
+                }, () => { c.value = ""; showToast("Δεν βρέθηκε.", 'error'); });
+            }
+        }
+
+        // --- 4. Scanner Logic ---
+        function toggleScanner() {
+            const container = document.getElementById('scanner-container');
+            
+            if (!container.classList.contains('hidden')) {
+                stopScanner();
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    stopScanner();
+                    if(navigator.vibrate) navigator.vibrate(200);
+                    document.getElementById('barcode-value').value = decodedText;
+                    document.getElementById('preview-text').innerText = `Barcode: ${decodedText}`;
+                    document.getElementById('media-preview').classList.remove('hidden');
+                    showToast("Barcode Scanned!", 'success');
+                },
+                (error) => { }
+            ).catch(err => {
+                console.error(err);
+                container.classList.add('hidden');
+                showToast("Δεν βρέθηκε κάμερα.", 'error');
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
+                    html5QrcodeScanner.clear();
+                }).catch(err => console.log(err));
+            } else {
+                document.getElementById('scanner-container').classList.add('hidden');
+            }
+        }
+
+        // --- 5. Submit & Realtime ---
         const form = document.getElementById('request-form');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -356,12 +467,11 @@
                 if(data) { const { data: { publicUrl } } = window.db.storage.from('requests-media').getPublicUrl(fileName); mediaUrl = publicUrl; }
             }
 
-            // Insert with Customer Data
             const { data, error } = await window.db.from('requests').insert([{
                 user_id: currentUser ? currentUser.id : null,
                 medicine_name: document.getElementById('medicine').value,
-                customer_name: document.getElementById('full-name').value, // NEW
-                phone: document.getElementById('phone').value,           // NEW
+                customer_name: document.getElementById('full-name').value,
+                phone: document.getElementById('phone').value,
                 substance: document.getElementById('substance').value,
                 quantity: document.getElementById('quantity').value,
                 med_type: document.getElementById('med-type').value,
@@ -379,23 +489,20 @@
                 showToast("Αναζήτηση...", 'info');
                 if(data && data.length > 0) { currentRequestId = data[0].id; }
                 subscribeToResponses();
-                // Start Polling Backup
                 if(requestPollInterval) clearInterval(requestPollInterval);
                 requestPollInterval = setInterval(checkResponsesPoll, 3000);
             }
         });
 
-        // --- 4. Realtime + Polling Backup ---
         function subscribeToResponses() {
             const channel = window.db.channel('public:responses');
             channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'responses' }, payload => {
                 if (currentRequestId && payload.new.request_id !== currentRequestId) return;
                 addResponseCard(payload.new);
-                stopPolling(); // Stop polling if realtime worked
+                stopPolling();
             }).subscribe();
         }
 
-        // Backup Mechanism
         async function checkResponsesPoll() {
             if(!currentRequestId) return;
             const { data } = await window.db.from('responses').select('*').eq('request_id', currentRequestId);
@@ -407,11 +514,9 @@
         function stopPolling() { if(requestPollInterval) clearInterval(requestPollInterval); }
 
         function addResponseCard(resp) {
-            // Check duplicates
             if(document.getElementById(`resp-${resp.id}`)) return;
-
             const list = document.getElementById('responses-list');
-            const dist = calculateDistance(userLocation.lat, userLocation.lon, null, null);
+            
             const isGeneric = resp.message && resp.message.toLowerCase().includes('γενόσημο');
             const badge = isGeneric ? `<span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold uppercase">💊 Γενοσημο</span>` : `<span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded font-bold uppercase">✅ Πρωτοτυπο</span>`;
             const pharmacyName = resp.pharmacy_id && resp.pharmacy_id.length > 5 ? '#' + resp.pharmacy_id.substr(0,4) : 'Φαρμακείο';
@@ -420,17 +525,16 @@
             const div = document.createElement('div');
             div.id = `resp-${resp.id}`;
             div.className = "bg-white dark:bg-slate-700 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 animate-slide-up";
-            div.innerHTML = `<div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-slate-800 dark:text-white text-lg">${pharmacyName}</h4><p class="text-xs text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist} χλμ ${closingInfo}</p></div>${badge}</div><p class="text-sm text-slate-600 dark:text-slate-300 mb-3 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">"${resp.message || 'Διαθέσιμο'}"</p><button onclick="promptSelection('${resp.id}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"><span>Κράτηση & Παραλαβή</span> <i class="ph ph-arrow-right"></i></button>`;
+            div.innerHTML = `<div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-slate-800 dark:text-white text-lg">${pharmacyName}</h4><p class="text-xs text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${closingInfo}</p></div>${badge}</div><p class="text-sm text-slate-600 dark:text-slate-300 mb-3 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">"${resp.message || 'Διαθέσιμο'}"</p><button onclick="promptSelection('${resp.id}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"><span>Κράτηση & Παραλαβή</span> <i class="ph ph-arrow-right"></i></button>`;
             list.prepend(div);
-            
             try { new Audio('https://cdn.freesound.org/previews/536/536108_11530694-lq.mp3').play().catch(e => {}); } catch(e){}
             showToast("🔔 Νέα προσφορά!", 'success');
         }
 
-        // --- UI Helpers ---
         function promptSelection(id) { selectedResponseId = id; openModal('safety'); }
         document.getElementById('confirm-pickup-btn').addEventListener('click', () => { closeModal('safety'); startPickupTimer(); });
         function startPickupTimer() { document.getElementById('results-view').classList.add('hidden'); document.getElementById('pickup-view').classList.remove('hidden'); pickupDeadline = Date.now() + (60 * 60 * 1000); updateTimerDisplay(pickupDeadline, 0); showToast("Η κράτηση ολοκληρώθηκε.", 'success'); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
+        
         function resetApp() { document.getElementById('pickup-view').classList.add('hidden'); document.getElementById('results-view').classList.add('hidden'); document.getElementById('tab-search').classList.add('active'); document.getElementById('request-form').reset(); clearMedia(); currentRequestId = null; stopPolling(); }
         let timerInterval; function updateTimerDisplay(d) { clearInterval(timerInterval); timerInterval = setInterval(() => { const diff = d - Date.now(); if(diff <= 0) { clearInterval(timerInterval); document.getElementById('timer-display').innerText = "00:00"; return; } const min = Math.floor(diff/60000); const sec = Math.floor((diff%60000)/1000); document.getElementById('timer-display').innerText = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }, 1000); }
         function extendPickupTime() { pickupDeadline += 15 * 60000; document.getElementById('extend-btn').disabled = true; document.getElementById('extend-btn').innerText = "Επεκτάθηκε (+15')"; showToast("Προστέθηκαν 15 λεπτά!", 'success'); }
@@ -442,14 +546,9 @@
         function switchTab(t){document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');}
         function handleFileSelect(i){if(i.files[0]){document.getElementById('preview-text').innerText=i.files[0].name;document.getElementById('media-preview').classList.remove('hidden');}}
         function clearMedia(){document.getElementById('media-preview').classList.add('hidden');document.getElementById('request-image').value='';}
-        
-        // Voice & Scanner Stubs
         function startVoiceInput(){ showToast("Listening...", 'info'); setTimeout(()=>{document.getElementById('medicine').value="Depon";showToast("Heard: Depon", 'success');},1500); }
-        function toggleScanner(){ document.getElementById('scanner-container').classList.remove('hidden'); setTimeout(()=>{document.getElementById('barcode-value').value="123456";document.getElementById('preview-text').innerText="Barcode: 123456";document.getElementById('media-preview').classList.remove('hidden');document.getElementById('scanner-container').classList.add('hidden');},1500); }
         function saveUserData(){ localStorage.setItem('mr_u', JSON.stringify({n:document.getElementById('full-name').value,p:document.getElementById('phone').value,c:document.getElementById('city').value})); }
         function loadUserData(){ const d=JSON.parse(localStorage.getItem('mr_u')||'{}'); if(d.n)document.getElementById('full-name').value=d.n; if(d.p)document.getElementById('phone').value=d.p; if(d.c)document.getElementById('city').value=d.c; }
-        function getLocation() { const c = document.getElementById('city'); c.value = "Εντοπισμός..."; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; c.value = `📍 ${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`; saveUserData(); showToast("Τοποθεσία βρέθηκε!", 'success'); }, () => { c.value = ""; showToast("Δεν βρέθηκε.", 'error'); }); } }
-        function calculateDistance(lat1, lon1, lat2, lon2) { if (!lat1 || !lon1) return (Math.random() * 2 + 0.2).toFixed(1); return (Math.random() * 2 + 0.2).toFixed(1); }
         function createEmojis(){ const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴']; for(let i=0; i<15; i++){ const e = document.createElement('div'); e.innerText = em[Math.floor(Math.random() * em.length)]; e.classList.add('emoji'); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = (12 + Math.random() * 20) + 's'; e.style.animationDelay = (Math.random() * 10) + 's'; c.appendChild(e); } }
     </script>
 </body>
