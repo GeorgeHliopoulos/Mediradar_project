@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediRadar - Admin</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { admin: '#4f46e5' } } } }
     </script>
@@ -20,11 +23,11 @@
                 <i class="ph ph-shield-check text-2xl text-yellow-400"></i>
                 <h1 class="font-bold text-xl">MediRadar <span class="font-light opacity-80">Admin</span></h1>
             </div>
-            <button onclick="logout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 px-3 py-1.5 rounded border border-indigo-600 transition">Έξοδος</button>
+            <button onclick="handleLogout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 px-3 py-1.5 rounded border border-indigo-600 transition">Έξοδος</button>
         </div>
     </nav>
 
-    <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+    <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="ph ph-lock-key-open"></i></div>
             <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Admin Access</h2>
@@ -37,7 +40,6 @@
     </div>
 
     <main id="dashboard" class="max-w-7xl mx-auto p-6 hidden">
-        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
                 <p class="text-slate-500 text-xs font-bold uppercase">Συνολικα Αιτηματα</p>
@@ -96,29 +98,29 @@
 
     <script src="env.js"></script>
     <script src="supabase.js"></script>
+
     <script>
         // --- ADMIN LOGIC ---
         
         window.onload = async function() {
             if(!window.db) return;
 
-            // Έλεγχος Σύνδεσης
+            // Έλεγχος αν είναι συνδεδεμένος ΚΑΙ ΟΧΙ ανώνυμος
             const { data: { session } } = await window.db.auth.getSession();
             
-            // ΣΗΜΑΝΤΙΚΗ ΑΛΛΑΓΗ: Αν είναι Guest (Anonymous), τον πετάμε έξω για να ζητήσουμε Admin login
             if (session && session.user && !session.user.is_anonymous) {
-                // Είναι κανονικός χρήστης (ελπίζουμε Admin), τον αφήνουμε να μπει
+                // Κανονικός χρήστης (Admin)
                 initDashboard(session.user);
             } else {
-                // Είναι Guest ή δεν είναι συνδεδεμένος -> Δείξε Login
+                // Ανώνυμος ή μη συνδεδεμένος -> Login Screen
                 document.getElementById('admin-login').classList.remove('hidden');
                 document.getElementById('dashboard').classList.add('hidden');
-                
-                // Αν ήταν guest, κάνε logout για να καθαρίσει
+                // Αν ήταν ανώνυμος, τον κάνουμε logout για να καθαρίσει
                 if(session) window.db.auth.signOut();
             }
         };
 
+        // Login Handler
         document.getElementById('admin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('a-email').value;
@@ -191,7 +193,7 @@
             loadData();
         }
 
-        async function logout() {
+        async function handleLogout() {
             await window.db.auth.signOut();
             window.location.reload();
         }
