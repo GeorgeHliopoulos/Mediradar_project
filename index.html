@@ -19,7 +19,12 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { primary: '#0d9488', secondary: '#0f172a' },
-                    animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards', 'slide-up': 'slideUp 0.3s ease-out forwards' },
+                    animation: { 
+                        'float': 'float 15s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
+                        'fade-in': 'fadeIn 0.3s ease-out forwards', 
+                        'slide-up': 'slideUp 0.3s ease-out forwards' 
+                    },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
                         slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
@@ -31,25 +36,28 @@
         }
     </script>
     <style>
+        /* Floating Emojis CSS */
         .emoji-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; pointer-events: none; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); transition: background 0.5s ease; }
         html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .emoji { position: absolute; bottom: -100px; font-size: 2rem; opacity: 0.4; animation: floatUp 15s linear infinite; z-index: 0; }
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
         
+        /* Glassmorphism */
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
 
+        /* Modals & Toasts */
         .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
         .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: scale(0.95); opacity: 0; }
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
-        
         .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
         .toast-exit { animation: slideOutDown 0.3s ease-in forwards; }
         body::-webkit-scrollbar { width: 0px; background: transparent; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
         
+        /* Radar */
         .radar-pulse { width: 100px; height: 100px; background: rgba(13, 148, 136, 0.2); border-radius: 50%; position: relative; margin: 0 auto; }
         .radar-pulse::before, .radar-pulse::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #0d9488; width: 100%; height: 100%; animation: ripple 2s linear infinite; opacity: 0; }
         .radar-pulse::after { animation-delay: 1s; }
@@ -308,7 +316,7 @@
         // --- 1. Init & Location ---
         window.onload = function() {
             loadUserData();
-            createEmojis();
+            createEmojis(); // <--- EMOJIS ACTIVATED
             // Try auto-locate on load
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((p) => {
@@ -396,14 +404,12 @@
             console.log("Initializing Realtime subscription...");
             
             // IMPORTANT: Subscribe to ALL responses first, then filter in the callback.
-            // This avoids RLS filtering issues for public/demo apps.
             const channel = window.db.channel('public:responses');
             
             channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'responses' }, payload => {
                 console.log("Realtime Event Received:", payload);
                 
                 // Safety Check: Only show response if it matches our current request
-                // (If currentRequestId is null, we might be in debug mode, so show it anyway)
                 if (currentRequestId && payload.new.request_id !== currentRequestId) {
                     console.log("Ignoring response for different request ID.");
                     return;
@@ -417,9 +423,6 @@
             })
             .subscribe((status) => {
                 console.log("Realtime Status:", status);
-                if (status === 'SUBSCRIBED') {
-                    // Optional: showToast("Συνδέθηκε στο δίκτυο", 'success');
-                }
             });
         }
 
@@ -528,7 +531,20 @@
         function toggleScanner(){ document.getElementById('scanner-container').classList.remove('hidden'); setTimeout(()=>{document.getElementById('barcode-value').value="123456";document.getElementById('preview-text').innerText="Barcode: 123456";document.getElementById('media-preview').classList.remove('hidden');document.getElementById('scanner-container').classList.add('hidden');},1500); }
         function saveUserData(){ localStorage.setItem('mr_u', JSON.stringify({n:document.getElementById('full-name').value,p:document.getElementById('phone').value,c:document.getElementById('city').value})); }
         function loadUserData(){ const d=JSON.parse(localStorage.getItem('mr_u')||'{}'); if(d.n)document.getElementById('full-name').value=d.n; if(d.p)document.getElementById('phone').value=d.p; if(d.c)document.getElementById('city').value=d.c; }
-        function createEmojis(){ /* bg logic */ }
+        
+        // Floating Emojis Logic
+        function createEmojis() {
+            const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴'];
+            for(let i=0; i<15; i++){
+                const e = document.createElement('div');
+                e.innerText = em[Math.floor(Math.random() * em.length)];
+                e.classList.add('emoji');
+                e.style.left = Math.random() * 100 + '%';
+                e.style.animationDuration = (12 + Math.random() * 20) + 's';
+                e.style.animationDelay = (Math.random() * 10) + 's';
+                c.appendChild(e);
+            }
+        }
     </script>
 </body>
 </html>
