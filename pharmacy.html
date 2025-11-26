@@ -18,7 +18,12 @@
     <nav class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 p-4 sticky top-0 z-30">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3"><div class="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-white shadow-lg"><i class="ph ph-first-aid-kit text-2xl"></i></div><div><h1 class="font-bold text-lg leading-tight">MediRadar <span class="text-secondary">Pro</span></h1><p class="text-xs text-slate-500 dark:text-slate-400">Κέντρο Διαχείρισης</p></div></div>
-            <div class="flex gap-3 items-center">
+            <div class="flex gap-2 items-center">
+                <!-- VERIFY BUTTON (MANUAL) -->
+                <button onclick="openVerificationModal()" class="text-xs font-bold bg-secondary text-white px-3 py-2 rounded-lg hover:bg-teal-700 transition flex items-center gap-1 shadow-md shadow-teal-500/20">
+                    <i class="ph ph-numpad text-lg"></i> <span class="hidden sm:inline">Επαλήθευση Κωδικού</span>
+                </button>
+                
                 <button onclick="openScheduleModal()" class="text-xs font-bold bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-lg hover:bg-slate-200 transition flex items-center gap-1"><i class="ph ph-calendar-check"></i> Ωράριο</button>
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"><i class="ph ph-moon-stars text-xl"></i></button>
                 <div id="auth-section"></div>
@@ -40,16 +45,56 @@
     <div id="schedule-modal" class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-3xl w-full border border-slate-700 h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-calendar-check text-secondary"></i> Εβδομαδιαίο Πρόγραμμα</h2>
-                    <p class="text-xs text-slate-500 mt-1">Ορίστε τις ώρες λειτουργίας για τις επόμενες 7 ημέρες.</p>
-                </div>
+                <div><h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="ph ph-calendar-check text-secondary"></i> Εβδομαδιαίο Πρόγραμμα</h2><p class="text-xs text-slate-500 mt-1">Ορίστε τις ώρες λειτουργίας.</p></div>
                 <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-white"><i class="ph ph-x text-xl"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto pr-2 space-y-2" id="schedule-form"></div>
             <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <button onclick="saveSchedule()" class="w-full bg-secondary hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2"><i class="ph ph-floppy-disk text-lg"></i> Αποθήκευση & Έναρξη</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MANUAL VERIFICATION MODAL -->
+    <div id="verification-input-modal" class="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-sm w-full text-center border border-slate-600 animate-[fadeIn_0.3s_ease-out]">
+            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="ph ph-keyboard"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Επαλήθευση Κωδικού</h3>
+            <p class="text-sm text-slate-500 mb-6">Πληκτρολογήστε τον 6-ψήφιο κωδικό που σας δείχνει ο πελάτης.</p>
+            
+            <div class="mb-6">
+                <input type="text" id="verify-code-input" placeholder="π.χ. a1b2c3" maxlength="8" 
+                       class="w-full p-4 text-center text-2xl font-mono font-bold tracking-widest uppercase rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none dark:bg-slate-900 dark:text-white dark:border-slate-600">
+            </div>
+
+            <button onclick="checkManualCode()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all">
+                <i class="ph ph-check-bold text-lg"></i> Έλεγχος
+            </button>
+            <button onclick="closeVerificationModal()" class="mt-3 text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 font-medium">Ακύρωση</button>
+        </div>
+    </div>
+
+    <!-- SUCCESS MODAL (AFTER CODE CHECK) -->
+    <div id="verification-success-modal" class="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl max-w-sm w-full text-center border-2 border-green-500 animate-[fadeIn_0.3s_ease-out]">
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl animate-bounce">
+                <i class="ph ph-check-circle-fill"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Επιτυχία!</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Η παραγγελία βρέθηκε.</p>
+            
+            <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-left space-y-3 mb-6">
+                <div><p class="text-xs text-slate-400 uppercase font-bold">Πελατης</p><p class="font-bold text-slate-800 dark:text-white text-lg" id="success-name">-</p></div>
+                <div><p class="text-xs text-slate-400 uppercase font-bold">Φαρμακο</p><p class="font-bold text-secondary text-lg" id="success-med">-</p></div>
+                <div><p class="text-xs text-slate-400 uppercase font-bold">Ποσοτητα</p><p class="font-mono font-bold text-slate-800 dark:text-white" id="success-qty">-</p></div>
+            </div>
+
+            <button id="success-confirm-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all">
+                <i class="ph ph-hand-coins text-lg"></i> Ολοκλήρωση Παράδοσης
+            </button>
+            <button onclick="document.getElementById('verification-success-modal').classList.add('hidden')" class="mt-3 text-sm text-slate-400 hover:text-white">Άκυρο</button>
         </div>
     </div>
 
@@ -72,19 +117,11 @@
     <script>
         let currentUser = null;
         let mySchedule = null;
-        const GREEK_DAYS = {'Monday':'Δευτέρα', 'Tuesday':'Τρίτη', 'Wednesday':'Τετάρτη', 'Thursday':'Πέμπτη', 'Friday':'Παρασκευή', 'Saturday':'Σάββατο', 'Sunday':'Κυριακή'};
+        let allActiveRequests = []; 
 
-        // Time helpers
-        function getNext7Days() {
-            const days = []; const today = new Date();
-            for(let i=0; i<7; i++) {
-                const d = new Date(today); d.setDate(today.getDate() + i);
-                const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
-                const dateStr = d.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
-                days.push({ dbName: dayName, label: GREEK_DAYS[dayName], date: dateStr, isToday: i === 0 });
-            }
-            return days;
-        }
+        const DAYS = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
+        const DB_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
         function getHourOptions(s) { let o=''; for(let i=0;i<24;i++){const v=i.toString().padStart(2,'0');o+=`<option value="${v}" ${v===s?'selected':''}>${v}</option>`;} return o; }
         function getMinOptions(s) { return ['00','15','30','45'].map(m=>`<option value="${m}" ${m===s?'selected':''}>${m}</option>`).join(''); }
 
@@ -93,23 +130,12 @@
             const { data: { session } } = await window.db.auth.getSession();
             if (session) { handleLoginSuccess(session.user); } else { document.getElementById('login-overlay').classList.remove('hidden'); }
             
-            // Setup Schedule Form
             const formContainer = document.getElementById('schedule-form');
-            const weekDays = getNext7Days();
-            weekDays.forEach((day, index) => {
-                const todayBadge = day.isToday ? '<span class="bg-secondary text-white text-[10px] px-2 py-0.5 rounded-full ml-2">ΣΗΜΕΡΑ</span>' : '';
-                const borderClass = day.isToday ? 'border-secondary ring-1 ring-secondary/30' : 'border-slate-200 dark:border-slate-700';
+            DAYS.forEach((day, index) => {
                 formContainer.innerHTML += `
-                    <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border ${borderClass}" data-day="${day.dbName}">
-                        <div class="w-full sm:w-32 flex flex-col">
-                            <div class="font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center"><input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4 mr-2" checked onchange="toggleDay(${index})">${day.label}${todayBadge}</div>
-                            <div class="text-xs text-slate-500 ml-6">${day.date}</div>
-                        </div>
-                        <div id="times-${index}" class="flex items-center gap-2 flex-1 w-full">
-                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2 flex-1 justify-center"><select id="open-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('08')}</select><span class="text-slate-400">:</span><select id="open-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div>
-                            <span class="text-slate-400 text-xs">έως</span>
-                            <div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2 flex-1 justify-center"><select id="close-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('21')}</select><span class="text-slate-400">:</span><select id="close-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div>
-                        </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="w-full sm:w-24 font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2"><input type="checkbox" id="active-${index}" class="accent-secondary w-4 h-4" checked onchange="toggleDay(${index})">${day}</div>
+                        <div id="times-${index}" class="flex items-center gap-2 flex-1"><div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2"><select id="open-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('08')}</select><span class="text-slate-400">:</span><select id="open-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div><span class="text-slate-400 text-xs">έως</span><div class="flex items-center bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 px-2"><select id="close-h-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getHourOptions('21')}</select><span class="text-slate-400">:</span><select id="close-m-${index}" class="bg-transparent py-2 outline-none text-sm font-mono">${getMinOptions('00')}</select></div></div>
                     </div>`;
             });
         };
@@ -130,141 +156,64 @@
             subscribeToRequests();
         }
 
-        // --- CORE PHARMACY LOGIC UPDATED ---
-        async function fetchRequests() {
-            const spinner = document.getElementById('loading-spinner'); const container = document.getElementById('requests-container'); spinner.classList.remove('hidden');
-            
-            // 1. Fetch Pending Requests
-            const { data: pendingData } = await window.db.from('requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-            
-            // 2. Fetch My Responses (to know what I've answered)
-            const { data: myResponses } = await window.db.from('responses').select('request_id').eq('pharmacist_id', currentUser.id);
-            const myRespondedIds = new Set((myResponses || []).map(r => r.request_id));
-
-            // 3. Fetch Won/Reserved Requests (Where I am the winner)
-            const { data: wonData } = await window.db.from('requests').select('*').eq('status', 'reserved').eq('winner_pharmacy_id', currentUser.id);
-
-            spinner.classList.add('hidden');
-            container.innerHTML = '';
-            
-            const allRequests = [...(wonData || []), ...(pendingData || [])];
-
-            if(allRequests.length > 0) { 
-                allRequests.forEach(req => container.innerHTML += createRequestCard(req, myRespondedIds.has(req.id))); 
-            } else { 
-                container.innerHTML = `<div class="text-center py-16 bg-white/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700"><p class="text-slate-500">Κανένα αίτημα.</p></div>`; 
-            }
+        // --- MANUAL VERIFICATION LOGIC ---
+        function openVerificationModal() {
+            document.getElementById('verification-input-modal').classList.remove('hidden');
+            document.getElementById('verify-code-input').value = '';
+            document.getElementById('verify-code-input').focus();
         }
 
-        function createRequestCard(req, hasResponded) {
-            const timeAgo = new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-            const typeBadge = req.med_type ? `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded uppercase">${req.med_type}</span>` : '';
-            const mediaButton = req.media_url ? `<a href="${req.media_url}" target="_blank" class="text-blue-500 text-xs font-bold flex items-center gap-1 bg-blue-50 px-2 py-1 rounded"><i class="ph ph-image"></i> Φωτό</a>` : '';
-            const customerInfo = req.customer_name ? `<div class="text-xs font-bold text-slate-800 dark:text-white mt-1"><i class="ph ph-user"></i> ${req.customer_name} <i class="ph ph-phone ml-1"></i> ${req.phone || '-'}</div>` : '';
+        function closeVerificationModal() {
+            document.getElementById('verification-input-modal').classList.add('hidden');
+        }
 
-            // Determine State UI
-            let stateUI = '';
-            let borderClass = 'border-l-secondary'; // Default teal
+        function checkManualCode() {
+            const code = document.getElementById('verify-code-input').value.trim();
+            if(!code || code.length < 4) { showToast("Εισάγετε τουλάχιστον 4 χαρακτήρες", 'error'); return; }
 
-            if (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
-                // CASE: WON (Reserved by Customer)
-                borderClass = 'border-l-green-500';
-                // Calculate remaining time
-                const deadline = new Date(req.deadline_at);
-                const now = new Date();
-                const diff = Math.ceil((deadline - now) / 60000);
-                const timeDisplay = diff > 0 ? `${diff} λεπτά` : 'ΕΛΗΞΕ';
-                const timerColor = diff > 0 ? 'text-green-600' : 'text-red-500';
+            // Search in active requests
+            const order = allActiveRequests.find(r => r.id.toLowerCase().startsWith(code.toLowerCase()));
 
-                stateUI = `
-                    <div class="mt-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-3 rounded-xl animate-pulse-slow">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-green-700 dark:text-green-300 flex items-center gap-2"><i class="ph ph-check-circle-fill text-xl"></i> ΚΡΑΤΗΣΗ!</span>
-                            <span class="font-mono font-bold text-lg ${timerColor}">${timeDisplay}</span>
-                        </div>
-                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">Ο πελάτης έρχεται για παραλαβή.</p>
-                        <div class="mt-2 flex gap-2">
-                            <button class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-green-700">Επιβεβαίωση QR</button>
-                            <button class="text-slate-500 text-xs hover:underline">Ακύρωση</button>
-                        </div>
-                    </div>
-                `;
-            } else if (hasResponded) {
-                // CASE: PENDING BUT RESPONDED
-                borderClass = 'border-l-yellow-400';
-                stateUI = `
-                    <div class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 rounded-xl">
-                        <div class="flex items-center gap-2 text-yellow-700 dark:text-yellow-400 font-bold text-sm">
-                            <i class="ph ph-hourglass-medium"></i> Αναμονή Πελάτη...
-                        </div>
-                        <p class="text-xs text-yellow-600 dark:text-yellow-500 mt-1">Έχετε στείλει προσφορά. Περιμένετε αποδοχή.</p>
-                    </div>
-                `;
+            if(order) {
+                closeVerificationModal();
+                // Show Success Details
+                document.getElementById('success-name').innerText = order.customer_name || 'Ανώνυμος';
+                document.getElementById('success-med').innerText = order.medicine_name;
+                document.getElementById('success-qty').innerText = order.quantity + ' τμχ';
+                
+                const confirmBtn = document.getElementById('success-confirm-btn');
+                confirmBtn.onclick = () => {
+                    completeOrder(order.id);
+                    document.getElementById('verification-success-modal').classList.add('hidden');
+                };
+                
+                document.getElementById('verification-success-modal').classList.remove('hidden');
             } else {
-                // CASE: NEW / PENDING RESPONSE
-                stateUI = `
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-                        <button onclick="sendResponse('${req.id}', 'original')" class="col-span-1 bg-secondary hover:bg-teal-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2"><i class="ph ph-check-circle text-lg"></i> Πρωτότυπο</button>
-                        <button onclick="sendResponse('${req.id}', 'generic')" class="col-span-1 bg-white border border-secondary text-secondary hover:bg-teal-50 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-pill text-lg"></i> Γενόσημο</button>
-                        <button onclick="dismissRequest('${req.id}')" class="col-span-2 sm:col-span-1 bg-slate-100 text-slate-500 hover:bg-slate-200 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-x text-lg"></i> Απόρριψη</button>
-                    </div>
-                `;
+                showToast("Ο κωδικός δεν βρέθηκε ή έχει λήξει.", 'error');
             }
-
-            return `
-            <div id="card-${req.id}" class="glass-panel p-5 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 ${borderClass} relative group">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1"><i class="ph ph-clock"></i> ${timeAgo}</span>
-                        ${typeBadge}
-                        <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${req.location || 'Τοποθεσία'}</span>
-                    </div>
-                </div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">${req.medicine_name} <span class="text-sm font-normal text-slate-500">x${req.quantity || 1}</span></h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">${req.substance || ''}</p>
-                        ${customerInfo}
-                    </div>
-                    <div class="flex flex-col items-end gap-2">${mediaButton}</div>
-                </div>
-                ${req.notes ? `<div class="bg-slate-50 p-3 rounded-lg text-xs italic border mb-4">" ${req.notes} "</div>` : ''}
-                ${stateUI}
-            </div>`;
         }
 
         async function fetchSchedule() {
-            // Convert id to text to avoid uuid error for demo users
             const { data, error } = await window.db.from('schedules').select('data').eq('pharmacist_id', currentUser.id).single();
-            if (!data || error) {
-                document.getElementById('schedule-modal').classList.remove('hidden');
-            } else {
-                mySchedule = data.data;
-            }
+            if (!data || error) { document.getElementById('schedule-modal').classList.remove('hidden'); } else { mySchedule = data.data; }
         }
 
         async function saveSchedule() {
             const scheduleData = {};
-            const weekDays = getNext7Days();
-            
-            weekDays.forEach((day, index) => {
-                scheduleData[day.dbName] = {
-                    open: `${document.getElementById(`open-h-${index}`).value}:${document.getElementById(`open-m-${index}`).value}`,
-                    close: `${document.getElementById(`close-h-${index}`).value}:${document.getElementById(`close-m-${index}`).value}`,
-                    isActive: document.getElementById(`active-${index}`).checked
+            for(let i=0; i<7; i++) {
+                scheduleData[DB_DAYS[i]] = {
+                    open: `${document.getElementById(`open-h-${i}`).value}:${document.getElementById(`open-m-${i}`).value}`,
+                    close: `${document.getElementById(`close-h-${i}`).value}:${document.getElementById(`close-m-${i}`).value}`,
+                    isActive: document.getElementById(`active-${i}`).checked
                 };
-            });
-
+            }
             const { error } = await window.db.from('schedules').upsert({ pharmacist_id: currentUser.id, data: scheduleData });
             if (error) { showToast("Σφάλμα: " + error.message, 'error'); } 
             else { mySchedule = scheduleData; document.getElementById('schedule-modal').classList.add('hidden'); showToast("Το ωράριο αποθηκεύτηκε!", 'success'); }
         }
 
         function openScheduleModal() { document.getElementById('schedule-modal').classList.remove('hidden'); }
-        function closeScheduleModal() { 
-            if(!mySchedule) { alert("Απαιτείται αποθήκευση ωραρίου!"); return; }
-            document.getElementById('schedule-modal').classList.add('hidden'); 
-        }
+        function closeScheduleModal() { if(!mySchedule) { alert("Απαιτείται αποθήκευση ωραρίου!"); return; } document.getElementById('schedule-modal').classList.add('hidden'); }
 
         function getClosingTimeToday() {
             if (!mySchedule) return null;
@@ -277,18 +226,12 @@
         function canAcceptOrder() {
             const closingTime = getClosingTimeToday();
             if (!closingTime) return { allowed: false, reason: "Το φαρμακείο φαίνεται κλειστό για σήμερα στο πρόγραμμα." };
-
             const now = new Date();
             const [cH, cM] = closingTime.split(':').map(Number);
             const closeDate = new Date();
             closeDate.setHours(cH, cM, 0);
-
-            if (now > closeDate) return { allowed: false, reason: "Το φαρμακείο έχει κλείσει ήδη." };
-
             const arrivalTime = new Date(now.getTime() + 60 * 60000);
-            if (arrivalTime > closeDate) {
-                return { allowed: false, reason: `Κλείνετε στις ${closingTime}. Δεν υπάρχει περιθώριο 60'.` };
-            }
+            if (arrivalTime > closeDate) { return { allowed: false, reason: `Κλείνετε στις ${closingTime}. Δεν υπάρχει περιθώριο 60'.` }; }
             return { allowed: true, closingTime };
         }
 
@@ -309,39 +252,106 @@
 
             if (!error) { 
                 showToast('Η απάντηση στάλθηκε!', 'success'); 
-                // Reload to show updated state (Waiting)
                 fetchRequests(); 
-            } 
-            else { showToast('Σφάλμα: ' + error.message, 'error'); }
+            } else { showToast('Σφάλμα: ' + error.message, 'error'); }
         }
-        
+
+        async function completeOrder(requestId) {
+            removeCard(requestId);
+            const { error } = await window.db.from('requests').update({ status: 'completed' }).eq('id', requestId);
+            if(!error) {
+                showToast('Παραδόθηκε!', 'success');
+                try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){}
+                fetchRequests();
+            }
+        }
+
+        async function fetchRequests() {
+            const spinner = document.getElementById('loading-spinner'); const container = document.getElementById('requests-container'); spinner.classList.remove('hidden');
+            
+            const { data, error } = await window.db.from('requests').select('*')
+                .or(`status.eq.pending,and(status.eq.reserved,winner_pharmacy_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: false });
+
+            if(data) allActiveRequests = data; // Cache for search
+
+            const { data: myResponses } = await window.db.from('responses').select('request_id').eq('pharmacist_id', currentUser.id);
+            const myRespondedIds = new Set((myResponses || []).map(r => r.request_id));
+
+            spinner.classList.add('hidden');
+            if(error) return; container.innerHTML = '';
+            
+            if(data && data.length > 0) { 
+                data.forEach(req => container.innerHTML += createRequestCard(req, myRespondedIds.has(req.id))); 
+            } else { container.innerHTML = `<div class="text-center py-16 bg-white/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-300 dark:border-slate-700"><p class="text-slate-500">Κανένα νέο αίτημα.</p></div>`; }
+        }
+
+        function createRequestCard(req, hasResponded) {
+            const timeAgo = new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+            const typeBadge = req.med_type ? `<span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-1 rounded uppercase">${req.med_type}</span>` : '';
+            const mediaButton = req.media_url ? `<a href="${req.media_url}" target="_blank" class="text-blue-500 text-xs font-bold flex items-center gap-1 bg-blue-50 px-2 py-1 rounded"><i class="ph ph-image"></i> Φωτό</a>` : '';
+            const customerInfo = req.customer_name ? `<div class="text-xs font-bold text-slate-800 dark:text-white mt-1"><i class="ph ph-user"></i> ${req.customer_name} <i class="ph ph-phone ml-1"></i> <a href="tel:${req.phone}" class="underline">${req.phone || '-'}</a></div>` : '';
+
+            let stateUI = '';
+            let borderClass = 'border-l-secondary'; 
+
+            if (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
+                borderClass = 'border-l-green-500 ring-1 ring-green-500/20';
+                stateUI = `
+                    <div class="mt-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 rounded-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-green-700 dark:text-green-300 flex items-center gap-2 text-sm"><i class="ph ph-check-circle-fill text-xl"></i> ΚΡΑΤΗΣΗ!</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-1 rounded font-mono">ID: ${req.id.substr(0,6)}</span>
+                        </div>
+                        <p class="text-xs text-green-600 dark:text-green-400">Ο πελάτης έρχεται. Εισάγετε τον κωδικό παραλαβής.</p>
+                        
+                        <button onclick="openVerificationModal()" class="w-full mt-3 bg-green-600 text-white px-3 py-3 rounded-xl text-sm font-bold hover:bg-green-700 flex items-center justify-center gap-2 shadow-md">
+                            <i class="ph ph-numpad text-lg"></i> Επαλήθευση & Παράδοση
+                        </button>
+                    </div>
+                `;
+            } else if (hasResponded) {
+                borderClass = 'border-l-yellow-400';
+                stateUI = `
+                    <div class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 rounded-xl">
+                        <div class="flex items-center gap-2 text-yellow-700 dark:text-yellow-400 font-bold text-sm"><i class="ph ph-hourglass-medium"></i> Αναμονή...</div>
+                        <p class="text-xs text-yellow-600 dark:text-yellow-500 mt-1">Στείλατε προσφορά.</p>
+                    </div>
+                `;
+            } else {
+                stateUI = `
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                        <button onclick="sendResponse('${req.id}', 'original')" class="col-span-1 bg-secondary hover:bg-teal-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2"><i class="ph ph-check-circle text-lg"></i> Πρωτότυπο</button>
+                        <button onclick="sendResponse('${req.id}', 'generic')" class="col-span-1 bg-white border border-secondary text-secondary hover:bg-teal-50 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-pill text-lg"></i> Γενόσημο</button>
+                        <button onclick="dismissRequest('${req.id}')" class="col-span-2 sm:col-span-1 bg-slate-100 text-slate-500 hover:bg-slate-200 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i class="ph ph-x text-lg"></i> Απόρριψη</button>
+                    </div>
+                `;
+            }
+
+            return `<div id="card-${req.id}" class="glass-panel p-5 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 ${borderClass} relative group"><div class="flex justify-between items-start mb-3"><div class="flex flex-wrap items-center gap-2"><span class="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1"><i class="ph ph-clock"></i> ${timeAgo}</span>${typeBadge}<span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${req.location || 'Τοποθεσία'}</span></div></div><div class="flex justify-between items-start"><div><h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">${req.medicine_name} <span class="text-sm font-normal text-slate-500">x${req.quantity || 1}</span></h3><p class="text-sm text-slate-500 dark:text-slate-400 mb-2">${req.substance || ''}</p>${customerInfo}</div><div class="flex flex-col items-end gap-2">${mediaButton}</div></div>${req.notes ? `<div class="bg-slate-50 p-3 rounded-lg text-xs italic border mb-4">" ${req.notes} "</div>` : ''}${stateUI}</div>`;
+        }
+
         function dismissRequest(requestId) { removeCard(requestId); }
         function removeCard(id) { const card = document.getElementById(`card-${id}`); if (card) { card.style.opacity = '0'; setTimeout(() => card.remove(), 300); } }
 
         function subscribeToRequests() {
              window.db.channel('pharmacy-feed')
-             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'requests' }, payload => {
-                 showToast('🔔 Νέο αίτημα!', 'info');
-                 fetchRequests(); // Reload list to sort correctly
-             })
-             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'requests' }, payload => {
-                 // Listen for Status Changes (e.g. RESERVED)
-                 if (payload.new.winner_pharmacy_id === currentUser.id) {
+             .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
+                 if(payload.eventType === 'INSERT') showToast('🔔 Νέο αίτημα!', 'info');
+                 if(payload.eventType === 'UPDATE' && payload.new.winner_pharmacy_id === currentUser.id && payload.new.status === 'reserved') {
                      showToast('✅ ΚΡΑΤΗΣΗ! Ένας πελάτης σας επέλεξε!', 'success');
-                     new Audio('https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3').play().catch(e=>{});
-                     fetchRequests();
+                     try { new Audio('https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3').play().catch(e=>{}); } catch(e){}
                  }
+                 fetchRequests();
              })
              .subscribe();
         }
 
-        function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-        
-        // Global Login Helpers
         document.getElementById('login-form').addEventListener('submit', async (e) => { e.preventDefault(); const { data, error } = await window.db.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('password').value }); if (error) showToast(error.message, 'error'); else handleLoginSuccess(data.user); });
         async function demoLogin() { const { data, error } = await window.db.auth.signInAnonymously(); if (error) { currentUser = { id: 'demo_pharmacist', email: 'demo@pharmacy.gr' }; handleLoginSuccess(currentUser); showToast('Demo Mode', 'success'); } else { handleLoginSuccess(data.user); } }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
+        function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
     </script>
 </body>
 </html>
