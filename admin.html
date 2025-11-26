@@ -4,199 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediRadar - Admin</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { admin: '#4f46e5' } } } }
-    </script>
+    <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { admin: '#4f46e5' } } } }</script>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen">
 
     <nav class="bg-admin text-white p-4 shadow-lg sticky top-0 z-30">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <i class="ph ph-shield-check text-2xl text-yellow-400"></i>
-                <h1 class="font-bold text-xl">MediRadar <span class="font-light opacity-80">Admin</span></h1>
-            </div>
+            <div class="flex items-center gap-3"><i class="ph ph-shield-check text-2xl text-yellow-400"></i><h1 class="font-bold text-xl">MediRadar <span class="font-light opacity-80">Admin</span></h1></div>
             <button onclick="handleLogout()" class="text-xs bg-indigo-800 hover:bg-indigo-700 px-3 py-1.5 rounded border border-indigo-600 transition">Έξοδος</button>
         </div>
     </nav>
 
     <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
-            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="ph ph-lock-key-open"></i></div>
             <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Admin Access</h2>
             <form id="admin-form" class="space-y-4">
-                <input type="email" id="a-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 outline-none focus:border-indigo-500" required>
-                <input type="password" id="a-pass" placeholder="Admin Key" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 outline-none focus:border-indigo-500" required>
+                <input type="email" id="a-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 outline-none" required>
+                <input type="password" id="a-pass" placeholder="Admin Key" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 outline-none" required>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition">Είσοδος</button>
             </form>
         </div>
     </div>
 
     <main id="dashboard" class="max-w-7xl mx-auto p-6 hidden">
+        
+        <!-- NEW: PENDING APPROVALS SECTION -->
+        <div id="pending-section" class="mb-8 hidden">
+            <h3 class="text-xl font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2"><i class="ph ph-warning-circle text-orange-500"></i> Εκκρεμείς Εγκρίσεις Φαρμακείων</h3>
+            <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-4 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="text-orange-800 dark:text-orange-200"><tr><th class="p-2">Όνομα</th><th class="p-2">ΑΦΜ/Άδεια</th><th class="p-2">Email</th><th class="p-2 text-right">Ενέργεια</th></tr></thead>
+                    <tbody id="pending-table"></tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
-                <p class="text-slate-500 text-xs font-bold uppercase">Συνολικα Αιτηματα</p>
-                <h3 id="stat-requests" class="text-3xl font-bold mt-2">-</h3>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
-                <p class="text-slate-500 text-xs font-bold uppercase">Απαντησεις Φαρμακειων</p>
-                <h3 id="stat-responses" class="text-3xl font-bold mt-2">-</h3>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-purple-500">
-                <p class="text-slate-500 text-xs font-bold uppercase">Ενεργα Φαρμακεια</p>
-                <h3 id="stat-pharmacies" class="text-3xl font-bold mt-2">-</h3>
-            </div>
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-blue-500"><p class="text-slate-500 text-xs font-bold uppercase">Συνολικα Αιτηματα</p><h3 id="stat-requests" class="text-3xl font-bold mt-2">-</h3></div>
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-green-500"><p class="text-slate-500 text-xs font-bold uppercase">Απαντησεις</p><h3 id="stat-responses" class="text-3xl font-bold mt-2">-</h3></div>
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-l-4 border-purple-500"><p class="text-slate-500 text-xs font-bold uppercase">Φαρμακεια</p><h3 id="stat-pharmacies" class="text-3xl font-bold mt-2">-</h3></div>
         </div>
 
         <div class="grid lg:grid-cols-2 gap-8">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
-                <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200">Πρόσφατα Αιτήματα</h3>
-                    <button onclick="loadData()" class="text-indigo-500 hover:text-indigo-600"><i class="ph ph-arrows-clockwise text-xl"></i></button>
-                </div>
-                <div class="max-h-[500px] overflow-y-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 sticky top-0">
-                            <tr>
-                                <th class="p-3">Ώρα</th>
-                                <th class="p-3">Φάρμακο</th>
-                                <th class="p-3">Περιοχή</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Act</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requests-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
-                    </table>
-                </div>
+                <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center"><h3 class="font-bold text-slate-700 dark:text-slate-200">Πρόσφατα Αιτήματα</h3><button onclick="loadData()" class="text-indigo-500"><i class="ph ph-arrows-clockwise text-xl"></i></button></div>
+                <div class="max-h-[500px] overflow-y-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 sticky top-0"><tr><th class="p-3">Ώρα</th><th class="p-3">Φάρμακο</th><th class="p-3">Περιοχή</th><th class="p-3">Status</th></tr></thead><tbody id="requests-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div>
             </div>
-
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
-                <div class="p-4 border-b border-slate-100 dark:border-slate-700">
-                    <h3 class="font-bold text-slate-700 dark:text-slate-200">Εγγεγραμμένα Ωράρια</h3>
-                </div>
-                <div class="max-h-[500px] overflow-y-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 sticky top-0">
-                            <tr>
-                                <th class="p-3">Φαρμακοποιός ID</th>
-                                <th class="p-3">Update</th>
-                            </tr>
-                        </thead>
-                        <tbody id="schedules-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
-                    </table>
-                </div>
+                <div class="p-4 border-b border-slate-100 dark:border-slate-700"><h3 class="font-bold text-slate-700 dark:text-slate-200">Εγγεγραμμένα Ωράρια</h3></div>
+                <div class="max-h-[500px] overflow-y-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 sticky top-0"><tr><th class="p-3">ID</th><th class="p-3">Update</th></tr></thead><tbody id="schedules-table" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody></table></div>
             </div>
         </div>
     </main>
 
     <script src="env.js"></script>
     <script src="supabase.js"></script>
-
     <script>
-        // --- ADMIN LOGIC ---
-        
-        window.onload = async function() {
-            if(!window.db) return;
+        const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
 
-            // Έλεγχος αν είναι συνδεδεμένος ΚΑΙ ΟΧΙ ανώνυμος
-            const { data: { session } } = await window.db.auth.getSession();
-            
-            if (session && session.user && !session.user.is_anonymous) {
-                // Κανονικός χρήστης (Admin)
-                initDashboard(session.user);
-            } else {
-                // Ανώνυμος ή μη συνδεδεμένος -> Login Screen
-                document.getElementById('admin-login').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
-                // Αν ήταν ανώνυμος, τον κάνουμε logout για να καθαρίσει
-                if(session) window.db.auth.signOut();
+        window.onload = async function() {
+            if(window.supabase) {
+                window.db = window.supabase.createClient(SB_URL, SB_KEY);
+                const { data: { session } } = await window.db.auth.getSession();
+                if (session && !session.user.is_anonymous) initDashboard(session.user);
+                else { document.getElementById('admin-login').classList.remove('hidden'); if(session) window.db.auth.signOut(); }
             }
         };
 
-        // Login Handler
         document.getElementById('admin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('a-email').value;
-            const pass = document.getElementById('a-pass').value;
-            const btn = e.target.querySelector('button');
-            btn.innerText = "Checking...";
-
-            const { data, error } = await window.db.auth.signInWithPassword({ email, password: pass });
-
-            if (error) {
-                alert("Access Denied: " + error.message);
-                btn.innerText = "Είσοδος";
-            } else {
-                initDashboard(data.user);
-            }
+            const { data, error } = await window.db.auth.signInWithPassword({ email: document.getElementById('a-email').value, password: document.getElementById('a-pass').value });
+            if (error) alert(error.message); else initDashboard(data.user);
         });
 
         function initDashboard(user) {
             document.getElementById('admin-login').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             loadData();
-            setInterval(loadData, 30000); // Auto refresh
+            setInterval(loadData, 30000);
         }
 
         async function loadData() {
-            // Fetch Data
             const { data: reqs, count: reqCount } = await window.db.from('requests').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(50);
             const { count: respCount } = await window.db.from('responses').select('*', { count: 'exact', head: true });
             const { count: schedCount, data: scheds } = await window.db.from('schedules').select('*', { count: 'exact' });
+            
+            // Fetch Pending Pharmacies
+            const { data: pendingPharms } = await window.db.from('pharmacies_profile').select('*').eq('status', 'pending');
 
-            // Stats
             document.getElementById('stat-requests').innerText = reqCount || 0;
             document.getElementById('stat-responses').innerText = respCount || 0;
             document.getElementById('stat-pharmacies').innerText = schedCount || 0;
 
-            // Requests Table
+            // Render Pending
+            const pendingSection = document.getElementById('pending-section');
+            const pendingTable = document.getElementById('pending-table');
+            if (pendingPharms && pendingPharms.length > 0) {
+                pendingSection.classList.remove('hidden');
+                pendingTable.innerHTML = pendingPharms.map(p => `
+                    <tr class="border-b border-orange-200">
+                        <td class="p-2 font-bold">${p.name}</td>
+                        <td class="p-2 font-mono">${p.license_number}</td>
+                        <td class="p-2 text-xs">${p.id}</td>
+                        <td class="p-2 text-right">
+                            <button onclick="approvePharmacy('${p.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Έγκριση</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                pendingSection.classList.add('hidden');
+            }
+
+            // Render Requests
             const reqTable = document.getElementById('requests-table');
             reqTable.innerHTML = '';
             reqs?.forEach(r => {
-                const time = new Date(r.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                const statusColor = r.status === 'pending' ? 'text-yellow-600 bg-yellow-100' : 'text-green-600 bg-green-100';
-                reqTable.innerHTML += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700">
-                        <td class="p-3 text-slate-500 text-xs font-mono">${time}</td>
-                        <td class="p-3 font-bold text-slate-800 dark:text-white">${r.medicine_name}</td>
-                        <td class="p-3 text-slate-500 text-xs">${r.location || '-'}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">${r.status}</span></td>
-                        <td class="p-3 text-right"><button onclick="deleteItem('requests', '${r.id}')" class="text-red-400 hover:text-red-600"><i class="ph ph-trash"></i></button></td>
-                    </tr>
-                `;
+                reqTable.innerHTML += `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700"><td class="p-3 text-slate-500 text-xs">${new Date(r.created_at).toLocaleTimeString()}</td><td class="p-3 font-bold text-slate-800 dark:text-white">${r.medicine_name}</td><td class="p-3 text-slate-500 text-xs">${r.location || '-'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${r.status==='pending'?'bg-yellow-100 text-yellow-800':'bg-green-100 text-green-800'}">${r.status}</span></td></tr>`;
             });
 
-            // Schedules Table
+            // Render Schedules
             const schedTable = document.getElementById('schedules-table');
             schedTable.innerHTML = '';
             scheds?.forEach(s => {
-                const updated = new Date(s.updated_at).toLocaleDateString();
-                schedTable.innerHTML += `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700">
-                        <td class="p-3 font-mono text-xs text-indigo-600 truncate max-w-[150px]">${s.pharmacist_id}</td>
-                        <td class="p-3 text-xs text-slate-500">${updated}</td>
-                    </tr>
-                `;
+                schedTable.innerHTML += `<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b dark:border-slate-700"><td class="p-3 font-mono text-xs text-indigo-600 truncate max-w-[150px]">${s.pharmacist_id}</td><td class="p-3 text-xs text-slate-500">${new Date(s.updated_at).toLocaleDateString()}</td></tr>`;
             });
         }
 
-        async function deleteItem(table, id) {
-            if(!confirm('Διαγραφή;')) return;
-            await window.db.from(table).delete().eq('id', id);
-            loadData();
+        async function approvePharmacy(id) {
+            if(!confirm('Έγκριση φαρμακείου;')) return;
+            const { error } = await window.db.from('pharmacies_profile').update({ status: 'approved' }).eq('id', id);
+            if(error) alert(error.message); else { alert('Εγκρίθηκε!'); loadData(); }
         }
 
-        async function handleLogout() {
-            await window.db.auth.signOut();
-            window.location.reload();
-        }
+        async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
     </script>
 </body>
 </html>
