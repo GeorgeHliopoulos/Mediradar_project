@@ -23,7 +23,7 @@
         window.OneSignalDeferred = window.OneSignalDeferred || [];
         OneSignalDeferred.push(function(OneSignal) {
             OneSignal.init({
-                appId: "YOUR-ONESIGNAL-APP-ID-HERE",
+                appId: "YOUR-ONESIGNAL-APP-ID-HERE", 
                 notifyButton: { enable: true },
             });
         });
@@ -71,17 +71,13 @@
         .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
         .toast-exit { animation: slideOutDown 0.3s ease-in forwards; }
         
-        /* Autocomplete Dropdown */
-        #drug-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
-        html.dark #drug-suggestions { background: #1e293b; border-color: #334155; }
+        /* Custom Dropdown */
+        .custom-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 250px; overflow-y: auto; z-index: 999; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
+        html.dark .custom-suggestions { background: #1e293b; border-color: #334155; }
         .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
         html.dark .suggestion-item { border-color: #334155; color: #e2e8f0; }
         .suggestion-item:hover { background-color: #f0f9ff; }
         html.dark .suggestion-item:hover { background-color: #334155; }
-        
-        /* Custom City Dropdown */
-        .custom-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 250px; overflow-y: auto; z-index: 999; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
-        html.dark .custom-suggestions { background: #1e293b; border-color: #334155; }
 
         /* Radar */
         .radar-pulse { width: 100px; height: 100px; background: rgba(13, 148, 136, 0.2); border-radius: 50%; position: relative; margin: 0 auto; }
@@ -105,7 +101,7 @@
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative">
         <div class="flex gap-2" id="user-nav-container">
             <button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all">
-                <i class="ph ph-user text-lg"></i> Είσοδος
+                <i class="ph ph-user text-lg"></i> <span data-lang-key="login">Είσοδος</span>
             </button>
         </div>
 
@@ -123,13 +119,12 @@
                 <i class="ph ph-magnifying-glass text-4xl text-primary"></i>
             </div>
             <h1 class="text-3xl font-bold text-primary bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-cyan-500 drop-shadow-sm">MediRadar</h1>
-            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Βρες το φάρμακό σου άμεσα & τοπικά.</p>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium" data-lang-key="subtitle">Βρες το φάρμακό σου άμεσα & τοπικά.</p>
         </header>
 
-        <!-- TABS NAVIGATION (CLEANED UP) -->
         <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card">
-            <button onclick="switchTab('search')" id="btn-search" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 transition-all">Αναζήτηση</button>
-            <button onclick="switchTab('how')" id="btn-how" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 transition-all">Πώς λειτουργεί</button>
+            <button onclick="switchTab('search')" id="btn-search" class="flex-1 py-3 rounded-xl text-sm font-bold bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 transition-all" data-lang-key="search">Αναζήτηση</button>
+            <button onclick="switchTab('how')" id="btn-how" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 transition-all" data-lang-key="how">Πώς λειτουργεί</button>
         </div>
 
         <!-- 1. SEARCH FORM -->
@@ -138,32 +133,34 @@
                 <form id="request-form" class="space-y-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ονομα</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="name">Ονομα</label>
                             <input id="full-name" type="text" placeholder="Μαρία Π." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-primary/50 outline-none" required>
                         </div>
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Τηλεφωνο</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="phone">Τηλεφωνο</label>
                             <input id="phone" type="tel" placeholder="69..." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-primary/50 outline-none" required>
                         </div>
                     </div>
 
-                    <!-- Location (Custom) -->
+                    <!-- Location -->
                     <div class="space-y-2 relative">
-                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Περιοχη</label>
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="area">Περιοχη</label>
                         <div class="relative">
-                            <input id="city" type="text" placeholder="Πληκτρολογήστε πόλη ή περιοχή..." autocomplete="off" oninput="saveUserData()" 
+                            <input id="city" type="text" placeholder="Πληκτρολογήστε πόλη..." autocomplete="off" oninput="saveUserData()" 
                                    class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 pr-32 focus:ring-2 focus:ring-primary/50 outline-none" required>
                             <div id="city-suggestions" class="custom-suggestions"></div>
-                            <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-200 flex items-center gap-1"><i class="ph ph-navigation-arrow text-sm"></i> Κοντά μου</button>
+                            <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-200 flex items-center gap-1">
+                                <i class="ph ph-navigation-arrow text-sm"></i> <span data-lang-key="near_me">Κοντά μου</span>
+                            </button>
                         </div>
                     </div>
 
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
-                    <!-- Medicine Autocomplete -->
+                    <!-- Medicine -->
                     <div class="space-y-4">
                         <div class="space-y-2 relative">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ονομα Φαρμακου</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="med_name">Ονομα Φαρμακου</label>
                             <div class="relative">
                                 <i class="ph ph-pill absolute left-4 top-4 text-slate-400 text-xl z-10"></i>
                                 <input id="medicine" type="text" placeholder="π.χ. Depon" autocomplete="off" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl pl-12 pr-12 py-3.5 text-lg font-semibold focus:ring-2 focus:ring-primary/50 outline-none" required>
@@ -173,99 +170,103 @@
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Δραστικη</label><input id="substance" type="text" placeholder="Προαιρετικά" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 outline-none"></div>
-                            <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ποσοτητα</label><input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 text-center font-bold outline-none"></div>
+                            <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="substance">Δραστικη</label><input id="substance" type="text" placeholder="Προαιρετικά" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 outline-none"></div>
+                            <div class="space-y-2"><label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="quantity">Ποσοτητα</label><input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 rounded-2xl px-4 py-3.5 text-center font-bold outline-none"></div>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Είδος / Μορφή</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="type">Είδος / Μορφή</label>
                             <div class="relative">
                                 <select id="med-type" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-white dark:focus:bg-slate-900 transition-all text-slate-900 dark:text-white font-medium shadow-sm">
-                                    <option value="">Επίλεξε είδος</option><option value="Χάπια/Κάψουλες">💊 Χάπια / Κάψουλες</option><option value="Σιρόπι/Πόσιμο">🧴 Σιρόπι / Πόσιμο</option><option value="Αλοιφή/Κρέμα">🧴 Αλοιφή / Κρέμα</option><option value="Εισπνεόμενο/Σπρέι">💨 Εισπνεόμενο / Σπρέι</option><option value="Ενέσιμο">💉 Ενέσιμο</option><option value="Σκόνη/Φακελάκια">🍚 Σκόνη / Φακελάκια</option><option value="Σταγόνες">💧 Σταγόνες</option><option value="Υπόθετο">💊 Υπόθετο</option><option value="Άλλο">❓ Άλλο</option>
+                                    <option value="" data-lang-key="opt_select">Επίλεξε είδος</option>
+                                    <option value="pills" data-lang-key="opt_pills">💊 Χάπια / Κάψουλες</option>
+                                    <option value="syrup" data-lang-key="opt_syrup">🧴 Σιρόπι / Πόσιμο</option>
+                                    <option value="cream" data-lang-key="opt_cream">🧴 Αλοιφή / Κρέμα</option>
+                                    <option value="spray" data-lang-key="opt_spray">💨 Εισπνεόμενο / Σπρέι</option>
+                                    <option value="inject" data-lang-key="opt_inject">💉 Ενέσιμο</option>
+                                    <option value="other" data-lang-key="opt_other">❓ Άλλο</option>
                                 </select>
                                 <i class="ph ph-caret-down absolute right-4 top-4 text-slate-500 pointer-events-none text-lg"></i>
                             </div>
                         </div>
 
                         <div class="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 border-2 border-dashed border-slate-300 hover:border-primary/50 transition-colors">
-                            <label class="text-xs font-bold text-slate-600 uppercase mb-3 block text-center">📸 Φωτο / Barcode</label>
+                            <label class="text-xs font-bold text-slate-600 uppercase mb-3 block text-center" data-lang-key="media">📸 Φωτο / Barcode</label>
                             <div class="grid grid-cols-2 gap-3">
                                 <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
-                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-camera text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Φωτογραφία</span></button>
-                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-barcode text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Scan Barcode</span></button>
+                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-camera text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Photo</span></button>
+                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 rounded-xl p-4 hover:shadow-md"><i class="ph ph-barcode text-3xl text-slate-600 dark:text-slate-300 mb-1"></i><span class="text-xs font-semibold text-slate-600 dark:text-slate-300">Scan</span></button>
                             </div>
-                            <div id="scanner-container" class="hidden mt-4 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-64"><div id="reader" style="width: 100%; height: 100%;"></div></div>
+                            <div id="scanner-container" class="hidden mt-4 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-64"><div id="reader" style="width:100%;height:100%;"></div></div>
                             <div id="media-preview" class="hidden mt-3 p-3 bg-teal-50 dark:bg-teal-900/30 border border-teal-100 rounded-xl flex items-center gap-3"><i class="ph ph-check-circle text-teal-600 text-xl"></i><p id="preview-text" class="text-xs text-teal-600 truncate flex-1">Uploaded</p><button type="button" onclick="clearMedia()"><i class="ph ph-trash text-teal-400"></i></button></div>
                             <input id="barcode-value" type="hidden">
                         </div>
 
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Σημειωσεις</label>
-                            <textarea id="notes" rows="2" placeholder="Π.χ. Προτιμώ συγκεκριμένη εταιρεία..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 resize-none focus:ring-2 focus:ring-primary/50 outline-none"></textarea>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="notes">Σημειωσεις</label>
+                            <textarea id="notes" rows="2" placeholder="..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 resize-none focus:ring-2 focus:ring-primary/50 outline-none"></textarea>
                         </div>
                     </div>
                     
                     <div class="space-y-3 pt-2">
-                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" class="mt-1 w-4 h-4 text-primary rounded border-gray-300" checked><span class="text-xs text-slate-600 dark:text-slate-300">Δέχομαι να μου προτείνουν <strong>γενόσημο</strong>.</span></label>
-                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" id="gdpr-check" class="mt-0.5 w-4 h-4 text-primary rounded border-gray-300" required><span class="text-xs text-slate-500">Αποδέχομαι τους <a href="#" data-open-modal="terms" class="underline text-primary">Όρους</a> και <a href="#" data-open-modal="gdpr" class="underline text-primary">GDPR</a>.</span></label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer">
+                            <input type="checkbox" class="mt-1 w-4 h-4 text-primary rounded border-gray-300" checked>
+                            <span class="text-xs text-slate-600 dark:text-slate-300">
+                                <span data-lang-key="accept_text">Δέχομαι να μου προτείνουν</span> 
+                                <a href="#" onclick="openModal('generic'); return false;" class="font-bold underline decoration-dotted text-primary" data-lang-key="accept_link">γενόσημο</a>.
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer">
+                            <input type="checkbox" id="gdpr-check" class="mt-0.5 w-4 h-4 text-primary rounded border-gray-300" required>
+                            <span class="text-xs text-slate-500">
+                                <span data-lang-key="terms_agree">Αποδέχομαι τους</span> 
+                                <a href="#" onclick="openModal('terms'); return false;" class="underline text-primary font-semibold" data-lang-key="terms_link">Όρους Χρήσης</a> 
+                                & 
+                                <a href="#" onclick="openModal('gdpr'); return false;" class="underline text-primary font-semibold" data-lang-key="gdpr_link">GDPR</a>.
+                            </span>
+                        </label>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-lg font-bold py-4 rounded-2xl shadow-lg transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right text-xl"></i> Αποστολή Αιτήματος</button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-lg font-bold py-4 rounded-2xl shadow-lg transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right text-xl"></i> <span data-lang-key="send">Αποστολή</span></button>
                 </form>
             </div>
         </div>
 
-        <!-- 2. RESULTS VIEW -->
+        <!-- RESULTS VIEW -->
         <div id="results-view" class="hidden animate-fadeIn">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
                 <div class="text-center mb-6">
                     <div class="radar-pulse"></div>
-                    <h2 class="text-xl font-bold mt-4 text-slate-800 dark:text-white">Αναζήτηση σε εξέλιξη...</h2>
-                    <p class="text-sm text-slate-500">Ειδοποιούμε τα φαρμακεία κοντά σου.</p>
+                    <h2 class="text-xl font-bold mt-4 text-slate-800 dark:text-white" data-lang-key="searching">Αναζήτηση...</h2>
+                    <p class="text-sm text-slate-500">Ειδοποιούμε τα φαρμακεία.</p>
                 </div>
                 <div id="responses-list" class="space-y-4"></div>
-                <div class="mt-8 text-center"><button onclick="resetApp()" class="text-sm text-red-400 hover:text-red-600 font-medium"><i class="ph ph-x-circle"></i> Ακύρωση Αναζήτησης</button></div>
+                <div class="mt-8 text-center"><button onclick="resetApp()" class="text-sm text-red-400 hover:text-red-600 font-medium"><i class="ph ph-x-circle"></i> Ακύρωση</button></div>
             </div>
         </div>
 
-        <!-- 3. HISTORY VIEW -->
+        <!-- HISTORY VIEW -->
         <div id="tab-history" class="tab-content">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
-                <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
-                    <i class="ph ph-clock-counter-clockwise text-primary"></i> Ιστορικό Αιτημάτων
-                </h3>
-                <div id="history-list" class="space-y-4">
-                    <!-- History items will be injected here -->
-                    <p class="text-center text-slate-400 text-sm py-10">Συνδεθείτε για να δείτε το ιστορικό σας.</p>
-                </div>
-                <div class="mt-6 text-center">
-                    <button onclick="switchTab('search')" class="text-sm text-teal-600 hover:underline">Επιστροφή στην Αναζήτηση</button>
-                </div>
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-clock-counter-clockwise text-primary"></i> Ιστορικό</h3>
+                <div id="history-list" class="space-y-4"><p class="text-center text-slate-400 text-sm py-10">Login to see history.</p></div>
+                <div class="mt-6 text-center"><button onclick="switchTab('search')" class="text-sm text-teal-600 hover:underline">Επιστροφή</button></div>
             </div>
         </div>
 
-        <!-- 4. HOW IT WORKS (UPDATED) -->
+        <!-- HOW IT WORKS -->
         <div id="tab-how" class="tab-content">
             <div class="glass-card rounded-3xl p-6">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-info text-primary"></i> Πώς λειτουργεί;</h3>
                 <div class="space-y-8">
-                    <div class="flex gap-4 items-start">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-magnifying-glass"></i></div>
-                        <div><h4 class="font-bold text-lg text-slate-800 dark:text-white">1. Αναζήτηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Γράφεις το φάρμακο που χρειάζεσαι. Το MediRadar ειδοποιεί άμεσα τα φαρμακεία κοντά σου.</p></div>
-                    </div>
-                    <div class="flex gap-4 items-start">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bell-ringing"></i></div>
-                        <div><h4 class="font-bold text-lg text-slate-800 dark:text-white">2. Ειδοποίηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Λαμβάνεις απάντηση στο κινητό σου μόλις βρεθεί διαθέσιμο. Βλέπεις την απόσταση.</p></div>
-                    </div>
-                    <div class="flex gap-4 items-start">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bag"></i></div>
-                        <div><h4 class="font-bold text-lg text-slate-800 dark:text-white">3. Παραλαβή</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Κάνεις κράτηση (ισχύει για 60') και περνάς να το παραλάβεις από το φαρμακείο!</p></div>
-                    </div>
+                    <div class="flex gap-4 items-start"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-magnifying-glass"></i></div><div><h4 class="font-bold text-lg text-slate-800 dark:text-white">1. Αναζήτηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Γράφεις το φάρμακο που χρειάζεσαι.</p></div></div>
+                    <div class="flex gap-4 items-start"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bell-ringing"></i></div><div><h4 class="font-bold text-lg text-slate-800 dark:text-white">2. Ειδοποίηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Λαμβάνεις απάντηση στο κινητό.</p></div></div>
+                    <div class="flex gap-4 items-start"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bag"></i></div><div><h4 class="font-bold text-lg text-slate-800 dark:text-white">3. Παραλαβή</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Κάνεις κράτηση και παραλαμβάνεις!</p></div></div>
                 </div>
                 <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center border border-slate-200 dark:border-slate-700"><p class="text-xs text-slate-500 dark:text-slate-400 font-medium">💡 Η υπηρεσία είναι εντελώς δωρεάν για τους χρήστες.</p></div>
             </div>
         </div>
         
-        <!-- Pickup View (Hidden Initially) -->
+        <!-- PICKUP VIEW -->
         <div id="pickup-view" class="hidden animate-fadeIn">
             <div class="glass-card rounded-3xl p-8 text-center border-teal-200 dark:border-teal-800">
                 <div class="w-24 h-24 bg-teal-100 dark:bg-teal-900/50 rounded-full flex flex-col items-center justify-center mx-auto mb-6 shadow-xl ring-8 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-hourglass-high text-4xl text-primary mb-1"></i><p class="text-xs font-bold text-primary">Pickup</p></div>
@@ -280,19 +281,55 @@
     </main>
 
     <footer class="mt-auto py-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-t border-slate-200 z-10 text-center">
-        <div class="flex justify-center gap-4 text-xs text-slate-500 mb-4"><a href="#" data-open-modal="terms">Όροι</a><a href="#" data-open-modal="gdpr">GDPR</a></div>
+        <div class="flex justify-center gap-4 text-xs text-slate-500 mb-4"><a href="#" onclick="openModal('terms'); return false;">Όροι</a><a href="#" onclick="openModal('gdpr'); return false;">GDPR</a></div>
         <p class="text-xs text-slate-400">© 2025 MediRadar</p>
     </footer>
 
     <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
 
-    <!-- SAFETY MODAL -->
+    <!-- MODALS -->
+    <!-- Generic Info Modal -->
+    <div id="modal-generic" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
+            <button onclick="closeModal('generic')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="ph ph-x text-xl"></i></button>
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="ph ph-pill"></i></div>
+            <h3 class="text-lg font-bold mb-2 text-slate-900 dark:text-white" data-lang-key="modal_generic_title">Τι είναι το γενόσημο;</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left leading-relaxed" data-lang-key="modal_generic_body">
+                Ένα γενόσημο φάρμακο είναι ένα φάρμακο που δημιουργήθηκε για να είναι το ίδιο με ένα ήδη εγκεκριμένο επώνυμο φάρμακο σε δοσολογία, ασφάλεια, ισχύ, τρόπο χορήγησης, ποιότητα και απόδοση.
+            </p>
+            <button onclick="closeModal('generic')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold">OK</button>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="modal-terms" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 relative glass-card !opacity-100 !transform-none max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModal('terms')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="ph ph-x text-xl"></i></button>
+            <h3 class="text-lg font-bold mb-3 text-slate-900 dark:text-white">Όροι Χρήσης</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left leading-relaxed">
+                Η εφαρμογή MediRadar παρέχει πληροφορίες διαθεσιμότητας φαρμάκων. Δεν αποτελεί ιατρική συμβουλή. Χρησιμοποιώντας την εφαρμογή, συμφωνείτε ότι η ευθύνη για την επιλογή και χρήση των φαρμάκων ανήκει αποκλειστικά σε εσάς και τον φαρμακοποιό σας.
+            </p>
+        </div>
+    </div>
+
+    <!-- GDPR Modal -->
+    <div id="modal-gdpr" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 relative glass-card !opacity-100 !transform-none max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModal('gdpr')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="ph ph-x text-xl"></i></button>
+            <h3 class="text-lg font-bold mb-3 text-slate-900 dark:text-white">Προσωπικά Δεδομένα (GDPR)</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left leading-relaxed">
+                Σεβόμαστε τα δεδομένα σας. Τα στοιχεία που εισάγετε (όνομα, τηλέφωνο) χρησιμοποιούνται αποκλειστικά για την επικοινωνία με το φαρμακείο στο πλαίσιο της τρέχουσας παραγγελίας και δεν κοινοποιούνται σε τρίτους για διαφημιστικούς σκοπούς.
+            </p>
+        </div>
+    </div>
+
+    <!-- Safety Modal -->
     <div id="modal-safety" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i class="ph ph-warning-circle text-3xl"></i></div>
             <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Σημαντική Ενημέρωση</h3>
             <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 p-4 rounded-xl mb-4 text-left">
-                <p class="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed"><strong>Αποποίηση Ευθύνης:</strong> Το MediRadar ενημερώνει μόνο για τη διαθεσιμότητα. Δεν φέρουμε ευθύνη για ιατρικές συμβουλές ή παρενέργειες.</p>
+                <p class="text-xs text-red-800 dark:text-red-200 font-medium leading-relaxed"><strong>Αποποίηση Ευθύνης:</strong> Το MediRadar ενημερώνει μόνο για τη διαθεσιμότητα.</p>
                 <p class="text-xs text-red-800 dark:text-red-200 font-bold mt-2 leading-relaxed">⚠️ Είστε αποκλειστικά υπεύθυνοι να ενημερώσετε τον φαρμακοποιό για τυχόν ΑΛΛΕΡΓΙΕΣ.</p>
             </div>
             <button id="confirm-pickup-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg">Έχω ενημερωθεί & Συνεχίζω</button>
@@ -300,28 +337,24 @@
         </div>
     </div>
 
-    <!-- LOGIN MODAL -->
+    <!-- Login User Modal -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
             <button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
             <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl"></i></div>
             <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Συνδέσου για να ενεργοποιήσεις το Ιστορικό Αιτημάτων και να παρακολουθείς τις παραγγελίες σου.</p>
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl text-left mb-4 flex gap-3">
-                <div class="text-xl">💡</div><div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"><strong>Δεν χρειάζεστε κωδικό!</strong><br>Γράψτε το email σας και θα σας στείλουμε έναν σύνδεσμο (link) για να μπείτε άμεσα.</div>
-            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Βλέπετε το ιστορικό των αναζητήσεών σας.</p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl text-left mb-4 flex gap-3"><div class="text-xl">💡</div><div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"><strong>Δεν χρειάζεστε κωδικό!</strong><br>Γράψτε το email σας και θα σας στείλουμε έναν σύνδεσμο (link) για να μπείτε άμεσα.</div></div>
             <form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)">
                 <div class="text-left"><label class="text-xs font-bold text-slate-500 ml-2 uppercase">Το Email σας</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div>
                 <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg"></i> Στείλτε μου Link Εισόδου</button>
             </form>
             <div class="relative my-6"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-white dark:bg-slate-800 px-2 text-slate-400">Ή συνεχιστε με</span></div></div>
-            <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all">
-                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg><span>Google</span>
-            </button>
+            <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg><span>Google</span></button>
         </div>
     </div>
-
-    <!-- PRO MODAL -->
+    
+    <!-- Pro Login Modal -->
     <div id="modal-pro" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
             <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
@@ -337,7 +370,6 @@
     <script src="supabase.js"></script>
     
     <script>
-        // --- Global State ---
         let userLocation = { lat: null, lon: null };
         let pickupDeadline = null;
         let selectedResponseId = null;
@@ -346,20 +378,40 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let requestPollInterval = null; 
         let html5QrcodeScanner = null;
-        
-        // --- CITY DATA ---
-        const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Δράμα", "Βέροια", "Κοζάνη", "Κέρκυρα", "Καρδίτσα", "Σαλαμίνα", "Ρέθυμνο", "Χίος", "Άργος", "Πύργος", "Θήβα", "Κόρινθος", "Μέγαρα", "Άρτα", "Πρέβεζα", "Αίγιο", "Μυτιλήνη", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Ορεστιάδα", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Άμφισσα", "Μεσολόγγι", "Ναύπακτος", "Λευκάδα", "Ζάκυνθος", "Αργοστόλι", "Σάμος", "Κως", "Σύρος", "Νάξος", "Ιεράπετρα", "Άγιος Νικόλαος", "Σητεία", "Γρεβενά", "Πολύγυρος", "Ιωλκός", "Νέα Ιωνία", "Αχαρνές", "Καλλιθέα", "Περιστέρι", "Νίκαια", "Γλυφάδα", "Ίλιον", "Ηλιούπολη", "Χαλάνδρι", "Αμαρούσιο", "Ζωγράφου", "Αιγάλεω", "Κορυδαλλός", "Παλαιό Φάληρο", "Νέα Σμύρνη", "Βύρωνας", "Γαλάτσι", "Αγία Παρασκευή", "Χαϊδάρι", "Πετρούπολη", "Χολαργός", "Άλιμος", "Άγιοι Ανάργυροι", "Αργυρούπολη", "Βριλήσσια", "Βούλα", "Ελληνικό", "Κηφισιά", "Μαρούσι", "Νέα Ερυθραία", "Πεύκη", "Μελίσσια", "Γέρακας", "Παλλήνη", "Κρωπία", "Μαρκόπουλο", "Λαύριο", "Ελευσίνα", "Ασπρόπυργος"];
+        const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Κόρινθος", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Μυτιλήνη", "Χίος", "Σάμος", "Κως", "Ζάκυνθος", "Κέρκυρα", "Λευκάδα", "Αργοστόλι", "Σύρος", "Νάξος", "Άγιος Νικόλαος", "Σητεία", "Ιεράπετρα", "Γρεβενά", "Πολύγυρος", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μεσολόγγι", "Ναύπακτος", "Άμφισσα", "Καρπενήσι", "Λιβαδειά", "Θήβα", "Χαλκίδα", "Πύργος", "Αμαλιάδα", "Ναύπλιο", "Άργος"];
 
-        // --- 1. Init & Auth ---
+        // Translations
+        const translations = {
+            el: {
+                search: "Αναζήτηση", how: "Πώς λειτουργεί", name: "Όνομα", phone: "Τηλέφωνο", area: "Περιοχή", near_me: "Κοντά μου", 
+                med_name: "Όνομα Φαρμάκου", substance: "Δραστική", quantity: "Ποσότητα", type: "Είδος / Μορφή", media: "Φωτο / Barcode", 
+                notes: "Σημειώσεις", accept_generic: "Δέχομαι γενόσημο", send: "Αποστολή Αιτήματος", searching: "Αναζήτηση σε εξέλιξη...", 
+                login: "Είσοδος", subtitle: "Βρες το φάρμακό σου άμεσα & τοπικά.", 
+                opt_select: "Επίλεξε είδος", opt_pills: "💊 Χάπια / Κάψουλες", opt_syrup: "🧴 Σιρόπι / Πόσιμο", opt_cream: "🧴 Αλοιφή / Κρέμα", 
+                opt_spray: "💨 Εισπνεόμενο / Σπρέι", opt_inject: "💉 Ενέσιμο", opt_other: "❓ Άλλο",
+                accept_text: "Δέχομαι να μου προτείνουν", accept_link: "γενόσημο",
+                terms_agree: "Αποδέχομαι τους", terms_link: "Όρους Χρήσης", gdpr_link: "GDPR",
+                modal_generic_title: "Τι είναι το γενόσημο;", modal_generic_body: "Ένα γενόσημο φάρμακο είναι ένα φάρμακο που δημιουργήθηκε για να είναι το ίδιο με ένα ήδη εγκεκριμένο επώνυμο φάρμακο σε δοσολογία, ασφάλεια, ισχύ, τρόπο χορήγησης, ποιότητα και απόδοση."
+            },
+            en: {
+                search: "Search", how: "How it works", name: "Name", phone: "Phone", area: "Area", near_me: "Near Me", 
+                med_name: "Medicine Name", substance: "Substance", quantity: "Quantity", type: "Type / Form", media: "Photo / Barcode", 
+                notes: "Notes", accept_generic: "I accept generic", send: "Send Request", searching: "Searching nearby...", 
+                login: "Login", subtitle: "Find your medicine instantly & locally.", 
+                opt_select: "Select type", opt_pills: "💊 Pills / Capsules", opt_syrup: "🧴 Syrup", opt_cream: "🧴 Cream / Ointment", 
+                opt_spray: "💨 Inhaler / Spray", opt_inject: "💉 Injection", opt_other: "❓ Other",
+                accept_text: "I accept", accept_link: "generic",
+                terms_agree: "I accept the", terms_link: "Terms of Use", gdpr_link: "GDPR",
+                modal_generic_title: "What is a generic drug?", modal_generic_body: "A generic drug is a medication created to be the same as an already marketed brand-name drug in dosage form, safety, strength, route of administration, quality, performance characteristics, and intended use."
+            }
+        };
+        let currentLang = 'el';
+
         window.onload = async function() {
             loadUserData();
             createEmojis();
             initCitySuggestions();
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; });
-            }
-            
+            if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; }); }
             if(window.db) {
                 const { data: { session } } = await window.db.auth.getSession();
                 if (session) { currentUser = session.user; if (!session.user.is_anonymous) updateNavForUser(currentUser); } 
@@ -368,163 +420,105 @@
             }
         };
 
+        function toggleLang() {
+            currentLang = currentLang === 'el' ? 'en' : 'el';
+            document.getElementById('lang-flag').innerText = currentLang === 'el' ? '🇬🇷' : '🇬🇧';
+            
+            // Update simple text elements
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if(translations[currentLang][key]) {
+                    // Special case for complex HTML keys
+                    if(['accept_text', 'terms_agree'].includes(key)) {
+                        // These are spans, update text inside
+                        el.innerText = translations[currentLang][key];
+                    } else if(['accept_link', 'terms_link', 'gdpr_link'].includes(key)) {
+                         el.innerText = translations[currentLang][key];
+                    } else {
+                         el.innerText = translations[currentLang][key];
+                    }
+                }
+            });
+            
+            // Update options
+             const select = document.getElementById('med-type');
+             Array.from(select.options).forEach(opt => {
+                 // Check if option has a key we can map or use values
+                 // For simplicity in this version, we mapped values in HTML. 
+                 // To update dynamic options we re-render or map. 
+                 // Since HTML options are static here, let's map by value to key.
+                 const keyMap = {
+                     '': 'opt_select', 'pills': 'opt_pills', 'syrup': 'opt_syrup', 
+                     'cream': 'opt_cream', 'spray': 'opt_spray', 'inject': 'opt_inject', 'other': 'opt_other'
+                 };
+                 const key = keyMap[opt.value];
+                 if(key && translations[currentLang][key]) opt.text = translations[currentLang][key];
+             });
+
+            // Update Placeholders
+            if(currentLang === 'en') {
+                document.getElementById('medicine').placeholder = "e.g. Depon";
+                document.getElementById('city').placeholder = "Type city or area...";
+            } else {
+                document.getElementById('medicine').placeholder = "π.χ. Depon";
+                document.getElementById('city').placeholder = "Πληκτρολογήστε πόλη ή περιοχή...";
+            }
+        }
+
         function initCitySuggestions() {
             const input = document.getElementById('city');
             const box = document.getElementById('city-suggestions');
-            
             input.addEventListener('input', (e) => {
                 const val = e.target.value.toLowerCase();
                 if (val.length < 2) { box.style.display = 'none'; return; }
                 const matches = citiesData.filter(c => c.toLowerCase().startsWith(val)).slice(0, 8);
-                if (matches.length > 0) {
-                    box.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selectCity('${c}')">${c}</div>`).join('');
-                    box.style.display = 'block';
-                } else { box.style.display = 'none'; }
+                if (matches.length > 0) { box.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selectCity('${c}')">${c}</div>`).join(''); box.style.display = 'block'; } else { box.style.display = 'none'; }
             });
-            
-            document.addEventListener('click', (e) => { 
-                if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; 
-            });
+            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; });
         }
         function selectCity(c) { document.getElementById('city').value = c; document.getElementById('city-suggestions').style.display = 'none'; saveUserData(); }
-
-        // ... (Auth & Nav Functions - Same as before) ...
-        function updateNavForUser(user) { 
-            const navContainer = document.getElementById('user-nav-container'); 
-            const name = user.user_metadata.full_name || user.email.split('@')[0]; 
-            // Modified Layout: Name + History Button Side-by-Side
-            navContainer.innerHTML = `
-                <div class="flex gap-2">
-                    <button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2 transition-all">
-                        <div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div>
-                        <span>${name}</span>
-                    </button>
-                    <button onclick="switchTab('history')" class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm flex items-center gap-1 hover:bg-indigo-100 transition-all" title="Ιστορικό">
-                        <i class="ph ph-clock-counter-clockwise text-lg"></i>
-                    </button>
-                    <button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Αποσύνδεση">
-                        <i class="ph ph-sign-out text-lg"></i>
-                    </button>
-                </div>`; 
-        }
-        function resetNavToGuest() { const navContainer = document.getElementById('user-nav-container'); navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> Είσοδος</button>`; }
-        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Στέλνουμε...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Σφάλμα: " + error.message, 'error'); } else { showToast("✅ Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
-        async function handleLogout() { await window.db.auth.signOut(); showToast("Αποσυνδεθήκατε.", 'info'); }
-
-        // Medicine Autocomplete
-        const medicineInput = document.getElementById('medicine');
-        const suggestionsBox = document.getElementById('drug-suggestions');
-        const localDrugs = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Amoxil", "Aerolin", "Fugentin", "Ponstan", "Buscopan", "Ibuprofen", "Paracetamol", "Aspirin", "Lonarid", "Salospir", "Brufen", "Xozal", "Zirtek"];
-        medicineInput.addEventListener('input', async (e) => { const query = e.target.value.trim(); if (query.length < 2) { suggestionsBox.style.display = 'none'; return; } let matches = localDrugs.filter(d => d.toLowerCase().includes(query.toLowerCase())); try { const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${query}*"&limit=5`); const data = await res.json(); if (data.results) { data.results.forEach(drug => { if (drug.openfda && drug.openfda.brand_name) { matches.push(...drug.openfda.brand_name); } }); } } catch (err) {} matches = [...new Set(matches)].slice(0, 6); if (matches.length > 0) { suggestionsBox.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectDrug('${m}')">${m}</div>`).join(''); suggestionsBox.style.display = 'block'; } else { suggestionsBox.style.display = 'none'; } });
-        function selectDrug(name) { medicineInput.value = name; suggestionsBox.style.display = 'none'; }
-        document.addEventListener('click', (e) => { if (!medicineInput.contains(e.target) && !suggestionsBox.contains(e.target)) { suggestionsBox.style.display = 'none'; } });
-
-        // Standard Functions
-        function getLocation() { const c = document.getElementById('city'); c.value = "Εντοπισμός..."; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; c.value = `📍 ${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`; saveUserData(); showToast("Τοποθεσία βρέθηκε!", 'success'); }, () => { c.value = ""; showToast("Δεν βρέθηκε.", 'error'); }); } }
+        function updateNavForUser(user) { const navContainer = document.getElementById('user-nav-container'); const name = user.user_metadata.full_name || user.email.split('@')[0]; navContainer.innerHTML = `<div class="flex gap-2"><button onclick="showToast('${name}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="switchTab('history')" class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm flex items-center gap-1 hover:bg-indigo-100" title="History"><i class="ph ph-clock-counter-clockwise text-lg"></i></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 transition-colors"><i class="ph ph-sign-out text-lg"></i></button></div>`; }
+        function resetNavToGuest() { const navContainer = document.getElementById('user-nav-container'); navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> <span data-lang-key="login">Είσοδος</span></button>`; }
+        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Error: " + error.message, 'error'); } else { showToast("Check email!", 'success'); closeModal('user'); } }
+        async function handleLogout() { await window.db.auth.signOut(); showToast("Logged out", 'info'); }
+        function getLocation() { const c = document.getElementById('city'); c.value = "Checking..."; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(async (p) => { const lat = p.coords.latitude; const lon = p.coords.longitude; userLocation = { lat, lon }; try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`); const data = await res.json(); const addr = data.address; const street = addr.road || ""; const area = addr.suburb || addr.city || addr.town || ""; c.value = street ? `${street}, ${area}` : area; if(!c.value) c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } catch(e) { c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } saveUserData(); showToast("Found!", 'success'); }, () => { c.value = ""; showToast("GPS Error", 'error'); }); } }
         function calculateDistance(lat1, lon1, lat2, lon2) { if (!lat1 || !lon1) return (Math.random() * 2 + 0.2).toFixed(1); return (Math.random() * 2 + 0.2).toFixed(1); }
         function openGoogleMaps() { const destLat = (userLocation.lat || 38.0) + 0.01; const destLon = (userLocation.lon || 23.7) + 0.01; window.open(`https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLon}`, '_blank'); }
         function switchTab(t) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); if(t === 'history') loadUserHistory(); }
         
         async function loadUserHistory() {
-            const container = document.getElementById('history-list');
-            container.innerHTML = '<p class="text-center text-slate-400 text-xs py-4"><i class="ph ph-spinner animate-spin"></i> Φόρτωση...</p>';
-            
-            // Only load if real user (not guest)
-            if (!currentUser || currentUser.is_anonymous) {
-                container.innerHTML = `
-                    <div class="text-center py-10 px-6">
-                        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400"><i class="ph ph-lock-key text-3xl"></i></div>
-                        <h3 class="font-bold text-slate-700 dark:text-white">Απαιτείται Σύνδεση</h3>
-                        <p class="text-xs text-slate-500 mt-1 mb-4">Συνδεθείτε με το email σας για να βλέπετε το ιστορικό των αναζητήσεών σας.</p>
-                        <button onclick="openModal('user')" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-bold">Σύνδεση</button>
-                    </div>`;
-                return;
-            }
-
-            const { data: reqs, error } = await window.db.from('requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            
-            if (error || !reqs || reqs.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-xs py-10">Δεν υπάρχει ιστορικό.</p>';
-                return;
-            }
-
+            const container = document.getElementById('history-list'); container.innerHTML = '...';
+            if (!currentUser || currentUser.is_anonymous) { container.innerHTML = `<div class="text-center py-10">Please Login</div>`; return; }
+            const { data: reqs } = await window.db.from('requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
             container.innerHTML = '';
-            reqs.forEach(r => {
-                const date = new Date(r.created_at).toLocaleDateString('el-GR');
-                const statusColor = r.status === 'pending' ? 'text-yellow-600 bg-yellow-50' : 'text-green-600 bg-green-50';
-                container.innerHTML += `
-                    <div class="p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-sm flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-slate-800 dark:text-white text-sm">${r.medicine_name}</h4>
-                            <p class="text-xs text-slate-500">${date} • ${r.location || ''}</p>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded ${statusColor} uppercase">${r.status}</span>
-                    </div>
-                `;
-            });
+            if (!reqs || reqs.length === 0) { container.innerHTML = '<p class="text-center py-10">No history</p>'; return; }
+            reqs.forEach(r => { container.innerHTML += `<div class="p-4 bg-white dark:bg-slate-800 border rounded-2xl shadow-sm mb-2"><h4>${r.medicine_name}</h4><p class="text-xs">${new Date(r.created_at).toLocaleDateString()}</p></div>`; });
         }
 
-        const form = document.getElementById('request-form');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!document.getElementById('gdpr-check').checked) { showToast("Αποδεχτείτε τους όρους.", 'error'); return; }
-            if(!window.db) { showToast("DB Error", 'error'); return; }
-            document.getElementById('tab-search').classList.remove('active');
-            document.getElementById('results-view').classList.remove('hidden');
-            document.getElementById('responses-list').innerHTML = '';
-            let mediaUrl = null;
-            const fileInput = document.getElementById('request-image');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const fileName = `req_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-                const { data } = await window.db.storage.from('requests-media').upload(fileName, file);
-                if(data) { const { data: { publicUrl } } = window.db.storage.from('requests-media').getPublicUrl(fileName); mediaUrl = publicUrl; }
-            }
-            const { data, error } = await window.db.from('requests').insert([{ user_id: currentUser ? currentUser.id : null, medicine_name: document.getElementById('medicine').value, customer_name: document.getElementById('full-name').value, phone: document.getElementById('phone').value, substance: document.getElementById('substance').value, quantity: document.getElementById('quantity').value, med_type: document.getElementById('med-type').value, notes: document.getElementById('notes').value, media_url: mediaUrl, barcode: document.getElementById('barcode-value').value, location: document.getElementById('city').value, status: 'pending', created_at: new Date() }]).select();
-            if (error) { console.error(error); showToast('Σφάλμα: ' + error.message, 'error'); resetApp(); } 
-            else { showToast("Αναζήτηση...", 'info'); if(data && data.length > 0) { currentRequestId = data[0].id; } subscribeToResponses(); if(requestPollInterval) clearInterval(requestPollInterval); requestPollInterval = setInterval(checkResponsesPoll, 3000); }
-        });
-
-        function subscribeToResponses() { const channel = window.db.channel('public:responses'); channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'responses' }, payload => { if (currentRequestId && payload.new.request_id !== currentRequestId) return; addResponseCard(payload.new); stopPolling(); }).subscribe(); }
-        async function checkResponsesPoll() { if(!currentRequestId) return; const { data } = await window.db.from('responses').select('*').eq('request_id', currentRequestId); if(data && data.length > 0) { data.forEach(resp => addResponseCard(resp)); stopPolling(); } }
-        function stopPolling() { if(requestPollInterval) clearInterval(requestPollInterval); }
-
-        function addResponseCard(resp) {
-            if(document.getElementById(`resp-${resp.id}`)) return;
-            const list = document.getElementById('responses-list');
-            const dist = calculateDistance(userLocation.lat, userLocation.lon, null, null);
-            const isGeneric = resp.message && resp.message.toLowerCase().includes('γενόσημο');
-            const badge = isGeneric ? `<span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold uppercase">💊 Γενοσημο</span>` : `<span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded font-bold uppercase">✅ Πρωτοτυπο</span>`;
-            const pharmacyName = resp.pharmacy_id && resp.pharmacy_id.length > 5 ? '#' + resp.pharmacy_id.substr(0,4) : 'Φαρμακείο';
-            let closingInfo = resp.closing_time ? `<span class="text-red-500 font-bold text-xs ml-2">⚠️ Κλείνει στις ${resp.closing_time}</span>` : '';
-            const mapId = `map-${resp.id}`;
-            const div = document.createElement('div'); div.id = `resp-${resp.id}`; div.className = "bg-white dark:bg-slate-700 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 animate-slide-up";
-            div.innerHTML = `<div class="flex justify-between items-start mb-2"><div><h4 class="font-bold text-slate-800 dark:text-white text-lg">${pharmacyName}</h4><p class="text-xs text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist} χλμ ${closingInfo}</p></div>${badge}</div><div id="${mapId}" class="map-container bg-slate-100 mb-3"></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-3 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">"${resp.message || 'Διαθέσιμο'}"</p><button onclick="promptSelection('${resp.id}')" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"><span>Κράτηση & Παραλαβή</span> <i class="ph ph-arrow-right"></i></button>`;
-            list.prepend(div);
-            try { new Audio('https://cdn.freesound.org/previews/536/536108_11530694-lq.mp3').play().catch(e => {}); } catch(e){}
-            showToast("🔔 Νέα προσφορά!", 'success');
-            setTimeout(() => { if(window.L) { const map = L.map(mapId).setView([userLocation.lat || 38.0, userLocation.lon || 23.7], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map); L.marker([userLocation.lat || 38.0, userLocation.lon || 23.7]).addTo(map).bindPopup('Εσείς').openPopup(); L.marker([ (userLocation.lat || 38.0) + 0.01, (userLocation.lon || 23.7) + 0.01 ]).addTo(map).bindPopup('Φαρμακείο'); } }, 500);
+        function toggleScanner() {
+            const container = document.getElementById('scanner-container');
+            if (!container.classList.contains('hidden')) { stopScanner(); return; }
+            container.classList.remove('hidden');
+            setTimeout(() => {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+                    (t) => { stopScanner(); document.getElementById('barcode-value').value = t; document.getElementById('preview-text').innerText = `Barcode: ${t}`; document.getElementById('media-preview').classList.remove('hidden'); showToast("Scanned!", 'success'); },
+                    (e) => {}
+                ).catch(err => { console.error(err); container.classList.add('hidden'); showToast("Camera Error", 'error'); });
+            }, 100);
         }
+        function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { document.getElementById('scanner-container').classList.add('hidden'); html5QrcodeScanner.clear(); }); else document.getElementById('scanner-container').classList.add('hidden'); }
 
-        function promptSelection(id) { selectedResponseId = id; openModal('safety'); }
-        document.getElementById('confirm-pickup-btn').addEventListener('click', () => { closeModal('safety'); startPickupTimer(); });
-        function startPickupTimer() { document.getElementById('results-view').classList.add('hidden'); document.getElementById('pickup-view').classList.remove('hidden'); pickupDeadline = Date.now() + (60 * 60 * 1000); updateTimerDisplay(pickupDeadline, 0); showToast("Η κράτηση ολοκληρώθηκε.", 'success'); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); }
-        function resetApp() { document.getElementById('pickup-view').classList.add('hidden'); document.getElementById('results-view').classList.add('hidden'); document.getElementById('tab-search').classList.add('active'); document.getElementById('request-form').reset(); clearMedia(); currentRequestId = null; stopPolling(); }
-        let timerInterval; function updateTimerDisplay(d) { clearInterval(timerInterval); timerInterval = setInterval(() => { const diff = d - Date.now(); if(diff <= 0) { clearInterval(timerInterval); document.getElementById('timer-display').innerText = "00:00"; return; } const min = Math.floor(diff/60000); const sec = Math.floor((diff%60000)/1000); document.getElementById('timer-display').innerText = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }, 1000); }
-        function extendPickupTime() { pickupDeadline += 15 * 60000; document.getElementById('extend-btn').disabled = true; document.getElementById('extend-btn').innerText = "Επεκτάθηκε (+15')"; showToast("Προστέθηκαν 15 λεπτά!", 'success'); }
-        function showToast(m,t='info'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className=`toast-enter p-3 rounded-xl shadow-lg bg-slate-800 text-white text-sm mb-2 border-l-4 ${t==='error'?'border-red-500':'border-teal-500'}`;d.innerText=m;c.appendChild(d);setTimeout(()=>d.remove(),3000);}
-        function toggleTheme(){document.documentElement.classList.toggle('dark');}
-        function toggleLang(){const f=document.getElementById('lang-flag');f.innerText=f.innerText==='🇬🇷'?'🇬🇧':'🇬🇷';}
-        function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
-        function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
-        function switchTab(t){document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active'); if(t === 'history') loadUserHistory();}
         function handleFileSelect(i){if(i.files[0]){document.getElementById('preview-text').innerText=i.files[0].name;document.getElementById('media-preview').classList.remove('hidden');}}
-        function clearMedia(){document.getElementById('media-preview').classList.add('hidden');document.getElementById('request-image').value='';}
-        function startVoiceInput(){ showToast("Listening...", 'info'); setTimeout(()=>{document.getElementById('medicine').value="Depon";showToast("Heard: Depon", 'success');},1500); }
-        function toggleScanner(){ document.getElementById('scanner-container').classList.remove('hidden'); setTimeout(()=>{document.getElementById('barcode-value').value="123456";document.getElementById('preview-text').innerText="Barcode: 123456";document.getElementById('media-preview').classList.remove('hidden');document.getElementById('scanner-container').classList.add('hidden');},1500); }
+        function clearMedia(){document.getElementById('media-preview').classList.add('hidden');document.getElementById('request-image').value='';document.getElementById('barcode-value').value='';}
+        function startVoiceInput(){ showToast("Listening...", 'info'); setTimeout(()=>{document.getElementById('medicine').value="Depon";showToast("Found", 'success');},1500); }
         function saveUserData(){ localStorage.setItem('mr_u', JSON.stringify({n:document.getElementById('full-name').value,p:document.getElementById('phone').value,c:document.getElementById('city').value})); }
         function loadUserData(){ const d=JSON.parse(localStorage.getItem('mr_u')||'{}'); if(d.n)document.getElementById('full-name').value=d.n; if(d.p)document.getElementById('phone').value=d.p; if(d.c)document.getElementById('city').value=d.c; }
         function createEmojis(){ const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴']; for(let i=0; i<15; i++){ const e = document.createElement('div'); e.innerText = em[Math.floor(Math.random() * em.length)]; e.classList.add('emoji'); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = (12 + Math.random() * 20) + 's'; e.style.animationDelay = (Math.random() * 10) + 's'; c.appendChild(e); } }
+        function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
+        function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
+        function showToast(m,t='info'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className=`toast-enter p-3 rounded-xl shadow-lg bg-slate-800 text-white text-sm mb-2`;d.innerText=m;c.appendChild(d);setTimeout(()=>d.remove(),3000);}
+        function toggleTheme(){document.documentElement.classList.toggle('dark');}
     </script>
 </body>
 </html>
