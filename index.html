@@ -25,7 +25,7 @@
         window.OneSignalDeferred = window.OneSignalDeferred || [];
         OneSignalDeferred.push(function(OneSignal) {
             OneSignal.init({
-                appId: "ed041355-ae15-49d9-83a6-9625c108d1e6", // ✅ Your ID
+                appId: "ed041355-ae15-49d9-83a6-9625c108d1e6", // ✅ Το ID σου
                 notifyButton: { enable: true },
             });
         });
@@ -64,7 +64,7 @@
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
 
-        /* Modals & Toasts */
+        /* Modals & Toasts - FIXED Z-INDEX */
         .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
         .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; }
@@ -112,6 +112,7 @@
         </div>
 
         <div class="flex gap-2">
+            <!-- Pro Button (Visible Everywhere) -->
             <button onclick="openModal('pro')" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50" title="Επαγγελματίες"><i class="ph ph-briefcase"></i></button>
             <button onclick="toggleLang()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm"><span id="lang-flag">🇬🇷</span></button>
             <button onclick="toggleTheme()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center shadow-sm"><i id="theme-icon" class="ph ph-moon-stars text-xl"></i></button>
@@ -223,7 +224,7 @@
             </div>
         </div>
 
-        <!-- 2. RESULTS VIEW -->
+        <!-- RESULTS VIEW -->
         <div id="results-view" class="hidden animate-fadeIn">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
                 <div class="text-center mb-6">
@@ -236,7 +237,7 @@
             </div>
         </div>
 
-        <!-- 3. HISTORY VIEW -->
+        <!-- HISTORY VIEW -->
         <div id="tab-history" class="tab-content">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
@@ -251,7 +252,7 @@
             </div>
         </div>
 
-        <!-- 4. HOW IT WORKS -->
+        <!-- HOW IT WORKS -->
         <div id="tab-how" class="tab-content">
             <div class="glass-card rounded-3xl p-6">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-info text-primary"></i> Πώς λειτουργεί;</h3>
@@ -262,7 +263,7 @@
                     </div>
                     <div class="flex gap-4 items-start">
                         <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bell-ringing"></i></div>
-                        <div><h4 class="font-bold text-lg text-slate-800 dark:text-white">2. Ειδοποίηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Λαμβάνεις απάντηση στο κινητό σου μόλις βρεθεί διαθέσιμο. Βλέπεις την απόσταση.</p></div>
+                        <div><h4 class="font-bold text-lg text-slate-800 dark:text-white">2. Ειδοποίηση</h4><p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Λαμβάνεις απάντηση στο κινητό σου μόλις βρεθεί διαθέσιμο.</p></div>
                     </div>
                     <div class="flex gap-4 items-start">
                         <div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 flex items-center justify-center text-2xl shadow-sm"><i class="ph ph-bag"></i></div>
@@ -270,6 +271,23 @@
                     </div>
                 </div>
                 <div class="mt-8 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-center border border-slate-200 dark:border-slate-700"><p class="text-xs text-slate-500 dark:text-slate-400 font-medium">💡 Η υπηρεσία είναι εντελώς δωρεάν για τους χρήστες.</p></div>
+            </div>
+        </div>
+        
+        <!-- Pickup View (Hidden Initially) -->
+        <div id="pickup-view" class="hidden animate-fadeIn">
+            <div class="glass-card rounded-3xl p-8 text-center border-teal-200 dark:border-teal-800">
+                <div class="w-24 h-24 bg-teal-100 dark:bg-teal-900/50 rounded-full flex flex-col items-center justify-center mx-auto mb-6 shadow-xl ring-8 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-hourglass-high text-4xl text-primary mb-1"></i><p class="text-xs font-bold text-primary">Pickup</p></div>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Χρόνος Παραλαβής</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-6">Κρατήθηκε! Παρακαλώ παραλάβετε εντός:</p>
+                <div class="bg-white dark:bg-slate-700 rounded-2xl p-4 mb-6 shadow-inner border border-slate-200 dark:border-slate-700"><p id="timer-display" class="text-5xl font-extrabold text-primary dark:text-teal-400 tracking-tighter">--:--</p><p class="text-sm text-slate-500 mt-1">Λεπτά</p></div>
+                <!-- QR Placeholder -->
+                <div id="pickup-qr" class="flex justify-center mb-4"></div>
+                <div id="pickup-code" class="text-center mb-6 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600"></div>
+                
+                <button id="extend-btn" onclick="extendPickupTime()" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-500 font-bold py-3 rounded-xl flex items-center justify-center gap-2 mb-4"><i class="ph ph-timer text-lg"></i> Παράταση 15'</button>
+                <button onclick="openGoogleMaps()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 mb-4 shadow-lg"><i class="ph ph-map-trifold text-lg"></i> 📍 Πλοήγηση (Google Maps)</button>
+                <button onclick="resetApp()" class="text-sm text-slate-400 hover:text-slate-600">Ολοκλήρωση / Ακύρωση</button>
             </div>
         </div>
     </main>
@@ -295,12 +313,12 @@
         </div>
     </div>
 
-    <!-- LOGIN MODAL -->
+    <!-- LOGIN MODAL (IMPROVED UX) -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
             <button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
             <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl"></i></div>
-            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος Χρήστη</h3>
+            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Συνδέσου για να ενεργοποιήσεις το Ιστορικό Αιτημάτων.</p>
             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl text-left mb-4 flex gap-3"><div class="text-xl">💡</div><div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"><strong>Δεν χρειάζεστε κωδικό!</strong><br>Γράψτε το email σας και θα σας στείλουμε έναν σύνδεσμο (link) για να μπείτε άμεσα.</div></div>
             <form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)">
@@ -311,7 +329,7 @@
             <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg><span>Google</span></button>
         </div>
     </div>
-
+    
     <!-- PRO MODAL -->
     <div id="modal-pro" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
@@ -319,10 +337,27 @@
             <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg"><i class="ph ph-briefcase text-3xl"></i></div>
             <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Είσοδος Pro</h3>
             <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών</p>
-            <button onclick="window.location.href='pharmacy.html'" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"><span>Μετάβαση στο Pro Panel</span> <i class="ph ph-arrow-right"></i></button>
-            <p class="mt-4 text-xs text-slate-400">Δεν έχετε λογαριασμό; <a href="#" class="underline font-semibold">Εγγραφή</a>.</p>
+            <div id="pro-login-view">
+                <a href="pharmacy.html" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mb-4">
+                    <span>Μετάβαση στο Pro Panel</span> <i class="ph ph-arrow-right"></i>
+                </a>
+                <p class="text-xs text-slate-400">Δεν έχετε λογαριασμό; <button onclick="toggleProMode()" class="underline font-semibold text-slate-600 dark:text-slate-200">Εγγραφή</button>.</p>
+            </div>
+            <div id="pro-register-view" class="hidden text-left space-y-3">
+                 <div><label class="text-xs font-bold text-slate-500 ml-1">Όνομα Φαρμακείου</label><input id="reg-name" type="text" class="w-full p-2 rounded border dark:bg-slate-900 dark:border-slate-600 text-sm"></div>
+                 <div><label class="text-xs font-bold text-slate-500 ml-1">ΑΦΜ / Αρ. Άδειας</label><input id="reg-license" type="text" class="w-full p-2 rounded border dark:bg-slate-900 dark:border-slate-600 text-sm"></div>
+                 <div><label class="text-xs font-bold text-slate-500 ml-1">Email</label><input id="reg-email" type="email" class="w-full p-2 rounded border dark:bg-slate-900 dark:border-slate-600 text-sm"></div>
+                 <div><label class="text-xs font-bold text-slate-500 ml-1">Κωδικός</label><input id="reg-pass" type="password" class="w-full p-2 rounded border dark:bg-slate-900 dark:border-slate-600 text-sm"></div>
+                 <button onclick="handleProRegister()" class="w-full bg-primary text-white font-bold py-2 rounded-xl mt-2">Εγγραφή</button>
+                 <p class="text-xs text-center text-slate-400 mt-2"><button onclick="toggleProMode()" class="underline">Επιστροφή στην Είσοδο</button></p>
+            </div>
         </div>
     </div>
+
+    <!-- Helper Modals -->
+    <div id="modal-terms" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('terms')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>Terms</h3></div></div>
+    <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('gdpr')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>GDPR</h3></div></div>
+    <div id="modal-generic" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('generic')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>Generic Info</h3></div></div>
 
     <script src="env.js"></script>
     <script src="supabase.js"></script>
@@ -334,12 +369,9 @@
         let selectedResponseId = null;
         let currentRequestId = null;
         let currentUser = null;
-        let selectedPharmacistId = null; // New: Store selected pharmacist
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let requestPollInterval = null; 
         let html5QrcodeScanner = null;
-        
-        // --- CITY DATA ---
         const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Κόρινθος", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Μυτιλήνη", "Χίος", "Σάμος", "Κως", "Ζάκυνθος", "Κέρκυρα", "Λευκάδα", "Αργοστόλι", "Σύρος", "Νάξος", "Άγιος Νικόλαος", "Σητεία", "Ιεράπετρα", "Γρεβενά", "Πολύγυρος", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μεσολόγγι", "Ναύπακτος", "Άμφισσα", "Καρπενήσι", "Λιβαδειά", "Θήβα", "Χαλκίδα", "Πύργος", "Αμαλιάδα", "Ναύπλιο", "Άργος"];
 
         // Translations
@@ -428,10 +460,10 @@
         function updateNavForUser(user) { 
             const navContainer = document.getElementById('user-nav-container'); 
             const name = user.user_metadata.full_name || user.email.split('@')[0]; 
-            navContainer.innerHTML = `<div class="flex gap-2"><button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="switchTab('history')" class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm flex items-center gap-1 hover:bg-indigo-100 transition-all" title="Ιστορικό"><i class="ph ph-clock-counter-clockwise text-lg"></i></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 transition-colors"><i class="ph ph-sign-out text-lg"></i></button></div>`; 
+            navContainer.innerHTML = `<div class="flex gap-2"><button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2 transition-all"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="switchTab('history')" class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm flex items-center gap-1 hover:bg-indigo-100 transition-all" title="Ιστορικό"><i class="ph ph-clock-counter-clockwise text-lg"></i></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 transition-colors"><i class="ph ph-sign-out text-lg"></i></button></div>`; 
         }
         function resetNavToGuest() { const navContainer = document.getElementById('user-nav-container'); navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> <span data-lang-key="login">Είσοδος</span></button>`; }
-        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Σφάλμα: " + error.message, 'error'); } else { showToast("✅ Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
+        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Error: " + error.message, 'error'); } else { showToast("Check email!", 'success'); closeModal('user'); } }
         async function handleLogout() { await window.db.auth.signOut(); showToast("Logged out", 'info'); }
         function getLocation() { const c = document.getElementById('city'); c.value = "Checking..."; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(async (p) => { const lat = p.coords.latitude; const lon = p.coords.longitude; userLocation = { lat, lon }; try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`); const data = await res.json(); const addr = data.address; const street = addr.road || ""; const area = addr.suburb || addr.city || addr.town || ""; c.value = street ? `${street}, ${area}` : area; if(!c.value) c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } catch(e) { c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } saveUserData(); showToast("Found!", 'success'); }, () => { c.value = ""; showToast("GPS Error", 'error'); }); } }
         function calculateDistance(lat1, lon1, lat2, lon2) { if (!lat1 || !lon1) return (Math.random() * 2 + 0.2).toFixed(1); return (Math.random() * 2 + 0.2).toFixed(1); }
@@ -471,6 +503,92 @@
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
         function showToast(m,t='info'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className=`toast-enter p-3 rounded-xl shadow-lg bg-slate-800 text-white text-sm mb-2`;d.innerText=m;c.appendChild(d);setTimeout(()=>d.remove(),3000);}
         function toggleTheme(){document.documentElement.classList.toggle('dark');}
+
+        // --- NEW: Pro Toggle Logic ---
+        function toggleProMode() {
+            const loginView = document.getElementById('pro-login-view');
+            const regView = document.getElementById('pro-register-view');
+            
+            if(loginView.classList.contains('hidden')) {
+                loginView.classList.remove('hidden');
+                regView.classList.add('hidden');
+            } else {
+                loginView.classList.add('hidden');
+                regView.classList.remove('hidden');
+            }
+        }
+
+        async function handleProRegister() {
+            const name = document.getElementById('reg-name').value;
+            const license = document.getElementById('reg-license').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if(!name || !license || !email || !pass) {
+                alert('Συμπληρώστε όλα τα πεδία'); return;
+            }
+
+            const { data, error } = await window.db.auth.signUp({
+                email, 
+                password: pass,
+                options: {
+                    data: {
+                        role: 'pharmacy',
+                        pharmacy_name: name,
+                        license_number: license,
+                        status: 'pending'
+                    }
+                }
+            });
+
+            if(error) {
+                alert('Σφάλμα: ' + error.message);
+            } else {
+                alert('Η εγγραφή ολοκληρώθηκε! Ο λογαριασμός σας είναι υπό έγκριση.');
+                closeModal('pro');
+            }
+        }
+
+        // --- BOOKING LOGIC WITH QR ---
+        function promptSelection(id) { selectedResponseId = id; openModal('safety'); }
+        document.getElementById('confirm-pickup-btn').addEventListener('click', () => { closeModal('safety'); startPickupTimer(); });
+        
+        async function startPickupTimer() { 
+            document.getElementById('results-view').classList.add('hidden'); 
+            document.getElementById('pickup-view').classList.remove('hidden'); 
+            pickupDeadline = Date.now() + (60 * 60 * 1000); 
+            updateTimerDisplay(pickupDeadline, 0);
+            
+            // Update DB that user reserved this response
+            if(selectedResponseId) {
+                await window.db.from('requests').update({ status: 'reserved', winner_pharmacy_id: 'pending-id', deadline_at: new Date(pickupDeadline).toISOString() }).eq('id', currentRequestId);
+                
+                // GENERATE QR CODE & TEXT
+                const qrContainer = document.getElementById('pickup-qr');
+                const codeContainer = document.getElementById('pickup-code');
+                qrContainer.innerHTML = ""; 
+                
+                // Generate QR
+                new QRCode(qrContainer, {
+                    text: `${currentRequestId}`, // Only the ID is enough
+                    width: 128,
+                    height: 128,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+                // Show Readable Code (First 6 chars of ID)
+                const shortCode = currentRequestId.substring(0, 6).toUpperCase();
+                codeContainer.innerHTML = `
+                    <p class="text-xs text-slate-500 uppercase font-bold">Κωδικος Παραλαβης</p>
+                    <p class="text-3xl font-mono font-bold text-slate-900 dark:text-white tracking-widest">${shortCode}</p>
+                `;
+            }
+
+            showToast("Η κράτηση ολοκληρώθηκε.", 'success'); 
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
+        }
     </script>
 </body>
 </html>
