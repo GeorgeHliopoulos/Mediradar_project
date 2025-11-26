@@ -1,22 +1,31 @@
-# Mediradar Project
+MediRadar Platform
 
-## Supabase Environment Configuration
+A modern, real-time web application designed for location-based resource availability and instant reservation management. This project demonstrates a serverless architecture focusing on speed, mobile-first design, and seamless user experience.
 
-Για να ολοκληρώσεις το βήμα 2 της διασύνδεσης με το Supabase, έχεις δύο επιλογές:
+🚀 Technology Stack
 
-1. **Χρήση μεταβλητών περιβάλλοντος (προτείνεται για παραγωγή)**
-   - Στο περιβάλλον build/deploy δήλωσε τις παρακάτω μεταβλητές:
-     - `SUPABASE_URL=https://qzerrisyowkfkmcyxmav.supabase.co`
-     - `SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk
-   - Το script `env.js` θα τις αντιγράψει αυτόματα στο `window.ENV` κατά το build ή το runtime.
+Built with a lightweight, performance-oriented stack:
 
-2. **Άμεση ενημέρωση του `env.js` (για τοπική δοκιμή ή στατικό hosting χωρίς build step)**
-   - Άνοιξε το αρχείο [`env.js`](./env.js).
-   - Βεβαιώσου ότι το αντικείμενο `fallbackEnv` περιέχει:
-     ```js
-     SUPABASE_URL: 'https://qzerrisyowkfkmcyxmav.supabase.co',
-     SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk'
-     ```
-   - Αποθήκευσε το αρχείο και φόρτωσε ξανά την εφαρμογή.
+Frontend: Vanilla JavaScript (ES6+), HTML5
 
-> 💡 Η εφαρμογή ελέγχει πρώτα για μεταβλητές περιβάλλοντος και στη συνέχεια χρησιμοποιεί τα fallback του `env.js`. Εφόσον συμπληρώσεις τις παραπάνω τιμές, ο Supabase client θα αρχικοποιείται σωστά και τα sign-in/sign-up flows θα λειτουργούν χωρίς προειδοποιήσεις.
+Styling: Tailwind CSS (via CDN for dev / PostCSS for prod)
+
+Backend & Database: Supabase (PostgreSQL)
+
+Realtime Engine: Supabase Realtime (WebSockets)
+
+Maps & Geocoding: Leaflet.js & OpenStreetMap API
+
+Notifications: OneSignal SDK
+
+🌟 Key Features
+
+Real-time Synchronization: Instant data propagation between client and provider dashboards without page reloads.
+
+Geolocation Services: Smart reverse geocoding and distance calculation between points of interest.
+
+Glassmorphism UI: A modern, aesthetic interface optimized for mobile devices with smooth animations.
+
+Passwordless Auth: Secure authentication flow using Magic Links (Email) and Anonymous guest access.
+
+Smart Autocomplete: Context-aware search suggestions.
