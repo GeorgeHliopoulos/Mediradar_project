@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Barcode Scanner Library -->
+    <!-- Real Barcode Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -72,14 +72,21 @@
         .toast-enter { animation: slideInUp 0.3s ease-out forwards; }
         .toast-exit { animation: slideOutDown 0.3s ease-in forwards; }
         
-        /* Autocomplete Dropdown */
-        #drug-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
-        html.dark #drug-suggestions { background: #1e293b; border-color: #334155; }
-        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+        /* Custom Autocomplete Dropdown (Replaces Datalist) */
+        .custom-suggestions { 
+            position: absolute; top: 100%; left: 0; right: 0; 
+            background: white; border: 1px solid #e2e8f0; 
+            border-radius: 0.75rem; max-height: 250px; overflow-y: auto; 
+            z-index: 999; /* Very high to sit on top */
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); 
+            display: none; margin-top: 4px;
+        }
+        html.dark .custom-suggestions { background: #1e293b; border-color: #334155; }
+        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; color: #334155; transition: background 0.2s; }
         html.dark .suggestion-item { border-color: #334155; color: #e2e8f0; }
         .suggestion-item:hover { background-color: #f0f9ff; }
         html.dark .suggestion-item:hover { background-color: #334155; }
-
+        
         /* Radar */
         .radar-pulse { width: 100px; height: 100px; background: rgba(13, 148, 136, 0.2); border-radius: 50%; position: relative; margin: 0 auto; }
         .radar-pulse::before, .radar-pulse::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #0d9488; width: 100%; height: 100%; animation: ripple 2s linear infinite; opacity: 0; }
@@ -133,7 +140,6 @@
             <div class="glass-card rounded-3xl p-6 relative overflow-hidden">
                 <form id="request-form" class="space-y-6">
                     
-                    <!-- User Info -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ονομα</label>
@@ -145,25 +151,23 @@
                         </div>
                     </div>
 
-                    <!-- Location -->
+                    <!-- Location (FIXED: Custom Suggestions - No Arrow) -->
                     <div class="space-y-2 relative">
                         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Περιοχη</label>
                         <div class="relative">
-                            <input id="city" type="text" list="greek-cities" placeholder="π.χ. Αθήνα ή Athens" oninput="saveUserData()" 
+                            <input id="city" type="text" placeholder="Πληκτρολογήστε πόλη ή περιοχή..." autocomplete="off" oninput="saveUserData()" 
                                    class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 pr-32 focus:ring-2 focus:ring-primary/50 outline-none" required>
-                            <datalist id="greek-cities">
-                                <option value="Αθήνα"><option value="Θεσσαλονίκη"><option value="Πάτρα"><option value="Ηράκλειο"><option value="Λάρισα">
-                                <option value="Βόλος"><option value="Ιωάννινα"><option value="Τρίκαλα"><option value="Χαλκίδα"><option value="Σέρρες">
-                                <option value="Αλεξανδρούπολη"><option value="Ξάνθη"><option value="Κατερίνη"><option value="Αγρίνιο"><option value="Καλαμάτα">
-                                <option value="Καβάλα"><option value="Χανιά"><option value="Λαμία"><option value="Κομοτηνή"><option value="Ρόδος">
-                            </datalist>
+                            
+                            <!-- Custom City Suggestions -->
+                            <div id="city-suggestions" class="custom-suggestions"></div>
+
                             <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 rounded-xl text-xs font-bold hover:bg-teal-200 flex items-center gap-1"><i class="ph ph-navigation-arrow text-sm"></i> Κοντά μου</button>
                         </div>
                     </div>
 
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
-                    <!-- Medicine with Autocomplete (UPDATED) -->
+                    <!-- Medicine with Autocomplete -->
                     <div class="space-y-4">
                         <div class="space-y-2 relative">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1">Ονομα Φαρμακου</label>
@@ -172,8 +176,8 @@
                                 <input id="medicine" type="text" placeholder="π.χ. Depon" autocomplete="off" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl pl-12 pr-12 py-3.5 text-lg font-semibold focus:ring-2 focus:ring-primary/50 outline-none" required>
                                 <button type="button" onclick="startVoiceInput()" id="voice-btn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 flex items-center justify-center text-xl text-slate-500 hover:text-primary"><i id="mic-icon" class="ph ph-microphone"></i></button>
                             </div>
-                            <!-- Dropdown Results -->
-                            <div id="drug-suggestions" class="shadow-xl"></div>
+                            <!-- Drug Suggestions Dropdown -->
+                            <div id="drug-suggestions" class="custom-suggestions"></div>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
@@ -191,7 +195,7 @@
                             </div>
                         </div>
 
-                        <!-- FIX: Camera with capture attribute -->
+                        <!-- FIX: Camera Logic -->
                         <div class="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 border-2 border-dashed border-slate-300 hover:border-primary/50 transition-colors">
                             <label class="text-xs font-bold text-slate-600 uppercase mb-3 block text-center">📸 Φωτο / Barcode</label>
                             <div class="grid grid-cols-2 gap-3">
@@ -346,8 +350,34 @@
         let requestPollInterval = null; 
         let html5QrcodeScanner = null;
         
-        // --- CITY DATA (Extensive Greek List) ---
+        // --- CITY DATA & LOGIC ---
         const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Δράμα", "Βέροια", "Κοζάνη", "Κέρκυρα", "Καρδίτσα", "Σαλαμίνα", "Ρέθυμνο", "Χίος", "Άργος", "Πύργος", "Θήβα", "Κόρινθος", "Μέγαρα", "Άρτα", "Πρέβεζα", "Αίγιο", "Μυτιλήνη", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Ορεστιάδα", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Άμφισσα", "Μεσολόγγι", "Ναύπακτος", "Λευκάδα", "Ζάκυνθος", "Αργοστόλι", "Σάμος", "Κως", "Σύρος", "Νάξος", "Ιεράπετρα", "Άγιος Νικόλαος", "Σητεία", "Γρεβενά", "Πολύγυρος", "Ιωλκός", "Νέα Ιωνία", "Αχαρνές", "Καλλιθέα", "Περιστέρι", "Νίκαια", "Γλυφάδα", "Ίλιον", "Ηλιούπολη", "Χαλάνδρι", "Αμαρούσιο", "Ζωγράφου", "Αιγάλεω", "Κορυδαλλός", "Παλαιό Φάληρο", "Νέα Σμύρνη", "Βύρωνας", "Γαλάτσι", "Αγία Παρασκευή", "Χαϊδάρι", "Πετρούπολη", "Χολαργός", "Άλιμος", "Άγιοι Ανάργυροι", "Αργυρούπολη", "Βριλήσσια", "Βούλα", "Ελληνικό", "Κηφισιά", "Μαρούσι", "Νέα Ερυθραία", "Πεύκη", "Μελίσσια", "Γέρακας", "Παλλήνη", "Κρωπία", "Μαρκόπουλο", "Λαύριο", "Ελευσίνα", "Ασπρόπυργος"];
+
+        function initCitySuggestions() {
+            const input = document.getElementById('city');
+            const box = document.getElementById('city-suggestions');
+            
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.toLowerCase();
+                if (val.length < 2) { box.style.display = 'none'; return; }
+                const matches = citiesData.filter(c => c.toLowerCase().startsWith(val)).slice(0, 6);
+                
+                if (matches.length > 0) {
+                    box.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selectCity('${c}')">${c}</div>`).join('');
+                    box.style.display = 'block';
+                } else { box.style.display = 'none'; }
+            });
+            
+            document.addEventListener('click', (e) => { 
+                if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; 
+            });
+        }
+
+        function selectCity(c) {
+            document.getElementById('city').value = c;
+            document.getElementById('city-suggestions').style.display = 'none';
+            saveUserData();
+        }
 
         // --- 1. Init & Auth ---
         window.onload = async function() {
@@ -367,35 +397,46 @@
             }
         };
 
-        function initCitySuggestions() {
-            const input = document.getElementById('city');
-            const box = document.getElementById('city-suggestions');
-            
-            input.addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
-                if (val.length < 2) { box.style.display = 'none'; return; }
-                const matches = citiesData.filter(c => c.toLowerCase().startsWith(val)).slice(0, 8);
-                if (matches.length > 0) {
-                    box.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selectCity('${c}')">${c}</div>`).join('');
-                    box.style.display = 'block';
-                } else { box.style.display = 'none'; }
-            });
-            
-            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; });
-        }
-        function selectCity(c) { document.getElementById('city').value = c; document.getElementById('city-suggestions').style.display = 'none'; saveUserData(); }
-
-        // ... (Auth & Nav Functions - Same as before) ...
         function updateNavForUser(user) { const navContainer = document.getElementById('user-nav-container'); const name = user.user_metadata.full_name || user.email.split('@')[0]; navContainer.innerHTML = `<button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2 transition-all"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors" title="Αποσύνδεση"><i class="ph ph-sign-out text-lg"></i></button>`; }
         function resetNavToGuest() { const navContainer = document.getElementById('user-nav-container'); navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> Είσοδος</button>`; }
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Στέλνουμε...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Σφάλμα: " + error.message, 'error'); } else { showToast("✅ Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
         async function handleLogout() { await window.db.auth.signOut(); showToast("Αποσυνδεθήκατε.", 'info'); }
 
-        // Medicine Autocomplete
+        // Medicine Autocomplete Logic
         const medicineInput = document.getElementById('medicine');
         const suggestionsBox = document.getElementById('drug-suggestions');
         const localDrugs = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Amoxil", "Aerolin", "Fugentin", "Ponstan", "Buscopan", "Ibuprofen", "Paracetamol", "Aspirin", "Lonarid", "Salospir", "Brufen", "Xozal", "Zirtek"];
-        medicineInput.addEventListener('input', async (e) => { const query = e.target.value.trim(); if (query.length < 2) { suggestionsBox.style.display = 'none'; return; } let matches = localDrugs.filter(d => d.toLowerCase().includes(query.toLowerCase())); try { const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${query}"&limit=5`); const data = await res.json(); if (data.results) { data.results.forEach(drug => { if (drug.openfda && drug.openfda.brand_name) { matches.push(...drug.openfda.brand_name); } }); } } catch (err) {} matches = [...new Set(matches)].slice(0, 6); if (matches.length > 0) { suggestionsBox.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectDrug('${m}')">${m}</div>`).join(''); suggestionsBox.style.display = 'block'; } else { suggestionsBox.style.display = 'none'; } });
+        
+        medicineInput.addEventListener('input', async (e) => { 
+            const query = e.target.value.trim(); 
+            if (query.length < 2) { suggestionsBox.style.display = 'none'; return; } 
+            
+            // Local search first
+            let matches = localDrugs.filter(d => d.toLowerCase().includes(query.toLowerCase())); 
+            
+            // FDA Fallback
+            try { 
+                // Fix: Add wildcard to search
+                const res = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${query}*"&limit=5`); 
+                const data = await res.json(); 
+                if (data.results) { 
+                    data.results.forEach(drug => { 
+                        if (drug.openfda && drug.openfda.brand_name) { 
+                            matches.push(...drug.openfda.brand_name); 
+                        } 
+                    }); 
+                } 
+            } catch (err) {} 
+            
+            matches = [...new Set(matches)].slice(0, 6); 
+            if (matches.length > 0) { 
+                suggestionsBox.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectDrug('${m}')">${m}</div>`).join(''); 
+                suggestionsBox.style.display = 'block'; 
+            } else { 
+                suggestionsBox.style.display = 'none'; 
+            } 
+        });
+        
         function selectDrug(name) { medicineInput.value = name; suggestionsBox.style.display = 'none'; }
         document.addEventListener('click', (e) => { if (!medicineInput.contains(e.target) && !suggestionsBox.contains(e.target)) { suggestionsBox.style.display = 'none'; } });
 
