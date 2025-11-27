@@ -85,7 +85,7 @@
         .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; }
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
 
-        /* Focus Styles */
+        /* Focus Styles for Accessibility */
         *:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
 
         /* --- Accessibility Modes CSS --- */
@@ -108,6 +108,7 @@
     <!-- Navbar -->
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative pt-safe" aria-label="Κύρια πλοήγηση">
         <div class="flex gap-2" id="user-nav-container">
+            <!-- User Login Button -->
             <button onclick="openModal('user')" aria-label="Είσοδος ή Εγγραφή Χρήστη" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center gap-1 active:scale-95">
                 <i class="ph ph-user text-lg" aria-hidden="true"></i> Είσοδος
             </button>
@@ -175,9 +176,12 @@
                             <div class="relative">
                                 <i class="ph ph-pill absolute left-4 top-4 text-slate-400 text-xl z-10" aria-hidden="true"></i>
                                 <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl pl-12 pr-12 py-3.5 text-base text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white shadow-sm" required autocomplete="off" enterkeyhint="search">
+                                
+                                <!-- Voice Input Inside Field -->
                                 <button type="button" onclick="startVoiceInput()" id="voice-btn" class="absolute right-2 top-2 bottom-2 w-10 h-10 rounded-full flex items-center justify-center text-xl text-slate-500 hover:text-primary transition-colors active:scale-95" title="Φωνητική Αναζήτηση" aria-label="Φωνητική Αναζήτηση Φαρμάκου">
                                     <i class="ph ph-microphone" aria-hidden="true"></i>
                                 </button>
+                                
                                 <div id="drug-suggestions" role="listbox"></div>
                             </div>
                         </div>
@@ -341,7 +345,8 @@
                 <span class="text-slate-300">|</span>
                 <a href="#" onclick="openModal('gdpr'); return false;" class="hover:text-primary">GDPR</a>
                 <span class="text-slate-300">|</span>
-                <a href="pharmacy.html" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
+                <!-- Updated Link to Pro Modal -->
+                <a href="#" onclick="openModal('pro'); return false;" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
             </div>
             
             <p class="text-[10px] text-slate-400 uppercase tracking-widest">© 2025 MediRadar Hellas</p>
@@ -416,6 +421,31 @@
             
             <div class="relative my-6"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-white dark:bg-slate-800 px-2 text-slate-400">Ή</span></div></div>
             <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95"><i class="ph ph-google-logo text-xl text-red-500" aria-hidden="true"></i> Google</button>
+        </div>
+    </div>
+
+    <!-- PRO MODAL (Updated Logic) -->
+    <div id="modal-pro" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
+            <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl"></i></button>
+            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg"><i class="ph ph-briefcase text-3xl"></i></div>
+            <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Είσοδος Pro</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών</p>
+            
+            <form class="space-y-3" onsubmit="window.location.href='pharmacy.html'; return false;">
+                <div class="text-left">
+                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label>
+                    <input type="email" placeholder="pharmacy@example.com" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
+                </div>
+                <div class="text-left">
+                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Κωδικός</label>
+                    <input type="password" placeholder="••••••••" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
+                </div>
+                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <span>Σύνδεση</span> <i class="ph ph-arrow-right"></i>
+                </button>
+            </form>
+            <p class="mt-4 text-xs text-slate-400">Δεν έχετε λογαριασμό; <a href="#" class="underline font-semibold">Εγγραφή</a>.</p>
         </div>
     </div>
     
@@ -615,10 +645,77 @@
 
         function handleFileSelect(input) { if(input.files[0]) { document.getElementById('media-preview').classList.remove('hidden'); showToast("Η φωτογραφία προστέθηκε!", 'success'); } }
         function switchTab(id) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); document.getElementById('pickup-view').classList.add('hidden'); if(id==='history') loadUserHistory(); }
-        function updateNavForUser(user) { const n = user.user_metadata.full_name || user.email.split('@')[0]; document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500"><i class="ph ph-sign-out"></i></button></div>`; }
+        
+        // FIX: Handle anonymous users safely to prevent crash
+        function updateNavForUser(user) { 
+            if (user.is_anonymous) return;
+            const n = user.user_metadata.full_name || (user.email ? user.email.split('@')[0] : 'User');
+            document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500"><i class="ph ph-sign-out"></i></button></div>`; 
+        }
+        
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) return showToast("Email?", 'error'); const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
-        function getLocation() { if(!navigator.geolocation) return showToast("GPS Error", "error"); document.querySelector('button[onclick="getLocation()"]').innerHTML = '...'; navigator.geolocation.getCurrentPosition(async (p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; try { const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lon}`); const d = await r.json(); document.getElementById('city').value = (d.address.road || "") + ", " + (d.address.suburb || d.address.city || ""); showToast("OK!", "success"); } catch(e) { document.getElementById('city').value = "Τοποθεσία OK"; } document.querySelector('button[onclick="getLocation()"]').innerHTML = '<i class="ph ph-navigation-arrow"></i>'; saveUserData(); }, () => { showToast("Error", "error"); }); }
+        
+        function getLocation() {
+            if(!navigator.geolocation) return showToast("GPS Error", "error");
+            
+            const btn = document.querySelector('button[onclick="getLocation()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>'; 
+            
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                userLocation = { lat: p.coords.latitude, lon: p.coords.longitude };
+                
+                try {
+                    // Χρήση Nominatim για μετατροπή συντεταγμένων σε διεύθυνση
+                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lon}&addressdetails=1`);
+                    
+                    if (!r.ok) throw new Error("Network error");
+                    
+                    const d = await r.json();
+                    
+                    // Έξυπνη κατασκευή διεύθυνσης
+                    let locationName = "";
+                    const addr = d.address;
+
+                    if (addr.road) locationName += addr.road;
+                    if (addr.house_number) locationName += " " + addr.house_number;
+                    
+                    if (addr.suburb) {
+                        locationName += (locationName ? ", " : "") + addr.suburb;
+                    } else if (addr.city) {
+                        locationName += (locationName ? ", " : "") + addr.city;
+                    } else if (addr.town) {
+                        locationName += (locationName ? ", " : "") + addr.town;
+                    } else if (addr.village) {
+                        locationName += (locationName ? ", " : "") + addr.village;
+                    }
+
+                    if (!locationName) locationName = "Η τοποθεσία μου";
+
+                    document.getElementById('city').value = locationName;
+                    saveUserData();
+                    showToast("Βρέθηκε: " + locationName, "success");
+                    
+                } catch(e) { 
+                    console.error(e);
+                    // Fallback αν αποτύχει η υπηρεσία, αλλά έχουμε συντεταγμένες
+                    document.getElementById('city').value = "Τρέχουσα Τοποθεσία";
+                    showToast("Τοποθεσία OK", "success");
+                }
+                
+                btn.innerHTML = originalText;
+                
+            }, () => { 
+                showToast("Δεν βρέθηκε τοποθεσία", "error");
+                btn.innerHTML = originalText;
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        }
+
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
         function createEmojis() { const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴']; for(let i=0; i<15; i++){ const e = document.createElement('div'); e.innerText = em[Math.floor(Math.random() * em.length)]; e.classList.add('emoji'); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = (12 + Math.random() * 20) + 's'; e.style.animationDelay = (Math.random() * 10) + 's'; c.appendChild(e); } }
