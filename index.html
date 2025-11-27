@@ -392,80 +392,25 @@
         </div>
     </div>
 
-    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
-
-    <!-- MODALS -->
-    
-    <!-- User Login Modal -->
-    <div id="modal-user" class="modal-backdrop">
+    <!-- SAFETY MODAL (Warning before booking) -->
+    <div id="modal-safety" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
-            <button onclick="closeModal('user')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
-            <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl" aria-hidden="true"></i></div>
-            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Χωρίς κωδικούς! Σας στέλνουμε ένα link στο email.</p>
-            
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-xl text-left mb-4 flex gap-3">
-                <div class="text-xl" aria-hidden="true">📧</div>
-                <div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    <strong>Πώς λειτουργεί:</strong><br>
-                    1. Γράφετε το email σας.<br>
-                    2. Πατάτε το κουμπί.<br>
-                    3. Ανοίγετε το email και πατάτε το link!
-                </div>
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i class="ph ph-warning-circle text-3xl"></i></div>
+            <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Σημαντική Ενημέρωση</h3>
+            <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 p-4 rounded-xl mb-4 text-left space-y-2">
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <strong>Αποποίηση Ευθύνης:</strong> Το MediRadar ενημερώνει μόνο για τη διαθεσιμότητα. Δεν φέρουμε ευθύνη για ιατρικές συμβουλές ή παρενέργειες.
+                </p>
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    ⚠️ Είστε αποκλειστικά υπεύθυνοι να ενημερώσετε τον φαρμακοποιό για τυχόν <strong>αλλεργίες</strong> ή άλλη φαρμακευτική αγωγή κατά την παραλαβή.
+                </p>
             </div>
-
-            <form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)">
-                <div class="text-left"><label for="user-email" class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div>
-                <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg" aria-hidden="true"></i> Στείλτε μου Link</button>
-            </form>
-            
-            <div class="relative my-6"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-white dark:bg-slate-800 px-2 text-slate-400">Ή</span></div></div>
-            <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95"><i class="ph ph-google-logo text-xl text-red-500" aria-hidden="true"></i> Google</button>
+            <button onclick="confirmBooking()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 mb-3">Έχω ενημερωθεί & Συνεχίζω</button>
+            <button onclick="closeModal('safety')" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium">Ακύρωση</button>
         </div>
     </div>
 
-    <!-- PRO MODAL (Updated Logic) -->
-    <div id="modal-pro" class="modal-backdrop">
-        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
-            <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl"></i></button>
-            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg"><i class="ph ph-briefcase text-3xl"></i></div>
-            <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Είσοδος Pro</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών</p>
-            
-            <form class="space-y-3" onsubmit="window.location.href='pharmacy.html'; return false;">
-                <div class="text-left">
-                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label>
-                    <input type="email" placeholder="pharmacy@example.com" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
-                </div>
-                <div class="text-left">
-                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Κωδικός</label>
-                    <input type="password" placeholder="••••••••" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
-                </div>
-                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
-                    <span>Σύνδεση</span> <i class="ph ph-arrow-right"></i>
-                </button>
-            </form>
-            <p class="mt-4 text-xs text-slate-400">Δεν έχετε λογαριασμό; <a href="#" class="underline font-semibold">Εγγραφή</a>.</p>
-        </div>
-    </div>
-    
-    <!-- Generic Info Modal -->
-    <div id="modal-generic" class="modal-backdrop">
-        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
-            <button onclick="closeModal('generic')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
-            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="ph ph-pill" aria-hidden="true"></i></div>
-            <h3 class="text-lg font-bold mb-2 text-slate-900 dark:text-white" data-lang-key="modal_generic_title">Τι είναι το γενόσημο;</h3>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left leading-relaxed" data-lang-key="modal_generic_body">
-                Ένα γενόσημο φάρμακο περιέχει την <strong>ίδια ακριβώς δραστική ουσία</strong>, στην ίδια ποσότητα και έχει την ίδια αποτελεσματικότητα με το πρωτότυπο φάρμακο.<br><br>
-                Είναι συνήθως <strong>πιο οικονομικό</strong> και εγκεκριμένο από τον ΕΟΦ. Επιλέγοντας γενόσημο, εξυπηρετείστε πιο γρήγορα αν υπάρχει έλλειψη στο πρωτότυπο.
-            </p>
-            <button onclick="closeModal('generic')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-colors active:scale-95">Κατάλαβα</button>
-        </div>
-    </div>
-
-    <!-- Helper Modals (Terms & GDPR) -->
-    <div id="modal-terms" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('terms')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-500 active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button><h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Όροι Χρήσης</h3><p class="text-sm text-slate-600 dark:text-slate-300">Το MediRadar είναι μια πλατφόρμα εύρεσης φαρμάκων... (Κείμενο Όρων)...</p></div></div>
-    <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('gdpr')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-500 active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button><h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">GDPR & Απόρρητο</h3><p class="text-sm text-slate-600 dark:text-slate-300">Τα δεδομένα σας χρησιμοποιούνται μόνο για την εκτέλεση του αιτήματος... (Κείμενο GDPR)...</p></div></div>
+    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
 
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
@@ -487,6 +432,7 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let html5QrcodeScanner = null;
         let pickupTimer = null;
+        let pendingPharmacyId = null; // Stores pharmacy ID before confirmation
 
         window.onload = async function() {
             createEmojis();
@@ -572,9 +518,17 @@
             list.innerHTML = html;
         }
 
-        async function acceptOffer(pharmacyId) {
-            if(!currentRequestId) return;
-            const { error } = await window.db.from('requests').update({ status: 'reserved', winner_pharmacy_id: pharmacyId }).eq('id', currentRequestId);
+        function acceptOffer(pharmacyId) {
+            pendingPharmacyId = pharmacyId;
+            openModal('safety');
+        }
+
+        async function confirmBooking() {
+            if(!currentRequestId || !pendingPharmacyId) return;
+            closeModal('safety');
+            
+            const { error } = await window.db.from('requests').update({ status: 'reserved', winner_pharmacy_id: pendingPharmacyId }).eq('id', currentRequestId);
+            
             if(error) showToast(error.message, 'error');
             else {
                 document.getElementById('pickup-view').classList.remove('hidden');
