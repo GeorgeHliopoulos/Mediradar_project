@@ -7,76 +7,94 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
     <script>
-        // Config
-        const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-        
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0d9488', secondary: '#0f172a' }, animation: { 'fade-in': 'fadeIn 0.3s ease-out forwards', 'slide-up': 'slideUp 0.3s ease-out forwards' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }, slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } } } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0d9488', secondary: '#0f172a' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards', 'slide-up': 'slideUp 0.3s ease-out forwards' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }, slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } } } } } }
     </script>
     <style>
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         .radar-pulse { width: 100px; height: 100px; background: rgba(13, 148, 136, 0.2); border-radius: 50%; position: relative; margin: 0 auto; }
         .radar-pulse::before, .radar-pulse::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #0d9488; width: 100%; height: 100%; animation: ripple 2s linear infinite; opacity: 0; }
         .radar-pulse::after { animation-delay: 1s; }
         @keyframes ripple { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 200%; height: 200%; opacity: 0; } }
-        .tab-content { display: none; } .tab-content.active { display: block; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
+        #drug-suggestions, #city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
+        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; } .suggestion-item:hover { background-color: #f0f9ff; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen relative flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen relative flex flex-col bg-slate-50">
 
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20">
         <h1 class="text-xl font-bold text-primary">MediRadar</h1>
-        <button onclick="window.location.reload()" class="text-sm font-medium text-slate-500">Reset</button>
+        <div class="flex gap-2">
+            <button onclick="window.location.href='pharmacy.html'" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">Pharmacist</button>
+            <button onclick="resetApp()" class="text-xs font-bold text-slate-500">Reset</button>
+        </div>
     </nav>
 
     <main class="w-full max-w-lg mx-auto p-4 pb-6 flex-grow z-10 relative">
         
         <div id="tab-search" class="tab-content active">
-            <div class="glass-card rounded-3xl p-6 relative">
+            <div class="glass-card rounded-3xl p-6">
                 <form id="request-form" class="space-y-6">
-                    <h2 class="text-2xl font-bold text-slate-800">Αναζήτηση Φαρμάκου</h2>
-                    
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold uppercase text-slate-500">Φάρμακο</label>
-                        <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-slate-100 rounded-xl px-4 py-3 font-bold outline-none focus:ring-2 focus:ring-primary" required>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2"><label class="text-xs font-bold uppercase text-slate-500">Όνομα</label><input id="full-name" type="text" class="w-full bg-slate-100 rounded-xl px-4 py-3 outline-none" required></div>
-                        <div class="space-y-2"><label class="text-xs font-bold uppercase text-slate-500">Περιοχή</label><input id="city" type="text" value="Αθήνα" class="w-full bg-slate-100 rounded-xl px-4 py-3 outline-none" required></div>
+                        <div class="space-y-2"><label class="text-xs font-bold text-slate-500 uppercase">Ονομα</label><input id="full-name" type="text" placeholder="Μαρία Π." class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-primary" required></div>
+                        <div class="space-y-2"><label class="text-xs font-bold text-slate-500 uppercase">Τηλεφωνο</label><input id="phone" type="tel" placeholder="69..." class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-primary" required></div>
                     </div>
 
-                    <div class="space-y-2"><label class="text-xs font-bold uppercase text-slate-500">Ποσότητα</label><input id="quantity" type="number" value="1" min="1" class="w-full bg-slate-100 rounded-xl px-4 py-3 outline-none"></div>
+                    <div class="space-y-2 relative">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Περιοχη</label>
+                        <div class="relative">
+                            <input id="city" type="text" placeholder="Περιοχή..." class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-3 pr-24 outline-none focus:border-primary" required autocomplete="off">
+                            <div id="city-suggestions"></div>
+                            <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 text-teal-800 rounded-lg text-xs font-bold">📍 Κοντά μου</button>
+                        </div>
+                    </div>
 
-                    <button type="submit" class="w-full bg-primary text-white text-lg font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform">Αποστολή Αιτήματος</button>
+                    <div class="border-t border-dashed border-slate-300"></div>
+                    
+                    <div class="space-y-2 relative">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Φαρμακο</label>
+                        <div class="relative">
+                            <i class="ph ph-pill absolute left-4 top-4 text-slate-400 text-xl"></i>
+                            <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl pl-12 pr-4 py-3 font-bold outline-none focus:border-primary" required autocomplete="off">
+                            <div id="drug-suggestions"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2"><label class="text-xs font-bold text-slate-500 uppercase">Ποσοτητα</label><input id="quantity" type="number" value="1" min="1" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-center outline-none"></div>
+
+                    <button type="submit" class="w-full bg-primary text-white text-lg font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all">Αποστολή Αιτήματος</button>
                 </form>
             </div>
         </div>
 
-        <div id="tab-results" class="tab-content">
+        <div id="results-view" class="hidden">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh] text-center">
-                <div id="loader-view">
-                    <div class="radar-pulse mb-6 mt-10"></div>
+                <div id="loading-state">
+                    <div class="radar-pulse mt-10 mb-6"></div>
                     <h2 class="text-xl font-bold text-slate-800">Αναζήτηση...</h2>
-                    <p class="text-sm text-slate-500">Ειδοποιούμε τα φαρμακεία κοντά σας.</p>
+                    <p class="text-sm text-slate-500">Ειδοποιούμε τα φαρμακεία.</p>
+                    <button onclick="resetApp()" class="mt-8 text-red-400 text-sm font-bold">Ακύρωση</button>
                 </div>
                 
-                <div id="responses-list" class="space-y-4 mt-6 text-left hidden">
+                <div id="responses-list" class="space-y-4 text-left hidden mt-4">
                     </div>
             </div>
         </div>
 
-        <div id="tab-pickup" class="tab-content">
+        <div id="pickup-view" class="hidden animate-slide-up">
             <div class="glass-card rounded-3xl p-8 text-center border-2 border-teal-500">
                 <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 text-primary"><i class="ph ph-check-circle text-4xl"></i></div>
-                <h2 class="text-2xl font-bold text-slate-800 mb-1">Έγινε Κράτηση!</h2>
+                <h2 class="text-2xl font-bold text-slate-800 mb-1">Κρατήθηκε!</h2>
                 <p class="text-sm text-slate-500 mb-6">Ο φαρμακοποιός ενημερώθηκε.</p>
 
                 <div class="bg-slate-100 rounded-2xl p-4 mb-6">
                     <p class="text-xs text-slate-500 font-bold uppercase mb-1">Χρονος Παραλαβης</p>
-                    <div id="countdown-display" class="text-5xl font-mono font-bold text-primary tracking-tighter">60:00</div>
+                    <div id="timer-display" class="text-5xl font-mono font-bold text-primary tracking-tighter">60:00</div>
                     <p class="text-xs text-slate-400 mt-2">Παρακαλώ παραλάβετε εντός του χρόνου.</p>
                 </div>
 
@@ -85,143 +103,202 @@
                     <div id="pickup-code" class="text-3xl font-mono font-bold text-slate-800 tracking-[0.2em] bg-white border border-slate-200 py-3 rounded-xl">------</div>
                     <p class="text-[10px] text-slate-400 mt-2">Δείξτε αυτόν τον κωδικό στο φαρμακείο.</p>
                 </div>
-
-                <button onclick="window.location.reload()" class="text-slate-400 text-sm mt-4 underline">Νέα Αναζήτηση</button>
+                
+                <button onclick="openGoogleMaps()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mb-3 flex items-center justify-center gap-2 shadow-lg"><i class="ph ph-map-trifold"></i> Χάρτης</button>
+                <button onclick="resetApp()" class="text-slate-400 text-sm underline">Ολοκλήρωση</button>
             </div>
         </div>
 
     </main>
 
-    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm pointer-events-none"></div>
 
     <script>
-        let currentRequestId = null;
+        // CONFIG
+        const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
+
+        // DATA
+        const cities = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Πειραιάς", "Περιστέρι", "Καλλιθέα", "Γλυφάδα", "Μαρούσι", "Κηφισιά"];
+        const medicines = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Amoxil", "Aerolin", "Ponstan", "Buscopan", "Ibuprofen", "Paracetamol", "Aspirin", "Zirtek", "Clarityne"];
+
+        // STATE
         let currentUser = null;
+        let currentRequestId = null;
+        let userLocation = { lat: null, lon: null };
         let pickupTimer = null;
 
-        // Initialize Supabase
-        window.db = window.supabase.createClient(SB_URL, SB_KEY);
-
         window.onload = async function() {
-            // Anonymous Login
+            // Autocomplete Setup
+            setupAutocomplete('city', 'city-suggestions', cities);
+            setupAutocomplete('medicine', 'drug-suggestions', medicines);
+            loadUserData();
+
+            // Supabase Init
+            window.db = window.supabase.createClient(SB_URL, SB_KEY);
+            
+            // Anon Login
             const { data, error } = await window.db.auth.signInAnonymously();
             if(!error) currentUser = data.user;
+            else console.error("Login failed:", error);
 
-            // Form Submit
-            document.getElementById('request-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if(!currentUser) return showToast("Σφάλμα σύνδεσης", "error");
-
-                // Collect Data
-                const formData = {
-                    user_id: currentUser.id,
-                    medicine_name: document.getElementById('medicine').value,
-                    customer_name: document.getElementById('full-name').value,
-                    location: document.getElementById('city').value,
-                    quantity: document.getElementById('quantity').value,
-                    status: 'pending'
-                };
-
-                // UI Loading
-                const btn = e.target.querySelector('button');
-                btn.innerHTML = 'Αποστολή...'; btn.disabled = true;
-
-                // Insert to DB
-                const { data: req, error: insertError } = await window.db.from('requests').insert([formData]).select().single();
-                
-                if(insertError) {
-                    showToast("Σφάλμα: " + insertError.message, "error");
-                    btn.innerHTML = 'Αποστολή Αιτήματος'; btn.disabled = false;
-                } else {
-                    currentRequestId = req.id;
-                    switchTab('results');
-                    subscribeToResponses(req.id);
-                }
-            });
+            // Listen for Submit
+            document.getElementById('request-form').addEventListener('submit', handleFormSubmit);
         };
 
-        // --- REALTIME RESPONSES ---
-        function subscribeToResponses(reqId) {
-            // Listen for NEW rows in 'responses' table where request_id matches
-            const channel = window.db.channel('client-sub')
-                .on(
-                    'postgres_changes', 
-                    { event: 'INSERT', schema: 'public', table: 'responses', filter: `request_id=eq.${reqId}` }, 
-                    (payload) => {
-                        const resp = payload.new;
-                        // Show Response Card
-                        document.getElementById('loader-view').classList.add('hidden');
-                        const list = document.getElementById('responses-list');
-                        list.classList.remove('hidden');
-                        
-                        const html = `
-                            <div class="glass-card bg-white p-4 rounded-2xl border-l-4 border-teal-500 animate-slide-up">
-                                <h4 class="font-bold text-lg text-teal-700">Φαρμακείο Βρέθηκε!</h4>
-                                <p class="text-sm font-medium mb-3">${resp.message}</p>
-                                <button onclick="acceptOffer('${resp.pharmacist_id}')" class="w-full bg-teal-600 text-white font-bold py-3 rounded-xl shadow-lg">Κράτηση Τώρα</button>
-                            </div>
-                        `;
-                        list.innerHTML = html;
-                        showToast("Βρέθηκε φαρμακείο!", "success");
-                    }
-                )
-                .subscribe((status) => {
-                    console.log("Subscription Status:", status);
-                });
-        }
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if(!currentUser) return showToast("Σφάλμα σύνδεσης", "error");
 
-        // --- ACCEPT OFFER ---
-        async function acceptOffer(pharmacyId) {
-            if(!currentRequestId) return;
-            
-            // Update request to 'reserved' and set the updated_at time triggers the timer on both ends
-            const { error } = await window.db
-                .from('requests')
-                .update({ status: 'reserved', winner_pharmacy_id: pharmacyId })
-                .eq('id', currentRequestId);
+            const btn = e.target.querySelector('button');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '...'; btn.disabled = true;
+
+            const formData = {
+                user_id: currentUser.id,
+                customer_name: document.getElementById('full-name').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('city').value,
+                medicine_name: document.getElementById('medicine').value,
+                quantity: document.getElementById('quantity').value,
+                status: 'pending'
+            };
+
+            const { data, error } = await window.db.from('requests').insert([formData]).select().single();
 
             if(error) {
-                showToast("Σφάλμα: " + error.message, "error");
+                showToast("Error: " + error.message, "error");
+                btn.innerHTML = oldText; btn.disabled = false;
             } else {
-                switchTab('pickup');
-                // Set Code
-                document.getElementById('pickup-code').innerText = currentRequestId.substring(0, 6);
-                // Start Timer
-                startLocalTimer();
+                currentRequestId = data.id;
+                saveUserData();
+                document.getElementById('tab-search').classList.remove('active');
+                document.getElementById('results-view').classList.remove('hidden');
+                
+                // IMPORTANT: Start listening BEFORE any reply comes
+                listenForResponsesRobust(data.id);
             }
         }
 
-        function startLocalTimer() {
-            let duration = 60 * 60; // 60 mins in seconds
-            const display = document.getElementById('countdown-display');
+        // --- ROBUST LISTENER (FIXED) ---
+        function listenForResponsesRobust(reqId) {
+            console.log("📡 Listening for responses for ID:", reqId);
             
-            pickupTimer = setInterval(() => {
-                const minutes = Math.floor(duration / 60);
-                const seconds = duration % 60;
-                display.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                
-                if (--duration < 0) {
-                    clearInterval(pickupTimer);
-                    display.innerText = "ΕΛΗΞΕ";
-                    display.classList.add('text-red-500');
+            // Channel name is unique to request to avoid collision
+            const channel = window.db.channel('request-' + reqId)
+            .on(
+                'postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'responses' }, 
+                (payload) => {
+                    console.log("📥 Signal Received!", payload);
+                    
+                    // Client-side filtering to be 100% sure
+                    if (payload.new.request_id === reqId) {
+                        displayResponse(payload.new);
+                    } else {
+                        console.log("Ignoring response for different ID");
+                    }
                 }
+            )
+            .subscribe((status) => {
+                console.log("Subscription Status:", status);
+                if(status === 'SUBSCRIBED') {
+                    console.log("✅ Ready to receive replies.");
+                }
+            });
+        }
+
+        function displayResponse(resp) {
+            const list = document.getElementById('responses-list');
+            const loader = document.getElementById('loading-state');
+            
+            loader.classList.add('hidden');
+            list.classList.remove('hidden');
+            
+            // Sound effect
+            try { new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3').play().catch(e=>{}); } catch(e){}
+            showToast("Βρέθηκε φαρμακείο!", "success");
+
+            const html = `
+                <div class="glass-card bg-white p-5 rounded-2xl border-l-4 border-teal-500 animate-slide-up shadow-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-lg text-teal-700">Φαρμακείο Βρέθηκε!</h4>
+                            <p class="text-sm font-semibold mt-1">${resp.message}</p>
+                            <p class="text-xs text-slate-500 mt-2">Απόσταση: <span class="font-mono">0.8 χλμ</span></p>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800">${resp.price > 0 ? resp.price+'€' : ''}</div>
+                    </div>
+                    <button onclick="acceptOffer('${resp.pharmacist_id}')" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all">
+                        Κράτηση Τώρα
+                    </button>
+                </div>
+            `;
+            list.innerHTML = html;
+        }
+
+        async function acceptOffer(pharmacyId) {
+            if(!currentRequestId) return;
+            
+            const { error } = await window.db.from('requests')
+                .update({ status: 'reserved', winner_pharmacy_id: pharmacyId })
+                .eq('id', currentRequestId);
+
+            if(error) showToast(error.message, 'error');
+            else {
+                document.getElementById('results-view').classList.add('hidden');
+                document.getElementById('pickup-view').classList.remove('hidden');
+                
+                document.getElementById('pickup-code').innerText = currentRequestId.substring(0, 6);
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            let duration = 3600; // 60 mins
+            const el = document.getElementById('timer-display');
+            pickupTimer = setInterval(() => {
+                const m = Math.floor(duration / 60);
+                const s = duration % 60;
+                el.innerText = `${m}:${s<10?'0':''}${s}`;
+                if(--duration < 0) { clearInterval(pickupTimer); el.innerText = "ΕΛΗΞΕ"; el.classList.add('text-red-500'); }
             }, 1000);
         }
 
-        // Helpers
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
+        // UTILS
+        function getLocation() {
+            if(!navigator.geolocation) return showToast("GPS Error", "error");
+            document.querySelector('button[onclick="getLocation()"]').innerText = "...";
+            navigator.geolocation.getCurrentPosition(async (p) => {
+                userLocation = { lat: p.coords.latitude, lon: p.coords.longitude };
+                try {
+                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lon}`);
+                    const d = await r.json();
+                    document.getElementById('city').value = (d.address.road || "") + ", " + (d.address.suburb || d.address.city || "");
+                    showToast("Τοποθεσία OK!", "success");
+                } catch(e) { document.getElementById('city').value = "Τοποθεσία OK"; }
+                document.querySelector('button[onclick="getLocation()"]').innerText = "📍 Κοντά μου";
+            }, () => { showToast("Δεν βρέθηκε τοποθεσία", "error"); });
         }
-        function showToast(msg, type='info') {
-            const c = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            const bg = type === 'success' ? 'bg-green-500' : 'bg-slate-800';
-            el.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${bg}`;
-            el.innerText = msg;
-            c.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+
+        function setupAutocomplete(id, boxId, data) {
+            const inp = document.getElementById(id);
+            const box = document.getElementById(boxId);
+            inp.addEventListener('input', (e) => {
+                const v = e.target.value.toLowerCase();
+                if(v.length < 1) { box.style.display = 'none'; return; }
+                const m = data.filter(i => i.toLowerCase().includes(v));
+                box.innerHTML = m.map(i => `<div class="suggestion-item" onclick="document.getElementById('${id}').value='${i}'; document.getElementById('${boxId}').style.display='none'">${i}</div>`).join('');
+                box.style.display = m.length ? 'block' : 'none';
+            });
+            document.addEventListener('click', (e) => { if(!inp.contains(e.target)) box.style.display = 'none'; });
         }
+
+        function saveUserData() { localStorage.setItem('mr_user', JSON.stringify({ n: document.getElementById('full-name').value, p: document.getElementById('phone').value, c: document.getElementById('city').value })); }
+        function loadUserData() { const d = JSON.parse(localStorage.getItem('mr_user') || '{}'); if(d.n) document.getElementById('full-name').value = d.n; if(d.p) document.getElementById('phone').value = d.p; if(d.c) document.getElementById('city').value = d.c; }
+        function resetApp() { window.location.reload(); }
+        function showToast(m, t='info') { const c = document.getElementById('toast-container'); const e = document.createElement('div'); e.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='error'?'bg-red-500':'bg-slate-800'}`; e.innerText = m; c.appendChild(e); setTimeout(()=>e.remove(), 3000); }
+        function openGoogleMaps() { window.open(`https://maps.google.com/?q=${userLocation.lat},${userLocation.lon}`, '_blank'); }
     </script>
 </body>
 </html>
