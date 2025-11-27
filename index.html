@@ -13,15 +13,12 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
         OneSignalDeferred.push(function(OneSignal) {
             OneSignal.init({
-                appId: "ed041355-ae15-49d9-83a6-9625c108d1e6", // ✅ Your ID
+                appId: "ed041355-ae15-49d9-83a6-9625c108d1e6", 
                 notifyButton: { enable: true },
             });
         });
@@ -338,25 +335,40 @@
     <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('gdpr')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>GDPR</h3></div></div>
 
     <script>
+        // --- Ρυθμίσεις Supabase ---
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-    </script>
 
-    <script>
+        // --- Δεδομένα (Ενσωματωμένα για ταχύτητα) ---
+        // 1. Λίστα Ελληνικών Πόλεων & Περιοχών
+        const citiesData = [
+            "Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", 
+            "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", 
+            "Κόρινθος", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Μυτιλήνη", "Χίος", 
+            "Σάμος", "Κως", "Ζάκυνθος", "Κέρκυρα", "Λευκάδα", "Αργοστόλι", "Σύρος", "Νάξος", "Άγιος Νικόλαος", "Σητεία", 
+            "Ιεράπετρα", "Γρεβενά", "Πολύγυρος", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μεσολόγγι", "Ναύπακτος", "Άμφισσα", 
+            "Καρπενήσι", "Λιβαδειά", "Θήβα", "Πύργος", "Αμαλιάδα", "Ναύπλιο", "Άργος", "Πειραιάς", "Περιστέρι", "Καλλιθέα",
+            "Νίκαια", "Κερατσίνι", "Ίλιον", "Γλυφάδα", "Ζωγράφου", "Ηλιούπολη", "Αιγάλεω", "Νέα Σμύρνη", "Χαλάνδρι", 
+            "Μαρούσι", "Κορυδαλλός", "Νέα Ιωνία", "Άγιος Δημήτριος", "Παλαιό Φάληρο", "Κηφισιά", "Αχαρνές"
+        ];
+
+        // 2. Λίστα Κοινών Φαρμάκων στην Ελλάδα
+        const medicinesData = [
+            "Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Amoxil", "Aerolin", "Fugentin", 
+            "Ponstan", "Buscopan", "Ibuprofen", "Paracetamol", "Aspirin", "Lonarid", "Salospir", "Brufen", "Xozal", 
+            "Zirtek", "Clarityne", "Nocid", "Zantac", "Laprazol", "Losec", "Stilnox", "Xanax", "Lexotanil", "Atarax",
+            "Fucidin", "Betadine", "Dettol", "Physiomer", "Otrivin", "Hexalen", "Strepsils", "Lysopaine", "Soldesanil",
+            "Primperan", "Imodium", "Ercefuryl", "Ciproxin", "Flagyl", "Vermox", "Fungoral", "Daktarin", "Travocort",
+            "Fenistil", "Counterpain", "Reparil", "Hirudoid", "Voltaren Emulgel", "Biofreeze", "Apotel", "Gantil"
+        ];
+
         // --- Global State ---
-        let userLocation = { lat: null, lon: null };
-        let pickupDeadline = null;
-        let selectedResponseId = null;
+        let userLocation = { lat: null, lon: null }; // Κρατάμε τις συντεταγμένες κρυφά
         let currentRequestId = null;
         let currentUser = null;
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let requestPollInterval = null; 
         let html5QrcodeScanner = null;
-        
-        // --- CITY DATA ---
-        const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Αγρίνιο", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Κόρινθος", "Τρίπολη", "Σπάρτη", "Νάουσα", "Καστοριά", "Φλώρινα", "Έδεσσα", "Κιλκίς", "Μυτιλήνη", "Χίος", "Σάμος", "Κως", "Ζάκυνθος", "Κέρκυρα", "Λευκάδα", "Αργοστόλι", "Σύρος", "Νάξος", "Άγιος Νικόλαος", "Σητεία", "Ιεράπετρα", "Γρεβενά", "Πολύγυρος", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μεσολόγγι", "Ναύπακτος", "Άμφισσα", "Καρπενήσι", "Λιβαδειά", "Θήβα", "Χαλκίδα", "Πύργος", "Αμαλιάδα", "Ναύπλιο", "Άργος"];
 
-        // Translations
+        // --- Translations ---
         const translations = {
             el: {
                 search: "Αναζήτηση", how: "Πώς λειτουργεί", name: "Όνομα", phone: "Τηλέφωνο", area: "Περιοχή", near_me: "Κοντά μου", 
@@ -383,34 +395,41 @@
         };
         let currentLang = 'el';
 
+        // --- Initialization ---
         window.onload = async function() {
             loadUserData();
             createEmojis();
-            initCitySuggestions();
-            if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((p) => { userLocation = { lat: p.coords.latitude, lon: p.coords.longitude }; }); }
             
-            // INITIALIZE SUPABASE MANUALLY
+            // Ενεργοποίηση Autocomplete
+            setupAutocomplete('city', 'city-suggestions', citiesData);
+            setupAutocomplete('medicine', 'drug-suggestions', medicinesData);
+            
+            // Initialize Supabase
             if(window.supabase) {
                 window.db = window.supabase.createClient(SB_URL, SB_KEY);
                 
                 const { data: { session } } = await window.db.auth.getSession();
                 if (session) { currentUser = session.user; if (!session.user.is_anonymous) updateNavForUser(currentUser); } 
                 else { const { data: guestData, error } = await window.db.auth.signInAnonymously(); if (!error && guestData.user) currentUser = guestData.user; }
-                window.db.auth.onAuthStateChange((event, session) => { if (session) { currentUser = session.user; if (!session.user.is_anonymous) updateNavForUser(currentUser); } else { window.db.auth.signInAnonymously(); resetNavToGuest(); } });
+                
+                window.db.auth.onAuthStateChange((event, session) => { 
+                    if (session) { currentUser = session.user; if (!session.user.is_anonymous) updateNavForUser(currentUser); } 
+                    else { window.db.auth.signInAnonymously(); resetNavToGuest(); } 
+                });
             }
 
-            // --- FIX: Λογική Αποστολής Αιτήματος ---
+            // Setup Form Submission
             const requestForm = document.getElementById('request-form');
             if (requestForm) {
                 requestForm.addEventListener('submit', async (e) => {
-                    e.preventDefault(); // 1. Σταματάμε το refresh της σελίδας
+                    e.preventDefault();
 
                     if (!currentUser) {
                         showToast("Περιμένετε να συνδεθείτε...", "error");
                         return;
                     }
 
-                    // 2. Συλλογή δεδομένων από τα inputs
+                    // Συλλογή δεδομένων
                     const formData = {
                         user_id: currentUser.id,
                         customer_name: document.getElementById('full-name').value,
@@ -421,31 +440,23 @@
                         quantity: document.getElementById('quantity').value,
                         med_type: document.getElementById('med-type').value,
                         notes: document.getElementById('notes').value,
-                        status: 'pending', // Αρχική κατάσταση
-                        lat: userLocation.lat,
-                        lon: userLocation.lon
+                        status: 'pending',
+                        // Στέλνουμε συντεταγμένες ΜΟΝΟ αν υπάρχουν, αλλιώς null
+                        // lat: userLocation.lat || null, // Αν δεν έχεις στήλες lat/lon στη βάση, άστο σχολιασμένο
+                        // lon: userLocation.lon || null 
                     };
 
-                    // UI: Αλλαγή κουμπιού σε "Loading"
                     const btn = requestForm.querySelector('button[type="submit"]');
                     const oldText = btn.innerHTML;
                     btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
                     btn.disabled = true;
 
                     try {
-                        // 3. Αποστολή στη Supabase
-                        const { data, error } = await window.db
-                            .from('requests')
-                            .insert([formData])
-                            .select()
-                            .single();
-
+                        const { data, error } = await window.db.from('requests').insert([formData]).select().single();
                         if (error) throw error;
 
-                        // 4. Επιτυχία! Εμφάνιση οθόνης αναζήτησης
                         currentRequestId = data.id;
-                        saveUserData(); 
-                        
+                        saveUserData();
                         showToast("Το αίτημα στάλθηκε!", "success");
                         
                         document.getElementById('tab-search').classList.remove('active');
@@ -465,7 +476,114 @@
             }
         };
 
-        // --- Logic for Realtime Responses ---
+        // --- Location Logic (Fixed Display) ---
+        function getLocation() {
+            const cityInput = document.getElementById('city');
+            const btnText = document.querySelector('button[onclick="getLocation()"] span');
+            
+            if (!navigator.geolocation) {
+                showToast("Το GPS δεν υποστηρίζεται.", "error");
+                return;
+            }
+
+            cityInput.placeholder = "Εντοπισμός...";
+            btnText.innerText = "...";
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                userLocation = { lat, lon }; // Αποθήκευση για εσωτερική χρήση
+
+                try {
+                    // Reverse Geocoding via OpenStreetMap (Nominatim)
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`);
+                    
+                    if (!response.ok) throw new Error("Network error");
+                    
+                    const data = await response.json();
+                    
+                    // Κατασκευή ευανάγνωστης διεύθυνσης
+                    let locationName = "";
+                    const addr = data.address;
+
+                    if (addr.road) locationName += addr.road;
+                    
+                    if (addr.suburb) {
+                        locationName += (locationName ? ", " : "") + addr.suburb;
+                    } else if (addr.city) {
+                        locationName += (locationName ? ", " : "") + addr.city;
+                    } else if (addr.town) {
+                        locationName += (locationName ? ", " : "") + addr.town;
+                    } else if (addr.village) {
+                        locationName += (locationName ? ", " : "") + addr.village;
+                    }
+
+                    // Fallback αν αποτύχει η ονομασία
+                    if (!locationName) locationName = "Η τοποθεσία μου";
+
+                    cityInput.value = locationName;
+                    saveUserData();
+                    showToast("Βρέθηκε: " + locationName, "success");
+
+                } catch (error) {
+                    console.error(error);
+                    cityInput.value = "Τρέχουσα Τοποθεσία";
+                    showToast("Τοποθεσία OK (χωρίς οδό)", "info");
+                } finally {
+                    btnText.innerText = "Κοντά μου";
+                    cityInput.placeholder = "Πληκτρολογήστε πόλη...";
+                }
+
+            }, (error) => {
+                console.error("Geolocation error:", error);
+                showToast("Δεν βρέθηκε τοποθεσία. Ελέγξτε το GPS.", "error");
+                btnText.innerText = "Κοντά μου";
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        }
+
+        // --- Autocomplete Logic (Generic) ---
+        function setupAutocomplete(inputId, suggestionBoxId, dataArray) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(suggestionBoxId);
+            
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.toLowerCase().trim();
+                if (val.length < 1) { box.style.display = 'none'; return; }
+                
+                // Φιλτράρισμα: Ξεκινάει με ή περιέχει το κείμενο
+                const matches = dataArray.filter(item => 
+                    item.toLowerCase().includes(val)
+                ).slice(0, 8); // Δείξε max 8 αποτελέσματα
+
+                if (matches.length > 0) {
+                    box.innerHTML = matches.map(item => 
+                        `<div class="suggestion-item" onclick="selectSuggestion('${inputId}', '${suggestionBoxId}', '${item}')">${item}</div>`
+                    ).join('');
+                    box.style.display = 'block';
+                } else {
+                    box.style.display = 'none';
+                }
+            });
+
+            // Κλείσιμο όταν κάνεις κλικ αλλού
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !box.contains(e.target)) {
+                    box.style.display = 'none';
+                }
+            });
+        }
+
+        function selectSuggestion(inputId, boxId, value) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(boxId).style.display = 'none';
+            if(inputId === 'city') saveUserData();
+        }
+
+        // --- Realtime Responses ---
         function startListeningForResponses(reqId) {
             const list = document.getElementById('responses-list');
             list.innerHTML = ''; 
@@ -475,7 +593,7 @@
                     { event: 'INSERT', schema: 'public', table: 'responses', filter: `request_id=eq.${reqId}` }, 
                     (payload) => {
                         const resp = payload.new;
-                        new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3').play().catch(e=>{});
+                        try { new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3').play().catch(e=>{}); } catch(e){}
                         showToast("Βρέθηκε φαρμακείο!", "success");
                         
                         const html = `
@@ -484,7 +602,6 @@
                                     <div>
                                         <h4 class="font-bold text-lg text-teal-700 dark:text-teal-300">Φαρμακείο Βρέθηκε!</h4>
                                         <p class="text-sm font-semibold">${resp.message}</p>
-                                        <p class="text-xs text-slate-500 mt-1">Απόσταση: ${calculateDistance(userLocation.lat, userLocation.lon)} χλμ.</p>
                                         <p class="text-xs text-red-500 font-bold mt-1">Κλείνει στις: ${resp.closing_time || '21:00'}</p>
                                     </div>
                                     <div class="text-right">
@@ -506,102 +623,58 @@
 
         async function acceptOffer(responseId, pharmacyId) {
             if(!currentRequestId) return;
-            
-            const { error } = await window.db
-                .from('requests')
-                .update({ 
-                    status: 'reserved', 
-                    winner_pharmacy_id: pharmacyId 
-                })
-                .eq('id', currentRequestId);
+            const { error } = await window.db.from('requests').update({ status: 'reserved', winner_pharmacy_id: pharmacyId }).eq('id', currentRequestId);
 
-            if(error) {
-                showToast("Σφάλμα: " + error.message, 'error');
-            } else {
-                showToast("Έγινε κράτηση! Οδηγίες στην οθόνη.", "success");
+            if(error) { showToast("Σφάλμα: " + error.message, 'error'); } 
+            else {
+                showToast("Έγινε κράτηση!", "success");
                 document.getElementById('results-view').classList.add('hidden');
                 document.getElementById('pickup-view').classList.remove('hidden');
                 document.getElementById('pickup-view').classList.add('block');
                 
                 document.getElementById('pickup-qr').innerHTML = '';
-                new QRCode(document.getElementById("pickup-qr"), {
-                    text: currentRequestId,
-                    width: 128,
-                    height: 128
-                });
+                new QRCode(document.getElementById("pickup-qr"), { text: currentRequestId, width: 128, height: 128 });
                 document.getElementById('pickup-code').innerHTML = `<span class="text-xs text-slate-400 block mb-1">Κωδικός Παραλαβής:</span><strong class="text-3xl tracking-widest font-mono text-slate-800 dark:text-white">${currentRequestId.substr(0,6)}</strong>`;
             }
         }
         
-        function resetApp() {
-            window.location.reload();
-        }
-
-        // --- UI Helpers ---
+        // --- Helpers ---
+        function resetApp() { window.location.reload(); }
         function toggleLang() {
             currentLang = currentLang === 'el' ? 'en' : 'el';
             document.getElementById('lang-flag').innerText = currentLang === 'el' ? '🇬🇷' : '🇬🇧';
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.getAttribute('data-lang-key');
-                if(translations[currentLang][key]) {
-                    if(['accept_text', 'terms_agree', 'accept_link', 'terms_link', 'gdpr_link', 'modal_generic_title', 'modal_generic_body'].includes(key)) { el.innerText = translations[currentLang][key]; } 
-                    else { el.innerText = translations[currentLang][key]; }
-                }
+                if(translations[currentLang][key]) el.innerText = translations[currentLang][key];
             });
-            const select = document.getElementById('med-type');
-            Array.from(select.options).forEach(opt => {
-                 const keyMap = { '': 'opt_select', 'pills': 'opt_pills', 'syrup': 'opt_syrup', 'cream': 'opt_cream', 'spray': 'opt_spray', 'inject': 'opt_inject', 'other': 'opt_other' };
-                 const key = keyMap[opt.value];
-                 if(key && translations[currentLang][key]) opt.text = translations[currentLang][key];
-            });
-            if(currentLang === 'en') { document.getElementById('medicine').placeholder = "e.g. Depon"; document.getElementById('city').placeholder = "Type city or area..."; } 
+            // Update placeholders
+            if(currentLang === 'en') { document.getElementById('medicine').placeholder = "e.g. Depon"; document.getElementById('city').placeholder = "City / Area..."; } 
             else { document.getElementById('medicine').placeholder = "π.χ. Depon"; document.getElementById('city').placeholder = "Πληκτρολογήστε πόλη..."; }
         }
-
-        function initCitySuggestions() {
-            const input = document.getElementById('city');
-            const box = document.getElementById('city-suggestions');
-            input.addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
-                if (val.length < 2) { box.style.display = 'none'; return; }
-                const matches = citiesData.filter(c => c.toLowerCase().startsWith(val)).slice(0, 8);
-                if (matches.length > 0) { box.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selectCity('${c}')">${c}</div>`).join(''); box.style.display = 'block'; } else { box.style.display = 'none'; }
-            });
-            document.addEventListener('click', (e) => { if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = 'none'; });
-        }
-        function selectCity(c) { document.getElementById('city').value = c; document.getElementById('city-suggestions').style.display = 'none'; saveUserData(); }
-        function updateNavForUser(user) { const navContainer = document.getElementById('user-nav-container'); const name = user.user_metadata.full_name || user.email.split('@')[0]; navContainer.innerHTML = `<div class="flex gap-2"><button onclick="showToast('Συνδεδεμένος ως: ${user.email}', 'success')" class="bg-teal-50 dark:bg-teal-900/30 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-700 shadow-sm flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] uppercase">${name.charAt(0)}</div><span>${name}</span></button><button onclick="switchTab('history')" class="bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 shadow-sm flex items-center gap-1 hover:bg-indigo-100 transition-all" title="Ιστορικό"><i class="ph ph-clock-counter-clockwise text-lg"></i></button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500 transition-colors"><i class="ph ph-sign-out text-lg"></i></button></div>`; }
-        function resetNavToGuest() { const navContainer = document.getElementById('user-nav-container'); navContainer.innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all"><i class="ph ph-user text-lg"></i> <span data-lang-key="login">Είσοδος</span></button>`; }
-        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) { showToast("Παρακαλώ εισάγετε email.", 'error'); return; } const btn = document.querySelector('#magic-link-form button[type="submit"]'); let oldText = 'Σύνδεση'; if(btn) { oldText = btn.innerHTML; btn.innerHTML = '...'; btn.disabled = true; } const { error } = await window.db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: window.location.href } }); if(btn) { btn.innerHTML = oldText; btn.disabled = false; } if (error) { showToast("Error: " + error.message, 'error'); } else { showToast("Check email!", 'success'); closeModal('user'); } }
-        async function handleLogout() { await window.db.auth.signOut(); showToast("Logged out", 'info'); }
-        function getLocation() { const c = document.getElementById('city'); c.value = "Checking..."; if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(async (p) => { const lat = p.coords.latitude; const lon = p.coords.longitude; userLocation = { lat, lon }; try { const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`); const data = await res.json(); const addr = data.address; const street = addr.road || ""; const area = addr.suburb || addr.city || addr.town || ""; c.value = street ? `${street}, ${area}` : area; if(!c.value) c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } catch(e) { c.value = `${lat.toFixed(4)}, ${lon.toFixed(4)}`; } saveUserData(); showToast("Found!", 'success'); }, () => { c.value = ""; showToast("GPS Error", 'error'); }); } }
-        function calculateDistance(lat1, lon1, lat2, lon2) { if (!lat1 || !lon1) return (Math.random() * 2 + 0.2).toFixed(1); return (Math.random() * 2 + 0.2).toFixed(1); }
-        function openGoogleMaps() { const destLat = (userLocation.lat || 38.0) + 0.01; const destLon = (userLocation.lon || 23.7) + 0.01; window.open(`https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLon}`, '_blank'); }
-        function switchTab(t) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); if(t === 'history') loadUserHistory(); }
         
+        function updateNavForUser(user) { const n = user.user_metadata.full_name || user.email.split('@')[0]; document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 border border-teal-200 shadow-sm flex items-center gap-2">👤 ${n}</button><button onclick="switchTab('history')" class="bg-indigo-50 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 border border-indigo-200 shadow-sm">📜</button><button onclick="handleLogout()" class="bg-slate-100 p-2 rounded-xl text-slate-500">🚪</button></div>`; }
+        function resetNavToGuest() { document.getElementById('user-nav-container').innerHTML = `<button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm"><i class="ph ph-user text-lg"></i> <span data-lang-key="login">Είσοδος</span></button>`; }
+        async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) return showToast("Email?", 'error'); const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error", 'error'); else { showToast("Check email!", 'success'); closeModal('user'); } }
+        async function handleLogout() { await window.db.auth.signOut(); showToast("Logged out", 'info'); }
+        function switchTab(t) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + t).classList.add('active'); if(t === 'history') loadUserHistory(); }
         async function loadUserHistory() {
-            const container = document.getElementById('history-list'); container.innerHTML = '...';
-            if (!currentUser || currentUser.is_anonymous) { container.innerHTML = `<div class="text-center py-10">Please Login</div>`; return; }
-            const { data: reqs } = await window.db.from('requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-            container.innerHTML = '';
-            if (!reqs || reqs.length === 0) { container.innerHTML = '<p class="text-center py-10">No history</p>'; return; }
-            reqs.forEach(r => { container.innerHTML += `<div class="p-4 bg-white dark:bg-slate-800 border rounded-2xl shadow-sm mb-2"><h4>${r.medicine_name}</h4><p class="text-xs">${new Date(r.created_at).toLocaleDateString()}</p></div>`; });
+            const container = document.getElementById('history-list');
+            if (!currentUser || currentUser.is_anonymous) { container.innerHTML = `<div class="text-center py-10">Συνδεθείτε πρώτα.</div>`; return; }
+            const { data } = await window.db.from('requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+            container.innerHTML = data && data.length ? data.map(r => `<div class="p-4 bg-white border rounded-2xl shadow-sm mb-2"><h4>${r.medicine_name}</h4><p class="text-xs text-slate-500">${new Date(r.created_at).toLocaleDateString()}</p></div>`).join('') : '<p class="text-center py-10">Κανένα ιστορικό.</p>';
         }
 
-        function toggleScanner() {
-            const container = document.getElementById('scanner-container');
-            if (!container.classList.contains('hidden')) { stopScanner(); return; }
-            container.classList.remove('hidden');
+        // Camera / Media / Utils
+        function toggleScanner() { 
+            const c = document.getElementById('scanner-container');
+            if (!c.classList.contains('hidden')) { stopScanner(); return; }
+            c.classList.remove('hidden');
             setTimeout(() => {
                 html5QrcodeScanner = new Html5Qrcode("reader");
-                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-                    (t) => { stopScanner(); document.getElementById('barcode-value').value = t; document.getElementById('preview-text').innerText = `Barcode: ${t}`; document.getElementById('media-preview').classList.remove('hidden'); showToast("Scanned!", 'success'); },
-                    (e) => {}
-                ).catch(err => { console.error(err); container.classList.add('hidden'); showToast("Camera Error", 'error'); });
+                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => { stopScanner(); document.getElementById('barcode-value').value = t; document.getElementById('preview-text').innerText = `Barcode: ${t}`; document.getElementById('media-preview').classList.remove('hidden'); showToast("Scanned!", 'success'); }, (e) => {});
             }, 100);
         }
-        function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { document.getElementById('scanner-container').classList.add('hidden'); html5QrcodeScanner.clear(); }); else document.getElementById('scanner-container').classList.add('hidden'); }
-
+        function stopScanner() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { document.getElementById('scanner-container').classList.add('hidden'); html5QrcodeScanner.clear(); }); }
         function handleFileSelect(i){if(i.files[0]){document.getElementById('preview-text').innerText=i.files[0].name;document.getElementById('media-preview').classList.remove('hidden');}}
         function clearMedia(){document.getElementById('media-preview').classList.add('hidden');document.getElementById('request-image').value='';document.getElementById('barcode-value').value='';}
         function startVoiceInput(){ showToast("Listening...", 'info'); setTimeout(()=>{document.getElementById('medicine').value="Depon";showToast("Found", 'success');},1500); }
@@ -612,14 +685,12 @@
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
         function showToast(m,t='info'){const c=document.getElementById('toast-container');const d=document.createElement('div');d.className=`toast-enter p-3 rounded-xl shadow-lg bg-slate-800 text-white text-sm mb-2`;d.innerText=m;c.appendChild(d);setTimeout(()=>d.remove(),3000);}
         function toggleTheme(){document.documentElement.classList.toggle('dark');}
-        
-        // Autocomplete Logic
-        const medInput = document.getElementById('medicine');
-        const suggBox = document.getElementById('drug-suggestions');
-        const lDrugs = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Amoxil", "Aerolin", "Fugentin", "Ponstan", "Buscopan", "Ibuprofen", "Paracetamol", "Aspirin", "Lonarid", "Salospir", "Brufen", "Xozal", "Zirtek"];
-        medInput.addEventListener('input', async (e) => { const q = e.target.value.trim(); if (q.length < 2) { suggBox.style.display = 'none'; return; } let m = lDrugs.filter(d => d.toLowerCase().includes(q.toLowerCase())); try { const r = await fetch(`https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${q}*"&limit=5`); const d = await r.json(); if (d.results) { d.results.forEach(dg => { if (dg.openfda && dg.openfda.brand_name) m.push(...dg.openfda.brand_name); }); } } catch (err) {} m = [...new Set(m)].slice(0, 6); if (m.length > 0) { suggBox.innerHTML = m.map(x => `<div class="suggestion-item" onclick="selectDrug('${x}')">${x}</div>`).join(''); suggBox.style.display = 'block'; } else { suggBox.style.display = 'none'; } });
-        function selectDrug(n) { medInput.value = n; suggBox.style.display = 'none'; }
-        document.addEventListener('click', (e) => { if (!medInput.contains(e.target) && !suggBox.contains(e.target)) suggBox.style.display = 'none'; });
+        function openGoogleMaps() { 
+            // Αν δεν έχουμε location, βάζουμε Αθήνα κέντρο
+            const destLat = userLocation.lat || 37.9838;
+            const destLon = userLocation.lon || 23.7275;
+            window.open(`https://www.google.com/maps/search/?api=1&query=${destLat},${destLon}`, '_blank'); 
+        }
     </script>
 </body>
 </html>
