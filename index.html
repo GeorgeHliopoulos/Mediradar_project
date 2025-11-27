@@ -5,21 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MediRadar App</title>
     
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
-    <!-- Leaflet CSS/JS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- OneSignal SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -100,10 +96,8 @@
 </head>
 <body class="text-slate-800 dark:text-slate-100 antialiased min-h-screen relative flex flex-col">
 
-    <!-- Background -->
     <div id="emoji-container" class="emoji-bg"></div>
 
-    <!-- Navbar -->
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative">
         <div class="flex gap-2" id="user-nav-container">
             <button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all">
@@ -133,7 +127,6 @@
             <button onclick="switchTab('how')" id="btn-how" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 transition-all" data-lang-key="how">Πώς λειτουργεί</button>
         </div>
 
-        <!-- 1. SEARCH FORM -->
         <div id="tab-search" class="tab-content active">
             <div class="glass-card rounded-3xl p-6 relative overflow-hidden">
                 <form id="request-form" class="space-y-6">
@@ -148,7 +141,6 @@
                         </div>
                     </div>
 
-                    <!-- Location (Custom) -->
                     <div class="space-y-2 relative">
                         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="area">Περιοχη</label>
                         <div class="relative">
@@ -163,7 +155,6 @@
 
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
-                    <!-- Medicine with Autocomplete -->
                     <div class="space-y-4">
                         <div class="space-y-2 relative">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="med_name">Ονομα Φαρμακου</label>
@@ -223,7 +214,6 @@
             </div>
         </div>
 
-        <!-- RESULTS VIEW -->
         <div id="results-view" class="hidden animate-fadeIn">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
                 <div class="text-center mb-6">
@@ -236,7 +226,6 @@
             </div>
         </div>
 
-        <!-- HISTORY VIEW -->
         <div id="tab-history" class="tab-content">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
@@ -251,7 +240,6 @@
             </div>
         </div>
 
-        <!-- HOW IT WORKS -->
         <div id="tab-how" class="tab-content">
             <div class="glass-card rounded-3xl p-6">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white"><i class="ph ph-info text-primary"></i> Πώς λειτουργεί;</h3>
@@ -273,14 +261,12 @@
             </div>
         </div>
         
-        <!-- Pickup View -->
         <div id="pickup-view" class="hidden animate-fadeIn">
             <div class="glass-card rounded-3xl p-8 text-center border-teal-200 dark:border-teal-800">
                 <div class="w-24 h-24 bg-teal-100 dark:bg-teal-900/50 rounded-full flex flex-col items-center justify-center mx-auto mb-6 shadow-xl ring-8 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-hourglass-high text-4xl text-primary mb-1"></i><p class="text-xs font-bold text-primary">Pickup</p></div>
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Χρόνος Παραλαβής</h2>
                 <p class="text-slate-500 dark:text-slate-400 mb-6">Κρατήθηκε! Παρακαλώ παραλάβετε εντός:</p>
                 <div class="bg-white dark:bg-slate-700 rounded-2xl p-4 mb-6 shadow-inner border border-slate-200 dark:border-slate-700"><p id="timer-display" class="text-5xl font-extrabold text-primary dark:text-teal-400 tracking-tighter">--:--</p><p class="text-sm text-slate-500 mt-1">Λεπτά</p></div>
-                <!-- QR Placeholder -->
                 <div id="pickup-qr" class="flex justify-center mb-4"></div>
                 <div id="pickup-code" class="text-center mb-6 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600"></div>
                 
@@ -298,7 +284,6 @@
 
     <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
 
-    <!-- SAFETY MODAL -->
     <div id="modal-safety" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i class="ph ph-warning-circle text-3xl"></i></div>
@@ -312,7 +297,6 @@
         </div>
     </div>
 
-    <!-- LOGIN MODAL -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
             <button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
@@ -329,7 +313,6 @@
         </div>
     </div>
     
-    <!-- OTHER MODALS -->
     <div id="modal-generic" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
             <button onclick="closeModal('generic')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="ph ph-x text-xl"></i></button>
@@ -340,7 +323,6 @@
         </div>
     </div>
 
-    <!-- PRO MODAL -->
     <div id="modal-pro" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
             <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"><i class="ph ph-x text-xl"></i></button>
@@ -352,11 +334,9 @@
         </div>
     </div>
 
-    <!-- Helper Modals -->
     <div id="modal-terms" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('terms')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>Terms</h3></div></div>
     <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white relative"><button onclick="closeModal('gdpr')" class="absolute top-4 right-4"><i class="ph ph-x"></i></button><h3>GDPR</h3></div></div>
 
-    <!-- HARDCODED CONFIG -->
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
@@ -418,7 +398,144 @@
                 else { const { data: guestData, error } = await window.db.auth.signInAnonymously(); if (!error && guestData.user) currentUser = guestData.user; }
                 window.db.auth.onAuthStateChange((event, session) => { if (session) { currentUser = session.user; if (!session.user.is_anonymous) updateNavForUser(currentUser); } else { window.db.auth.signInAnonymously(); resetNavToGuest(); } });
             }
+
+            // --- FIX: Λογική Αποστολής Αιτήματος ---
+            const requestForm = document.getElementById('request-form');
+            if (requestForm) {
+                requestForm.addEventListener('submit', async (e) => {
+                    e.preventDefault(); // 1. Σταματάμε το refresh της σελίδας
+
+                    if (!currentUser) {
+                        showToast("Περιμένετε να συνδεθείτε...", "error");
+                        return;
+                    }
+
+                    // 2. Συλλογή δεδομένων από τα inputs
+                    const formData = {
+                        user_id: currentUser.id,
+                        customer_name: document.getElementById('full-name').value,
+                        phone: document.getElementById('phone').value,
+                        location: document.getElementById('city').value,
+                        medicine_name: document.getElementById('medicine').value,
+                        substance: document.getElementById('substance').value,
+                        quantity: document.getElementById('quantity').value,
+                        med_type: document.getElementById('med-type').value,
+                        notes: document.getElementById('notes').value,
+                        status: 'pending', // Αρχική κατάσταση
+                        lat: userLocation.lat,
+                        lon: userLocation.lon
+                    };
+
+                    // UI: Αλλαγή κουμπιού σε "Loading"
+                    const btn = requestForm.querySelector('button[type="submit"]');
+                    const oldText = btn.innerHTML;
+                    btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+                    btn.disabled = true;
+
+                    try {
+                        // 3. Αποστολή στη Supabase
+                        const { data, error } = await window.db
+                            .from('requests')
+                            .insert([formData])
+                            .select()
+                            .single();
+
+                        if (error) throw error;
+
+                        // 4. Επιτυχία! Εμφάνιση οθόνης αναζήτησης
+                        currentRequestId = data.id;
+                        saveUserData(); 
+                        
+                        showToast("Το αίτημα στάλθηκε!", "success");
+                        
+                        document.getElementById('tab-search').classList.remove('active');
+                        document.getElementById('results-view').classList.remove('hidden');
+                        document.getElementById('results-view').classList.add('block');
+                        
+                        startListeningForResponses(data.id);
+
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Σφάλμα: " + err.message, "error");
+                    } finally {
+                        btn.innerHTML = oldText;
+                        btn.disabled = false;
+                    }
+                });
+            }
         };
+
+        // --- Logic for Realtime Responses ---
+        function startListeningForResponses(reqId) {
+            const list = document.getElementById('responses-list');
+            list.innerHTML = ''; 
+
+            window.db.channel('user-responses')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'responses', filter: `request_id=eq.${reqId}` }, 
+                    (payload) => {
+                        const resp = payload.new;
+                        new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3').play().catch(e=>{});
+                        showToast("Βρέθηκε φαρμακείο!", "success");
+                        
+                        const html = `
+                            <div class="glass-card bg-white dark:bg-slate-800 p-4 rounded-2xl border-l-4 border-teal-500 animate-slide-up">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-lg text-teal-700 dark:text-teal-300">Φαρμακείο Βρέθηκε!</h4>
+                                        <p class="text-sm font-semibold">${resp.message}</p>
+                                        <p class="text-xs text-slate-500 mt-1">Απόσταση: ${calculateDistance(userLocation.lat, userLocation.lon)} χλμ.</p>
+                                        <p class="text-xs text-red-500 font-bold mt-1">Κλείνει στις: ${resp.closing_time || '21:00'}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xl font-bold text-slate-800 dark:text-white">${resp.price > 0 ? resp.price + '€' : ''}</div>
+                                    </div>
+                                </div>
+                                <button onclick="acceptOffer('${resp.id}', '${resp.pharmacist_id}')" class="w-full mt-3 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl shadow-lg">
+                                    Κράτηση Τώρα
+                                </button>
+                            </div>
+                        `;
+                        list.innerHTML += html;
+                        document.querySelector('.radar-pulse').style.animation = 'none'; 
+                        document.querySelector('[data-lang-key="searching"]').innerText = "Βρέθηκαν Αποτελέσματα!";
+                    }
+                )
+                .subscribe();
+        }
+
+        async function acceptOffer(responseId, pharmacyId) {
+            if(!currentRequestId) return;
+            
+            const { error } = await window.db
+                .from('requests')
+                .update({ 
+                    status: 'reserved', 
+                    winner_pharmacy_id: pharmacyId 
+                })
+                .eq('id', currentRequestId);
+
+            if(error) {
+                showToast("Σφάλμα: " + error.message, 'error');
+            } else {
+                showToast("Έγινε κράτηση! Οδηγίες στην οθόνη.", "success");
+                document.getElementById('results-view').classList.add('hidden');
+                document.getElementById('pickup-view').classList.remove('hidden');
+                document.getElementById('pickup-view').classList.add('block');
+                
+                document.getElementById('pickup-qr').innerHTML = '';
+                new QRCode(document.getElementById("pickup-qr"), {
+                    text: currentRequestId,
+                    width: 128,
+                    height: 128
+                });
+                document.getElementById('pickup-code').innerHTML = `<span class="text-xs text-slate-400 block mb-1">Κωδικός Παραλαβής:</span><strong class="text-3xl tracking-widest font-mono text-slate-800 dark:text-white">${currentRequestId.substr(0,6)}</strong>`;
+            }
+        }
+        
+        function resetApp() {
+            window.location.reload();
+        }
 
         // --- UI Helpers ---
         function toggleLang() {
