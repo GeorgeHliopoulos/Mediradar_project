@@ -185,7 +185,7 @@
                 contact_person: document.getElementById('reg-contact').value,
                 email: document.getElementById('reg-email').value,
                 phone: document.getElementById('reg-phone').value,
-                status: 'pending' 
+                status: 'pending' // Αρχική κατάσταση
             };
 
             const btn = e.target.querySelector('button');
@@ -200,6 +200,7 @@
                 btn.innerHTML = oldText; btn.disabled = false;
             } else {
                 showToast("✅ Η αίτηση εστάλη! Θα επικοινωνήσουμε μαζί σας.", 'success');
+                // Reset form & show message
                 document.getElementById('auth-register').innerHTML = `
                     <div class="text-center py-10 animate-[fadeIn_0.5s]">
                         <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl"><i class="ph ph-check"></i></div>
@@ -217,6 +218,9 @@
             document.getElementById('auth-section').innerHTML = `<span class="text-xs font-medium mr-2 hidden sm:inline">${user.email}</span><button onclick="handleLogout()" class="text-xs bg-slate-200 px-3 py-1 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`;
             fetchRequests();
             subscribeToEverything();
+            
+            // Fallback auto-refresh interval (every 30s)
+            setInterval(fetchRequests, 30000);
         }
 
         async function demoLogin() {
@@ -226,19 +230,20 @@
         }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
 
-        // --- FETCH REQUESTS ---
+        // --- FETCH REQUESTS (FIXED: Filtering rejected) ---
         async function fetchRequests() {
-            document.getElementById('loading-spinner').classList.remove('hidden');
             const container = document.getElementById('requests-container');
             
+            // Φέρε τα αιτήματα που ΔΕΝ είναι rejected ή completed
             const { data, error } = await window.db.from('requests').select('*')
+                .neq('status', 'rejected') 
+                .neq('status', 'completed') 
                 .or(`status.eq.pending,and(status.eq.reserved,winner_pharmacy_id.eq.${currentUser.id})`)
                 .order('created_at', { ascending: false });
 
             const { data: myResponses } = await window.db.from('responses').select('request_id').eq('pharmacist_id', currentUser.id);
             const myRespondedIds = new Set((myResponses || []).map(r => r.request_id));
 
-            document.getElementById('loading-spinner').classList.add('hidden');
             if(error) return; 
             
             container.innerHTML = '';
@@ -260,7 +265,7 @@
             let stateUI = '';
             let borderClass = 'border-l-secondary';
             
-            // Check if generic is allowed (default true if null)
+            // Έλεγχος αν ο χρήστης δέχεται γενόσημο (αν είναι null θεωρούμε ναι)
             const allowGeneric = req.accepts_generic !== false; 
 
             if (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
@@ -269,42 +274,107 @@
                 stateUI = `
                     <div class="mt-4 bg-green-50 border border-green-200 p-4 rounded-xl animate-[fadeIn_0.5s]">
                         <div class="flex justify-between items-start mb-4">
-                            <div><h4 class="font-bold text-green-800 flex items-center gap-2"><i class="ph ph-check-circle text-xl"></i> Ο Πελάτης Έρχεται!</h4><p class="text-xs text-green-700 mt-1">Απομένουν: <span id="timer-${req.id}" class="font-mono font-bold text-lg">...</span></p></div>
-                            <div class="text-right"><span class="text-[10px] uppercase text-slate-400 font-bold">Κωδικος</span><div class="text-2xl font-mono font-bold text-slate-800 tracking-widest">${verifyCode}</div></div>
+                            <div>
+                                <h4 class="font-bold text-green-800 flex items-center gap-2"><i class="ph ph-check-circle text-xl"></i> Ο Πελάτης Έρχεται!</h4>
+                                <p class="text-xs text-green-700 mt-1">Απομένουν: <span id="timer-${req.id}" class="font-mono font-bold text-lg">Loading...</span></p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] uppercase text-slate-400 font-bold">Κωδικος</span>
+                                <div class="text-2xl font-mono font-bold text-slate-800 tracking-widest">${verifyCode}</div>
+                            </div>
                         </div>
-                        <div class="bg-white p-3 rounded-xl border border-green-100 flex gap-2"><input type="text" id="verify-input-${req.id}" placeholder="Εισαγωγή Κωδικού" class="flex-1 bg-transparent outline-none text-center font-bold tracking-widest uppercase"><button onclick="verifyOrder('${req.id}', '${verifyCode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-md">Επαλήθευση</button></div>
-                    </div>`;
-            } else if (hasResponded) {
+                        
+                        <div class="bg-white p-3 rounded-xl border border-green-100 flex gap-2">
+                            <input type="text" id="verify-input-${req.id}" placeholder="Εισαγωγή Κωδικού" class="flex-1 bg-transparent outline-none text-center font-bold tracking-widest uppercase">
+                            <button onclick="verifyOrder('${req.id}', '${verifyCode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-md">Επαλήθευση</button>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (hasResponded) {
                 borderClass = 'border-l-yellow-400';
-                stateUI = `<div class="mt-4 bg-yellow-50 border border-yellow-200 p-3 rounded-xl flex items-center justify-between"><div class="flex items-center gap-2 text-yellow-700 font-bold text-sm"><i class="ph ph-hourglass-medium animate-spin"></i> Αναμονή πελάτη...</div><span class="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Απαντήσατε</span></div>`;
-            } else {
+                stateUI = `
+                    <div class="mt-4 bg-yellow-50 border border-yellow-200 p-3 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-yellow-700 font-bold text-sm">
+                            <i class="ph ph-hourglass-medium animate-spin"></i> Αναμονή πελάτη...
+                        </div>
+                        <span class="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Απαντήσατε</span>
+                    </div>
+                `;
+            } 
+            else {
+                // Κουμπί Γενόσημου: Ενεργό ή Ανενεργό ανάλογα με την επιλογή του χρήστη
                 const genericBtn = allowGeneric 
                     ? `<button onclick="sendResponse('${req.id}', 'generic')" class="col-span-1 bg-white border border-secondary text-secondary hover:bg-teal-50 py-3 rounded-xl font-bold text-sm transition-transform active:scale-95">💊 Υπάρχει (Γενόσημο)</button>`
-                    : `<button disabled class="col-span-1 bg-slate-100 border border-slate-200 text-slate-400 py-3 rounded-xl font-bold text-xs cursor-not-allowed opacity-60">🚫 Γενόσημο (Όχι)</button>`;
+                    : `<button disabled class="col-span-1 bg-slate-100 border border-slate-200 text-slate-400 py-3 rounded-xl font-bold text-xs cursor-not-allowed" title="Ο χρήστης δεν δέχεται γενόσημο">🚫 Γενόσημο (Όχι)</button>`;
 
-                stateUI = `<div class="grid grid-cols-2 gap-3 mt-4"><button onclick="sendResponse('${req.id}', 'original')" class="col-span-1 bg-secondary hover:bg-teal-700 text-white py-3 rounded-xl font-bold text-sm shadow-md transition-transform active:scale-95">✅ Υπάρχει (Πρωτότυπο)</button>${genericBtn}<button onclick="dismissRequest('${req.id}')" class="col-span-2 text-xs text-slate-400 hover:text-slate-600 py-2">Απόρριψη</button></div>`;
+                stateUI = `
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <button onclick="sendResponse('${req.id}', 'original')" class="col-span-1 bg-secondary hover:bg-teal-700 text-white py-3 rounded-xl font-bold text-sm shadow-md transition-transform active:scale-95">✅ Υπάρχει (Πρωτότυπο)</button>
+                        ${genericBtn}
+                        <button onclick="dismissRequest('${req.id}')" class="col-span-2 text-xs text-slate-400 hover:text-slate-600 py-2">Απόρριψη</button>
+                    </div>
+                `;
             }
 
-            return `<div id="card-${req.id}" class="glass-panel p-5 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 ${borderClass} relative mb-4"><div class="flex justify-between items-start mb-2"><span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1"><i class="ph ph-clock"></i> ${timeAgo}</span><span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${req.location || 'Τοποθεσία'}</span></div><h3 class="text-xl font-bold text-slate-900 mb-1">${req.medicine_name} <span class="text-lg font-normal text-slate-500">x${req.quantity}</span></h3><p class="text-sm text-slate-500 mb-2">${req.customer_name || 'Πελάτης'}</p>${req.notes ? `<div class="bg-slate-50 p-2 rounded text-xs italic border border-slate-100">"${req.notes}"</div>` : ''}${!allowGeneric ? '<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded inline-block mb-2">⚠️ Μόνο Πρωτότυπο</span>' : ''}${stateUI}</div>`;
+            return `
+                <div id="card-${req.id}" class="glass-panel p-5 rounded-2xl shadow-sm hover:shadow-md transition-all border-l-4 ${borderClass} relative mb-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1"><i class="ph ph-clock"></i> ${timeAgo}</span>
+                        <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${req.location || 'Τοποθεσία'}</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-1">${req.medicine_name} <span class="text-lg font-normal text-slate-500">x${req.quantity}</span></h3>
+                    <p class="text-sm text-slate-500 mb-2">${req.customer_name || 'Πελάτης'}</p>
+                    ${req.notes ? `<div class="bg-slate-50 p-2 rounded text-xs italic border border-slate-100">"${req.notes}"</div>` : ''}
+                    ${!allowGeneric ? '<span class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded inline-block mb-2">⚠️ Μόνο Πρωτότυπο</span>' : ''}
+                    ${stateUI}
+                </div>
+            `;
         }
 
+        // --- ACTIONS ---
         async function sendResponse(requestId, type) {
-            const { error } = await window.db.from('responses').insert({ request_id: requestId, pharmacist_id: currentUser.id, response_type: type, message: type === 'original' ? 'Διαθέσιμο (Πρωτότυπο)' : 'Διαθέσιμο (Γενόσημο)', price: '0.00' });
-            if (!error) { showToast('Η απάντηση στάλθηκε!', 'success'); fetchRequests(); } else { showToast('Σφάλμα: ' + error.message, 'error'); }
+            const { error } = await window.db.from('responses').insert({ 
+                request_id: requestId, 
+                pharmacist_id: currentUser.id, 
+                response_type: type, 
+                message: type === 'original' ? 'Διαθέσιμο (Πρωτότυπο)' : 'Διαθέσιμο (Γενόσημο)',
+                price: '0.00' 
+            });
+
+            if (!error) { 
+                showToast('Η απάντηση στάλθηκε!', 'success'); 
+                fetchRequests();
+            } else { 
+                showToast('Σφάλμα: ' + error.message, 'error');
+            }
         }
 
         function verifyOrder(requestId, correctCode) {
             const input = document.getElementById(`verify-input-${requestId}`);
-            if (input.value.trim() === correctCode) { completeOrder(requestId); } 
-            else { showToast('Λάθος κωδικός!', 'error'); input.classList.add('ring-2', 'ring-red-500'); setTimeout(() => input.classList.remove('ring-2', 'ring-red-500'), 1000); }
+            if (input.value.trim() === correctCode) {
+                completeOrder(requestId);
+            } else {
+                showToast('Λάθος κωδικός!', 'error');
+                input.classList.add('ring-2', 'ring-red-500');
+                setTimeout(() => input.classList.remove('ring-2', 'ring-red-500'), 1000);
+            }
         }
 
         async function completeOrder(requestId) {
             const { error } = await window.db.from('requests').update({ status: 'completed' }).eq('id', requestId);
-            if(!error) { document.getElementById(`card-${requestId}`).remove(); showToast('Η παραγγελία ολοκληρώθηκε!', 'success'); try { new Audio('https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3').play().catch(e=>{}); } catch(e){} }
+            if(!error) {
+                document.getElementById(`card-${requestId}`).remove();
+                showToast('Η παραγγελία ολοκληρώθηκε!', 'success');
+                try { new Audio('https://cdn.freesound.org/previews/171/171671_2437358-lq.mp3').play().catch(e=>{}); } catch(e){}
+            }
         }
 
-        function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); }
+        // FIX: Actual DB update for rejection
+        async function dismissRequest(id) {
+            document.getElementById(`card-${id}`).remove();
+            await window.db.from('requests').update({ status: 'rejected' }).eq('id', id);
+        }
 
         function startCountdown(reqId, startTimeStr) {
             if(timers[reqId]) clearInterval(timers[reqId]);
@@ -322,10 +392,18 @@
             update(); timers[reqId] = setInterval(update, 1000);
         }
 
+        // --- REALTIME (NUCLEAR OPTION) ---
         function subscribeToEverything() {
             window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); }
-                if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Ο πελάτης έκανε κράτηση!', 'success'); fetchRequests(); }
+                if(payload.eventType === 'INSERT') {
+                    showToast('🔔 Νέο αίτημα!', 'info');
+                    try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){}
+                    fetchRequests();
+                }
+                if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) {
+                    showToast('✅ Ο πελάτης έκανε κράτηση!', 'success');
+                    fetchRequests(); // Αυτό θα ενεργοποιήσει και τον timer
+                }
             }).subscribe();
         }
 
