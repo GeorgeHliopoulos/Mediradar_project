@@ -64,6 +64,10 @@
         /* Tab Animation */
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
         .tab-content.active { display: block; }
+        
+        /* Auth Tabs inside Modal */
+        .auth-tab-content { display: none; }
+        .auth-tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
 
         /* Autocomplete */
         #drug-suggestions, #city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
@@ -115,9 +119,6 @@
         </div>
 
         <div class="flex gap-2">
-            <button onclick="openModal('pro')" aria-label="Είσοδος Φαρμακοποιού" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95 text-primary">
-                <i class="ph ph-briefcase"></i>
-            </button>
             <button onclick="toggleLang()" aria-label="Αλλαγή Γλώσσας" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95">
                 <span id="lang-flag" aria-hidden="true">🇬🇷</span>
             </button>
@@ -349,7 +350,7 @@
                 <span class="text-slate-300">|</span>
                 <a href="#" onclick="openModal('gdpr'); return false;" class="hover:text-primary">GDPR</a>
                 <span class="text-slate-300">|</span>
-                <!-- Updated Link to Pro Modal -->
+                <!-- Updated Link to Pro Modal in Footer -->
                 <a href="#" onclick="openModal('pro'); return false;" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
             </div>
             
@@ -414,7 +415,7 @@
         </div>
     </div>
     
-    <!-- User Login Modal -->
+    <!-- User Login Modal (FIXED & UPGRADED) -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
             <button onclick="closeModal('user')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
@@ -438,36 +439,84 @@
             </form>
             
             <div class="relative my-6"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center text-xs uppercase"><span class="bg-white dark:bg-slate-800 px-2 text-slate-400">Ή</span></div></div>
-            <button onclick="showToast('Η σύνδεση με Google έρχεται σύντομα.', 'info')" class="w-full bg-white border-2 border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95"><i class="ph ph-google-logo text-xl text-red-500" aria-hidden="true"></i> Google</button>
-        </div>
-    </div>
-
-    <!-- PRO MODAL (Now in Index) -->
-    <div id="modal-pro" class="modal-backdrop">
-        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
-            <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl"></i></button>
-            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg"><i class="ph ph-briefcase text-3xl"></i></div>
-            <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Είσοδος Pro</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών</p>
             
-            <form class="space-y-3" onsubmit="window.location.href='pharmacy.html'; return false;">
-                <div class="text-left">
-                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label>
-                    <input type="email" placeholder="pharmacy@example.com" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
-                </div>
-                <div class="text-left">
-                    <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Κωδικός</label>
-                    <input type="password" placeholder="••••••••" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
-                </div>
-                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
-                    <span>Σύνδεση</span> <i class="ph ph-arrow-right"></i>
-                </button>
-            </form>
-            <p class="mt-4 text-xs text-slate-400">Δεν έχετε λογαριασμό; <a href="#" class="underline font-semibold">Εγγραφή</a>.</p>
+            <!-- Google Button with Official SVG & Action -->
+            <button onclick="handleGoogleLogin()" class="w-full bg-white border-2 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-sm">
+                <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+                Συνέχεια με Google
+            </button>
         </div>
     </div>
 
-    <div id="toast-container" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2 pointer-events-none"></div>
+    <!-- PRO MODAL (Updated with Tabs - Login/Register) -->
+    <div id="modal-pro" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md">
+            <button onclick="closeModal('pro')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
+            
+            <!-- Tabs Header -->
+            <div class="flex bg-slate-100 dark:bg-slate-700/50 p-1 rounded-xl mb-6">
+                <button onclick="switchProAuthTab('login')" id="btn-pro-login" class="flex-1 py-2 rounded-lg text-xs font-bold shadow-sm bg-white dark:bg-slate-600 text-primary transition-all">Σύνδεση</button>
+                <button onclick="switchProAuthTab('register')" id="btn-pro-register" class="flex-1 py-2 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 transition-all">Εγγραφή</button>
+            </div>
+
+            <!-- Login Content -->
+            <div id="pro-login-content">
+                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-white shadow-lg"><i class="ph ph-briefcase text-3xl"></i></div>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-white">Είσοδος Pro</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Πλατφόρμα Φαρμακοποιών</p>
+                
+                <form class="space-y-3" onsubmit="window.location.href='pharmacy.html'; return false;">
+                    <div class="text-left">
+                        <label class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label>
+                        <input type="email" placeholder="pharmacy@example.com" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-slate-500 dark:text-white transition-all font-medium">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
+                        <span>Είσοδος στο Portal</span> <i class="ph ph-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Register Content -->
+            <div id="pro-register-content" class="hidden text-left space-y-3 h-[60vh] overflow-y-auto pr-2">
+                <h3 class="text-xl font-bold text-center mb-4 text-slate-800 dark:text-white">Νέα Εγγραφή</h3>
+                
+                <form onsubmit="handleProRegistration(event)" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">Επωνυμια</label><input id="reg-name" type="text" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500 uppercase">ΑΦΜ</label><input id="reg-afm" type="text" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                    </div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Αρ. Αδειας</label><input id="reg-license" type="text" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Διευθυνση</label><input id="reg-address" type="text" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Υπευθυνος</label><input id="reg-contact" type="text" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Email</label><input id="reg-email" type="email" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Τηλεφωνο</label><input id="reg-phone" type="tel" required class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary"></div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg mt-4">
+                        Υποβολή Αίτησης
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Generic Info Modal -->
+    <div id="modal-generic" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none">
+            <button onclick="closeModal('generic')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
+            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="ph ph-pill" aria-hidden="true"></i></div>
+            <h3 class="text-lg font-bold mb-2 text-slate-900 dark:text-white" data-lang-key="modal_generic_title">Τι είναι το γενόσημο;</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left leading-relaxed" data-lang-key="modal_generic_body">
+                Ένα γενόσημο φάρμακο περιέχει την <strong>ίδια ακριβώς δραστική ουσία</strong>, στην ίδια ποσότητα και έχει την ίδια αποτελεσματικότητα με το πρωτότυπο φάρμακο.<br><br>
+                Είναι συνήθως <strong>πιο οικονομικό</strong> και εγκεκριμένο από τον ΕΟΦ. Επιλέγοντας γενόσημο, εξυπηρετείστε πιο γρήγορα αν υπάρχει έλλειψη στο πρωτότυπο.
+            </p>
+            <button onclick="closeModal('generic')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-colors active:scale-95">Κατάλαβα</button>
+        </div>
+    </div>
+
+    <!-- Helper Modals (Terms & GDPR) -->
+    <div id="modal-terms" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('terms')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-500 active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button><h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Όροι Χρήσης</h3><p class="text-sm text-slate-600 dark:text-slate-300">Το MediRadar είναι μια πλατφόρμα εύρεσης φαρμάκων... (Κείμενο Όρων)...</p></div></div>
+    <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('gdpr')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-500 active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button><h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">GDPR & Απόρρητο</h3><p class="text-sm text-slate-600 dark:text-slate-300">Τα δεδομένα σας χρησιμοποιούνται μόνο για την εκτέλεση του αιτήματος... (Κείμενο GDPR)...</p></div></div>
 
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
@@ -506,6 +555,68 @@
 
             document.getElementById('request-form').addEventListener('submit', handleFormSubmit);
         };
+
+        // --- PRO MODAL TABS LOGIC ---
+        function switchProAuthTab(tab) {
+            const loginContent = document.getElementById('pro-login-content');
+            const registerContent = document.getElementById('pro-register-content');
+            const btnLogin = document.getElementById('btn-pro-login');
+            const btnRegister = document.getElementById('btn-pro-register');
+
+            if (tab === 'login') {
+                loginContent.classList.remove('hidden');
+                registerContent.classList.add('hidden');
+                
+                btnLogin.classList.add('bg-white', 'dark:bg-slate-600', 'text-primary', 'shadow-sm');
+                btnLogin.classList.remove('text-slate-500', 'dark:text-slate-400');
+                
+                btnRegister.classList.remove('bg-white', 'dark:bg-slate-600', 'text-primary', 'shadow-sm');
+                btnRegister.classList.add('text-slate-500', 'dark:text-slate-400');
+            } else {
+                loginContent.classList.add('hidden');
+                registerContent.classList.remove('hidden');
+                
+                btnRegister.classList.add('bg-white', 'dark:bg-slate-600', 'text-primary', 'shadow-sm');
+                btnRegister.classList.remove('text-slate-500', 'dark:text-slate-400');
+                
+                btnLogin.classList.remove('bg-white', 'dark:bg-slate-600', 'text-primary', 'shadow-sm');
+                btnLogin.classList.add('text-slate-500', 'dark:text-slate-400');
+            }
+        }
+
+        async function handleProRegistration(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Υποβολή...'; btn.disabled = true;
+
+            const formData = {
+                pharmacy_name: document.getElementById('reg-name').value,
+                afm: document.getElementById('reg-afm').value,
+                license_number: document.getElementById('reg-license').value,
+                address: document.getElementById('reg-address').value,
+                contact_person: document.getElementById('reg-contact').value,
+                email: document.getElementById('reg-email').value,
+                phone: document.getElementById('reg-phone').value,
+                status: 'pending'
+            };
+
+            const { error } = await window.db.from('pharmacy_registrations').insert([formData]);
+
+            if (error) {
+                showToast("Σφάλμα: " + error.message, 'error');
+                btn.innerHTML = oldText; btn.disabled = false;
+            } else {
+                showToast("✅ Η αίτηση εστάλη επιτυχώς!", 'success');
+                document.getElementById('pro-register-content').innerHTML = `
+                    <div class="text-center py-10 animate-[fadeIn_0.5s]">
+                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="ph ph-check"></i></div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">Ευχαριστούμε!</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Η αίτησή σας παραλήφθηκε.<br>Θα επικοινωνήσουμε μαζί σας σύντομα.</p>
+                    </div>
+                `;
+            }
+        }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -669,6 +780,18 @@
         }
         
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) return showToast("Email?", 'error'); const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
+        
+        // GOOGLE AUTH LOGIC
+        async function handleGoogleLogin() {
+            const { error } = await window.db.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.href 
+                }
+            });
+            if (error) showToast(error.message, 'error');
+        }
+
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
         
         function getLocation() {
