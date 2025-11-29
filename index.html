@@ -2,6 +2,7 @@
 <html lang="el" class="light">
 <head>
     <meta charset="UTF-8">
+    <!-- Mobile Viewport Fixes -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="MediRadar - Βρείτε φάρμακα άμεσα και τοπικά.">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,6 +13,7 @@
 
     <title>MediRadar App</title>
     
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -28,8 +30,7 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { primary: '#0d9488', secondary: '#0f172a' },
                     animation: { 
-                        'float': 'float 15s linear infinite',
-                        'bounce-seq': 'bounce 1s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
                         'fade-in': 'fadeIn 0.3s ease-out forwards', 
                         'slide-up': 'slideUp 0.3s ease-out forwards' 
                     },
@@ -48,28 +49,22 @@
         html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .emoji { position: absolute; bottom: -100px; font-size: 2rem; opacity: 0.4; animation: floatUp 15s linear infinite; z-index: 0; }
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
-        
-        /* Improved Glass Card for Contrast */
-        .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
         html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
-        
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
-        
         #drug-suggestions, #city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
         html.dark #drug-suggestions, html.dark #city-suggestions { background: #1e293b; border-color: #334155; }
         .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; } 
         html.dark .suggestion-item { border-color: #334155; color: #e2e8f0; } .suggestion-item:hover { background-color: #f0f9ff; } html.dark .suggestion-item:hover { background-color: #334155; }
-        
+        .radar-pulse { width: 100px; height: 100px; background: rgba(13, 148, 136, 0.2); border-radius: 50%; position: relative; margin: 0 auto; }
+        .radar-pulse::before, .radar-pulse::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #0d9488; width: 100%; height: 100%; animation: ripple 2s linear infinite; opacity: 0; }
+        .radar-pulse::after { animation-delay: 1s; }
+        @keyframes ripple { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 200%; height: 200%; opacity: 0; } }
         .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
         .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; }
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
         *:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
-        
-        /* Loading Animation Delays */
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
         
         /* Accessibility Classes */
         .a11y-grayscale { filter: grayscale(100%) !important; } .a11y-high-contrast { filter: contrast(125%) brightness(90%) !important; } .a11y-links-underline a, .a11y-links-underline button { text-decoration: underline !important; text-decoration-thickness: 2px !important; } .a11y-readable-font * { font-family: sans-serif !important; letter-spacing: 0.05em !important; word-spacing: 0.1em !important; }
@@ -535,87 +530,23 @@
 
         function handleFileSelect(input) { if(input.files[0]) { document.getElementById('media-preview').classList.remove('hidden'); showToast("Η φωτογραφία προστέθηκε!", 'success'); } }
         function switchTab(id) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); document.getElementById('pickup-view').classList.add('hidden'); if(id==='history') loadUserHistory(); }
+        function updateNavForUser(user) { if (user.is_anonymous) return; const n = user.user_metadata.full_name || (user.email ? user.email.split('@')[0] : 'User'); document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500"><i class="ph ph-sign-out"></i></button></div>`; }
         
-        // FIX: Handle anonymous users safely to prevent crash
-        function updateNavForUser(user) { 
-            if (user.is_anonymous) return;
-            const n = user.user_metadata.full_name || (user.email ? user.email.split('@')[0] : 'User');
-            document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button><button onclick="handleLogout()" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-xl text-slate-500 hover:text-red-500"><i class="ph ph-sign-out"></i></button></div>`; 
-        }
-        
+        // Auth Helpers
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; if(!email) return showToast("Email?", 'error'); const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Ελέγξτε το email σας!", 'success'); closeModal('user'); } }
-        
-        // GOOGLE AUTH LOGIC
-        async function handleGoogleLogin() {
-            const { error } = await window.db.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.href 
-                }
-            });
-            if (error) showToast(error.message, 'error');
-        }
-
+        async function handleGoogleLogin() { const { error } = await window.db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } }); if (error) showToast(error.message, 'error'); }
         async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
         
         function getLocation() {
             if(!navigator.geolocation) return showToast("GPS Error", "error");
-            
             const btn = document.querySelector('button[onclick="getLocation()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>'; 
-            
+            const originalText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>'; 
             navigator.geolocation.getCurrentPosition(async (p) => {
                 userLocation = { lat: p.coords.latitude, lon: p.coords.longitude };
-                
-                try {
-                    // Χρήση Nominatim για μετατροπή συντεταγμένων σε διεύθυνση
-                    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lon}&addressdetails=1`);
-                    
-                    if (!r.ok) throw new Error("Network error");
-                    
-                    const d = await r.json();
-                    
-                    // Έξυπνη κατασκευή διεύθυνσης
-                    let locationName = "";
-                    const addr = d.address;
-
-                    if (addr.road) locationName += addr.road;
-                    if (addr.house_number) locationName += " " + addr.house_number;
-                    
-                    if (addr.suburb) {
-                        locationName += (locationName ? ", " : "") + addr.suburb;
-                    } else if (addr.city) {
-                        locationName += (locationName ? ", " : "") + addr.city;
-                    } else if (addr.town) {
-                        locationName += (locationName ? ", " : "") + addr.town;
-                    } else if (addr.village) {
-                        locationName += (locationName ? ", " : "") + addr.village;
-                    }
-
-                    if (!locationName) locationName = "Η τοποθεσία μου";
-
-                    document.getElementById('city').value = locationName;
-                    saveUserData();
-                    showToast("Βρέθηκε: " + locationName, "success");
-                    
-                } catch(e) { 
-                    console.error(e);
-                    // Fallback αν αποτύχει η υπηρεσία, αλλά έχουμε συντεταγμένες
-                    document.getElementById('city').value = "Τρέχουσα Τοποθεσία";
-                    showToast("Τοποθεσία OK", "success");
-                }
-                
+                try { const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.lat}&lon=${userLocation.lon}&addressdetails=1`); const d = await r.json(); let loc = d.address.road || ""; if(d.address.suburb) loc += " " + d.address.suburb; else if(d.address.city) loc += " " + d.address.city; document.getElementById('city').value = loc || "Τοποθεσία OK"; saveUserData(); showToast("Βρέθηκε: " + (loc||"Τοποθεσία"), "success"); } 
+                catch(e) { document.getElementById('city').value = "Τρέχουσα Τοποθεσία"; showToast("Τοποθεσία OK", "success"); }
                 btn.innerHTML = originalText;
-                
-            }, () => { 
-                showToast("Δεν βρέθηκε τοποθεσία", "error");
-                btn.innerHTML = originalText;
-            }, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            });
+            }, () => { showToast("Δεν βρέθηκε τοποθεσία", "error"); btn.innerHTML = originalText; }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
         }
 
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
@@ -623,62 +554,20 @@
         function createEmojis() { const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴']; for(let i=0; i<15; i++){ const e = document.createElement('div'); e.innerText = em[Math.floor(Math.random() * em.length)]; e.classList.add('emoji'); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = (12 + Math.random() * 20) + 's'; e.style.animationDelay = (Math.random() * 10) + 's'; c.appendChild(e); } }
         function setupAutocomplete(id, boxId, data) { const inp = document.getElementById(id); const box = document.getElementById(boxId); inp.addEventListener('input', (e) => { const v = e.target.value.toLowerCase(); if(v.length < 1) { box.style.display = 'none'; return; } const m = data.filter(i => i.toLowerCase().includes(v)); box.innerHTML = m.map(i => `<div class="suggestion-item" onclick="document.getElementById('${id}').value='${i}'; document.getElementById('${boxId}').style.display='none'">${i}</div>`).join(''); box.style.display = m.length ? 'block' : 'none'; }); document.addEventListener('click', (e) => { if(!inp.contains(e.target)) box.style.display = 'none'; }); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+        function toggleLang() { currentLang = currentLang === 'el' ? 'en' : 'el'; showToast("Language switched (Demo)", 'info'); }
         function saveUserData() { localStorage.setItem('mr_user', JSON.stringify({ n: document.getElementById('full-name').value, p: document.getElementById('phone').value, c: document.getElementById('city').value })); }
         function loadUserData() { const d = JSON.parse(localStorage.getItem('mr_user') || '{}'); if(d.n) document.getElementById('full-name').value = d.n; if(d.p) document.getElementById('phone').value = d.p; if(d.c) document.getElementById('city').value = d.c; }
         function resetApp() { window.location.reload(); }
         function showToast(m, t='info') { const c = document.getElementById('toast-container'); const e = document.createElement('div'); e.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-slate-800'} animate-toast`; e.innerText = m; c.appendChild(e); setTimeout(()=>e.remove(), 3000); }
         function openGoogleMaps() { window.open(`https://maps.google.com/?q=${userLocation.lat},${userLocation.lon}`, '_blank'); }
-
-        /* --- Accessibility Logic --- */
-        function toggleA11yMenu() {
-            const menu = document.getElementById('a11y-menu');
-            const btn = document.getElementById('a11y-btn');
-            menu.classList.toggle('hidden');
-            const isExpanded = !menu.classList.contains('hidden');
-            btn.setAttribute('aria-expanded', isExpanded);
-        }
-
-        function toggleFontSize() {
-            const html = document.documentElement;
-            const currentSize = parseFloat(getComputedStyle(html).fontSize);
-            // Toggle between 100% (16px) and 125% (20px)
-            if (currentSize > 18) {
-                html.style.fontSize = '16px';
-            } else {
-                html.style.fontSize = '20px';
-            }
-        }
-
-        function toggleContrast() {
-            document.body.classList.toggle('a11y-high-contrast');
-        }
-
-        function toggleGrayscale() {
-            document.body.classList.toggle('a11y-grayscale');
-        }
-
-        function toggleReadableFont() {
-            document.body.classList.toggle('a11y-readable-font');
-        }
-
-        function toggleLinksHighlight() {
-            document.body.classList.toggle('a11y-links-underline');
-        }
-
-        function resetA11y() {
-            const html = document.documentElement;
-            html.style.fontSize = '';
-            document.body.classList.remove('a11y-high-contrast', 'a11y-grayscale', 'a11y-readable-font', 'a11y-links-underline');
-        }
-
-        // Close menu when clicking outside
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('a11y-menu');
-            const btn = document.getElementById('a11y-btn');
-            if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
-                toggleA11yMenu();
-            }
-        });
+        function toggleA11yMenu() { document.getElementById('a11y-menu').classList.toggle('hidden'); }
+        function resetA11y() { document.documentElement.style.fontSize = ''; document.body.className = "text-slate-800 dark:text-slate-100 antialiased min-h-screen relative flex flex-col pb-safe"; }
+        // Accessibility functions placeholders
+        function toggleFontSize() { const h = document.documentElement; h.style.fontSize = h.style.fontSize === '16px' ? '20px' : '16px'; }
+        function toggleContrast() { document.body.classList.toggle('a11y-high-contrast'); }
+        function toggleGrayscale() { document.body.classList.toggle('a11y-grayscale'); }
+        function toggleReadableFont() { document.body.classList.toggle('a11y-readable-font'); }
+        function toggleLinksHighlight() { document.body.classList.toggle('a11y-links-underline'); }
     </script>
 </body>
 </html>
