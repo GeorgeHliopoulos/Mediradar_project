@@ -47,7 +47,7 @@
             top: 0; left: 0; 
             width: 100vw; height: 100vh; 
             overflow: hidden; 
-            z-index: -1; /* Critical: Sends background behind everything */
+            z-index: -1; 
             pointer-events: none; 
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
         }
@@ -290,6 +290,7 @@
         let pickupTimer = null;
         let pendingPharmacyId = null;
         let intervalId = null;
+        let responsePoller = null; // Νέα μεταβλητή για το Polling
 
         window.onload = async function() {
             createEmojis();
@@ -393,10 +394,14 @@
                     document.getElementById('loading-text').innerText = texts[i];
                 }, 2500);
 
+                // Start Realtime Listener
                 listenForResponsesRobust(data.id);
+                // Start Safety Polling (Αυτόματος Έλεγχος)
+                startResponsePolling(data.id);
             }
         }
 
+        // Realtime Listener
         function listenForResponsesRobust(reqId) {
             window.db.channel('public:responses')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'responses' }, (payload) => {
@@ -405,8 +410,21 @@
             .subscribe();
         }
 
+        // Safety Polling (Η ΛΥΣΗ ΓΙΑ ΤΟ ΚΟΛΛΗΜΑ)
+        function startResponsePolling(reqId) {
+            if(responsePoller) clearInterval(responsePoller);
+            responsePoller = setInterval(async () => {
+                const { data } = await window.db.from('responses').select('*').eq('request_id', reqId);
+                if (data && data.length > 0) {
+                    displayResponse(data[0]); // Βρέθηκε απάντηση!
+                }
+            }, 3000); // Έλεγχος κάθε 3 δευτερόλεπτα
+        }
+
         function displayResponse(resp) {
-            clearInterval(intervalId);
+            clearInterval(intervalId); // Stop loading text
+            clearInterval(responsePoller); // Stop polling since we found it
+            
             const list = document.getElementById('responses-list');
             document.getElementById('loading-state').classList.add('hidden');
             list.classList.remove('hidden');
