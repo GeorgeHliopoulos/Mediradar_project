@@ -75,10 +75,7 @@
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
         *:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
         
-        /* Accessibility */
-        .a11y-grayscale { filter: grayscale(100%) !important; } .a11y-high-contrast { filter: contrast(125%) brightness(90%) !important; } .a11y-links-underline a, .a11y-links-underline button { text-decoration: underline !important; text-decoration-thickness: 2px !important; } .a11y-readable-font * { font-family: sans-serif !important; letter-spacing: 0.05em !important; word-spacing: 0.1em !important; }
-        
-        /* List Animation */
+        /* Animations */
         .item-badge { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
@@ -113,56 +110,109 @@
         <div id="tab-search" class="tab-content active" role="tabpanel" aria-labelledby="btn-search">
             <div class="glass-card rounded-3xl p-6 relative overflow-visible">
                 <form id="request-form" class="space-y-6">
+                    
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2"><label for="full-name" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="name">Ονομα</label><input id="full-name" type="text" placeholder="Μαρία Π." oninput="saveUserData()" autocomplete="name" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium shadow-sm" required></div>
-                        <div class="space-y-2"><label for="phone" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="phone">Τηλεφωνο</label><input id="phone" type="tel" placeholder="69..." oninput="saveUserData()" autocomplete="tel" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium shadow-sm" required></div>
+                        <div class="space-y-1">
+                            <label for="full-name" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Ονομα <span class="text-red-500">*</span></label>
+                            <input id="full-name" type="text" placeholder="Μαρία Π." oninput="saveUserData()" autocomplete="name" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium" required>
+                        </div>
+                        <div class="space-y-1 relative">
+                            <label for="phone" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Κινητο (10 ψηφια) <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input id="phone" type="tel" maxlength="10" placeholder="69..." oninput="validatePhoneUI(this)" autocomplete="tel" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required>
+                                <div id="phone-status" class="absolute right-3 top-3 text-lg hidden"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="space-y-2 relative"><label for="city" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="area">Περιοχη</label><div class="relative"><input id="city" type="text" placeholder="Περιοχή..." oninput="saveUserData()" autocomplete="off" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 pr-32 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium shadow-sm" required><div id="city-suggestions" role="listbox"></div><button type="button" onclick="getLocation()" aria-label="Εντοπισμός τοποθεσίας" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-xl text-xs font-bold hover:bg-teal-200 transition-colors flex items-center gap-1 shadow-sm active:scale-95"><i class="ph ph-navigation-arrow text-sm" aria-hidden="true"></i> <span data-lang-key="near_me">Κοντά μου</span></button></div></div>
+
+                    <div class="space-y-1 relative">
+                        <label for="city" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Περιοχη <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input id="city" type="text" placeholder="Περιοχή..." oninput="saveUserData()" autocomplete="off" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 pr-32 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium" required>
+                            <div id="city-suggestions" role="listbox"></div>
+                            <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-lg text-[10px] font-bold hover:bg-teal-200 transition-colors flex items-center gap-1 shadow-sm active:scale-95">
+                                <i class="ph ph-navigation-arrow text-sm" aria-hidden="true"></i> <span data-lang-key="near_me">Κοντά μου</span>
+                            </button>
+                        </div>
+                    </div>
                     
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2" role="separator"></div>
                     
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary"></i> Λιστα Φαρμακων</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary text-lg"></i> Λιστα Φαρμακων <span class="text-red-500">*</span></label>
                             <span class="text-[10px] bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-full font-bold" id="items-count-badge">0 είδη</span>
                         </div>
                         
                         <div id="items-list-display" class="space-y-2 mb-2 empty:hidden max-h-40 overflow-y-auto pr-1"></div>
                     
-                        <div class="grid grid-cols-12 gap-2 relative">
-                            <div class="col-span-8 relative">
-                                <i class="ph ph-pill absolute left-3 top-3.5 text-slate-400 text-lg z-10" aria-hidden="true"></i>
-                                <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl pl-10 pr-10 py-3 text-sm font-semibold focus:ring-2 focus:ring-primary/50 outline-none dark:text-white shadow-sm" autocomplete="off" enterkeyhint="next">
-                                <button type="button" onclick="startVoiceInput()" class="absolute right-2 top-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors active:scale-95" title="Φωνητική Αναζήτηση"><i class="ph ph-microphone text-lg" aria-hidden="true"></i></button>
+                        <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                            <div class="relative mb-3">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ονομασια Ειδους</label>
+                                <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg pl-3 pr-10 py-2 text-sm font-semibold focus:ring-2 focus:ring-primary/50 outline-none dark:text-white" autocomplete="off" enterkeyhint="next">
+                                <button type="button" onclick="startVoiceInput()" class="absolute right-1 top-6 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors active:scale-95" title="Φωνητική Εισαγωγή">
+                                    <i class="ph ph-microphone text-lg"></i>
+                                </button>
                                 <div id="drug-suggestions" role="listbox"></div>
                             </div>
-                            <div class="col-span-2">
-                                 <input id="quantity" type="number" min="1" value="1" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-1 py-3 text-sm text-center font-bold outline-none dark:text-white shadow-sm">
+
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Κατηγορια</label>
+                                    <div class="relative">
+                                        <select id="med-type" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-2 text-sm appearance-none outline-none focus:border-primary cursor-pointer">
+                                            <option value="pills">💊 Χάπια / Κάψουλες</option>
+                                            <option value="syrup">🧴 Σιρόπι / Πόσιμο</option>
+                                            <option value="cream">🩹 Αλοιφή / Τζελ</option>
+                                            <option value="inject">💉 Ενέσιμο / Αμπούλες</option>
+                                            <option value="spray">💨 Εισπνεόμενο / Σπρέι</option>
+                                            <option value="baby">🍼 Βρεφικά / Γάλατα</option>
+                                            <option value="cosmetic">💄 Καλλυντικά</option>
+                                            <option value="device">🩺 Ιατροτεχνολογικά</option>
+                                            <option value="other">❓ Άλλο</option>
+                                        </select>
+                                        <i class="ph ph-caret-down absolute right-2 top-2.5 text-slate-400 pointer-events-none"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ποσοτητα</label>
+                                    <div class="flex items-center">
+                                        <button type="button" onclick="adjustQty(-1)" class="bg-slate-200 w-8 h-9 rounded-l-lg text-slate-600 hover:bg-slate-300 font-bold">-</button>
+                                        <input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 border-y border-slate-200 h-9 text-center text-sm font-bold outline-none dark:bg-slate-800 dark:border-slate-600">
+                                        <button type="button" onclick="adjustQty(1)" class="bg-slate-200 w-8 h-9 rounded-r-lg text-slate-600 hover:bg-slate-300 font-bold">+</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-span-2">
-                                <button type="button" onclick="addItemToList()" class="w-full h-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center justify-center text-xl shadow-md transition-transform active:scale-95"><i class="ph ph-plus text-white font-bold"></i></button>
-                            </div>
+
+                            <button type="button" onclick="addItemToList()" class="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-lg py-2.5 flex items-center justify-center gap-2 font-bold text-sm shadow-md transition-transform active:scale-[0.98]">
+                                <i class="ph ph-plus-circle text-lg"></i> Προσθήκη στη Λίστα
+                            </button>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
-                            
-                            <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:shadow-md transition-all group active:scale-95">
-                                <i class="ph ph-camera text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-blue-500 transition-colors"></i>
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">Photo</span>
-                            </button>
-                            
-                            <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:shadow-md transition-all group active:scale-95">
-                                <i class="ph ph-barcode text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-teal-500 transition-colors"></i>
-                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">Scan</span>
-                            </button>
+                        <div class="mt-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2 text-center">Δεν ξερετε το ονομα; Χρησιμοποιηστε:</p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
+                                
+                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-blue-400 transition-all group active:scale-95">
+                                    <i class="ph ph-camera text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-blue-500 transition-colors"></i>
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Φωτογραφία Κουτιού</span>
+                                    <span class="text-[9px] text-slate-400">Για σιγουριά</span>
+                                </button>
+                                
+                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-teal-400 transition-all group active:scale-95">
+                                    <i class="ph ph-barcode text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-teal-500 transition-colors"></i>
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Σάρωση Barcode</span>
+                                    <span class="text-[9px] text-slate-400">Πάνω στο κουτί</span>
+                                </button>
+                            </div>
                         </div>
                         
                         <div id="scanner-container" class="hidden mt-2 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-48 shadow-lg"><div id="reader" style="width:100%;height:100%;"></div></div>
                         <div id="media-preview" class="hidden mt-2 text-xs text-teal-600 font-bold text-center bg-teal-50 p-2 rounded-lg" role="status"><i class="ph ph-check"></i> Φωτογραφία προστέθηκε!</div>
                     </div>
 
-                    <div class="space-y-2"><label for="notes" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="notes">Σημειωσεις</label><textarea id="notes" rows="2" placeholder="..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base resize-none focus:ring-2 focus:ring-primary/50 outline-none dark:text-white"></textarea></div>
+                    <div class="space-y-2"><label for="notes" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1" data-lang-key="notes">Σημειωσεις (Προαιρετικο)</label><textarea id="notes" rows="2" placeholder="Π.χ. Θα ήθελα και οδηγίες χρήσης..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base resize-none focus:ring-2 focus:ring-primary/50 outline-none dark:text-white"></textarea></div>
                     
                     <div class="space-y-3 pt-2">
                         <label class="flex items-start gap-3 px-3 cursor-pointer group bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl active:bg-slate-100 dark:active:bg-slate-800"><input type="checkbox" id="accept-generic" class="mt-1 w-5 h-5 text-primary rounded border-gray-300 focus:ring-offset-0" checked aria-label="Αποδοχή γενόσημου"><span class="text-xs text-slate-600 dark:text-slate-300"><span data-lang-key="accept_text">Δέχομαι να μου προτείνουν</span> <a href="#" onclick="openModal('generic'); return false;" class="font-bold underline decoration-dotted text-primary hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-primary rounded" data-lang-key="accept_link">γενόσημο</a>.</span></label>
@@ -280,14 +330,25 @@
         let userLocation = { lat: null, lon: null };
         let currentRequestId = null;
         let currentUser = null;
-        let requestItems = []; // List of items
+        let requestItems = []; 
         let pendingPharmacyId = null;
         let intervalId = null;
         let responsePoller = null;
-        let itemsNotReserved = []; // Track missing items
+        let itemsNotReserved = [];
+        let isPhoneValid = false;
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let html5QrcodeScanner = null;
+
+        // Icon mapping for types
+        const typeIcons = {
+            'pills': '💊', 'syrup': '🧴', 'cream': '🩹', 'inject': '💉', 
+            'spray': '💨', 'baby': '🍼', 'cosmetic': '💄', 'device': '🩺', 'other': '❓'
+        };
+        const typeLabels = {
+            'pills': 'Χάπια', 'syrup': 'Σιρόπι', 'cream': 'Αλοιφή', 'inject': 'Ενέσιμο', 
+            'spray': 'Σπρέι', 'baby': 'Βρεφικά', 'cosmetic': 'Καλλυντικά', 'device': 'Συσκευές', 'other': 'Άλλο'
+        };
 
         window.onload = async function() {
             createEmojis();
@@ -301,27 +362,56 @@
             
             if(window.db) { window.db.auth.onAuthStateChange((event, session) => { if(session) { currentUser = session.user; updateNavForUser(session.user); } }); }
             document.getElementById('request-form').addEventListener('submit', handleFormSubmit);
-            
-            // Add input enter listener
-            document.getElementById('medicine').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') { e.preventDefault(); addItemToList(); }
-            });
+            document.getElementById('medicine').addEventListener('keypress', function (e) { if (e.key === 'Enter') { e.preventDefault(); addItemToList(); } });
         };
 
-        // --- NEW LIST LOGIC ---
+        function validatePhoneUI(input) {
+            const val = input.value.replace(/\D/g, ''); // Remove non-digits
+            input.value = val;
+            
+            const statusDiv = document.getElementById('phone-status');
+            statusDiv.classList.remove('hidden');
+
+            const greekMobileRegex = /^69\d{8}$/;
+
+            if (greekMobileRegex.test(val)) {
+                input.classList.remove('border-red-500', 'focus:ring-red-200');
+                input.classList.add('border-green-500', 'focus:ring-green-200');
+                statusDiv.innerHTML = '✅';
+                isPhoneValid = true;
+            } else {
+                input.classList.remove('border-green-500', 'focus:ring-green-200');
+                input.classList.add('border-red-500', 'focus:ring-red-200');
+                statusDiv.innerHTML = '❌';
+                isPhoneValid = false;
+            }
+            saveUserData();
+        }
+
+        function adjustQty(amount) {
+            const el = document.getElementById('quantity');
+            let val = parseInt(el.value) || 1;
+            val = Math.max(1, val + amount);
+            el.value = val;
+        }
+
         function addItemToList() {
             const nameInput = document.getElementById('medicine');
             const qtyInput = document.getElementById('quantity');
+            const typeInput = document.getElementById('med-type');
+            
             const name = nameInput.value.trim();
             const qty = qtyInput.value;
+            const type = typeInput.value;
 
             if(!name) return showToast("Γράψτε όνομα φαρμάκου", "error");
 
-            requestItems.push({ name: name, quantity: qty });
+            requestItems.push({ name: name, quantity: qty, type: type });
             updateItemsUI();
             
             nameInput.value = '';
             qtyInput.value = '1';
+            typeInput.value = 'pills'; // Reset to default
             nameInput.focus();
         }
 
@@ -337,11 +427,16 @@
             badge.innerText = `${requestItems.length} είδη`;
             list.innerHTML = requestItems.map((item, i) => `
                 <div class="item-badge flex justify-between items-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 p-2 rounded-xl shadow-sm">
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <span class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">${item.quantity}</span>
-                        <span class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">${item.name}</span>
+                    <div class="flex items-center gap-3 overflow-hidden flex-1">
+                        <div class="bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-inner" title="${typeLabels[item.type]}">
+                            ${typeIcons[item.type]}
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${item.name}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400">${typeLabels[item.type]} • x${item.quantity}</span>
+                        </div>
                     </div>
-                    <button type="button" onclick="removeItem(${i})" class="text-red-400 hover:text-red-600 p-1"><i class="ph ph-trash"></i></button>
+                    <button type="button" onclick="removeItem(${i})" class="text-slate-400 hover:text-red-500 p-2 transition-colors"><i class="ph ph-trash text-lg"></i></button>
                 </div>
             `).join('');
         }
@@ -350,7 +445,13 @@
             e.preventDefault();
             if(!currentUser) return showToast("Παρακαλώ περιμένετε...", "error");
 
-            // Check if items list is empty, if so, try add from input
+            // Validate Phone
+            const phoneVal = document.getElementById('phone').value;
+            if(!/^69\d{8}$/.test(phoneVal)) {
+                document.getElementById('phone').focus();
+                return showToast("Το κινητό πρέπει να είναι 10 ψηφία και να αρχίζει από 69", "error");
+            }
+
             if(requestItems.length === 0) {
                 if(document.getElementById('medicine').value.trim()) addItemToList();
                 else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error");
@@ -365,10 +466,10 @@
             const formData = {
                 user_id: currentUser.id,
                 customer_name: document.getElementById('full-name').value,
-                phone: document.getElementById('phone').value,
+                phone: phoneVal,
                 location: document.getElementById('city').value,
-                items: requestItems, // Send JSON Array
-                medicine_name: requestItems.map(i => i.name).join(', '), // Fallback for display
+                items: requestItems, 
+                medicine_name: requestItems.map(i => `${i.name} (${typeIcons[i.type]})`).join(', '),
                 quantity: requestItems.length,
                 notes: document.getElementById('notes').value,
                 status: 'pending',
@@ -401,7 +502,6 @@
             responsePoller = setInterval(async () => {
                 const { data } = await window.db.from('responses').select('*').eq('request_id', reqId);
                 if (data && data.length > 0) {
-                    // Clear previous list first to avoid duplicates in polling
                     document.getElementById('responses-list').innerHTML = ''; 
                     data.forEach(displayResponse);
                 }
@@ -414,7 +514,6 @@
             document.getElementById('loading-state').classList.add('hidden');
             list.classList.remove('hidden');
             
-            // Logic to calculate missing items
             let foundBadges = '';
             let foundCount = 0;
             let missingCount = 0;
@@ -428,8 +527,6 @@
             }
 
             const isPartial = missingCount > 0;
-            
-            // Avoid adding duplicate cards
             if(document.getElementById(`resp-card-${resp.id}`)) return;
 
             const html = `
@@ -462,11 +559,8 @@
         function storeResponseItemsAndOpenModal(pharmacyId, foundItemsStr) {
             pendingPharmacyId = pharmacyId;
             const foundItems = JSON.parse(decodeURIComponent(foundItemsStr));
-            
-            // Calculate missing
             const foundNames = new Set(foundItems.map(i => i.name));
             itemsNotReserved = requestItems.filter(i => !foundNames.has(i.name));
-
             openModal('safety');
         }
 
@@ -483,7 +577,6 @@
                 document.getElementById('tab-results').classList.remove('active');
                 document.getElementById('pickup-code').innerText = currentRequestId.substring(0, 6);
                 
-                // Show missing items section if needed
                 if(itemsNotReserved.length > 0) {
                     const alertBox = document.getElementById('missing-items-alert');
                     const missingList = document.getElementById('missing-items-list');
@@ -492,24 +585,18 @@
                 } else {
                     document.getElementById('missing-items-alert').classList.add('hidden');
                 }
-
                 startTimer();
             }
         }
 
         function reSearchMissing() {
-            // Reset state
             document.getElementById('pickup-view').classList.add('hidden');
             document.getElementById('responses-list').innerHTML = '';
             document.getElementById('responses-list').classList.add('hidden');
             document.getElementById('loading-state').classList.remove('hidden');
             document.getElementById('missing-items-alert').classList.add('hidden');
-            
-            // Set items to the missing ones
             requestItems = itemsNotReserved;
             updateItemsUI();
-            
-            // Switch tab
             switchTab('search');
             showToast("Η λίστα ενημερώθηκε με τα είδη που έλειπαν!", 'info');
         }
@@ -525,37 +612,20 @@
             }, 1000);
         }
 
-        // --- UTILS & MEDIA HANDLERS RESTORED ---
-        
-        // Handle File Select (Photo)
-        function handleFileSelect(input) { 
-            if(input.files[0]) { 
-                document.getElementById('media-preview').classList.remove('hidden'); 
-                showToast("Η φωτογραφία προστέθηκε!", 'success'); 
-            } 
-        }
-
-        // Handle Scanner
+        function handleFileSelect(input) { if(input.files[0]) { document.getElementById('media-preview').classList.remove('hidden'); showToast("Η φωτογραφία προστέθηκε!", 'success'); } }
         function toggleScanner() {
             const c = document.getElementById('scanner-container');
-            if(!c.classList.contains('hidden')) { 
-                if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); 
-                return; 
-            }
+            if(!c.classList.contains('hidden')) { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); return; }
             c.classList.remove('hidden');
             setTimeout(() => {
                 html5QrcodeScanner = new Html5Qrcode("reader");
                 html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
                     html5QrcodeScanner.stop().then(() => c.classList.add('hidden'));
-                    document.getElementById('medicine').value = t; 
-                    // Optional: Auto-add or let user verify
-                    // addItemToList(); 
-                    showToast("Barcode Scanned!", 'success');
+                    document.getElementById('medicine').value = t; showToast("Barcode Scanned!", 'success');
                 }, (e) => {});
             }, 100);
         }
 
-        // Handle Voice
         function startVoiceInput() {
             if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error');
             const recognition = new SpeechRecognition();
@@ -584,7 +654,6 @@
             if(!navigator.geolocation) return showToast("GPS not supported.", "error");
             const btn = document.querySelector('button[onclick="getLocation()"]');
             const originalText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>'; 
-            
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = { lat: position.coords.latitude, lon: position.coords.longitude };
@@ -602,10 +671,7 @@
         function toggleLang() {
             currentLang = currentLang === 'el' ? 'en' : 'el';
             document.getElementById('lang-flag').innerText = currentLang === 'el' ? '🇬🇷' : '🇬🇧';
-            document.querySelectorAll('[data-lang-key]').forEach(el => {
-                const key = el.getAttribute('data-lang-key');
-                if(translations[currentLang][key]) el.innerText = translations[currentLang][key];
-            });
+            document.querySelectorAll('[data-lang-key]').forEach(el => { const key = el.getAttribute('data-lang-key'); if(translations[currentLang][key]) el.innerText = translations[currentLang][key]; });
         }
         
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Check email!", 'success'); closeModal('user'); } }
