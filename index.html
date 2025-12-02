@@ -75,7 +75,10 @@
         .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
         *:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
         
-        /* List Item Badge Animation */
+        /* Accessibility */
+        .a11y-grayscale { filter: grayscale(100%) !important; } .a11y-high-contrast { filter: contrast(125%) brightness(90%) !important; } .a11y-links-underline a, .a11y-links-underline button { text-decoration: underline !important; text-decoration-thickness: 2px !important; } .a11y-readable-font * { font-family: sans-serif !important; letter-spacing: 0.05em !important; word-spacing: 0.1em !important; }
+        
+        /* List Animation */
         .item-badge { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
@@ -118,34 +121,45 @@
                     
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2" role="separator"></div>
                     
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
                         <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus"></i> Λιστα Φαρμακων</label>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary"></i> Λιστα Φαρμακων</label>
                             <span class="text-[10px] bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-full font-bold" id="items-count-badge">0 είδη</span>
                         </div>
                         
-                        <div id="items-list-display" class="space-y-2 mb-4 empty:hidden max-h-40 overflow-y-auto"></div>
+                        <div id="items-list-display" class="space-y-2 mb-2 empty:hidden max-h-40 overflow-y-auto pr-1"></div>
                     
                         <div class="grid grid-cols-12 gap-2 relative">
                             <div class="col-span-8 relative">
-                                <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none dark:text-white shadow-sm" autocomplete="off" enterkeyhint="next">
+                                <i class="ph ph-pill absolute left-3 top-3.5 text-slate-400 text-lg z-10" aria-hidden="true"></i>
+                                <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl pl-10 pr-10 py-3 text-sm font-semibold focus:ring-2 focus:ring-primary/50 outline-none dark:text-white shadow-sm" autocomplete="off" enterkeyhint="next">
+                                <button type="button" onclick="startVoiceInput()" class="absolute right-2 top-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors active:scale-95" title="Φωνητική Αναζήτηση"><i class="ph ph-microphone text-lg" aria-hidden="true"></i></button>
                                 <div id="drug-suggestions" role="listbox"></div>
                             </div>
                             <div class="col-span-2">
-                                 <input id="quantity" type="number" min="1" value="1" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-1 py-3 text-sm text-center font-bold outline-none dark:text-white shadow-sm">
+                                 <input id="quantity" type="number" min="1" value="1" class="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-1 py-3 text-sm text-center font-bold outline-none dark:text-white shadow-sm">
                             </div>
                             <div class="col-span-2">
-                                <button type="button" onclick="addItemToList()" class="w-full h-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center justify-center text-xl shadow-md transition-transform active:scale-95"><i class="ph ph-plus-bold"></i></button>
+                                <button type="button" onclick="addItemToList()" class="w-full h-full bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center justify-center text-xl shadow-md transition-transform active:scale-95"><i class="ph ph-plus text-white font-bold"></i></button>
                             </div>
                         </div>
-                        
-                        <div class="flex gap-3 text-xs text-slate-500 justify-end items-center pt-1">
-                            <span>Γρήγορη προσθήκη:</span>
-                            <button type="button" onclick="startVoiceInput()" class="w-8 h-8 rounded-full bg-white dark:bg-slate-700 shadow flex items-center justify-center hover:text-primary active:scale-95"><i class="ph ph-microphone text-lg"></i></button>
-                            <button type="button" onclick="toggleScanner()" class="w-8 h-8 rounded-full bg-white dark:bg-slate-700 shadow flex items-center justify-center hover:text-primary active:scale-95"><i class="ph ph-barcode text-lg"></i></button>
-                        </div>
 
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
+                            
+                            <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:shadow-md transition-all group active:scale-95">
+                                <i class="ph ph-camera text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-blue-500 transition-colors"></i>
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">Photo</span>
+                            </button>
+                            
+                            <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:shadow-md transition-all group active:scale-95">
+                                <i class="ph ph-barcode text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-teal-500 transition-colors"></i>
+                                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase">Scan</span>
+                            </button>
+                        </div>
+                        
                         <div id="scanner-container" class="hidden mt-2 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-48 shadow-lg"><div id="reader" style="width:100%;height:100%;"></div></div>
+                        <div id="media-preview" class="hidden mt-2 text-xs text-teal-600 font-bold text-center bg-teal-50 p-2 rounded-lg" role="status"><i class="ph ph-check"></i> Φωτογραφία προστέθηκε!</div>
                     </div>
 
                     <div class="space-y-2"><label for="notes" class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase ml-1" data-lang-key="notes">Σημειωσεις</label><textarea id="notes" rows="2" placeholder="..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base resize-none focus:ring-2 focus:ring-primary/50 outline-none dark:text-white"></textarea></div>
@@ -200,6 +214,24 @@
         </div>
     </main>
 
+    <footer class="mt-auto py-8 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-10" role="contentinfo">
+        <div class="max-w-lg mx-auto px-6 text-center">
+            <div class="flex justify-center gap-6 mb-6">
+                <a href="#" aria-label="Facebook" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-facebook-logo text-2xl" aria-hidden="true"></i></a>
+                <a href="#" aria-label="Instagram" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-instagram-logo text-2xl" aria-hidden="true"></i></a>
+                <a href="#" aria-label="Twitter" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-twitter-logo text-2xl" aria-hidden="true"></i></a>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-500 mb-6">
+                <a href="#" onclick="openModal('terms'); return false;" class="hover:text-primary">Όροι Χρήσης</a>
+                <span class="text-slate-300">|</span>
+                <a href="#" onclick="openModal('gdpr'); return false;" class="hover:text-primary">GDPR</a>
+                <span class="text-slate-300">|</span>
+                <a href="#" onclick="openModal('pro'); return false;" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
+            </div>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest">© 2025 MediRadar Hellas</p>
+        </div>
+    </footer>
+
     <div id="modal-safety" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i class="ph ph-warning-circle text-3xl"></i></div><h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Σημαντική Ενημέρωση</h3><div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 p-4 rounded-xl mb-4 text-left space-y-2"><p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"><strong>Αποποίηση:</strong> Το MediRadar ενημερώνει μόνο για διαθεσιμότητα.</p></div><button onclick="confirmBooking()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 mb-3">Έχω ενημερωθεί & Συνεχίζω</button><button onclick="closeModal('safety')" class="text-slate-500 text-sm font-medium">Ακύρωση</button></div></div>
     
     <div id="modal-user" class="modal-backdrop">
@@ -213,6 +245,16 @@
                 <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg" aria-hidden="true"></i> Στείλτε μου Link</button>
             </form>
             <div class="flex justify-center mt-4"><button onclick="window.location.href='pharmacy.html'" class="text-xs text-teal-600 font-bold underline">Είστε Φαρμακοποιός;</button></div>
+        </div>
+    </div>
+    
+    <div id="modal-pro" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md">
+            <button onclick="closeModal('pro')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
+            <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Είσοδος Φαρμακείου</h3>
+            <div class="w-20 h-20 bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl"><i class="ph ph-first-aid-kit"></i></div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">Μεταβείτε στο ειδικό Portal για επαγγελματίες υγείας.</p>
+            <button onclick="window.location.href='pharmacy.html'" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"><span>Μετάβαση στο Portal</span> <i class="ph ph-arrow-right"></i></button>
         </div>
     </div>
     
@@ -483,7 +525,49 @@
             }, 1000);
         }
 
-        // --- UTILS ---
+        // --- UTILS & MEDIA HANDLERS RESTORED ---
+        
+        // Handle File Select (Photo)
+        function handleFileSelect(input) { 
+            if(input.files[0]) { 
+                document.getElementById('media-preview').classList.remove('hidden'); 
+                showToast("Η φωτογραφία προστέθηκε!", 'success'); 
+            } 
+        }
+
+        // Handle Scanner
+        function toggleScanner() {
+            const c = document.getElementById('scanner-container');
+            if(!c.classList.contains('hidden')) { 
+                if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); 
+                return; 
+            }
+            c.classList.remove('hidden');
+            setTimeout(() => {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
+                    html5QrcodeScanner.stop().then(() => c.classList.add('hidden'));
+                    document.getElementById('medicine').value = t; 
+                    // Optional: Auto-add or let user verify
+                    // addItemToList(); 
+                    showToast("Barcode Scanned!", 'success');
+                }, (e) => {});
+            }, 100);
+        }
+
+        // Handle Voice
+        function startVoiceInput() {
+            if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error');
+            const recognition = new SpeechRecognition();
+            recognition.lang = currentLang === 'el' ? 'el-GR' : 'en-US';
+            recognition.onstart = () => showToast("Μιλήστε τώρα...", 'info');
+            recognition.onresult = (e) => { 
+                document.getElementById('medicine').value = e.results[0][0].transcript; 
+                showToast("Είπατε: " + e.results[0][0].transcript, 'success');
+            };
+            recognition.start();
+        }
+
         function switchTab(id) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); }
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
@@ -515,28 +599,6 @@
             );
         }
         
-        function toggleScanner() {
-            const c = document.getElementById('scanner-container');
-            if(!c.classList.contains('hidden')) { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); return; }
-            c.classList.remove('hidden');
-            setTimeout(() => {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-                    html5QrcodeScanner.stop().then(() => c.classList.add('hidden'));
-                    document.getElementById('medicine').value = t; addItemToList(); showToast("Barcode Scanned!", 'success');
-                }, (e) => {});
-            }, 100);
-        }
-
-        function startVoiceInput() {
-            if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error');
-            const recognition = new SpeechRecognition();
-            recognition.lang = currentLang === 'el' ? 'el-GR' : 'en-US';
-            recognition.onstart = () => showToast("Μιλήστε τώρα...", 'info');
-            recognition.onresult = (e) => { document.getElementById('medicine').value = e.results[0][0].transcript; addItemToList(); };
-            recognition.start();
-        }
-
         function toggleLang() {
             currentLang = currentLang === 'el' ? 'en' : 'el';
             document.getElementById('lang-flag').innerText = currentLang === 'el' ? '🇬🇷' : '🇬🇧';
