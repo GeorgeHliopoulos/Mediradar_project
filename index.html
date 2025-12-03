@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="MediRadar - Βρείτε φάρμακα άμεσα και τοπικά.">
     <meta name="theme-color" content="#0d9488">
-    
     <title>MediRadar App</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -16,66 +14,20 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#0d9488', secondary: '#0f172a' },
-                    animation: { 
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 
-                        'fade-in': 'fadeIn 0.3s ease-out forwards', 
-                        'slide-up': 'slideUp 0.3s ease-out forwards' 
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0d9488', secondary: '#0f172a' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards', 'slide-up': 'slideUp 0.3s ease-out forwards' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }, slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } } } } } }
     </script>
 
     <style>
-        /* Base Resets */
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        body { overscroll-behavior-y: none; display: flex; flex-direction: column; min-height: 100dvh; }
-        
-        /* Background Fixes */
-        .emoji-bg { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100vw; height: 100vh; 
-            overflow: hidden; 
-            z-index: -1; 
-            pointer-events: none; 
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
-        }
-        html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        
-        /* Floating Emojis */
-        .emoji { position: absolute; bottom: -100px; font-size: 2rem; opacity: 0.4; animation: floatUp 15s linear infinite; z-index: -1; }
-        @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
-        
-        /* Glass Components */
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; }
-        html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
-        
-        /* Tabs & Lists */
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; } body { overscroll-behavior-y: none; display: flex; flex-direction: column; min-height: 100dvh; }
+        .emoji-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: -1; pointer-events: none; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); } html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .emoji { position: absolute; bottom: -100px; font-size: 2rem; opacity: 0.4; animation: floatUp 15s linear infinite; z-index: -1; } @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; } html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
-        #drug-suggestions, #city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; }
-        html.dark #drug-suggestions, html.dark #city-suggestions { background: #1e293b; border-color: #334155; }
-        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; } 
-        html.dark .suggestion-item { border-color: #334155; color: #e2e8f0; } .suggestion-item:hover { background-color: #f0f9ff; } html.dark .suggestion-item:hover { background-color: #334155; }
-        
-        /* Modals */
-        .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; }
-        .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
-        .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; }
-        .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
+        #drug-suggestions, #city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; margin-top: 4px; } html.dark #drug-suggestions, html.dark #city-suggestions { background: #1e293b; border-color: #334155; }
+        .suggestion-item { padding: 0.75rem 1rem; cursor: pointer; font-size: 0.875rem; border-bottom: 1px solid #f1f5f9; } html.dark .suggestion-item { border-color: #334155; color: #e2e8f0; } .suggestion-item:hover { background-color: #f0f9ff; } html.dark .suggestion-item:hover { background-color: #334155; }
+        .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; } .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; } .modal-backdrop.active .modal-content { animation: slideUp 0.3s ease-out forwards; }
         *:focus-visible { outline: 2px solid #0d9488; outline-offset: 2px; }
-        
-        /* Animations */
         .item-badge { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
@@ -85,140 +37,74 @@
 
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative pt-safe" aria-label="Κύρια πλοήγηση">
         <div class="flex gap-2" id="user-nav-container">
-            <button onclick="openModal('user')" aria-label="Είσοδος ή Εγγραφή Χρήστη" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center gap-1 active:scale-95">
-                <i class="ph ph-user text-lg" aria-hidden="true"></i> Είσοδος
+            <button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded-xl text-xs font-bold text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center gap-1 active:scale-95">
+                <i class="ph ph-user text-lg"></i> Είσοδος
             </button>
         </div>
         <div class="flex gap-2">
-            <button onclick="toggleLang()" aria-label="Αλλαγή Γλώσσας" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95"><span id="lang-flag" aria-hidden="true">🇬🇷</span></button>
-            <button onclick="toggleTheme()" aria-label="Εναλλαγή Φωτεινού/Σκοτεινού θέματος" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm transition-transform border border-white/50 hover:scale-110 active:scale-95"><i id="theme-icon" class="ph ph-moon-stars" aria-hidden="true"></i></button>
+            <button onclick="toggleLang()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95"><span id="lang-flag">🇬🇷</span></button>
+            <button onclick="toggleTheme()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm transition-transform border border-white/50 hover:scale-110 active:scale-95"><i id="theme-icon" class="ph ph-moon-stars"></i></button>
         </div>
     </nav>
 
     <main id="main-content" class="w-full max-w-lg mx-auto p-4 pb-6 flex-grow z-10 relative">
         <header class="text-center mb-6">
-            <div class="inline-flex items-center justify-center bg-white/70 dark:bg-slate-700/70 p-4 rounded-2xl mb-3 shadow-sm backdrop-blur-sm border border-white/50" aria-hidden="true"><i class="ph ph-magnifying-glass text-4xl text-primary"></i></div>
+            <div class="inline-flex items-center justify-center bg-white/70 dark:bg-slate-700/70 p-4 rounded-2xl mb-3 shadow-sm backdrop-blur-sm border border-white/50"><i class="ph ph-magnifying-glass text-4xl text-primary"></i></div>
             <h1 class="text-3xl font-bold text-primary bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-cyan-500 drop-shadow-sm">MediRadar</h1>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium" data-lang-key="subtitle">Βρες το φάρμακό σου άμεσα & τοπικά.</p>
         </header>
 
-        <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist" aria-label="Επιλογές προβολής">
-            <button onclick="switchTab('search')" id="btn-search" role="tab" aria-selected="true" aria-controls="tab-search" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5" data-lang-key="search_tab">Αναζήτηση</button>
-            <button onclick="switchTab('how')" id="btn-how" role="tab" aria-selected="false" aria-controls="tab-how" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Πώς λειτουργεί</button>
+        <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist">
+            <button onclick="switchTab('search')" id="btn-search" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5" data-lang-key="search_tab">Αναζήτηση</button>
+            <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Πώς λειτουργεί</button>
         </div>
 
-        <div id="tab-search" class="tab-content active" role="tabpanel" aria-labelledby="btn-search">
+        <div id="tab-search" class="tab-content active" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 relative overflow-visible">
                 <form id="request-form" class="space-y-6">
-                    
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label for="full-name" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Ονομα <span class="text-red-500">*</span></label>
-                            <input id="full-name" type="text" placeholder="Μαρία Π." oninput="saveUserData()" autocomplete="name" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium" required>
-                        </div>
-                        <div class="space-y-1 relative">
-                            <label for="phone" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Κινητο (10 ψηφια) <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <input id="phone" type="tel" maxlength="10" placeholder="69..." oninput="validatePhoneUI(this)" autocomplete="tel" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required>
-                                <div id="phone-status" class="absolute right-3 top-3 text-lg hidden"></div>
-                            </div>
-                        </div>
+                        <div class="space-y-1"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Ονομα <span class="text-red-500">*</span></label><input id="full-name" type="text" placeholder="Μαρία Π." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required></div>
+                        <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Κινητο (10 ψηφια) <span class="text-red-500">*</span></label><div class="relative"><input id="phone" type="tel" maxlength="10" placeholder="69..." oninput="validatePhoneUI(this)" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required><div id="phone-status" class="absolute right-3 top-3 text-lg hidden"></div></div></div>
                     </div>
-
-                    <div class="space-y-1 relative">
-                        <label for="city" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Περιοχη <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <input id="city" type="text" placeholder="Περιοχή..." oninput="saveUserData()" autocomplete="off" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 pr-32 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-slate-900 dark:text-white font-medium" required>
-                            <div id="city-suggestions" role="listbox"></div>
-                            <button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-lg text-[10px] font-bold hover:bg-teal-200 transition-colors flex items-center gap-1 shadow-sm active:scale-95">
-                                <i class="ph ph-navigation-arrow text-sm" aria-hidden="true"></i> <span data-lang-key="near_me">Κοντά μου</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2" role="separator"></div>
+                    <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Περιοχη <span class="text-red-500">*</span></label><div class="relative"><input id="city" type="text" placeholder="Περιοχή..." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 pr-32 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required><div id="city-suggestions" role="listbox"></div><button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-lg text-[10px] font-bold hover:bg-teal-200 transition-colors flex items-center gap-1 shadow-sm active:scale-95"><i class="ph ph-navigation-arrow text-sm"></i> <span data-lang-key="near_me">Κοντά μου</span></button></div></div>
+                    <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary text-lg"></i> Λιστα Φαρμακων <span class="text-red-500">*</span></label>
                             <span class="text-[10px] bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 px-2 py-1 rounded-full font-bold" id="items-count-badge">0 είδη</span>
                         </div>
-                        
                         <div id="items-list-display" class="space-y-2 mb-2 empty:hidden max-h-40 overflow-y-auto pr-1"></div>
-                    
                         <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative">
                             <div class="relative mb-3">
                                 <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ονομασια Ειδους</label>
                                 <input id="medicine" type="text" placeholder="π.χ. Depon" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg pl-3 pr-10 py-2 text-sm font-semibold focus:ring-2 focus:ring-primary/50 outline-none dark:text-white" autocomplete="off" enterkeyhint="next">
-                                <button type="button" onclick="startVoiceInput()" class="absolute right-1 top-6 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors active:scale-95" title="Φωνητική Εισαγωγή">
-                                    <i class="ph ph-microphone text-lg"></i>
-                                </button>
+                                <button type="button" onclick="startVoiceInput()" class="absolute right-1 top-6 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors active:scale-95"><i class="ph ph-microphone text-lg"></i></button>
                                 <div id="drug-suggestions" role="listbox"></div>
                             </div>
-
                             <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Κατηγορια</label>
-                                    <div class="relative">
-                                        <select id="med-type" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-2 text-sm appearance-none outline-none focus:border-primary cursor-pointer">
-                                            <option value="pills">💊 Χάπια / Κάψουλες</option>
-                                            <option value="syrup">🧴 Σιρόπι / Πόσιμο</option>
-                                            <option value="cream">🩹 Αλοιφή / Τζελ</option>
-                                            <option value="inject">💉 Ενέσιμο / Αμπούλες</option>
-                                            <option value="spray">💨 Εισπνεόμενο / Σπρέι</option>
-                                            <option value="baby">🍼 Βρεφικά / Γάλατα</option>
-                                            <option value="cosmetic">💄 Καλλυντικά</option>
-                                            <option value="device">🩺 Ιατροτεχνολογικά</option>
-                                            <option value="other">❓ Άλλο</option>
-                                        </select>
-                                        <i class="ph ph-caret-down absolute right-2 top-2.5 text-slate-400 pointer-events-none"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ποσοτητα</label>
-                                    <div class="flex items-center">
-                                        <button type="button" onclick="adjustQty(-1)" class="bg-slate-200 w-8 h-9 rounded-l-lg text-slate-600 hover:bg-slate-300 font-bold">-</button>
-                                        <input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 border-y border-slate-200 h-9 text-center text-sm font-bold outline-none dark:bg-slate-800 dark:border-slate-600">
-                                        <button type="button" onclick="adjustQty(1)" class="bg-slate-200 w-8 h-9 rounded-r-lg text-slate-600 hover:bg-slate-300 font-bold">+</button>
-                                    </div>
-                                </div>
+                                <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Κατηγορια</label><div class="relative"><select id="med-type" class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-2 text-sm appearance-none outline-none focus:border-primary cursor-pointer"><option value="pills">💊 Χάπια</option><option value="syrup">🧴 Σιρόπι</option><option value="cream">🩹 Αλοιφή</option><option value="inject">💉 Ενέσιμο</option><option value="spray">💨 Σπρέι</option><option value="baby">🍼 Βρεφικά</option><option value="cosmetic">💄 Καλλυντικά</option><option value="device">🩺 Συσκευές</option><option value="other">❓ Άλλο</option></select><i class="ph ph-caret-down absolute right-2 top-2.5 text-slate-400 pointer-events-none"></i></div></div>
+                                <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Ποσοτητα</label><div class="flex items-center"><button type="button" onclick="adjustQty(-1)" class="bg-slate-200 w-8 h-9 rounded-l-lg text-slate-600 hover:bg-slate-300 font-bold">-</button><input id="quantity" type="number" min="1" value="1" class="w-full bg-slate-100 border-y border-slate-200 h-9 text-center text-sm font-bold outline-none dark:bg-slate-800 dark:border-slate-600"><button type="button" onclick="adjustQty(1)" class="bg-slate-200 w-8 h-9 rounded-r-lg text-slate-600 hover:bg-slate-300 font-bold">+</button></div></div>
                             </div>
-
-                            <button type="button" onclick="addItemToList()" class="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-lg py-2.5 flex items-center justify-center gap-2 font-bold text-sm shadow-md transition-transform active:scale-[0.98]">
-                                <i class="ph ph-plus-circle text-lg"></i> Προσθήκη στη Λίστα
-                            </button>
+                            <button type="button" onclick="addItemToList()" class="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-lg py-2.5 flex items-center justify-center gap-2 font-bold text-sm shadow-md transition-transform active:scale-[0.98]"><i class="ph ph-plus-circle text-lg"></i> Προσθήκη στη Λίστα</button>
                         </div>
-
-                        <div class="mt-4">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-2 text-center">Δεν ξερετε το ονομα; Χρησιμοποιηστε:</p>
+                        <div class="mt-4"><p class="text-[10px] font-bold text-slate-400 uppercase mb-2 text-center">Δεν ξερετε το ονομα;</p>
                             <div class="grid grid-cols-2 gap-3">
                                 <input id="request-image" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(this)">
-                                
-                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-blue-400 transition-all group active:scale-95">
-                                    <i class="ph ph-camera text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-blue-500 transition-colors"></i>
-                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Φωτογραφία Κουτιού</span>
-                                    <span class="text-[9px] text-slate-400">Για σιγουριά</span>
-                                </button>
-                                
-                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-teal-400 transition-all group active:scale-95">
-                                    <i class="ph ph-barcode text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-teal-500 transition-colors"></i>
-                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Σάρωση Barcode</span>
-                                    <span class="text-[9px] text-slate-400">Πάνω στο κουτί</span>
-                                </button>
+                                <button type="button" onclick="document.getElementById('request-image').click()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-blue-400 transition-all group active:scale-95"><i class="ph ph-camera text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-blue-500 transition-colors"></i><span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Φωτογραφία</span></button>
+                                <button type="button" onclick="toggleScanner()" class="flex flex-col items-center justify-center bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-3 hover:border-teal-400 transition-all group active:scale-95"><i class="ph ph-barcode text-2xl text-slate-600 dark:text-slate-300 mb-1 group-hover:text-teal-500 transition-colors"></i><span class="text-[10px] font-bold text-slate-700 dark:text-slate-200">Scan Barcode</span></button>
                             </div>
                         </div>
-                        
                         <div id="scanner-container" class="hidden mt-2 rounded-xl overflow-hidden relative bg-black border-2 border-primary h-48 shadow-lg"><div id="reader" style="width:100%;height:100%;"></div></div>
-                        <div id="media-preview" class="hidden mt-2 text-xs text-teal-600 font-bold text-center bg-teal-50 p-2 rounded-lg" role="status"><i class="ph ph-check"></i> Φωτογραφία προστέθηκε!</div>
+                        <div id="media-preview" class="hidden mt-2 text-xs text-teal-600 font-bold text-center bg-teal-50 p-2 rounded-lg"><i class="ph ph-check"></i> Φωτογραφία προστέθηκε!</div>
                     </div>
 
-                    <div class="space-y-2"><label for="notes" class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1" data-lang-key="notes">Σημειωσεις (Προαιρετικο)</label><textarea id="notes" rows="2" placeholder="Π.χ. Θα ήθελα και οδηγίες χρήσης..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base resize-none focus:ring-2 focus:ring-primary/50 outline-none dark:text-white"></textarea></div>
-                    
+                    <div class="space-y-2"><label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Σημειωσεις (Προαιρετικο)</label><textarea id="notes" rows="2" placeholder="..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl px-4 py-3.5 text-base resize-none focus:ring-2 focus:ring-primary/50 outline-none dark:text-white"></textarea></div>
                     <div class="space-y-3 pt-2">
-                        <label class="flex items-start gap-3 px-3 cursor-pointer group bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl active:bg-slate-100 dark:active:bg-slate-800"><input type="checkbox" id="accept-generic" class="mt-1 w-5 h-5 text-primary rounded border-gray-300 focus:ring-offset-0" checked aria-label="Αποδοχή γενόσημου"><span class="text-xs text-slate-600 dark:text-slate-300"><span data-lang-key="accept_text">Δέχομαι να μου προτείνουν</span> <a href="#" onclick="openModal('generic'); return false;" class="font-bold underline decoration-dotted text-primary hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-primary rounded" data-lang-key="accept_link">γενόσημο</a>.</span></label>
-                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" id="gdpr-check" class="mt-0.5 w-5 h-5 text-primary rounded border-gray-300 focus:ring-offset-0" required aria-label="Αποδοχή όρων χρήσης και GDPR"><span class="text-xs text-slate-500 dark:text-slate-400"><span data-lang-key="terms_agree">Αποδέχομαι τους</span> <a href="#" onclick="openModal('terms'); return false;" class="underline text-primary font-semibold focus:outline-none focus:ring-2 focus:ring-primary rounded" data-lang-key="terms_link">Όρους Χρήσης</a> & <a href="#" onclick="openModal('gdpr'); return false;" class="underline text-primary font-semibold focus:outline-none focus:ring-2 focus:ring-primary rounded" data-lang-key="gdpr_link">GDPR</a>.</span></label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer group bg-slate-50 dark:bg-slate-800/50 p-2 rounded-xl active:bg-slate-100 dark:active:bg-slate-800"><input type="checkbox" id="accept-generic" class="mt-1 w-5 h-5 text-primary rounded border-gray-300 focus:ring-offset-0" checked><span class="text-xs text-slate-600 dark:text-slate-300"><span data-lang-key="accept_text">Δέχομαι να μου προτείνουν</span> <a href="#" onclick="openModal('generic'); return false;" class="font-bold underline decoration-dotted text-primary hover:text-teal-700">γενόσημο</a>.</span></label>
+                        <label class="flex items-start gap-3 px-3 cursor-pointer"><input type="checkbox" id="gdpr-check" class="mt-0.5 w-5 h-5 text-primary rounded border-gray-300 focus:ring-offset-0" required><span class="text-xs text-slate-500 dark:text-slate-400"><span data-lang-key="terms_agree">Αποδέχομαι τους</span> <a href="#" onclick="openModal('terms'); return false;" class="underline text-primary font-semibold">Όρους Χρήσης</a> & <a href="#" onclick="openModal('gdpr'); return false;" class="underline text-primary font-semibold">GDPR</a>.</span></label>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-lg font-bold py-4 rounded-2xl shadow-lg shadow-teal-500/30 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-teal-200"><i class="ph ph-paper-plane-right text-xl" aria-hidden="true"></i> <span data-lang-key="send">Αποστολή</span></button>
+                    <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-lg font-bold py-4 rounded-2xl shadow-lg shadow-teal-500/30 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-teal-200"><i class="ph ph-paper-plane-right text-xl"></i> <span data-lang-key="send">Αποστολή</span></button>
                 </form>
             </div>
         </div>
@@ -226,88 +112,53 @@
         <div id="tab-results" class="tab-content" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 min-h-[50vh] text-center">
                 <div id="loading-state" role="status" aria-live="polite">
-                    <div class="flex justify-center gap-4 mb-6 text-4xl">
-                        <span class="animate-bounce delay-100">💊</span><span class="animate-bounce delay-200">🩹</span><span class="animate-bounce delay-300">🩺</span>
-                    </div>
+                    <div class="flex justify-center gap-4 mb-6 text-4xl"><span class="animate-bounce delay-100">💊</span><span class="animate-bounce delay-200">🩹</span><span class="animate-bounce delay-300">🩺</span></div>
                     <h2 id="loading-text" class="text-xl font-bold text-primary mb-2">Αναζήτηση...</h2>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Ειδοποιούμε τα φαρμακεία κοντά σας.</p>
                     <button onclick="resetApp()" class="mt-4 text-red-400 text-sm font-bold hover:text-red-500 active:scale-95 border border-red-200 rounded-lg px-4 py-2">Ακύρωση</button>
                 </div>
-                <div id="responses-list" class="space-y-4 text-left hidden mt-4" aria-live="polite"></div>
+                <div id="responses-list" class="space-y-4 text-left hidden mt-4 pb-20" aria-live="polite"></div>
             </div>
         </div>
 
-        <div id="pickup-view" class="hidden animate-fadeIn" role="region" aria-label="Πληροφορίες Παραλαβής">
+        <div id="pickup-view" class="hidden animate-fadeIn" role="region">
             <div class="glass-card rounded-3xl p-8 text-center border-2 border-teal-500 dark:border-teal-700">
-                <div class="w-24 h-24 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl ring-8 ring-teal-50 dark:ring-teal-900/20" aria-hidden="true"><i class="ph ph-check-circle text-4xl text-primary"></i></div>
+                <div class="w-24 h-24 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl ring-8 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-check-circle text-4xl text-primary"></i></div>
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Κρατήθηκε!</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Ο φαρμακοποιός ενημερώθηκε.</p>
-                
                 <div id="missing-items-alert" class="hidden mb-6 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-left">
                     <h4 class="text-sm font-bold text-orange-700 dark:text-orange-400 flex items-center gap-2"><i class="ph ph-warning"></i> Εκκρεμότητες</h4>
                     <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 mb-2">Δεν βρέθηκαν στο φαρμακείο:</p>
                     <div id="missing-items-list" class="flex flex-wrap gap-2 mb-3"></div>
-                    <button onclick="reSearchMissing()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg shadow active:scale-95 flex items-center justify-center gap-2">
-                        <i class="ph ph-magnifying-glass"></i> Νέα Αναζήτηση για τα υπόλοιπα
-                    </button>
+                    <button onclick="reSearchMissing()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 rounded-lg shadow active:scale-95 flex items-center justify-center gap-2"><i class="ph ph-magnifying-glass"></i> Νέα Αναζήτηση για τα υπόλοιπα</button>
                 </div>
-
-                <div class="bg-white dark:bg-slate-700 rounded-2xl p-4 mb-6 shadow-inner border border-slate-200 dark:border-slate-600"><p class="text-xs text-slate-500 dark:text-slate-300 font-bold uppercase mb-1">Χρονος Παραλαβης</p><div id="timer-display" class="text-5xl font-mono font-bold text-primary dark:text-teal-400 tracking-tighter" role="timer" aria-live="off">60:00</div></div>
-                <div class="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 pt-4"><p class="text-xs text-slate-500 dark:text-slate-300 font-bold uppercase mb-2">Κωδικος Παραλαβης</p><div id="pickup-code" class="text-3xl font-mono font-bold text-slate-800 dark:text-white tracking-[0.2em] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 py-3 rounded-xl" aria-label="Κωδικός παραλαβής">------</div></div>
-                <button onclick="openGoogleMaps()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mb-3 flex items-center justify-center gap-2 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 active:scale-95"><i class="ph ph-map-trifold text-lg" aria-hidden="true"></i> Χάρτης</button>
-                <button onclick="resetApp()" class="text-slate-400 text-sm underline hover:text-slate-600 dark:hover:text-slate-200 active:scale-95">Ολοκλήρωση</button>
+                <div class="bg-white dark:bg-slate-700 rounded-2xl p-4 mb-6 shadow-inner border border-slate-200 dark:border-slate-600"><p class="text-xs text-slate-500 dark:text-slate-300 font-bold uppercase mb-1">Χρονος Παραλαβης</p><div id="timer-display" class="text-5xl font-mono font-bold text-primary dark:text-teal-400 tracking-tighter">60:00</div></div>
+                <div class="border-t border-dashed border-slate-300 dark:border-slate-600 my-4 pt-4"><p class="text-xs text-slate-500 dark:text-slate-300 font-bold uppercase mb-2">Κωδικος Παραλαβης</p><div id="pickup-code" class="text-3xl font-mono font-bold text-slate-800 dark:text-white tracking-[0.2em] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 py-3 rounded-xl">------</div></div>
+                <button onclick="openGoogleMaps()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mb-3 flex items-center justify-center gap-2 shadow-lg active:scale-95"><i class="ph ph-map-trifold text-lg"></i> Χάρτης</button>
+                <button onclick="resetApp()" class="text-slate-400 text-sm underline hover:text-slate-600 active:scale-95">Ολοκλήρωση</button>
             </div>
         </div>
         
-        <div id="tab-how" class="tab-content" role="tabpanel" aria-labelledby="btn-how">
-             <div class="glass-card rounded-3xl p-6"><h3 class="text-xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2"><i class="ph ph-info text-primary" aria-hidden="true"></i> Πώς λειτουργεί;</h3><ul class="space-y-6"><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm" aria-hidden="true">1</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Αίτημα</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Συμπληρώνεις τη λίστα φαρμάκων.</p></div></li><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm" aria-hidden="true">2</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Ειδοποίηση</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Το MediRadar ψάχνει στα φαρμακεία.</p></div></li><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm" aria-hidden="true">3</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Κράτηση</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Βλέπεις τι βρέθηκε και κάνεις κράτηση.</p></div></li></ul></div>
-        </div>
+        <div id="tab-how" class="tab-content" role="tabpanel"><div class="glass-card rounded-3xl p-6"><h3 class="text-xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2"><i class="ph ph-info text-primary"></i> Πώς λειτουργεί;</h3><ul class="space-y-6"><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm">1</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Αίτημα</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Συμπληρώνεις τη λίστα φαρμάκων.</p></div></li><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm">2</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Ειδοποίηση</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Το MediRadar ψάχνει στα φαρμακεία.</p></div></li><li class="flex gap-4 items-start"><div class="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300 w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-lg shadow-sm">3</div><div><h4 class="font-bold text-slate-800 dark:text-slate-200">Κράτηση</h4><p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Βλέπεις τι βρέθηκε και κάνεις κράτηση.</p></div></li></ul></div></div>
     </main>
 
     <footer class="mt-auto py-8 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-10" role="contentinfo">
         <div class="max-w-lg mx-auto px-6 text-center">
             <div class="flex justify-center gap-6 mb-6">
-                <a href="#" aria-label="Facebook" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-facebook-logo text-2xl" aria-hidden="true"></i></a>
-                <a href="#" aria-label="Instagram" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-instagram-logo text-2xl" aria-hidden="true"></i></a>
-                <a href="#" aria-label="Twitter" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-twitter-logo text-2xl" aria-hidden="true"></i></a>
+                <a href="#" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-facebook-logo text-2xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-instagram-logo text-2xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-primary transition-colors"><i class="ph ph-twitter-logo text-2xl"></i></a>
             </div>
             <div class="flex flex-wrap justify-center gap-4 text-xs font-bold text-slate-500 mb-6">
-                <a href="#" onclick="openModal('terms'); return false;" class="hover:text-primary">Όροι Χρήσης</a>
-                <span class="text-slate-300">|</span>
-                <a href="#" onclick="openModal('gdpr'); return false;" class="hover:text-primary">GDPR</a>
-                <span class="text-slate-300">|</span>
-                <a href="#" onclick="openModal('pro'); return false;" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
+                <a href="#" onclick="openModal('terms'); return false;" class="hover:text-primary">Όροι Χρήσης</a><span class="text-slate-300">|</span><a href="#" onclick="openModal('gdpr'); return false;" class="hover:text-primary">GDPR</a><span class="text-slate-300">|</span><a href="#" onclick="openModal('pro'); return false;" class="hover:text-primary text-teal-600 dark:text-teal-400">Φαρμακοποιοί (Pro)</a>
             </div>
             <p class="text-[10px] text-slate-400 uppercase tracking-widest">© 2025 MediRadar Hellas</p>
         </div>
     </footer>
 
     <div id="modal-safety" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i class="ph ph-warning-circle text-3xl"></i></div><h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Σημαντική Ενημέρωση</h3><div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 p-4 rounded-xl mb-4 text-left space-y-2"><p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"><strong>Αποποίηση:</strong> Το MediRadar ενημερώνει μόνο για διαθεσιμότητα.</p></div><button onclick="confirmBooking()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95 mb-3">Έχω ενημερωθεί & Συνεχίζω</button><button onclick="closeModal('safety')" class="text-slate-500 text-sm font-medium">Ακύρωση</button></div></div>
-    
-    <div id="modal-user" class="modal-backdrop">
-        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up">
-            <button onclick="closeModal('user')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
-            <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl" aria-hidden="true"></i></div>
-            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Χωρίς κωδικούς! Σας στέλνουμε ένα link στο email.</p>
-            <form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)">
-                <div class="text-left"><label for="user-email" class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div>
-                <button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg" aria-hidden="true"></i> Στείλτε μου Link</button>
-            </form>
-            <div class="flex justify-center mt-4"><button onclick="window.location.href='pharmacy.html'" class="text-xs text-teal-600 font-bold underline">Είστε Φαρμακοποιός;</button></div>
-        </div>
-    </div>
-    
-    <div id="modal-pro" class="modal-backdrop">
-        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md">
-            <button onclick="closeModal('pro')" aria-label="Κλείσιμο" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-90"><i class="ph ph-x text-xl" aria-hidden="true"></i></button>
-            <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Είσοδος Φαρμακείου</h3>
-            <div class="w-20 h-20 bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl"><i class="ph ph-first-aid-kit"></i></div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">Μεταβείτε στο ειδικό Portal για επαγγελματίες υγείας.</p>
-            <button onclick="window.location.href='pharmacy.html'" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"><span>Μετάβαση στο Portal</span> <i class="ph ph-arrow-right"></i></button>
-        </div>
-    </div>
-    
+    <div id="modal-user" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up"><button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl"></i></button><div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl"></i></div><h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3><p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Χωρίς κωδικούς! Σας στέλνουμε ένα link στο email.</p><form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)"><div class="text-left"><label for="user-email" class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div><button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg"></i> Στείλτε μου Link</button></form><div class="flex justify-center mt-4"><button onclick="window.location.href='pharmacy.html'" class="text-xs text-teal-600 font-bold underline">Είστε Φαρμακοποιός;</button></div></div></div>
+    <div id="modal-pro" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md"><button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl"></i></button><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Είσοδος Φαρμακείου</h3><div class="w-20 h-20 bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl"><i class="ph ph-first-aid-kit"></i></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-6">Μεταβείτε στο ειδικό Portal για επαγγελματίες υγείας.</p><button onclick="window.location.href='pharmacy.html'" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"><span>Μετάβαση στο Portal</span> <i class="ph ph-arrow-right"></i></button></div></div>
     <div id="modal-generic" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none"><button onclick="closeModal('generic')" class="absolute top-4 right-4 text-slate-400"><i class="ph ph-x text-xl"></i></button><h3 class="text-lg font-bold mb-2 dark:text-white">Τι είναι το γενόσημο;</h3><p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left">Ίδια δραστική ουσία, ίδια αποτελεσματικότητα, χαμηλότερη τιμή.</p><button onclick="closeModal('generic')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg">Κατάλαβα</button></div></div>
     <div id="modal-terms" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('terms')" class="absolute top-4 right-4 text-slate-500"><i class="ph ph-x text-xl"></i></button><h3 class="font-bold text-xl mb-4 dark:text-white">Όροι Χρήσης</h3><p class="text-sm text-slate-600 dark:text-slate-300">Terms content...</p></div></div>
     <div id="modal-gdpr" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 relative p-6 h-[80vh] overflow-y-auto"><button onclick="closeModal('gdpr')" class="absolute top-4 right-4 text-slate-500"><i class="ph ph-x text-xl"></i></button><h3 class="font-bold text-xl mb-4 dark:text-white">GDPR</h3><p class="text-sm text-slate-600 dark:text-slate-300">GDPR content...</p></div></div>
@@ -320,11 +171,7 @@
 
         const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα"];
         const medicinesData = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin"];
-        
-        const translations = {
-            el: { search_tab: "Αναζήτηση", how_tab: "Πώς λειτουργεί", name: "Όνομα", phone: "Τηλέφωνο", area: "Περιοχή", near_me: "Κοντά μου", notes: "Σημειώσεις", accept_text: "Δέχομαι να μου προτείνουν", accept_link: "γενόσημο", terms_agree: "Αποδέχομαι τους", terms_link: "Όρους Χρήσης", gdpr_link: "GDPR", send: "Αποστολή", subtitle: "Βρες το φάρμακό σου άμεσα & τοπικά." },
-            en: { search_tab: "Search", how_tab: "How it works", name: "Name", phone: "Phone", area: "City / Area", near_me: "Near Me", notes: "Notes", accept_text: "I accept suggestions for", accept_link: "generics", terms_agree: "I accept the", terms_link: "Terms", gdpr_link: "GDPR", send: "Send Request", subtitle: "Find your medicine instantly & locally." }
-        };
+        const translations = { el: { search_tab: "Αναζήτηση", how_tab: "Πώς λειτουργεί", name: "Όνομα", phone: "Τηλέφωνο", area: "Περιοχή", near_me: "Κοντά μου", notes: "Σημειώσεις", accept_text: "Δέχομαι να μου προτείνουν", accept_link: "γενόσημο", terms_agree: "Αποδέχομαι τους", terms_link: "Όρους Χρήσης", gdpr_link: "GDPR", send: "Αποστολή", subtitle: "Βρες το φάρμακό σου άμεσα & τοπικά." }, en: { search_tab: "Search", how_tab: "How it works", name: "Name", phone: "Phone", area: "City / Area", near_me: "Near Me", notes: "Notes", accept_text: "I accept suggestions for", accept_link: "generics", terms_agree: "I accept the", terms_link: "Terms", gdpr_link: "GDPR", send: "Send Request", subtitle: "Find your medicine instantly & locally." } };
         
         let currentLang = 'el';
         let userLocation = { lat: null, lon: null };
@@ -336,163 +183,61 @@
         let responsePoller = null;
         let itemsNotReserved = [];
         let isPhoneValid = false;
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let html5QrcodeScanner = null;
 
-        // Icon mapping for types
-        const typeIcons = {
-            'pills': '💊', 'syrup': '🧴', 'cream': '🩹', 'inject': '💉', 
-            'spray': '💨', 'baby': '🍼', 'cosmetic': '💄', 'device': '🩺', 'other': '❓'
-        };
-        const typeLabels = {
-            'pills': 'Χάπια', 'syrup': 'Σιρόπι', 'cream': 'Αλοιφή', 'inject': 'Ενέσιμο', 
-            'spray': 'Σπρέι', 'baby': 'Βρεφικά', 'cosmetic': 'Καλλυντικά', 'device': 'Συσκευές', 'other': 'Άλλο'
-        };
+        const typeIcons = {'pills': '💊', 'syrup': '🧴', 'cream': '🩹', 'inject': '💉', 'spray': '💨', 'baby': '🍼', 'cosmetic': '💄', 'device': '🩺', 'other': '❓'};
+        const typeLabels = {'pills': 'Χάπια', 'syrup': 'Σιρόπι', 'cream': 'Αλοιφή', 'inject': 'Ενέσιμο', 'spray': 'Σπρέι', 'baby': 'Βρεφικά', 'cosmetic': 'Καλλυντικά', 'device': 'Συσκευές', 'other': 'Άλλο'};
 
         window.onload = async function() {
             createEmojis();
             setupAutocomplete('city', 'city-suggestions', citiesData);
             setupAutocomplete('medicine', 'drug-suggestions', medicinesData);
             loadUserData();
-
             window.db = window.supabase.createClient(SB_URL, SB_KEY);
             const { data, error } = await window.db.auth.signInAnonymously();
             if(!error) currentUser = data.user;
-            
             if(window.db) { window.db.auth.onAuthStateChange((event, session) => { if(session) { currentUser = session.user; updateNavForUser(session.user); } }); }
             document.getElementById('request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('medicine').addEventListener('keypress', function (e) { if (e.key === 'Enter') { e.preventDefault(); addItemToList(); } });
         };
 
         function validatePhoneUI(input) {
-            const val = input.value.replace(/\D/g, ''); // Remove non-digits
-            input.value = val;
-            
-            const statusDiv = document.getElementById('phone-status');
-            statusDiv.classList.remove('hidden');
-
-            const greekMobileRegex = /^69\d{8}$/;
-
-            if (greekMobileRegex.test(val)) {
-                input.classList.remove('border-red-500', 'focus:ring-red-200');
-                input.classList.add('border-green-500', 'focus:ring-green-200');
-                statusDiv.innerHTML = '✅';
-                isPhoneValid = true;
-            } else {
-                input.classList.remove('border-green-500', 'focus:ring-green-200');
-                input.classList.add('border-red-500', 'focus:ring-red-200');
-                statusDiv.innerHTML = '❌';
-                isPhoneValid = false;
-            }
+            const val = input.value.replace(/\D/g, ''); input.value = val;
+            const statusDiv = document.getElementById('phone-status'); statusDiv.classList.remove('hidden');
+            if (/^69\d{8}$/.test(val)) { input.classList.remove('border-red-500', 'focus:ring-red-200'); input.classList.add('border-green-500', 'focus:ring-green-200'); statusDiv.innerHTML = '✅'; isPhoneValid = true; } 
+            else { input.classList.remove('border-green-500', 'focus:ring-green-200'); input.classList.add('border-red-500', 'focus:ring-red-200'); statusDiv.innerHTML = '❌'; isPhoneValid = false; }
             saveUserData();
         }
 
-        function adjustQty(amount) {
-            const el = document.getElementById('quantity');
-            let val = parseInt(el.value) || 1;
-            val = Math.max(1, val + amount);
-            el.value = val;
-        }
-
+        function adjustQty(amount) { const el = document.getElementById('quantity'); let val = parseInt(el.value) || 1; val = Math.max(1, val + amount); el.value = val; }
         function addItemToList() {
-            const nameInput = document.getElementById('medicine');
-            const qtyInput = document.getElementById('quantity');
-            const typeInput = document.getElementById('med-type');
-            
-            const name = nameInput.value.trim();
-            const qty = qtyInput.value;
-            const type = typeInput.value;
-
+            const name = document.getElementById('medicine').value.trim(); const qty = document.getElementById('quantity').value; const type = document.getElementById('med-type').value;
             if(!name) return showToast("Γράψτε όνομα φαρμάκου", "error");
-
-            requestItems.push({ name: name, quantity: qty, type: type });
-            updateItemsUI();
-            
-            nameInput.value = '';
-            qtyInput.value = '1';
-            typeInput.value = 'pills'; // Reset to default
-            nameInput.focus();
+            requestItems.push({ name: name, quantity: qty, type: type }); updateItemsUI();
+            document.getElementById('medicine').value = ''; document.getElementById('quantity').value = '1'; document.getElementById('med-type').value = 'pills'; document.getElementById('medicine').focus();
         }
-
-        function removeItem(index) {
-            requestItems.splice(index, 1);
-            updateItemsUI();
-        }
-
+        function removeItem(index) { requestItems.splice(index, 1); updateItemsUI(); }
         function updateItemsUI() {
-            const list = document.getElementById('items-list-display');
-            const badge = document.getElementById('items-count-badge');
-            
-            badge.innerText = `${requestItems.length} είδη`;
-            list.innerHTML = requestItems.map((item, i) => `
-                <div class="item-badge flex justify-between items-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 p-2 rounded-xl shadow-sm">
-                    <div class="flex items-center gap-3 overflow-hidden flex-1">
-                        <div class="bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-inner" title="${typeLabels[item.type]}">
-                            ${typeIcons[item.type]}
-                        </div>
-                        <div class="flex flex-col min-w-0">
-                            <span class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${item.name}</span>
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400">${typeLabels[item.type]} • x${item.quantity}</span>
-                        </div>
-                    </div>
-                    <button type="button" onclick="removeItem(${i})" class="text-slate-400 hover:text-red-500 p-2 transition-colors"><i class="ph ph-trash text-lg"></i></button>
-                </div>
-            `).join('');
+            const list = document.getElementById('items-list-display'); document.getElementById('items-count-badge').innerText = `${requestItems.length} είδη`;
+            list.innerHTML = requestItems.map((item, i) => `<div class="item-badge flex justify-between items-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 p-2 rounded-xl shadow-sm"><div class="flex items-center gap-3 overflow-hidden flex-1"><div class="bg-slate-100 dark:bg-slate-800 w-8 h-8 rounded-lg flex items-center justify-center text-lg shadow-inner">${typeIcons[item.type]}</div><div class="flex flex-col min-w-0"><span class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${item.name}</span><span class="text-[10px] text-slate-500 dark:text-slate-400">${typeLabels[item.type]} • x${item.quantity}</span></div></div><button type="button" onclick="removeItem(${i})" class="text-slate-400 hover:text-red-500 p-2"><i class="ph ph-trash text-lg"></i></button></div>`).join('');
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
             if(!currentUser) return showToast("Παρακαλώ περιμένετε...", "error");
-
-            // Validate Phone
             const phoneVal = document.getElementById('phone').value;
-            if(!/^69\d{8}$/.test(phoneVal)) {
-                document.getElementById('phone').focus();
-                return showToast("Το κινητό πρέπει να είναι 10 ψηφία και να αρχίζει από 69", "error");
-            }
-
-            if(requestItems.length === 0) {
-                if(document.getElementById('medicine').value.trim()) addItemToList();
-                else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error");
-            }
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            const oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; btn.disabled = true;
-
-            const acceptsGeneric = document.getElementById('accept-generic').checked;
-
-            const formData = {
-                user_id: currentUser.id,
-                customer_name: document.getElementById('full-name').value,
-                phone: phoneVal,
-                location: document.getElementById('city').value,
-                items: requestItems, 
-                medicine_name: requestItems.map(i => `${i.name} (${typeIcons[i.type]})`).join(', '),
-                quantity: requestItems.length,
-                notes: document.getElementById('notes').value,
-                status: 'pending',
-                lat: userLocation.lat,
-                lon: userLocation.lon,
-                accepts_generic: acceptsGeneric
-            };
-
+            if(!/^69\d{8}$/.test(phoneVal)) { document.getElementById('phone').focus(); return showToast("Το κινητό πρέπει να είναι 10 ψηφία και να αρχίζει από 69", "error"); }
+            if(requestItems.length === 0) { if(document.getElementById('medicine').value.trim()) addItemToList(); else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error"); }
+            const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; btn.disabled = true;
+            
+            const formData = { user_id: currentUser.id, customer_name: document.getElementById('full-name').value, phone: phoneVal, location: document.getElementById('city').value, items: requestItems, medicine_name: requestItems.map(i => `${i.name}`).join(', '), quantity: requestItems.length, notes: document.getElementById('notes').value, status: 'pending', lat: userLocation.lat, lon: userLocation.lon, accepts_generic: document.getElementById('accept-generic').checked };
             const { data, error } = await window.db.from('requests').insert([formData]).select().single();
-
-            if(error) {
-                showToast("Σφάλμα: " + error.message, "error");
-                btn.innerHTML = oldText; btn.disabled = false;
-            } else {
-                currentRequestId = data.id;
-                saveUserData();
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0d9488', '#38bdf8'] });
-                switchTab('results');
-                
-                const texts = ["Ειδοποιούμε τα φαρμακεία...", "Έλεγχος αποθέματος...", "Αναζήτηση σε εξέλιξη..."];
-                let i = 0;
+            if(error) { showToast("Σφάλμα: " + error.message, "error"); btn.innerHTML = oldText; btn.disabled = false; } 
+            else {
+                currentRequestId = data.id; saveUserData(); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0d9488', '#38bdf8'] }); switchTab('results');
+                let i = 0; const texts = ["Ειδοποιούμε τα φαρμακεία...", "Έλεγχος αποθέματος...", "Αναζήτηση σε εξέλιξη..."];
                 intervalId = setInterval(() => { i = (i + 1) % texts.length; document.getElementById('loading-text').innerText = texts[i]; }, 2500);
-
                 startResponsePolling(data.id);
             }
         }
@@ -502,7 +247,7 @@
             responsePoller = setInterval(async () => {
                 const { data } = await window.db.from('responses').select('*').eq('request_id', reqId);
                 if (data && data.length > 0) {
-                    document.getElementById('responses-list').innerHTML = ''; 
+                    // Check for new items before updating to prevent blink
                     data.forEach(displayResponse);
                 }
             }, 3000);
@@ -510,134 +255,78 @@
 
         function displayResponse(resp) {
             clearInterval(intervalId);
-            const list = document.getElementById('responses-list');
-            document.getElementById('loading-state').classList.add('hidden');
-            list.classList.remove('hidden');
+            const list = document.getElementById('responses-list'); document.getElementById('loading-state').classList.add('hidden'); list.classList.remove('hidden');
             
-            let foundBadges = '';
-            let foundCount = 0;
-            let missingCount = 0;
-            
-            if(resp.found_items && Array.isArray(resp.found_items)) {
-                foundCount = resp.found_items.length;
-                missingCount = requestItems.length - foundCount;
-                foundBadges = resp.found_items.map(item => 
-                    `<span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold mr-1 mb-1 inline-block">✅ ${item.name}</span>`
-                ).join('');
-            }
+            // SMART LOGIC: Compare Requested vs Found Qty
+            let foundBadges = ''; let missingBadges = ''; let isPerfectMatch = true; let missingCount = 0;
+            const responseMap = new Map();
+            if(resp.found_items && Array.isArray(resp.found_items)) resp.found_items.forEach(i => responseMap.set(i.name, parseInt(i.quantity)));
 
-            const isPartial = missingCount > 0;
-            if(document.getElementById(`resp-card-${resp.id}`)) return;
+            requestItems.forEach(reqItem => {
+                const reqQty = parseInt(reqItem.quantity); const foundQty = responseMap.get(reqItem.name) || 0;
+                if (foundQty >= reqQty) foundBadges += `<span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold mr-1 mb-1 inline-block">✅ ${reqItem.name} (x${foundQty})</span>`;
+                else if (foundQty > 0) { isPerfectMatch = false; missingCount++; foundBadges += `<span class="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md font-bold mr-1 mb-1 inline-block">⚠️ ${reqItem.name} (x${foundQty}/${reqQty})</span>`; }
+                else { isPerfectMatch = false; missingCount++; missingBadges += `<span class="text-[10px] bg-red-50 text-red-500 px-2 py-1 rounded-md font-bold border border-red-100 mr-1 mb-1 inline-block">❌ ${reqItem.name}</span>`; }
+            });
+
+            if(document.getElementById(`resp-card-${resp.id}`)) return; // Prevents re-render blinking
+
+            const borderClass = isPerfectMatch ? 'border-teal-500 ring-2 ring-teal-500/10' : 'border-orange-400';
+            const btnClass = isPerfectMatch ? 'bg-teal-600 hover:bg-teal-700' : 'bg-orange-500 hover:bg-orange-600';
+            const btnText = isPerfectMatch ? 'Κράτηση Όλων (Τέλεια Επιλογή)' : 'Κράτηση των Διαθέσιμων';
+            const method = isPerfectMatch ? 'afterbegin' : 'beforeend';
 
             const html = `
-                <div id="resp-card-${resp.id}" class="glass-card bg-white p-5 rounded-2xl border-l-4 ${isPartial ? 'border-orange-400' : 'border-teal-500'} animate-slide-up shadow-lg relative z-50 mb-4">
+                <div id="resp-card-${resp.id}" class="glass-card bg-white p-5 rounded-2xl border-l-4 ${borderClass} animate-slide-up shadow-lg relative z-50 mb-4">
                     <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-lg text-slate-800">${isPartial ? 'Μερική Διαθεσιμότητα' : 'Όλα Διαθέσιμα!'}</h4>
-                            <p class="text-xs text-slate-500 mb-2">Απόσταση: <span class="font-mono font-bold text-slate-700">${resp.distance} χλμ</span></p>
-                            <div class="mt-2 flex flex-wrap">
-                                ${foundBadges}
-                                ${isPartial ? `<span class="text-[10px] bg-red-50 text-red-500 px-2 py-1 rounded-md font-bold border border-red-100">λείπουν ${missingCount} είδη</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[10px] text-slate-400">${resp.response_type === 'generic' ? 'Περιέχει Γενόσημα' : 'Πρωτότυπα'}</div>
-                        </div>
+                        <div><h4 class="font-bold text-lg text-slate-800 flex items-center gap-2">${isPerfectMatch ? '🏆 Όλα Διαθέσιμα!' : '⚠️ Μερική Διαθεσιμότητα'}</h4><p class="text-xs text-slate-500 mb-2">Απόσταση: <span class="font-mono font-bold text-slate-700">${resp.distance} χλμ</span></p>
+                        <div class="mt-2"><p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Βρεθηκαν:</p><div class="flex flex-wrap">${foundBadges}</div></div>
+                        ${missingBadges ? `<div class="mt-2"><p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Λειπουν:</p><div class="flex flex-wrap">${missingBadges}</div></div>` : ''}</div>
+                        <div class="text-right"><div class="text-[10px] text-slate-400 bg-slate-100 px-2 py-1 rounded">${resp.response_type === 'generic' ? 'Γενόσημα' : 'Πρωτότυπα'}</div></div>
                     </div>
-                    <div class="mt-4 text-xs text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 italic">
-                        "${resp.message}"
-                    </div>
-                    <button onclick="storeResponseItemsAndOpenModal('${resp.pharmacist_id}', '${encodeURIComponent(JSON.stringify(resp.found_items || []))}')" class="w-full mt-4 ${isPartial ? 'bg-orange-500 hover:bg-orange-600' : 'bg-teal-600 hover:bg-teal-700'} text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all">
-                        ${isPartial ? 'Κράτηση των Διαθέσιμων' : 'Κράτηση Όλων'}
-                    </button>
+                    <div class="mt-4 text-xs text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 italic">"${resp.message}"</div>
+                    <button onclick="storeResponseItemsAndOpenModal('${resp.pharmacist_id}', '${encodeURIComponent(JSON.stringify(resp.found_items || []))}')" class="w-full mt-4 ${btnClass} text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all">${btnText}</button>
                 </div>
             `;
-            list.innerHTML += html;
+            list.insertAdjacentHTML(method, html);
             try { new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3').play().catch(e=>{}); } catch(e){}
         }
 
         function storeResponseItemsAndOpenModal(pharmacyId, foundItemsStr) {
             pendingPharmacyId = pharmacyId;
             const foundItems = JSON.parse(decodeURIComponent(foundItemsStr));
-            const foundNames = new Set(foundItems.map(i => i.name));
-            itemsNotReserved = requestItems.filter(i => !foundNames.has(i.name));
+            const responseMap = new Map(); foundItems.forEach(i => responseMap.set(i.name, parseInt(i.quantity)));
+            itemsNotReserved = [];
+            requestItems.forEach(reqItem => {
+                const reqQty = parseInt(reqItem.quantity); const foundQty = responseMap.get(reqItem.name) || 0;
+                if (foundQty < reqQty) itemsNotReserved.push({ name: reqItem.name, type: reqItem.type, quantity: reqQty - foundQty });
+            });
             openModal('safety');
         }
 
         async function confirmBooking() {
-            if(!currentRequestId || !pendingPharmacyId) return;
-            closeModal('safety');
-            clearInterval(responsePoller);
-
+            if(!currentRequestId || !pendingPharmacyId) return; closeModal('safety'); clearInterval(responsePoller);
             const { error } = await window.db.from('requests').update({ status: 'reserved', winner_pharmacy_id: pendingPharmacyId }).eq('id', currentRequestId);
-            
             if(error) showToast(error.message, 'error');
             else {
-                document.getElementById('pickup-view').classList.remove('hidden');
-                document.getElementById('tab-results').classList.remove('active');
-                document.getElementById('pickup-code').innerText = currentRequestId.substring(0, 6);
-                
+                document.getElementById('pickup-view').classList.remove('hidden'); document.getElementById('tab-results').classList.remove('active'); document.getElementById('pickup-code').innerText = currentRequestId.substring(0, 6);
                 if(itemsNotReserved.length > 0) {
-                    const alertBox = document.getElementById('missing-items-alert');
-                    const missingList = document.getElementById('missing-items-list');
-                    alertBox.classList.remove('hidden');
-                    missingList.innerHTML = itemsNotReserved.map(i => `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">${i.name}</span>`).join('');
-                } else {
-                    document.getElementById('missing-items-alert').classList.add('hidden');
-                }
+                    const alertBox = document.getElementById('missing-items-alert'); const missingList = document.getElementById('missing-items-list');
+                    alertBox.classList.remove('hidden'); missingList.innerHTML = itemsNotReserved.map(i => `<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-[10px] font-bold">${i.name} (x${i.quantity})</span>`).join('');
+                } else document.getElementById('missing-items-alert').classList.add('hidden');
                 startTimer();
             }
         }
 
         function reSearchMissing() {
-            document.getElementById('pickup-view').classList.add('hidden');
-            document.getElementById('responses-list').innerHTML = '';
-            document.getElementById('responses-list').classList.add('hidden');
-            document.getElementById('loading-state').classList.remove('hidden');
-            document.getElementById('missing-items-alert').classList.add('hidden');
-            requestItems = itemsNotReserved;
-            updateItemsUI();
-            switchTab('search');
-            showToast("Η λίστα ενημερώθηκε με τα είδη που έλειπαν!", 'info');
+            document.getElementById('pickup-view').classList.add('hidden'); document.getElementById('responses-list').innerHTML = ''; document.getElementById('responses-list').classList.add('hidden'); document.getElementById('loading-state').classList.remove('hidden'); document.getElementById('missing-items-alert').classList.add('hidden');
+            requestItems = itemsNotReserved; updateItemsUI(); switchTab('search'); showToast("Η λίστα ενημερώθηκε με τα είδη που έλειπαν!", 'info');
         }
 
-        function startTimer() {
-            let duration = 3600; 
-            const el = document.getElementById('timer-display');
-            const pickupTimer = setInterval(() => {
-                const m = Math.floor(duration / 60);
-                const s = duration % 60;
-                el.innerText = `${m}:${s<10?'0':''}${s}`;
-                if(--duration < 0) { clearInterval(pickupTimer); el.innerText = "ΕΛΗΞΕ"; el.classList.add('text-red-500'); }
-            }, 1000);
-        }
-
+        function startTimer() { let duration = 3600; const el = document.getElementById('timer-display'); const pickupTimer = setInterval(() => { const m = Math.floor(duration / 60); const s = duration % 60; el.innerText = `${m}:${s<10?'0':''}${s}`; if(--duration < 0) { clearInterval(pickupTimer); el.innerText = "ΕΛΗΞΕ"; el.classList.add('text-red-500'); } }, 1000); }
         function handleFileSelect(input) { if(input.files[0]) { document.getElementById('media-preview').classList.remove('hidden'); showToast("Η φωτογραφία προστέθηκε!", 'success'); } }
-        function toggleScanner() {
-            const c = document.getElementById('scanner-container');
-            if(!c.classList.contains('hidden')) { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); return; }
-            c.classList.remove('hidden');
-            setTimeout(() => {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => {
-                    html5QrcodeScanner.stop().then(() => c.classList.add('hidden'));
-                    document.getElementById('medicine').value = t; showToast("Barcode Scanned!", 'success');
-                }, (e) => {});
-            }, 100);
-        }
-
-        function startVoiceInput() {
-            if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error');
-            const recognition = new SpeechRecognition();
-            recognition.lang = currentLang === 'el' ? 'el-GR' : 'en-US';
-            recognition.onstart = () => showToast("Μιλήστε τώρα...", 'info');
-            recognition.onresult = (e) => { 
-                document.getElementById('medicine').value = e.results[0][0].transcript; 
-                showToast("Είπατε: " + e.results[0][0].transcript, 'success');
-            };
-            recognition.start();
-        }
-
+        function toggleScanner() { const c = document.getElementById('scanner-container'); if(!c.classList.contains('hidden')) { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); return; } c.classList.remove('hidden'); setTimeout(() => { html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => { html5QrcodeScanner.stop().then(() => c.classList.add('hidden')); document.getElementById('medicine').value = t; showToast("Barcode Scanned!", 'success'); }, (e) => {}); }, 100); }
+        function startVoiceInput() { if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error'); const recognition = new SpeechRecognition(); recognition.lang = currentLang === 'el' ? 'el-GR' : 'en-US'; recognition.onstart = () => showToast("Μιλήστε τώρα...", 'info'); recognition.onresult = (e) => { document.getElementById('medicine').value = e.results[0][0].transcript; showToast("Είπατε: " + e.results[0][0].transcript, 'success'); }; recognition.start(); }
         function switchTab(id) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); }
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
@@ -654,6 +343,7 @@
             if(!navigator.geolocation) return showToast("GPS not supported.", "error");
             const btn = document.querySelector('button[onclick="getLocation()"]');
             const originalText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>'; 
+            
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = { lat: position.coords.latitude, lon: position.coords.longitude };
