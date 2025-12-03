@@ -19,7 +19,7 @@
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .today-highlight { background-color: #f0fdfa; border-left: 4px solid #0d9488; }
-        /* Force 24h feel regarding inputs */
+        /* Style time inputs */
         input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; }
     </style>
 </head>
@@ -61,19 +61,19 @@
                     <div class="glass-panel p-5 rounded-2xl shadow-sm bg-white">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="font-bold text-xs uppercase text-slate-500">Live Status</h3>
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span id="status-indicator" class="w-3 h-3 rounded-full bg-red-500 shadow-md"></span>
                         </div>
                         <div class="flex items-center gap-3">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="status-toggle" class="sr-only peer" onchange="togglePharmacyStatus()">
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-secondary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                                <div class="w-14 h-7 bg-red-500 peer-focus:outline-none rounded-full peer peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner"></div>
                             </label>
                             <span class="text-sm font-bold text-slate-800" id="status-text">Κλειστό</span>
                         </div>
                     </div>
                     <div class="glass-panel p-5 rounded-2xl shadow-sm bg-blue-50 border-blue-100">
                         <h3 class="font-bold text-xs uppercase text-blue-800 mb-1">Σημερα (<span id="today-name">...</span>)</h3>
-                        <p id="hours-display" class="text-lg font-bold text-slate-800 mt-2">Φόρτωση...</p>
+                        <p id="hours-display" class="text-xl font-bold text-slate-800 mt-2 font-mono">-- : --</p>
                     </div>
                 </div>
 
@@ -90,7 +90,7 @@
 
         <div id="tab-history" class="tab-content">
             <div class="glass-panel bg-white p-6 rounded-3xl shadow-sm min-h-[60vh]">
-                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><i class="ph ph-archive"></i> Ιστορικό Απαντήσεων</h2>
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><i class="ph ph-archive"></i> Ιστορικό & Απορρίψεις</h2>
                 <div id="history-container" class="space-y-3"></div>
             </div>
         </div>
@@ -127,7 +127,7 @@
                     <h3 class="font-bold text-lg text-slate-800 border-l-4 border-secondary pl-3 mb-4 flex items-center gap-2">Εβδομαδιαίο Ωράριο <span class="text-[10px] font-normal text-red-500 bg-red-50 px-2 py-0.5 rounded">* Υποχρεωτικό</span></h3>
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-100/50"><tr><th class="px-4 py-3 rounded-l-lg">Ημερα</th><th class="px-4 py-3">Ανοιγμα (HH:MM)</th><th class="px-4 py-3">Κλεισιμο (HH:MM)</th><th class="px-4 py-3 rounded-r-lg text-center">Κλειστο</th></tr></thead>
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-100/50"><tr><th class="px-4 py-3 rounded-l-lg">Ημερα</th><th class="px-4 py-3">Ανοιγμα (24h)</th><th class="px-4 py-3">Κλεισιμο (24h)</th><th class="px-4 py-3 rounded-r-lg text-center">Κλειστο</th></tr></thead>
                             <tbody id="schedule-body" class="divide-y divide-slate-100">
                                 </tbody>
                         </table>
@@ -166,8 +166,8 @@
                 tbody.innerHTML += `
                     <tr class="${rowClass}" id="row-${day}">
                         <td class="px-4 py-3 font-bold text-slate-700 flex items-center">${dayLabels[i]} ${todayBadge}</td>
-                        <td class="px-4 py-3"><input type="time" id="start-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono" required></td>
-                        <td class="px-4 py-3"><input type="time" id="end-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono" required></td>
+                        <td class="px-4 py-3"><input type="time" id="start-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono tracking-wider"></td>
+                        <td class="px-4 py-3"><input type="time" id="end-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono tracking-wider"></td>
                         <td class="px-4 py-3 text-center">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="closed-${day}" class="sr-only peer" onchange="toggleDayRow('${day}')">
@@ -188,13 +188,17 @@
             const endInp = document.getElementById(`end-${day}`);
             
             startInp.disabled = isClosed; endInp.disabled = isClosed;
-            startInp.required = !isClosed; endInp.required = !isClosed;
-
+            
+            // FIX: If closed, remove required. If open, add required.
             if(isClosed) {
+                startInp.removeAttribute('required');
+                endInp.removeAttribute('required');
                 startInp.value = ''; endInp.value = '';
                 startInp.parentElement.classList.add('opacity-30');
                 endInp.parentElement.classList.add('opacity-30');
             } else {
+                startInp.setAttribute('required', 'true');
+                endInp.setAttribute('required', 'true');
                 startInp.parentElement.classList.remove('opacity-30');
                 endInp.parentElement.classList.remove('opacity-30');
             }
@@ -228,12 +232,9 @@
                     if(data.lat) { myLat = data.lat; myLon = data.lon; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; }
                     else updateLocation();
 
+                    // --- FIX: UI for Status Toggle ---
                     document.getElementById('status-toggle').checked = data.is_open;
-                    document.getElementById('status-text').innerText = data.is_open ? 'Ανοιχτό' : 'Κλειστό';
-
-                    // --- FIX FOR TODAY DISPLAY ---
-                    // Default to "Not Set"
-                    document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
+                    updateStatusUI(data.is_open);
 
                     // Load Schedule if exists
                     if(data.schedule) {
@@ -251,9 +252,14 @@
                         const todayKey = days[(jsDay === 0) ? 6 : jsDay - 1];
                         const todaySched = data.schedule[todayKey];
                         
+                        // --- FIX: Force 24h format display in Dashboard card ---
                         if (todaySched) {
                             document.getElementById('hours-display').innerText = todaySched.closed ? "ΚΛΕΙΣΤΑ" : `${todaySched.start} - ${todaySched.end}`;
+                        } else {
+                            document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
                         }
+                    } else {
+                        document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
                     }
                 }
             } catch (e) {
@@ -267,12 +273,25 @@
             const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = 'Αποθήκευση...'; btn.disabled = true;
 
             const schedule = {};
+            let hasError = false;
             days.forEach(day => {
                 const closed = document.getElementById(`closed-${day}`).checked;
                 const start = document.getElementById(`start-${day}`).value;
                 const end = document.getElementById(`end-${day}`).value;
+                
+                // FIX: Validation Logic - Only error if NOT closed AND times are missing
+                if (!closed && (!start || !end)) {
+                    hasError = true;
+                }
+
                 schedule[day] = { start, end, closed };
             });
+
+            if (hasError) {
+                showToast("Συμπληρώστε τις ώρες για τις ανοιχτές μέρες!", "error");
+                btn.innerHTML = oldText; btn.disabled = false;
+                return;
+            }
 
             const updates = {
                 name: document.getElementById('prof-name').value,
@@ -297,10 +316,21 @@
             }
         }
 
+        // --- STATUS TOGGLE LOGIC ---
         async function togglePharmacyStatus() {
             const isOpen = document.getElementById('status-toggle').checked;
-            document.getElementById('status-text').innerText = isOpen ? 'Ανοιχτό' : 'Κλειστό';
+            updateStatusUI(isOpen);
             await window.db.from('pharmacies').update({ is_open: isOpen }).eq('id', currentUser.id);
+        }
+
+        function updateStatusUI(isOpen) {
+            document.getElementById('status-text').innerText = isOpen ? 'Ανοιχτό' : 'Κλειστό';
+            const indicator = document.getElementById('status-indicator');
+            if(isOpen) {
+                indicator.classList.remove('bg-red-500'); indicator.classList.add('bg-emerald-500', 'animate-pulse');
+            } else {
+                indicator.classList.add('bg-red-500'); indicator.classList.remove('bg-emerald-500', 'animate-pulse');
+            }
         }
 
         function updateLocation() {
@@ -322,12 +352,14 @@
             });
         }
 
+        // --- REQUESTS LOGIC ---
         async function fetchRequests() {
             if(!currentUser) return;
             const container = document.getElementById('requests-container');
             const historyContainer = document.getElementById('history-container');
             
-            const { data, error } = await window.db.from('requests').select('*').neq('status', 'rejected').order('created_at', { ascending: false });
+            // FIX: Fetch ALL requests, including rejected, to show in history
+            const { data, error } = await window.db.from('requests').select('*').order('created_at', { ascending: false });
             if(error) return;
 
             const { data: myResponses } = await window.db.from('responses').select('request_id, found_items, message').eq('pharmacist_id', currentUser.id);
@@ -340,13 +372,22 @@
 
             data.forEach(req => {
                 const hasResponded = responseMap.has(req.id);
+                
+                // LOGIC: 
+                // 1. Show in Incoming IF status is pending AND I haven't responded yet.
+                // 2. Show in History IF I have responded OR status is 'reserved' (and winner is me) OR status is 'rejected'.
+                
                 if (req.status === 'pending' && !hasResponded) {
                     container.innerHTML += createPendingCard(req);
                     pendingCount++;
-                } else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id)) {
+                } 
+                else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) || req.status === 'rejected') {
+                    // Only show rejected in history if *I* rejected it? Or show global rejections?
+                    // For now show all, marking them properly.
                     historyContainer.innerHTML += createHistoryCard(req, responseMap.get(req.id));
                 }
             });
+            
             const badge = document.getElementById('badge-count');
             if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
         }
@@ -407,6 +448,8 @@
             if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
                 statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε!</span>';
                 extraInfo = `<div class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-center"><span class="text-[10px] uppercase font-bold text-green-800">Κωδικος Επαληθευσης</span><div class="text-xl font-mono font-bold text-green-700 tracking-widest">${req.id.substring(0, 6)}</div></div>`;
+            } else if (req.status === 'rejected') {
+                statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Απορρίφθηκε</span>';
             }
 
             let sentItemsHtml = '';
@@ -459,7 +502,15 @@
             else { showToast('Σφάλμα: ' + error.message, 'error'); }
         }
 
-        async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); }
+        async function dismissRequest(id) { 
+            // Optimistic update: Remove card immediately
+            document.getElementById(`card-${id}`).remove(); 
+            // FIX: If I reject, status becomes rejected for everyone. 
+            // In a real app we'd have a 'rejections' table. For now, this global reject works for MVP.
+            await window.db.from('requests').update({ status: 'rejected' }).eq('id', id);
+            fetchRequests(); // Refresh so it goes to history
+        }
+
         function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
         function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); } if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Κράτηση!', 'success'); fetchRequests(); } }).subscribe(); }
     </script>
