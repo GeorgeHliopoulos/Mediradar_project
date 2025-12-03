@@ -12,15 +12,15 @@
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0f172a', secondary: '#0d9488' } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0f172a', secondary: '#0d9488' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } } }
     </script>
     <style>
         .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid #e2e8f0; }
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* Style time inputs to look cleaner */
-        input[type="time"] { font-family: 'Inter', sans-serif; font-weight: 600; }
         .today-highlight { background-color: #f0fdfa; border-left: 4px solid #0d9488; }
+        /* Force 24h feel regarding inputs */
+        input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
@@ -73,7 +73,7 @@
                     </div>
                     <div class="glass-panel p-5 rounded-2xl shadow-sm bg-blue-50 border-blue-100">
                         <h3 class="font-bold text-xs uppercase text-blue-800 mb-1">Σημερα (<span id="today-name">...</span>)</h3>
-                        <p id="hours-display" class="text-lg font-bold text-slate-800 mt-2">-- : --</p>
+                        <p id="hours-display" class="text-lg font-bold text-slate-800 mt-2">Φόρτωση...</p>
                     </div>
                 </div>
 
@@ -127,7 +127,7 @@
                     <h3 class="font-bold text-lg text-slate-800 border-l-4 border-secondary pl-3 mb-4 flex items-center gap-2">Εβδομαδιαίο Ωράριο <span class="text-[10px] font-normal text-red-500 bg-red-50 px-2 py-0.5 rounded">* Υποχρεωτικό</span></h3>
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-100/50"><tr><th class="px-4 py-3 rounded-l-lg">Ημερα</th><th class="px-4 py-3">Ανοιγμα (24h)</th><th class="px-4 py-3">Κλεισιμο (24h)</th><th class="px-4 py-3 rounded-r-lg text-center">Κλειστο</th></tr></thead>
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-100/50"><tr><th class="px-4 py-3 rounded-l-lg">Ημερα</th><th class="px-4 py-3">Ανοιγμα (HH:MM)</th><th class="px-4 py-3">Κλεισιμο (HH:MM)</th><th class="px-4 py-3 rounded-r-lg text-center">Κλειστο</th></tr></thead>
                             <tbody id="schedule-body" class="divide-y divide-slate-100">
                                 </tbody>
                         </table>
@@ -146,21 +146,17 @@
 
     <script>
         let currentUser = null; let myLat = null; let myLon = null; let timers = {};
-        // Mapping: 0=Mon, 1=Tue... (Supabase storage friendly)
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         const dayLabels = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
         
         window.db = window.supabase.createClient(SB_URL, SB_KEY);
 
         window.onload = async function() {
-            // Get proper Greek day index (JS: Sun=0, we want Mon=0)
+            // Setup Schedule Table with Today Highlighting
             const jsDay = new Date().getDay(); 
             const todayIdx = (jsDay === 0) ? 6 : jsDay - 1; 
-            
-            // Set Today's Name immediately
             document.getElementById('today-name').innerText = dayLabels[todayIdx];
 
-            // Build Schedule Table UI
             const tbody = document.getElementById('schedule-body');
             days.forEach((day, i) => {
                 const isToday = (i === todayIdx);
@@ -182,7 +178,6 @@
                 `;
             });
 
-            // Auth Check
             const { data: { session } } = await window.db.auth.getSession();
             if (session) { handleLoginSuccess(session.user); } else { document.getElementById('login-overlay').classList.remove('hidden'); }
         };
@@ -192,10 +187,8 @@
             const startInp = document.getElementById(`start-${day}`);
             const endInp = document.getElementById(`end-${day}`);
             
-            startInp.disabled = isClosed;
-            endInp.disabled = isClosed;
-            startInp.required = !isClosed; // Only required if open
-            endInp.required = !isClosed;
+            startInp.disabled = isClosed; endInp.disabled = isClosed;
+            startInp.required = !isClosed; endInp.required = !isClosed;
 
             if(isClosed) {
                 startInp.value = ''; endInp.value = '';
@@ -210,7 +203,15 @@
         // --- AUTH ---
         async function handleProLogin(e) { e.preventDefault(); const email = document.getElementById('login-email').value; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast(error.message, 'error'); else showToast("✅ Magic Link Sent!", 'success'); }
         async function demoLogin() { const { data, error } = await window.db.auth.signInAnonymously(); if(error) showToast('Error', 'error'); else handleLoginSuccess(data.user); }
-        function handleLoginSuccess(user) { currentUser = user; document.getElementById('login-overlay').classList.add('hidden'); document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; loadProfile(); fetchRequests(); setInterval(fetchRequests, 10000); }
+        function handleLoginSuccess(user) { 
+            currentUser = user; 
+            document.getElementById('login-overlay').classList.add('hidden'); 
+            document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
+            loadProfile(); 
+            fetchRequests(); 
+            subscribeToEverything(); 
+            setInterval(fetchRequests, 10000); 
+        }
 
         // --- PROFILE & SCHEDULE LOGIC ---
         async function loadProfile() {
@@ -230,7 +231,11 @@
                     document.getElementById('status-toggle').checked = data.is_open;
                     document.getElementById('status-text').innerText = data.is_open ? 'Ανοιχτό' : 'Κλειστό';
 
-                    // Load Schedule safely
+                    // --- FIX FOR TODAY DISPLAY ---
+                    // Default to "Not Set"
+                    document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
+
+                    // Load Schedule if exists
                     if(data.schedule) {
                         days.forEach(day => {
                             if(data.schedule[day]) {
@@ -241,18 +246,14 @@
                             }
                         });
                         
-                        // Set Today's display safely
+                        // Calculate Today safely
                         const jsDay = new Date().getDay(); 
                         const todayKey = days[(jsDay === 0) ? 6 : jsDay - 1];
                         const todaySched = data.schedule[todayKey];
                         
                         if (todaySched) {
                             document.getElementById('hours-display').innerText = todaySched.closed ? "ΚΛΕΙΣΤΑ" : `${todaySched.start} - ${todaySched.end}`;
-                        } else {
-                            document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
                         }
-                    } else {
-                        document.getElementById('hours-display').innerText = "Δεν ορίστηκε";
                     }
                 }
             } catch (e) {
@@ -266,22 +267,12 @@
             const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = 'Αποθήκευση...'; btn.disabled = true;
 
             const schedule = {};
-            let hasError = false;
             days.forEach(day => {
                 const closed = document.getElementById(`closed-${day}`).checked;
                 const start = document.getElementById(`start-${day}`).value;
                 const end = document.getElementById(`end-${day}`).value;
-                
-                if (!closed && (!start || !end)) hasError = true; // Validate strictly
-
                 schedule[day] = { start, end, closed };
             });
-
-            if (hasError) {
-                showToast("Συμπληρώστε τις ώρες για τις ανοιχτές μέρες!", "error");
-                btn.innerHTML = oldText; btn.disabled = false;
-                return;
-            }
 
             const updates = {
                 name: document.getElementById('prof-name').value,
@@ -321,11 +312,9 @@
             });
         }
 
-        // --- REQUESTS LOGIC ---
         function switchMainTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
             ['requests', 'history', 'profile'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
                 if(t === tab) btn.className = "px-6 py-3 text-sm font-bold rounded-t-xl transition-all flex items-center gap-2 bg-white text-secondary border-b-2 border-secondary shadow-sm";
@@ -338,4 +327,141 @@
             const container = document.getElementById('requests-container');
             const historyContainer = document.getElementById('history-container');
             
-            const { data
+            const { data, error } = await window.db.from('requests').select('*').neq('status', 'rejected').order('created_at', { ascending: false });
+            if(error) return;
+
+            const { data: myResponses } = await window.db.from('responses').select('request_id, found_items, message').eq('pharmacist_id', currentUser.id);
+            const responseMap = new Map();
+            myResponses.forEach(r => responseMap.set(r.request_id, r));
+
+            container.innerHTML = '';
+            historyContainer.innerHTML = '';
+            let pendingCount = 0;
+
+            data.forEach(req => {
+                const hasResponded = responseMap.has(req.id);
+                if (req.status === 'pending' && !hasResponded) {
+                    container.innerHTML += createPendingCard(req);
+                    pendingCount++;
+                } else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id)) {
+                    historyContainer.innerHTML += createHistoryCard(req, responseMap.get(req.id));
+                }
+            });
+            const badge = document.getElementById('badge-count');
+            if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+        }
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return "N/A"; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return (R * c).toFixed(1); }
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
+
+        function createPendingCard(req) {
+            const dist = (myLat && req.lat) ? getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon) + ' χλμ' : '...';
+            let items = Array.isArray(req.items) ? req.items : [{name: req.medicine_name, quantity: req.quantity}];
+            
+            const itemList = items.map((item, idx) => `
+                <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-2">
+                    <input type="checkbox" id="check-${req.id}-${idx}" value="${item.name}" checked class="w-5 h-5 text-secondary rounded focus:ring-secondary cursor-pointer" onchange="toggleItemInputs('${req.id}-${idx}')">
+                    <div class="flex-1">
+                        <span class="font-bold text-sm text-slate-800">${item.name}</span>
+                        <div class="text-[10px] text-slate-400">Ζητάει: <strong>${item.quantity}</strong> ${item.type ? `(${item.type})` : ''}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col items-end">
+                            <label class="text-[9px] text-slate-400 font-bold uppercase">Ποσοτητα</label>
+                            <input type="number" id="qty-${req.id}-${idx}" min="1" max="${item.quantity}" value="${item.quantity}" class="w-12 text-center text-xs font-bold bg-slate-50 border border-slate-200 rounded p-1 focus:ring-secondary">
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <label class="text-[9px] text-slate-400 font-bold uppercase">Τυπος</label>
+                            <select id="type-${req.id}-${idx}" class="text-xs bg-slate-50 border border-slate-200 rounded p-1 font-medium focus:ring-secondary">
+                                <option value="original">Πρωτότυπο</option>
+                                <option value="generic">Γενόσημο</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div id="card-${req.id}" class="glass-panel p-6 rounded-3xl shadow-sm border-l-4 border-secondary relative animate-fadeIn bg-white">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-slate-100 p-2 rounded-full"><i class="ph ph-user text-slate-600"></i></div>
+                            <div><h3 class="font-bold text-slate-800 text-sm">${req.customer_name}</h3><span class="text-xs text-slate-500">${new Date(req.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div>
+                        </div>
+                        <span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-teal-100"><i class="ph ph-map-pin"></i> ${dist}</span>
+                    </div>
+                    ${req.notes ? `<div class="bg-yellow-50 border border-yellow-100 p-3 rounded-xl mb-4 text-xs text-slate-700 italic flex gap-2"><i class="ph ph-chat-text text-yellow-500 text-lg"></i> <span>"${req.notes}"</span></div>` : ''}
+                    <div class="mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">${itemList}</div>
+                    <div class="flex gap-2">
+                        <button onclick="sendDetailedResponse('${req.id}')" class="flex-1 bg-secondary hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right"></i> Απάντηση</button>
+                        <button onclick="dismissRequest('${req.id}')" class="px-4 py-3 bg-white border border-slate-200 text-slate-400 hover:text-red-500 rounded-xl font-bold transition-all"><i class="ph ph-x"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createHistoryCard(req, myResp) {
+            let statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Απαντήθηκε</span>';
+            let extraInfo = '';
+
+            if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
+                statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε!</span>';
+                extraInfo = `<div class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-center"><span class="text-[10px] uppercase font-bold text-green-800">Κωδικος Επαληθευσης</span><div class="text-xl font-mono font-bold text-green-700 tracking-widest">${req.id.substring(0, 6)}</div></div>`;
+            }
+
+            let sentItemsHtml = '';
+            if(myResp && myResp.found_items) {
+                const items = typeof myResp.found_items === 'string' ? JSON.parse(decodeURIComponent(myResp.found_items)) : myResp.found_items;
+                sentItemsHtml = items.map(i => `<span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200">${i.name} (x${i.quantity}) <b>${i.responseType === 'generic' ? 'Γεν' : 'Πρωτ'}</b></span>`).join(' ');
+            }
+
+            return `
+                <div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-2"><span class="font-bold text-sm text-slate-800">${req.customer_name}</span>${statusBadge}</div>
+                    <div class="flex flex-wrap gap-1 mb-2">${sentItemsHtml}</div>
+                    <div class="text-[10px] text-slate-400 flex justify-between"><span>${new Date(req.created_at).toLocaleString()}</span></div>
+                    ${extraInfo}
+                </div>
+            `;
+        }
+
+        function toggleItemInputs(id) {
+            const cb = document.getElementById(`check-${id}`);
+            const qty = document.getElementById(`qty-${id}`);
+            const type = document.getElementById(`type-${id}`);
+            if(!cb.checked) { qty.disabled = true; type.disabled = true; qty.classList.add('opacity-50'); type.classList.add('opacity-50'); }
+            else { qty.disabled = false; type.disabled = false; qty.classList.remove('opacity-50'); type.classList.remove('opacity-50'); }
+        }
+
+        async function sendDetailedResponse(reqId) {
+            const container = document.getElementById(`card-${reqId}`);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+            if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error');
+
+            const foundItems = Array.from(checkboxes).map(cb => {
+                const idxStr = cb.id.split('-').pop();
+                return {
+                    name: cb.value,
+                    quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value),
+                    responseType: document.getElementById(`type-${reqId}-${idxStr}`).value
+                };
+            });
+
+            const message = `Βρέθηκαν ${foundItems.length} είδη.`;
+            let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {}
+
+            const { error } = await window.db.from('responses').insert({ 
+                request_id: reqId, pharmacist_id: currentUser.id, message: message, 
+                price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' 
+            });
+
+            if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); } 
+            else { showToast('Σφάλμα: ' + error.message, 'error'); }
+        }
+
+        async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); }
+        function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
+        function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); } if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Κράτηση!', 'success'); fetchRequests(); } }).subscribe(); }
+    </script>
+</body>
+</html>
