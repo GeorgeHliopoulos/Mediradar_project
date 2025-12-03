@@ -19,6 +19,8 @@
         .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .today-highlight { background-color: #f0fdfa; border-left: 4px solid #0d9488; }
+        /* Remove default arrow from selects for cleaner look */
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em; padding-right: 2.5rem; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
@@ -126,8 +128,7 @@
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-slate-500 uppercase bg-slate-100/50"><tr><th class="px-4 py-3 rounded-l-lg">Ημερα</th><th class="px-4 py-3">Ανοιγμα</th><th class="px-4 py-3">Κλεισιμο</th><th class="px-4 py-3 rounded-r-lg text-center">Κλειστο</th></tr></thead>
-                            <tbody id="schedule-body" class="divide-y divide-slate-100">
-                                </tbody>
+                            <tbody id="schedule-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -147,7 +148,7 @@
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         const dayLabels = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
         
-        // Generate Time Options (00:00 to 23:30)
+        // Generate Strict 24h Options (Dropdowns)
         function generateTimeOptions() {
             let opts = '<option value="">--:--</option>';
             for(let h=0; h<24; h++) {
@@ -163,7 +164,7 @@
         window.db = window.supabase.createClient(SB_URL, SB_KEY);
 
         window.onload = async function() {
-            // Setup Schedule Table with SELECTS (Strict 24h)
+            // Setup Schedule Table
             const jsDay = new Date().getDay(); 
             const todayIdx = (jsDay === 0) ? 6 : jsDay - 1; 
             document.getElementById('today-name').innerText = dayLabels[todayIdx];
@@ -177,22 +178,9 @@
                 tbody.innerHTML += `
                     <tr class="${rowClass}" id="row-${day}">
                         <td class="px-4 py-3 font-bold text-slate-700 flex items-center">${dayLabels[i]} ${todayBadge}</td>
-                        <td class="px-4 py-3">
-                            <select id="start-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono">
-                                ${timeOptions}
-                            </select>
-                        </td>
-                        <td class="px-4 py-3">
-                            <select id="end-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono">
-                                ${timeOptions}
-                            </select>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="closed-${day}" class="sr-only peer" onchange="toggleDayRow('${day}')">
-                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-red-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-                            </label>
-                        </td>
+                        <td class="px-4 py-3"><select id="start-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono">${timeOptions}</select></td>
+                        <td class="px-4 py-3"><select id="end-${day}" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-secondary focus:border-secondary block w-full p-2 font-mono">${timeOptions}</select></td>
+                        <td class="px-4 py-3 text-center"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="closed-${day}" class="sr-only peer" onchange="toggleDayRow('${day}')"><div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:bg-red-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div></label></td>
                     </tr>
                 `;
             });
@@ -205,29 +193,14 @@
             const isClosed = document.getElementById(`closed-${day}`).checked;
             const startInp = document.getElementById(`start-${day}`);
             const endInp = document.getElementById(`end-${day}`);
-            
             startInp.disabled = isClosed; endInp.disabled = isClosed;
-            if(isClosed) {
-                startInp.value = ''; endInp.value = '';
-                startInp.parentElement.classList.add('opacity-30');
-                endInp.parentElement.classList.add('opacity-30');
-            } else {
-                startInp.parentElement.classList.remove('opacity-30');
-                endInp.parentElement.classList.remove('opacity-30');
-            }
+            if(isClosed) { startInp.value = ''; endInp.value = ''; startInp.parentElement.classList.add('opacity-30'); endInp.parentElement.classList.add('opacity-30'); } 
+            else { startInp.parentElement.classList.remove('opacity-30'); endInp.parentElement.classList.remove('opacity-30'); }
         }
 
         async function handleProLogin(e) { e.preventDefault(); const email = document.getElementById('login-email').value; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast(error.message, 'error'); else showToast("✅ Magic Link Sent!", 'success'); }
         async function demoLogin() { const { data, error } = await window.db.auth.signInAnonymously(); if(error) showToast('Error', 'error'); else handleLoginSuccess(data.user); }
-        function handleLoginSuccess(user) { 
-            currentUser = user; 
-            document.getElementById('login-overlay').classList.add('hidden'); 
-            document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
-            loadProfile(); 
-            fetchRequests(); 
-            subscribeToEverything(); 
-            setInterval(fetchRequests, 10000); 
-        }
+        function handleLoginSuccess(user) { currentUser = user; document.getElementById('login-overlay').classList.add('hidden'); document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; loadProfile(); fetchRequests(); subscribeToEverything(); setInterval(fetchRequests, 10000); }
 
         async function loadProfile() {
             try {
@@ -239,10 +212,8 @@
                     document.getElementById('prof-address').value = data.address || '';
                     document.getElementById('prof-phone').value = data.phone || '';
                     if(data.image_url) document.getElementById('profile-img-preview').src = data.image_url;
+                    if(data.lat) { myLat = data.lat; myLon = data.lon; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; } else updateLocation();
                     
-                    if(data.lat) { myLat = data.lat; myLon = data.lon; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; }
-                    else updateLocation();
-
                     document.getElementById('status-toggle').checked = data.is_open;
                     updateStatusUI(data.is_open);
 
@@ -255,21 +226,17 @@
                                 toggleDayRow(day);
                             }
                         });
-                        const jsDay = new Date().getDay(); 
-                        const todayKey = days[(jsDay === 0) ? 6 : jsDay - 1];
-                        const todaySched = data.schedule[todayKey];
-                        document.getElementById('hours-display').innerText = (todaySched && !todaySched.closed) ? `${todaySched.start} - ${todaySched.end}` : (todaySched && todaySched.closed ? "ΚΛΕΙΣΤΑ" : "Δεν ορίστηκε");
+                        const jsDay = new Date().getDay(); const todayKey = days[(jsDay === 0) ? 6 : jsDay - 1]; const todaySched = data.schedule[todayKey];
+                        document.getElementById('hours-display').innerText = (todaySched && !todaySched.closed && todaySched.start) ? `${todaySched.start} - ${todaySched.end}` : "ΚΛΕΙΣΤΑ";
                     } else { document.getElementById('hours-display').innerText = "Δεν ορίστηκε"; }
                 }
-            } catch (e) { console.error("Profile error", e); document.getElementById('hours-display').innerText = "Σφάλμα"; }
+            } catch (e) { console.error("Profile load error", e); document.getElementById('hours-display').innerText = "Σφάλμα"; }
         }
 
         async function saveProfile(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = 'Αποθήκευση...'; btn.disabled = true;
-
-            const schedule = {};
-            let hasError = false;
+            const schedule = {}; let hasError = false;
             days.forEach(day => {
                 const closed = document.getElementById(`closed-${day}`).checked;
                 const start = document.getElementById(`start-${day}`).value;
@@ -277,17 +244,18 @@
                 if (!closed && (!start || !end)) hasError = true;
                 schedule[day] = { start, end, closed };
             });
-
             if (hasError) { showToast("Συμπληρώστε τις ώρες!", "error"); btn.innerHTML = oldText; btn.disabled = false; return; }
+            
+            // UPSERT to avoid create error
+            const profileData = { id: currentUser.id, name: document.getElementById('prof-name').value, address: document.getElementById('prof-address').value, phone: document.getElementById('prof-phone').value, schedule: schedule, image_url: document.getElementById('profile-img-preview').src, updated_at: new Date() };
+            if(myLat) { profileData.lat = myLat; profileData.lon = myLon; } // Only update loc if we have it
 
-            const updates = { name: document.getElementById('prof-name').value, address: document.getElementById('prof-address').value, phone: document.getElementById('prof-phone').value, schedule: schedule, image_url: document.getElementById('profile-img-preview').src, updated_at: new Date() };
-            const { error } = await window.db.from('pharmacies').update(updates).eq('id', currentUser.id);
+            const { error } = await window.db.from('pharmacies').upsert(profileData);
             if(error) showToast('Σφάλμα αποθήκευσης', 'error'); else { showToast('Το προφίλ ενημερώθηκε!', 'success'); loadProfile(); }
             btn.innerHTML = oldText; btn.disabled = false;
         }
 
         function handleLogoUpload(input) { if (input.files && input.files[0]) { if(input.files[0].size > 800000) return showToast("Μεγάλη Εικόνα (>800KB)", "error"); const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profile-img-preview').src = e.target.result; }; reader.readAsDataURL(input.files[0]); } }
-
         async function togglePharmacyStatus() { const isOpen = document.getElementById('status-toggle').checked; updateStatusUI(isOpen); await window.db.from('pharmacies').update({ is_open: isOpen }).eq('id', currentUser.id); }
         function updateStatusUI(isOpen) { document.getElementById('status-text').innerText = isOpen ? 'Ανοιχτό' : 'Κλειστό'; const indicator = document.getElementById('status-indicator'); if(isOpen) { indicator.classList.remove('bg-red-500'); indicator.classList.add('bg-emerald-500', 'animate-pulse'); } else { indicator.classList.add('bg-red-500'); indicator.classList.remove('bg-emerald-500', 'animate-pulse'); } }
         function updateLocation() { navigator.geolocation.getCurrentPosition(async (pos) => { myLat = pos.coords.latitude; myLon = pos.coords.longitude; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; await window.db.from('pharmacies').update({ lat: myLat, lon: myLon }).eq('id', currentUser.id); showToast(`Τοποθεσία ενημερώθηκε!`, 'success'); }); }
@@ -305,7 +273,10 @@
             data.forEach(req => {
                 const hasResponded = responseMap.has(req.id);
                 if (req.status === 'pending' && !hasResponded) { container.innerHTML += createPendingCard(req); pendingCount++; } 
-                else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) || req.status === 'rejected') { historyContainer.innerHTML += createHistoryCard(req, responseMap.get(req.id)); if(req.status==='reserved' && req.winner_pharmacy_id===currentUser.id) startCountdown(req.id, req.updated_at || new Date().toISOString()); }
+                else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) || req.status === 'rejected') { 
+                    historyContainer.innerHTML += createHistoryCard(req, responseMap.get(req.id)); 
+                    if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) startCountdown(req.id, req.updated_at); // SYNCED TIMER
+                }
             });
             const badge = document.getElementById('badge-count'); if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
         }
@@ -325,8 +296,8 @@
             if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
                 statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε!</span>';
                 extraInfo = `<div class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-center"><span class="text-[10px] uppercase font-bold text-green-800">Κωδικος Επαληθευσης</span><div class="text-xl font-mono font-bold text-green-700 tracking-widest">${req.id.substring(0, 6)}</div></div>`;
-                // SYNCED TIMER
-                timerHtml = `<div class="text-xs font-mono font-bold text-red-500 bg-red-50 px-2 py-1 rounded mt-1 text-center">Λήγει σε: <span id="timer-${req.id}">...</span></div>`;
+                // Add Timer Container
+                timerHtml = `<div class="text-xs font-mono font-bold text-red-500 bg-red-50 px-2 py-1 rounded mt-1 text-center border border-red-100">Λήγει σε: <span id="timer-${req.id}">...</span></div>`;
             } else if (req.status === 'rejected') { statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Απορρίφθηκε</span>'; }
 
             let sentItemsHtml = '';
@@ -335,25 +306,37 @@
                 sentItemsHtml = items.map(i => `<span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200">${i.name} (x${i.quantity}) <b>${i.responseType === 'generic' ? 'Γεν' : 'Πρωτ'}</b></span>`).join(' ');
             }
 
-            return `<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all"><div class="flex justify-between items-start mb-2"><span class="font-bold text-sm text-slate-800">${req.customer_name}</span>${statusBadge}</div><div class="flex flex-wrap gap-1 mb-2">${sentItemsHtml}</div><div class="text-[10px] text-slate-400 flex justify-between items-center"><span>${new Date(req.created_at).toLocaleString()}</span>${timerHtml}</div>${extraInfo}</div>`;
+            return `<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all"><div class="flex justify-between items-start mb-2"><span class="font-bold text-sm text-slate-800">${req.customer_name}</span>${statusBadge}</div><div class="flex flex-wrap gap-1 mb-2">${sentItemsHtml}</div><div class="text-[10px] text-slate-400 flex justify-between items-center"><span>${new Date(req.created_at).toLocaleString()}</span></div>${timerHtml}${extraInfo}</div>`;
         }
 
         // --- UTILS ---
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return "N/A"; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return (R * c).toFixed(1); }
         function deg2rad(deg) { return deg * (Math.PI / 180); }
         function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const qty = document.getElementById(`qty-${id}`); const type = document.getElementById(`type-${id}`); if(!cb.checked) { qty.disabled = true; type.disabled = true; qty.classList.add('opacity-50'); type.classList.add('opacity-50'); } else { qty.disabled = false; type.disabled = false; qty.classList.remove('opacity-50'); type.classList.remove('opacity-50'); } }
+        async function sendDetailedResponse(reqId) { const container = document.getElementById(`card-${reqId}`); const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked'); if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error'); const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; }); const message = `Βρέθηκαν ${foundItems.length} είδη.`; let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {} const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' }); if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); } else { showToast('Σφάλμα: ' + error.message, 'error'); } }
+        async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); fetchRequests(); }
         
-        async function sendDetailedResponse(reqId) {
-            const container = document.getElementById(`card-${reqId}`); const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
-            if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error');
-            const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; });
-            const message = `Βρέθηκαν ${foundItems.length} είδη.`; let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {}
-            const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' });
-            if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); } else { showToast('Σφάλμα: ' + error.message, 'error'); }
+        // SYNCED TIMER LOGIC (Identical to User App)
+        function startCountdown(reqId, startTimeStr) { 
+            if(!startTimeStr) return; // Guard
+            if(timers[reqId]) clearInterval(timers[reqId]); 
+            const safeStartTime = new Date(startTimeStr).getTime(); 
+            const duration = 60 * 60 * 1000; 
+            const endTime = safeStartTime + duration; 
+            
+            function update() { 
+                const distance = endTime - new Date().getTime(); 
+                const el = document.getElementById(`timer-${reqId}`); 
+                if (!el) { clearInterval(timers[reqId]); return; } 
+                if (distance < 0) { clearInterval(timers[reqId]); el.innerHTML = "ΕΛΗΞΕ"; el.classList.add('text-slate-500'); el.parentElement.classList.add('bg-slate-100', 'border-slate-200'); el.parentElement.classList.remove('bg-red-50', 'border-red-100', 'text-red-500'); return; } 
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); 
+                const s = Math.floor((distance % (1000 * 60)) / 1000); 
+                el.innerHTML = `${m}:${s < 10 ? '0' : ''}${s}`; 
+            } 
+            update(); 
+            timers[reqId] = setInterval(update, 1000); 
         }
 
-        async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); fetchRequests(); }
-        function startCountdown(reqId, startTimeStr) { if(timers[reqId]) clearInterval(timers[reqId]); const safeStartTime = new Date(startTimeStr).getTime(); const duration = 60 * 60 * 1000; const endTime = safeStartTime + duration; function update() { const distance = endTime - new Date().getTime(); const el = document.getElementById(`timer-${reqId}`); if (!el) { clearInterval(timers[reqId]); return; } if (distance < 0) { clearInterval(timers[reqId]); el.innerHTML = "ΕΛΗΞΕ"; return; } const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((distance % (1000 * 60)) / 1000); el.innerHTML = `${m}:${s < 10 ? '0' : ''}${s}`; } update(); timers[reqId] = setInterval(update, 1000); }
         function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
         function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); } if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Κράτηση!', 'success'); fetchRequests(); } }).subscribe(); }
     </script>
