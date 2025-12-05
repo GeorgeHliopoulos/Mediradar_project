@@ -8,11 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0f172a', secondary: '#0d9488' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' } } } }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0f172a', secondary: '#0d9488' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } } } } } }
     </script>
     <style>
         .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid #e2e8f0; }
@@ -160,6 +161,32 @@
         let currentUser = null; let myLat = null; let myLon = null; let timers = {};
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         const dayLabels = ['Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο', 'Κυριακή'];
+        
+        // OneSignal Keys - INSERTED AS REQUESTED
+        const ONESIGNAL_APP_ID = "ed041355-ae15-49d9-83a6-9625c108d1e6";
+        const ONESIGNAL_API_KEY = "os_v2_app_5ucbgvnocve5ta5gsys4ccgr4z7mhpbmou2uj647qeyeihq4peviwmyixwqdlchi4qtiyq4cbhdulbbxvborg4ahuimg4bzzqccdyxa";
+
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.init({ appId: ONESIGNAL_APP_ID });
+            OneSignal.User.PushSubscription.optIn();
+        });
+
+        async function notifyUser(userId, pharmacyName) {
+            const options = {
+                method: 'POST',
+                headers: { accept: 'application/json', 'content-type': 'application/json', Authorization: 'Basic ' + ONESIGNAL_API_KEY },
+                body: JSON.stringify({
+                    app_id: ONESIGNAL_APP_ID,
+                    include_external_user_ids: [userId],
+                    contents: { en: "Pharmacy responded!", el: `Το ${pharmacyName} απάντησε!` },
+                    headings: { en: "MediRadar Update", el: "Βρέθηκαν τα φάρμακα!" },
+                    url: "https://mediradar.netlify.app/"
+                })
+            };
+            try { await fetch('https://onesignal.com/api/v1/notifications', options); } catch (err) { console.error(err); }
+        }
+
         function generateTimeOptions() { let opts = '<option value="">--:--</option>'; for(let h=0; h<24; h++) { for(let m=0; m<60; m+=30) { const time = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; opts += `<option value="${time}">${time}</option>`; } } return opts; }
         const timeOptions = generateTimeOptions();
 
@@ -186,8 +213,7 @@
         async function handleProLogin(e) { 
             e.preventDefault(); 
             const email = document.getElementById('login-email').value; 
-            // 1. ΔΙΟΡΘΩΣΗ REDIRECT: Στέλνουμε το χρήστη πίσω στο pharmacy.html
-            const currentPath = window.location.href.split('?')[0]; // Καθαρίζει τυχόν παραμέτρους
+            const currentPath = window.location.href.split('?')[0];
             const { error } = await window.db.auth.signInWithOtp({ 
                 email, 
                 options: { emailRedirectTo: currentPath } 
@@ -201,6 +227,13 @@
             currentUser = user; 
             document.getElementById('login-overlay').classList.add('hidden'); 
             document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
+            
+            // OneSignal Identification
+            window.OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.login(user.id);
+                OneSignal.User.addTag("role", "pharmacist");
+            });
+
             loadProfile(); 
         }
 
@@ -210,20 +243,16 @@
                 if (!data) { const { data: newData } = await window.db.from('pharmacies').insert([{ id: currentUser.id, name: 'Νέο Φαρμακείο' }]).select().single(); data = newData; }
                 
                 if (data) {
-                    // 2. ΕΛΕΓΧΟΣ: Εχει συμπληρώσει τα στοιχεία; (Registration Check)
                     if (!data.name || data.name === 'Νέο Φαρμακείο' || !data.phone) {
                         document.getElementById('registration-overlay').classList.remove('hidden');
-                        return; // Σταματάμε εδώ μέχρι να κάνει register
+                        return;
                     }
-
-                    // 3. ΕΛΕΓΧΟΣ: Εχει εγκριθεί; (Verification Check)
                     if (data.approved === false) {
-                        document.getElementById('registration-overlay').classList.add('hidden'); // Κρύβουμε τη φόρμα αν ήταν ανοιχτή
+                        document.getElementById('registration-overlay').classList.add('hidden');
                         document.getElementById('pending-overlay').classList.remove('hidden');
-                        return; // Σταματάμε εδώ
+                        return;
                     }
 
-                    // 4. ΕΙΝΑΙ ΚΟΜΠΛΕ: Φορτώνουμε το App
                     document.getElementById('main-app').classList.remove('hidden');
                     fetchRequests(); subscribeToEverything(); setInterval(fetchRequests, 10000);
 
@@ -252,21 +281,16 @@
             } catch (e) { console.error("Profile load error", e); }
         }
 
-        // 5. ΥΠΟΒΟΛΗ ΦΟΡΜΑΣ ΕΓΓΡΑΦΗΣ
         async function submitRegistration(e) {
             e.preventDefault();
             const updates = {
                 name: document.getElementById('reg-name').value,
                 phone: document.getElementById('reg-phone').value,
                 address: document.getElementById('reg-address').value,
-                // approved: false // Αφήνουμε το default false
             };
             const { error } = await window.db.from('pharmacies').update(updates).eq('id', currentUser.id);
             if(error) showToast("Σφάλμα: " + error.message, 'error');
-            else {
-                showToast("Τα στοιχεία υποβλήθηκαν!", 'success');
-                location.reload(); // Κάνει refresh για να πιάσει το Pending State
-            }
+            else { showToast("Τα στοιχεία υποβλήθηκαν!", 'success'); location.reload(); }
         }
 
         async function saveProfile(e) {
@@ -324,6 +348,7 @@
             const badge = document.getElementById('badge-count'); if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
         }
 
+        // UPDATED PENDING CARD: With Image & Barcode support + FETCH USER_ID FIX
         function createPendingCard(req) {
             const dist = (myLat && req.lat) ? getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon) + ' χλμ' : '...';
             let items = Array.isArray(req.items) ? req.items : [{name: req.medicine_name, quantity: req.quantity}];
@@ -331,7 +356,7 @@
             const itemList = items.map((item, idx) => {
                 const isBarcode = /^\d+$/.test(item.name);
                 const displayName = isBarcode ? `<span class="font-mono bg-slate-100 px-1 rounded text-slate-600">${item.name} <i class="ph ph-barcode"></i></span>` : item.name;
-                const imageHtml = item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 cursor-zoom-in hover:scale-105 transition-transform" onclick="window.open('${item.image}', '_blank')">` : ''; // Simple new tab for image
+                const imageHtml = item.image ? `<img src="${item.image}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 cursor-zoom-in hover:scale-105 transition-transform" onclick="window.open('${item.image}', '_blank')">` : ''; 
                 
                 return `
                 <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-2">
@@ -375,7 +400,24 @@
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return "N/A"; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return (R * c).toFixed(1); }
         function deg2rad(deg) { return deg * (Math.PI / 180); }
         function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const qty = document.getElementById(`qty-${id}`); const type = document.getElementById(`type-${id}`); if(!cb.checked) { qty.disabled = true; type.disabled = true; qty.classList.add('opacity-50'); type.classList.add('opacity-50'); } else { qty.disabled = false; type.disabled = false; qty.classList.remove('opacity-50'); type.classList.remove('opacity-50'); } }
-        async function sendDetailedResponse(reqId) { const container = document.getElementById(`card-${reqId}`); const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked'); if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error'); const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; }); const message = `Βρέθηκαν ${foundItems.length} είδη.`; let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {} const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' }); if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); } else { showToast('Σφάλμα: ' + error.message, 'error'); } }
+        async function sendDetailedResponse(reqId) { 
+            const container = document.getElementById(`card-${reqId}`); 
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked'); 
+            if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error'); 
+            const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; }); 
+            const message = `Βρέθηκαν ${foundItems.length} είδη.`; 
+            let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {} 
+            
+            // Fetch User ID to send notification
+            const { data: requestData } = await window.db.from('requests').select('user_id').eq('id', reqId).single();
+
+            const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' }); 
+            if (!error) { 
+                showToast('Η απάντηση εστάλη!', 'success'); 
+                fetchRequests(); 
+                if(requestData) notifyUser(requestData.user_id, document.getElementById('prof-name').value);
+            } else { showToast('Σφάλμα: ' + error.message, 'error'); } 
+        }
         async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); fetchRequests(); }
         
         function startCountdown(reqId, startTimeStr) { 
