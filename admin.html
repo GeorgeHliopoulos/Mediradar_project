@@ -22,7 +22,7 @@
     <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Admin Access</h2>
-            <p class="text-sm text-slate-500 mb-4">Σύνδεση με Magic Link (στο email σου)</p>
+            <p class="text-sm text-slate-500 mb-4">Σύνδεση με Magic Link</p>
             <form id="admin-form" class="space-y-4">
                 <input type="email" id="a-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 outline-none" required>
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition">Αποστολή Link</button>
@@ -73,12 +73,20 @@
             }
         };
 
-        // Αλλαγή σε Magic Link γιατί δεν ξέρουμε κωδικό
+        // --- Η ΔΙΟΡΘΩΣΗ ΓΙΑ ΤΟ REDIRECT ---
         document.getElementById('admin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('a-email').value;
-            const { error } = await window.db.auth.signInWithOtp({ email: email }); // Magic Link
-            if (error) alert(error.message); else alert("Check email for Magic Link!");
+            
+            const { error } = await window.db.auth.signInWithOtp({ 
+                email: email,
+                options: {
+                    emailRedirectTo: window.location.href // <-- ΑΥΤΟ ΤΟ ΔΙΟΡΘΩΝΕΙ
+                }
+            }); 
+            
+            if (error) alert(error.message); 
+            else alert("Ελέγξτε το email σας! Το link θα σας φέρει πίσω εδώ.");
         });
 
         function initDashboard(user) {
@@ -98,14 +106,13 @@
             document.getElementById('stat-responses').innerText = respCount || 0;
             document.getElementById('stat-pharmacies').innerText = pharmCount || 0;
 
-            // 2. Φόρτωση Εκκρεμών (Pending)
-            // Εδώ ψάχνουμε στον πίνακα pharmacies όπου approved = false
-            const pendingPharms = pharmacies.filter(p => p.approved === false);
+            // 2. Φόρτωση Εκκρεμών (Pending) - Χρήση του σωστού πίνακα 'pharmacies'
+            const pendingPharms = pharmacies ? pharmacies.filter(p => p.approved === false) : [];
 
             const pendingSection = document.getElementById('pending-section');
             const pendingTable = document.getElementById('pending-table');
             
-            if (pendingPharms && pendingPharms.length > 0) {
+            if (pendingPharms.length > 0) {
                 pendingSection.classList.remove('hidden');
                 pendingTable.innerHTML = pendingPharms.map(p => `
                     <tr class="border-b border-orange-200 bg-orange-50/50">
@@ -142,7 +149,7 @@
 
         async function approvePharmacy(id) {
             if(!confirm('Είστε σίγουροι για την έγκριση;')) return;
-            // UPDATE approved = true
+            // UPDATE approved = true στον σωστό πίνακα 'pharmacies'
             const { error } = await window.db.from('pharmacies').update({ approved: true }).eq('id', id);
             if(error) alert('Σφάλμα: ' + error.message); else { loadData(); }
         }
