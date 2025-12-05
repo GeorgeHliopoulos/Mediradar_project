@@ -247,11 +247,21 @@
             if (hasError) { showToast("Συμπληρώστε τις ώρες!", "error"); btn.innerHTML = oldText; btn.disabled = false; return; }
             
             // UPSERT to avoid create error
-            const profileData = { id: currentUser.id, name: document.getElementById('prof-name').value, address: document.getElementById('prof-address').value, phone: document.getElementById('prof-phone').value, schedule: schedule, image_url: document.getElementById('profile-img-preview').src, updated_at: new Date() };
+            const profileData = { 
+                id: currentUser.id, 
+                name: document.getElementById('prof-name').value, 
+                address: document.getElementById('prof-address').value, 
+                phone: document.getElementById('prof-phone').value, 
+                schedule: schedule, 
+                image_url: document.getElementById('profile-img-preview').src, 
+                updated_at: new Date() 
+            };
             if(myLat) { profileData.lat = myLat; profileData.lon = myLon; } // Only update loc if we have it
 
-            const { error } = await window.db.from('pharmacies').upsert(profileData);
-            if(error) showToast('Σφάλμα αποθήκευσης', 'error'); else { showToast('Το προφίλ ενημερώθηκε!', 'success'); loadProfile(); }
+            // *** ΕΝΣΩΜΑΤΩΣΗ ΤΗΣ ΔΙΟΡΘΩΣΗΣ: Προσθήκη { onConflict: 'id' } ***
+            const { error } = await window.db.from('pharmacies').upsert(profileData, { onConflict: 'id' });
+            
+            if(error) showToast('Σφάλμα αποθήκευσης: ' + error.message, 'error'); else { showToast('Το προφίλ ενημερώθηκε!', 'success'); loadProfile(); }
             btn.innerHTML = oldText; btn.disabled = false;
         }
 
