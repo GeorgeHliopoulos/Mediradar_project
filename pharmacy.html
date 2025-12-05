@@ -253,8 +253,8 @@
                 address: document.getElementById('prof-address').value, 
                 phone: document.getElementById('prof-phone').value, 
                 schedule: schedule, 
-                image_url: document.getElementById('profile-img-preview').src, 
-                updated_at: new Date() 
+                image_url: document.getElementById('profile-img-preview').src
+                // AFAIRETHIKE TO updated_at GIA NA MIN XTIPAEI ERROR
             };
             if(myLat) { profileData.lat = myLat; profileData.lon = myLon; } // Only update loc if we have it
 
