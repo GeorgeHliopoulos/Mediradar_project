@@ -180,8 +180,57 @@
         </div>
     </div>
 
-    <div id="modal-user" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up"><button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl"></i></button><div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl"></i></div><h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3><p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Χωρίς κωδικούς! Σας στέλνουμε ένα link στο email.</p><form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)"><div class="text-left"><label for="user-email" class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div><button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg"></i> Στείλτε μου Link</button></form><div class="flex justify-center mt-4"><button onclick="window.location.href='pharmacy.html'" class="text-xs text-teal-600 font-bold underline">Είστε Φαρμακοποιός;</button></div></div></div>
-    <div id="modal-pro" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md"><button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl"></i></button><h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Είσοδος Φαρμακείου</h3><div class="w-20 h-20 bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl"><i class="ph ph-first-aid-kit"></i></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-6">Μεταβείτε στο ειδικό Portal για επαγγελματίες υγείας.</p><button onclick="window.location.href='pharmacy.html'" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"><span>Μετάβαση στο Portal</span> <i class="ph ph-arrow-right"></i></button></div></div>
+    <div id="modal-user" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up"><button onclick="closeModal('user')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90"><i class="ph ph-x text-xl"></i></button><div class="w-16 h-16 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center mx-auto mb-4 text-primary ring-4 ring-teal-50 dark:ring-teal-900/20"><i class="ph ph-user-circle text-3xl"></i></div><h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Είσοδος / Εγγραφή</h3><p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Χωρίς κωδικούς! Σας στέλνουμε ένα link στο email.</p><form id="magic-link-form" class="space-y-3" onsubmit="handleMagicLink(event)"><div class="text-left"><label for="user-email" class="text-xs font-bold text-slate-500 ml-2 uppercase">Email</label><input id="user-email" type="email" placeholder="onoma@email.com" required class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-white transition-all font-medium"></div><button type="submit" class="w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all transform active:scale-[0.98]"><i class="ph ph-paper-plane-tilt text-lg"></i> Στείλτε μου Link</button></form><div class="flex justify-center mt-4"><button onclick="closeModal('user'); openModal('pro');" class="text-xs text-teal-600 font-bold underline">Είστε Φαρμακοποιός;</button></div></div></div>
+    
+    <div id="modal-pro" class="modal-backdrop">
+        <div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none animate-slide-up !max-w-md">
+            <button onclick="closeModal('pro')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white active:scale-90">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+            
+            <div class="w-16 h-16 bg-teal-100 dark:bg-teal-900 text-teal-600 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+                <i class="ph ph-first-aid-kit"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-1 text-slate-800 dark:text-white">Portal Φαρμακοποιών</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Σύνδεση ή Εγγραφή επαγγελματία.</p>
+
+            <div class="space-y-4">
+                <button onclick="handleGoogleLoginPro()" class="flex items-center justify-center gap-3 w-full bg-white dark:bg-slate-100 text-slate-600 font-bold py-3 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:bg-slate-50 transition-all active:scale-95">
+                    <svg viewBox="0 0 48 48" class="w-6 h-6">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                    </svg>
+                    <span>Σύνδεση με Google</span>
+                </button>
+
+                <div class="relative flex items-center py-2">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase">ή με Email</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+
+                <form id="pro-login-form" class="space-y-3 text-left" onsubmit="handleProLoginFromUserApp(event)">
+                    <div>
+                        <input id="pro-email-input" type="email" placeholder="pharmacy@example.com" required 
+                               class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:text-white font-medium">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                        <i class="ph ph-envelope-simple"></i> Αποστολή Link Εισόδου
+                    </button>
+                </form>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button onclick="window.location.href='pharmacy.html'" class="text-xs text-slate-500 dark:text-slate-400 hover:text-primary underline">
+                    Μετάβαση στη σελίδα login (χωρίς αποστολή)
+                </button>
+            </div>
+        </div>
+    </div>
     
     <div id="modal-generic" class="modal-backdrop"><div class="modal-content bg-white dark:bg-slate-800 text-center relative glass-card !opacity-100 !transform-none"><button onclick="closeModal('generic')" class="absolute top-4 right-4 text-slate-400"><i class="ph ph-x text-xl"></i></button><h3 class="text-lg font-bold mb-2 dark:text-white">Τι είναι το γενόσημο;</h3><p class="text-sm text-slate-600 dark:text-slate-300 mb-4 text-left">Ένα γενόσημο φάρμακο είναι ένα φαρμακευτικό προϊόν που δημιουργήθηκε για να είναι ίδιο με ένα ήδη κυκλοφορούν επώνυμο φάρμακο στη μορφή δοσολογίας, την ασφάλεια, την ισχύ, την οδό χορήγησης, την ποιότητα, τα χαρακτηριστικά απόδοσης και την προοριζόμενη χρήση. <br><br><strong>Ουσιαστικά:</strong> Ίδια δραστική ουσία, ίδια θεραπευτική δράση, συνήθως χαμηλότερη τιμή.</p><button onclick="closeModal('generic')" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg">Κατάλαβα</button></div></div>
     
@@ -196,7 +245,7 @@
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
 
-        // OneSignal Keys - INSERTED AS REQUESTED
+        // OneSignal Keys
         const ONESIGNAL_APP_ID = "ed041355-ae15-49d9-83a6-9625c108d1e6";
         const ONESIGNAL_API_KEY = "os_v2_app_5ucbgvnocve5ta5gsys4ccgr4z7mhpbmou2uj647qeyeihq4peviwmyixwqdlchi4qtiyq4cbhdulbbxvborg4ahuimg4bzzqccdyxa";
 
@@ -468,8 +517,8 @@
         function saveUserData() { localStorage.setItem('mr_user', JSON.stringify({ n: document.getElementById('full-name').value, p: document.getElementById('phone').value, c: document.getElementById('city').value })); }
         function loadUserData() { const d = JSON.parse(localStorage.getItem('mr_user') || '{}'); if(d.n) document.getElementById('full-name').value = d.n; if(d.p) document.getElementById('phone').value = d.p; if(d.c) document.getElementById('city').value = d.c; }
         function resetApp() { window.location.reload(); }
-        function showToast(m, t='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); e.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-slate-800'} animate-toast`; e.innerText = m; c.appendChild(e); setTimeout(()=>e.remove(), 3000); }
-        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`https://maps.google.com/?q=${userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`https://maps.google.com/?q=${document.getElementById('city').value}`, '_blank'); } }
+        function showToast(m, t='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); el.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-slate-800'} animate-toast`; el.innerText = m; c.appendChild(el); setTimeout(()=>el.remove(), 3000); }
+        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`http://maps.google.com/maps?q=${userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`http://maps.google.com/maps?q=${document.getElementById('city').value}`, '_blank'); } }
         
         function getLocation() {
             if(!navigator.geolocation) return showToast("GPS not supported.", "error");
@@ -498,6 +547,43 @@
         
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Check email!", 'success'); closeModal('user'); } }
         function updateNavForUser(user) { if (user.is_anonymous) return; const n = user.user_metadata.full_name || (user.email ? user.email.split('@')[0] : 'User'); document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button></div>`; }
+
+        // --- NEW PHARMACIST LOGIC ---
+
+        async function handleProLoginFromUserApp(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...'; btn.disabled = true;
+
+            const email = document.getElementById('pro-email-input').value;
+            const redirectUrl = window.location.origin + '/pharmacy.html';
+
+            const { error } = await window.db.auth.signInWithOtp({
+                email: email,
+                options: { emailRedirectTo: redirectUrl }
+            });
+
+            if (error) {
+                showToast("Σφάλμα: " + error.message, 'error');
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            } else {
+                showToast("✅ Link εστάλη! Ελέγξτε το email σας.", 'success');
+                btn.innerHTML = '<i class="ph ph-check"></i> Εστάλη!';
+                setTimeout(() => closeModal('pro'), 2000);
+            }
+        }
+
+        async function handleGoogleLoginPro() {
+            const redirectUrl = window.location.origin + '/pharmacy.html';
+            const { error } = await window.db.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: redirectUrl }
+            });
+            if (error) showToast(error.message, 'error');
+        }
+
     </script>
     
     <div id="image-modal" class="fixed inset-0 z-[60] bg-black/90 hidden items-center justify-center p-4 cursor-pointer" onclick="this.classList.add('hidden')">
