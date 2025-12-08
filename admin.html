@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <script>
+    
+    <script>
         tailwind.config = { 
             darkMode: 'class', 
             theme: { 
@@ -33,7 +34,7 @@
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex">
 
-    <aside class="w-64 bg-slate-900 text-white flex-col hidden md:flex h-full shadow-2xl z-20">
+    <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-col hidden md:flex h-full shadow-2xl z-20">
         <div class="p-6 flex items-center gap-3 border-b border-slate-800">
             <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="ph ph-shield-check text-2xl"></i></div>
             <div><h1 class="font-bold text-lg">MediRadar</h1><p class="text-xs text-slate-400">Admin Console</p></div>
@@ -48,18 +49,19 @@
         </div>
     </aside>
 
-    <div class="md:hidden fixed top-0 w-full bg-slate-900 text-white p-4 z-20 flex justify-between items-center shadow-md">
+    <div id="mobile-header" class="md:hidden fixed top-0 w-full bg-slate-900 text-white p-4 z-20 flex justify-between items-center shadow-md hidden">
         <span class="font-bold">MediRadar Admin</span>
         <button onclick="handleLogout()" class="text-sm bg-slate-800 px-3 py-1 rounded">Exit</button>
     </div>
 
     <main class="flex-1 h-full overflow-y-auto relative pt-16 md:pt-0">
         
-        <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+        <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4 hidden">
             <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border-4 border-indigo-500/20">
                 <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6"><i class="ph ph-lock-key text-3xl"></i></div>
                 <h2 class="text-2xl font-bold mb-2 text-slate-800">Admin Access</h2>
-                <p class="text-sm text-slate-500 mb-6">Αυστηρά για διαχειριστές.</p>
+                <p id="login-msg" class="text-sm text-slate-500 mb-6">Αυστηρά για διαχειριστές.</p>
+                
                 <form id="admin-form" class="space-y-4">
                     <input type="email" id="a-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500" required>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-500/30">Αποστολή Magic Link</button>
@@ -181,15 +183,43 @@
 
         window.onload = async function() {
             window.db = window.supabase.createClient(SB_URL, SB_KEY);
-            const { data: { session } } = await window.db.auth.getSession();
-            
-            if (session && !session.user.is_anonymous) {
-                initDashboard(session.user);
-            } else {
-                // Αν δεν υπάρχει session ή είναι anonymous, δείξε login
+
+            // 1. ΕΛΕΓΧΟΣ ΓΙΑ ΕΠΙΣΤΡΟΦΗ ΑΠΟ MAGIC LINK
+            // Αν το URL έχει access_token, σημαίνει ότι ο χρήστης μόλις πάτησε το Link από το email
+            const isMagicLinkReturn = window.location.hash && window.location.hash.includes('access_token');
+
+            if (isMagicLinkReturn) {
+                // Δείξε μήνυμα φόρτωσης και κρύψε τη φόρμα
                 document.getElementById('admin-login').classList.remove('hidden');
-                if(session) window.db.auth.signOut(); 
+                document.getElementById('admin-form').classList.add('hidden');
+                document.getElementById('login-msg').innerText = "Γίνεται ασφαλής σύνδεση...";
+                // Άσε το Supabase να κάνει τη δουλειά στο onAuthStateChange
+            } else {
+                // Αν δεν είναι magic link, έλεγξε αν υπάρχει ήδη session
+                const { data: { session } } = await window.db.auth.getSession();
+                if (!session) {
+                    document.getElementById('admin-login').classList.remove('hidden');
+                }
             }
+
+            // 2. LISTEN FOR AUTH CHANGES (Η ΚΑΡΔΙΑ ΤΗΣ ΛΥΣΗΣ)
+            window.db.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                    if (session && !session.user.is_anonymous) {
+                        // Καθαρισμός URL για να μην μείνει το token (και προκαλεί otp_expired στο refresh)
+                        if (window.location.hash) {
+                            window.history.replaceState(null, null, window.location.pathname);
+                        }
+                        initDashboard(session.user);
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    document.getElementById('admin-login').classList.remove('hidden');
+                    document.getElementById('admin-form').classList.remove('hidden');
+                    document.getElementById('content-area').classList.add('hidden');
+                    document.querySelector('aside').classList.add('hidden');
+                    document.getElementById('mobile-header').classList.add('hidden');
+                }
+            });
         };
 
         // LOGIN HANDLER
@@ -206,15 +236,19 @@
             }); 
             
             if (error) alert(error.message); 
-            else alert("Ελέγξτε το email σας!");
+            else alert("Ελέγξτε το email σας! Θα σας συνδέσει αυτόματα.");
+            
             btn.innerText = originalText; btn.disabled = false;
         });
 
         function initDashboard(user) {
             document.getElementById('admin-login').classList.add('hidden');
             document.getElementById('content-area').classList.remove('hidden');
-            document.querySelector('aside').classList.remove('hidden'); // Show sidebar
+            document.querySelector('aside').classList.remove('hidden'); 
+            document.getElementById('mobile-header').classList.remove('hidden');
             loadData();
+            // Auto refresh every 30s
+            setInterval(loadData, 30000);
         }
 
         async function loadData() {
