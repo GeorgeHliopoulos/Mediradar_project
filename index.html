@@ -548,7 +548,7 @@
         async function handleMagicLink(e) { e.preventDefault(); const email = document.getElementById('user-email').value; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }); if (error) showToast("Error: "+error.message, 'error'); else { showToast("Check email!", 'success'); closeModal('user'); } }
         function updateNavForUser(user) { if (user.is_anonymous) return; const n = user.user_metadata.full_name || (user.email ? user.email.split('@')[0] : 'User'); document.getElementById('user-nav-container').innerHTML = `<div class="flex gap-2"><button class="bg-teal-50 dark:bg-teal-900 px-3 py-2 rounded-xl text-xs font-bold text-teal-700 dark:text-teal-300 border border-teal-200 shadow-sm flex items-center gap-2"><i class="ph ph-user"></i> ${n}</button></div>`; }
 
-        // --- NEW PHARMACIST LOGIC ---
+        // --- NEW PHARMACIST LOGIC: DIRECTS TO PHARMACY.HTML ---
 
         async function handleProLoginFromUserApp(e) {
             e.preventDefault();
@@ -556,12 +556,15 @@
             const oldText = btn.innerHTML;
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...'; btn.disabled = true;
 
-            const email = document.getElementById('pro-email-input').value;
+            const email = document.getElementById('pro-email-input').value.trim();
             const redirectUrl = window.location.origin + '/pharmacy.html';
 
             const { error } = await window.db.auth.signInWithOtp({
                 email: email,
-                options: { emailRedirectTo: redirectUrl }
+                options: { 
+                    emailRedirectTo: redirectUrl,
+                    shouldCreateUser: true
+                }
             });
 
             if (error) {
@@ -571,7 +574,7 @@
             } else {
                 showToast("✅ Link εστάλη! Ελέγξτε το email σας.", 'success');
                 btn.innerHTML = '<i class="ph ph-check"></i> Εστάλη!';
-                setTimeout(() => closeModal('pro'), 2000);
+                setTimeout(() => closeModal('pro'), 3000);
             }
         }
 
