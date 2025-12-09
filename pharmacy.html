@@ -13,6 +13,10 @@
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
+        
+        // --- ΡΥΘΜΙΣΗ ΑΚΤΙΝΑΣ ΕΞΥΠΗΡΕΤΗΣΗΣ (ΣΕ ΧΙΛΙΟΜΕΤΡΑ) ---
+        const MAX_RADIUS_KM = 20; 
+
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#0f172a', secondary: '#0d9488' }, animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'fade-in': 'fadeIn 0.3s ease-out forwards' }, keyframes: { fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } } } } } }
     </script>
     <style>
@@ -120,7 +124,7 @@
 
                 <div class="lg:col-span-3">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-800">Νέα Αιτήματα</h2>
+                        <h2 class="text-xl font-bold text-slate-800">Νέα Αιτήματα <span id="location-warning" class="hidden text-xs text-orange-500 bg-orange-100 px-2 py-1 rounded ml-2 font-normal">⚠️ Ενεργοποιήστε το GPS για φιλτράρισμα</span></h2>
                         <button onclick="fetchRequests()" class="text-xs bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-lg font-bold transition-all active:scale-95 flex items-center gap-1"><i class="ph ph-arrows-clockwise"></i> Ανανέωση</button>
                     </div>
                     <div id="loading-spinner" class="hidden text-center py-12"><i class="ph ph-spinner animate-spin text-3xl text-secondary"></i></div>
@@ -158,7 +162,7 @@
                         <div><label class="text-[10px] font-bold text-slate-500 uppercase">Διεύθυνση</label><input id="prof-address" type="text" class="w-full p-2.5 rounded-lg border bg-slate-50 focus:bg-white outline-none focus:border-secondary transition-colors text-sm"></div>
                         <div class="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
                             <div><span class="text-xs font-bold text-slate-700 block">GPS Location</span><span id="gps-coords" class="text-[10px] text-slate-400 font-mono">Not set</span></div>
-                            <button type="button" onclick="updateLocation()" class="text-xs bg-white border border-slate-300 hover:text-secondary px-3 py-1.5 rounded-lg font-bold shadow-sm transition-all"><i class="ph ph-crosshair"></i> Ενημέρωση</button>
+                            <button type="button" onclick="updateLocation()" class="text-xs bg-white border border-slate-300 hover:text-secondary px-3 py-1.5 rounded-lg font-bold shadow-sm transition-all"><i class="ph ph-crosshair"></i> Ενημέρωση & Reverse Geocode</button>
                         </div>
                     </div>
                 </div>
@@ -212,42 +216,21 @@
 
         window.db = window.supabase.createClient(SB_URL, SB_KEY);
 
-        // --- NEW IMPROVED WINDOW.ONLOAD & AUTH FLOW ---
         window.onload = async function() {
             initializeScheduleUI();
-
-            // 1. Check for Magic Link return (URL has access_token)
             const isMagicLinkReturn = window.location.hash && window.location.hash.includes('access_token');
-            
-            if (isMagicLinkReturn) {
-                showToast('🔄 Γίνεται σύνδεση...', 'info');
-                // Don't show login overlay, Supabase handles it
-            } else {
+            if (isMagicLinkReturn) { showToast('🔄 Γίνεται σύνδεση...', 'info'); } 
+            else {
                 const { data: { session } } = await window.db.auth.getSession();
-                if (!session) {
-                    document.getElementById('login-overlay').classList.remove('hidden');
-                }
+                if (!session) { document.getElementById('login-overlay').classList.remove('hidden'); }
             }
 
-            // 2. Auth State Listener
             window.db.auth.onAuthStateChange(async (event, session) => {
                 if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                     if (session) {
                         currentUser = session.user;
-                        
-                        // Clean URL hash to prevent otp_expired error on refresh
-                        if (window.location.hash) {
-                            window.history.replaceState(null, null, window.location.pathname);
-                        }
-                        
-                        if(window.OneSignalDeferred){
-                            window.OneSignalDeferred.push(function(OneSignal) {
-                                OneSignal.login(currentUser.id);
-                                OneSignal.User.addTag("role", "pharmacist");
-                            });
-                        }
-
-                        // Check status and route accordingly
+                        if (window.location.hash) window.history.replaceState(null, null, window.location.pathname);
+                        if(window.OneSignalDeferred){ window.OneSignalDeferred.push(function(OneSignal) { OneSignal.login(currentUser.id); OneSignal.User.addTag("role", "pharmacist"); }); }
                         await checkPharmacyStatus();
                     }
                 } else if (event === 'SIGNED_OUT') {
@@ -259,25 +242,12 @@
             });
         };
 
-        // --- AUTH STATUS CHECKER ---
         async function checkPharmacyStatus() {
             document.getElementById('login-overlay').classList.add('hidden');
-            
             let { data: pharm, error } = await window.db.from('pharmacies').select('*').eq('id', currentUser.id).single();
-
-            if (!pharm) {
-                // Scenario 1: New User
-                document.getElementById('registration-overlay').classList.remove('hidden');
-            } else if (pharm.approved === false) {
-                // Scenario 2: Pending Approval
-                document.getElementById('registration-overlay').classList.add('hidden');
-                document.getElementById('pending-overlay').classList.remove('hidden');
-            } else {
-                // Scenario 3: Approved -> Load Dashboard
-                document.getElementById('registration-overlay').classList.add('hidden');
-                document.getElementById('pending-overlay').classList.add('hidden');
-                handleLoginSuccess(pharm);
-            }
+            if (!pharm) { document.getElementById('registration-overlay').classList.remove('hidden'); } 
+            else if (pharm.approved === false) { document.getElementById('registration-overlay').classList.add('hidden'); document.getElementById('pending-overlay').classList.remove('hidden'); } 
+            else { document.getElementById('registration-overlay').classList.add('hidden'); document.getElementById('pending-overlay').classList.add('hidden'); handleLoginSuccess(pharm); }
         }
 
         function initializeScheduleUI() {
@@ -298,38 +268,25 @@
             if(isClosed) { document.getElementById(`start-${day}`).value = ''; document.getElementById(`end-${day}`).value = ''; }
         }
 
-        async function handleProLogin(e) { 
-            e.preventDefault(); 
-            const email = document.getElementById('login-email').value; 
-            const redirectUrl = window.location.origin + '/pharmacy.html';
-            const { error } = await window.db.auth.signInWithOtp({ 
-                email, 
-                options: { emailRedirectTo: redirectUrl } 
-            }); 
-            if (error) showToast(error.message, 'error'); else showToast("✅ Magic Link Sent!", 'success'); 
-        }
-
-        async function handleGoogleLogin() {
-            const redirectUrl = window.location.origin + '/pharmacy.html';
-            const { error } = await window.db.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: redirectUrl }
-            });
-            if (error) showToast(error.message, 'error');
-        }
+        async function handleProLogin(e) { e.preventDefault(); const email = document.getElementById('login-email').value; const redirectUrl = window.location.origin + '/pharmacy.html'; const { error } = await window.db.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } }); if (error) showToast(error.message, 'error'); else showToast("✅ Magic Link Sent!", 'success'); }
+        async function handleGoogleLogin() { const redirectUrl = window.location.origin + '/pharmacy.html'; const { error } = await window.db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } }); if (error) showToast(error.message, 'error'); }
         
-        // Load data into dashboard
         async function handleLoginSuccess(pharmData) { 
             document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
             document.getElementById('main-app').classList.remove('hidden');
             
-            // Fill UI with data
             const data = pharmData;
-            document.getElementById('prof-name').value = data.name || '';
-            document.getElementById('prof-address').value = data.address || '';
-            document.getElementById('prof-phone').value = data.phone || '';
+            if(data.name && data.name !== 'Νέο Φαρμακείο') document.getElementById('prof-name').value = data.name;
+            if(data.address) document.getElementById('prof-address').value = data.address;
+            if(data.phone) document.getElementById('prof-phone').value = data.phone;
             if(data.image_url) document.getElementById('profile-img-preview').src = data.image_url;
-            if(data.lat) { myLat = data.lat; myLon = data.lon; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; } else updateLocation();
+            
+            if(data.lat) { 
+                myLat = data.lat; myLon = data.lon; 
+                document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; 
+            } else {
+                document.getElementById('location-warning').classList.remove('hidden');
+            }
             
             document.getElementById('status-toggle').checked = data.is_open;
             updateStatusUI(data.is_open);
@@ -347,22 +304,14 @@
                 document.getElementById('hours-display').innerText = (todaySched && !todaySched.closed && todaySched.start) ? `${todaySched.start} - ${todaySched.end}` : "ΚΛΕΙΣΤΑ";
             } else { document.getElementById('hours-display').innerText = "Δεν ορίστηκε"; }
 
-            // Start polling
             fetchRequests(); subscribeToEverything(); setInterval(fetchRequests, 10000);
         }
 
         async function submitRegistration(e) {
             e.preventDefault();
-            const updates = {
-                id: currentUser.id,
-                name: document.getElementById('reg-name').value,
-                phone: document.getElementById('reg-phone').value,
-                address: document.getElementById('reg-address').value,
-                approved: false // Explicitly set to false initially
-            };
+            const updates = { id: currentUser.id, name: document.getElementById('reg-name').value, phone: document.getElementById('reg-phone').value, address: document.getElementById('reg-address').value, approved: false };
             const { error } = await window.db.from('pharmacies').upsert(updates);
-            if(error) showToast("Σφάλμα: " + error.message, 'error');
-            else { showToast("Τα στοιχεία υποβλήθηκαν!", 'success'); location.reload(); }
+            if(error) showToast("Σφάλμα: " + error.message, 'error'); else { showToast("Τα στοιχεία υποβλήθηκαν!", 'success'); location.reload(); }
         }
 
         async function saveProfile(e) {
@@ -378,18 +327,9 @@
             });
             if (hasError) { showToast("Συμπληρώστε τις ώρες!", "error"); btn.innerHTML = oldText; btn.disabled = false; return; }
             
-            const profileData = { 
-                id: currentUser.id, 
-                name: document.getElementById('prof-name').value, 
-                address: document.getElementById('prof-address').value, 
-                phone: document.getElementById('prof-phone').value, 
-                schedule: schedule, 
-                image_url: document.getElementById('profile-img-preview').src
-            };
+            const profileData = { id: currentUser.id, name: document.getElementById('prof-name').value, address: document.getElementById('prof-address').value, phone: document.getElementById('prof-phone').value, schedule: schedule, image_url: document.getElementById('profile-img-preview').src };
             if(myLat) { profileData.lat = myLat; profileData.lon = myLon; } 
-
             const { error } = await window.db.from('pharmacies').update(profileData).eq('id', currentUser.id);
-            
             if(error) showToast('Σφάλμα αποθήκευσης: ' + error.message, 'error'); else { showToast('Το προφίλ ενημερώθηκε!', 'success'); }
             btn.innerHTML = oldText; btn.disabled = false;
         }
@@ -397,9 +337,46 @@
         function handleLogoUpload(input) { if (input.files && input.files[0]) { if(input.files[0].size > 800000) return showToast("Μεγάλη Εικόνα (>800KB)", "error"); const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profile-img-preview').src = e.target.result; }; reader.readAsDataURL(input.files[0]); } }
         async function togglePharmacyStatus() { const isOpen = document.getElementById('status-toggle').checked; updateStatusUI(isOpen); await window.db.from('pharmacies').update({ is_open: isOpen }).eq('id', currentUser.id); }
         function updateStatusUI(isOpen) { document.getElementById('status-text').innerText = isOpen ? 'Ανοιχτό' : 'Κλειστό'; const indicator = document.getElementById('status-indicator'); if(isOpen) { indicator.classList.remove('bg-red-500'); indicator.classList.add('bg-emerald-500', 'animate-pulse'); } else { indicator.classList.add('bg-red-500'); indicator.classList.remove('bg-emerald-500', 'animate-pulse'); } }
-        function updateLocation() { navigator.geolocation.getCurrentPosition(async (pos) => { myLat = pos.coords.latitude; myLon = pos.coords.longitude; document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; await window.db.from('pharmacies').update({ lat: myLat, lon: myLon }).eq('id', currentUser.id); showToast(`Τοποθεσία ενημερώθηκε!`, 'success'); }); }
+        
+        // --- NEW UPDATE LOCATION WITH REVERSE GEOCODING ---
+        function updateLocation() { 
+            const btn = document.querySelector('button[onclick="updateLocation()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Λήψη...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(async (pos) => { 
+                myLat = pos.coords.latitude; myLon = pos.coords.longitude; 
+                document.getElementById('gps-coords').innerText = `${myLat.toFixed(4)}, ${myLon.toFixed(4)}`; 
+                document.getElementById('location-warning').classList.add('hidden');
+                
+                // Reverse Geocoding
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${myLat}&lon=${myLon}&addressdetails=1`);
+                    const data = await res.json();
+                    if(data && data.display_name) {
+                        const addr = data.address.road || data.address.pedestrian || '';
+                        const num = data.address.house_number || '';
+                        const city = data.address.city || data.address.town || data.address.suburb || '';
+                        const fullAddr = `${addr} ${num}, ${city}`;
+                        document.getElementById('prof-address').value = fullAddr;
+                        showToast(`Διεύθυνση βρέθηκε: ${fullAddr}`, 'success');
+                    }
+                } catch(e) { console.error(e); }
+
+                await window.db.from('pharmacies').update({ lat: myLat, lon: myLon }).eq('id', currentUser.id); 
+                showToast(`Τοποθεσία ενημερώθηκε!`, 'success');
+                btn.innerHTML = originalText; btn.disabled = false;
+                fetchRequests(); // Refresh list with new location
+            }, (err) => {
+                showToast("Δεν βρέθηκε τοποθεσία: " + err.message, "error");
+                btn.innerHTML = originalText; btn.disabled = false;
+            }); 
+        }
+
         function switchMainTab(tab) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${tab}`).classList.add('active'); ['requests', 'history', 'profile'].forEach(t => { const btn = document.getElementById(`nav-${t}`); if(t === tab) btn.className = "px-6 py-3 text-sm font-bold rounded-t-xl transition-all flex items-center gap-2 bg-white text-secondary border-b-2 border-secondary shadow-sm"; else btn.className = "px-6 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-white/50 rounded-t-xl transition-all flex items-center gap-2"; }); }
 
+        // --- FETCH REQUESTS WITH RADIUS FILTERING ---
         async function fetchRequests() {
             if(!currentUser) return;
             const container = document.getElementById('requests-container'); const historyContainer = document.getElementById('history-container');
@@ -409,7 +386,14 @@
             const responseMap = new Map(); myResponses.forEach(r => responseMap.set(r.request_id, r));
 
             container.innerHTML = ''; historyContainer.innerHTML = ''; let pendingCount = 0;
+            
             data.forEach(req => {
+                // Radius Filtering Logic
+                if (req.lat && req.lon && myLat && myLon) {
+                    const dist = getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon);
+                    if (dist > MAX_RADIUS_KM) return; // Skip if too far
+                }
+
                 const hasResponded = responseMap.has(req.id);
                 if (req.status === 'pending' && !hasResponded) { container.innerHTML += createPendingCard(req); pendingCount++; } 
                 else if (hasResponded || (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) || req.status === 'rejected') { 
@@ -467,8 +451,7 @@
             return `<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all"><div class="flex justify-between items-start mb-2"><span class="font-bold text-sm text-slate-800">${req.customer_name}</span>${statusBadge}</div><div class="flex flex-wrap gap-1 mb-2">${sentItemsHtml}</div><div class="text-[10px] text-slate-400 flex justify-between items-center"><span>${new Date(req.created_at).toLocaleString()}</span></div>${timerHtml}${extraInfo}</div>`;
         }
 
-        // --- UTILS ---
-        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return "N/A"; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return (R * c).toFixed(1); }
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return 99999; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return parseFloat((R * c).toFixed(1)); }
         function deg2rad(deg) { return deg * (Math.PI / 180); }
         function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const qty = document.getElementById(`qty-${id}`); const type = document.getElementById(`type-${id}`); if(!cb.checked) { qty.disabled = true; type.disabled = true; qty.classList.add('opacity-50'); type.classList.add('opacity-50'); } else { qty.disabled = false; type.disabled = false; qty.classList.remove('opacity-50'); type.classList.remove('opacity-50'); } }
         async function sendDetailedResponse(reqId) { 
@@ -478,25 +461,17 @@
             const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; }); 
             const message = `Βρέθηκαν ${foundItems.length} είδη.`; 
             let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {} 
-            
             const { data: requestData } = await window.db.from('requests').select('user_id').eq('id', reqId).single();
-
             const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' }); 
-            if (!error) { 
-                showToast('Η απάντηση εστάλη!', 'success'); 
-                fetchRequests(); 
-                if(requestData) notifyUser(requestData.user_id, document.getElementById('prof-name').value);
-            } else { showToast('Σφάλμα: ' + error.message, 'error'); } 
+            if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); if(requestData) notifyUser(requestData.user_id, document.getElementById('prof-name').value); } else { showToast('Σφάλμα: ' + error.message, 'error'); } 
         }
         async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); fetchRequests(); }
-        
         function startCountdown(reqId, startTimeStr) { 
             if(!startTimeStr) return; 
             if(timers[reqId]) clearInterval(timers[reqId]); 
             const safeStartTime = new Date(startTimeStr).getTime(); 
             const duration = 60 * 60 * 1000; 
             const endTime = safeStartTime + duration; 
-            
             function update() { 
                 const distance = endTime - new Date().getTime(); 
                 const el = document.getElementById(`timer-${reqId}`); 
@@ -509,7 +484,6 @@
             update(); 
             timers[reqId] = setInterval(update, 1000); 
         }
-
         function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
         function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); } if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Κράτηση!', 'success'); fetchRequests(); } }).subscribe(); }
     </script>
