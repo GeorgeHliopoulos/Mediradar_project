@@ -114,6 +114,10 @@
         </div>
     </main>
 
+    <div id="image-modal" class="fixed inset-0 z-[60] bg-black/90 hidden items-center justify-center p-4 cursor-pointer" onclick="this.classList.add('hidden')">
+        <img id="image-modal-src" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl border-4 border-white/10">
+    </div>
+
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
@@ -235,7 +239,7 @@
         }
 
         function handleLogoUpload(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profile-img-preview').src = e.target.result; }; reader.readAsDataURL(input.files[0]); } }
-        async function togglePharmacyStatus() { const isOpen = document.getElementById('status-toggle').checked; updateStatusUI(isOpen); await window.db.from('pharmacies').update({ is_open: isOpen }).eq('id', currentUser.id); fetchRequests(); } // Added fetchRequests here to refresh list immediately
+        async function togglePharmacyStatus() { const isOpen = document.getElementById('status-toggle').checked; updateStatusUI(isOpen); await window.db.from('pharmacies').update({ is_open: isOpen }).eq('id', currentUser.id); fetchRequests(); } 
         function updateStatusUI(isOpen) { document.getElementById('status-text').innerText = isOpen ? 'Ανοιχτό' : 'Κλειστό'; const indicator = document.getElementById('status-indicator'); if(isOpen) { indicator.classList.remove('bg-red-500'); indicator.classList.add('bg-emerald-500', 'animate-pulse'); } else { indicator.classList.add('bg-red-500'); indicator.classList.remove('bg-emerald-500', 'animate-pulse'); } }
         
         function updateLocation() { 
@@ -267,7 +271,6 @@
             if(!currentUser) return;
             const container = document.getElementById('requests-container');
             
-            // --- NEW: CHECK IF OPEN ---
             const isOpen = document.getElementById('status-toggle').checked;
             if (!isOpen) {
                 container.innerHTML = `<div class="text-center py-10 flex flex-col items-center opacity-60"><div class="bg-red-100 p-4 rounded-full mb-3 text-red-500"><i class="ph ph-prohibit text-4xl"></i></div><h3 class="font-bold text-slate-700">Είστε Offline</h3><p class="text-sm text-slate-500">Ενεργοποιήστε το Live Status για να λάβετε αιτήματα.</p></div>`;
@@ -287,20 +290,44 @@
             const badge = document.getElementById('badge-count'); if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
         }
 
+        // --- UPDATED CARD CREATION: BARCODE UI & IMAGE MODAL ---
         function createPendingCard(req) {
             const dist = (myLat && req.lat) ? getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon) + ' χλμ' : '...';
             let items = Array.isArray(req.items) ? req.items : [{name: req.medicine_name, quantity: req.quantity}];
-            const itemList = items.map((item, idx) => `
+            
+            const itemList = items.map((item, idx) => {
+                // Check if name is purely numeric (Barcode)
+                const isBarcode = /^\d+$/.test(item.name);
+                const displayName = isBarcode 
+                    ? `<div class="flex items-center gap-1 font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 text-sm border border-slate-300 w-fit"><i class="ph ph-barcode text-lg"></i> <span class="tracking-widest font-bold">${item.name}</span></div>` 
+                    : `<span class="font-bold text-sm block text-slate-800">${item.name}</span>`;
+
+                const imageHtml = item.image 
+                    ? `<img src="${item.image}" class="w-12 h-12 rounded-lg border border-slate-200 cursor-zoom-in hover:scale-105 transition-transform object-cover shadow-sm bg-white" onclick="showImageModal('${item.image}')">` 
+                    : '';
+
+                return `
                 <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm mb-2">
-                    <input type="checkbox" id="check-${req.id}-${idx}" value="${item.name}" checked class="w-5 h-5 text-secondary rounded focus:ring-secondary" onchange="toggleItemInputs('${req.id}-${idx}')">
-                    ${item.image ? `<img src="${item.image}" class="w-12 h-12 rounded border" onclick="window.open('${item.image}')">` : ''}
-                    <div class="flex-1"><span class="font-bold text-sm block">${item.name}</span><span class="text-[10px] text-slate-400">Ποσότητα: ${item.quantity}</span></div>
-                    <div class="flex gap-2"><input type="number" id="qty-${req.id}-${idx}" value="${item.quantity}" class="w-12 text-center text-xs font-bold border rounded p-1"><select id="type-${req.id}-${idx}" class="text-xs border rounded p-1"><option value="original">Πρωτ.</option><option value="generic">Γεν.</option></select></div>
-                </div>`).join('');
-            return `<div id="card-${req.id}" class="glass-panel p-6 rounded-3xl shadow-sm border-l-4 border-secondary animate-fadeIn bg-white mb-4"><div class="flex justify-between items-start mb-4"><div class="flex gap-2"><div class="bg-slate-100 p-2 rounded-full"><i class="ph ph-user"></i></div><div><h3 class="font-bold text-sm">${req.customer_name}</h3><span class="text-xs text-slate-500">${new Date(req.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div></div><span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold border border-teal-100"><i class="ph ph-map-pin"></i> ${dist}</span></div>${req.notes ? `<div class="bg-yellow-50 p-2 rounded mb-3 text-xs italic">"${req.notes}"</div>` : ''}<div class="mb-4 bg-slate-50 p-3 rounded-2xl border">${itemList}</div><div class="flex gap-2"><button onclick="sendDetailedResponse('${req.id}')" class="flex-1 bg-secondary text-white font-bold py-3 rounded-xl shadow-md">Απάντηση</button><button onclick="dismissRequest('${req.id}')" class="px-4 py-3 border text-slate-400 rounded-xl hover:text-red-500"><i class="ph ph-x"></i></button></div></div>`;
+                    <input type="checkbox" id="check-${req.id}-${idx}" value="${item.name}" checked class="w-5 h-5 text-secondary rounded focus:ring-secondary cursor-pointer" onchange="toggleItemInputs('${req.id}-${idx}')">
+                    ${imageHtml}
+                    <div class="flex-1">
+                        ${displayName}
+                        <span class="text-[10px] text-slate-400 font-medium">Ποσότητα: <strong class="text-slate-600">${item.quantity}</strong> ${item.type ? `(${item.type})` : ''}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="qty-${req.id}-${idx}" value="${item.quantity}" class="w-12 text-center text-xs font-bold border border-slate-200 rounded-lg p-1.5 bg-slate-50 focus:ring-secondary focus:border-secondary outline-none">
+                        <select id="type-${req.id}-${idx}" class="text-xs border border-slate-200 rounded-lg p-1.5 bg-slate-50 font-medium focus:ring-secondary focus:border-secondary outline-none cursor-pointer">
+                            <option value="original">Πρωτ.</option>
+                            <option value="generic">Γεν.</option>
+                        </select>
+                    </div>
+                </div>`;
+            }).join('');
+
+            return `<div id="card-${req.id}" class="glass-panel p-6 rounded-3xl shadow-sm border-l-4 border-secondary animate-fadeIn bg-white mb-4"><div class="flex justify-between items-start mb-4"><div class="flex gap-2"><div class="bg-slate-100 p-2 rounded-full"><i class="ph ph-user text-slate-600"></i></div><div><h3 class="font-bold text-sm text-slate-800">${req.customer_name}</h3><span class="text-xs text-slate-500 font-medium">${new Date(req.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div></div><span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold border border-teal-100 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist}</span></div>${req.notes ? `<div class="bg-yellow-50 border border-yellow-100 p-3 rounded-xl mb-3 text-xs text-slate-700 italic flex gap-2"><i class="ph ph-chat-text text-yellow-500 text-lg"></i><span>"${req.notes}"</span></div>` : ''}<div class="mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">${itemList}</div><div class="flex gap-2"><button onclick="sendDetailedResponse('${req.id}')" class="flex-1 bg-secondary hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right"></i> Απάντηση</button><button onclick="dismissRequest('${req.id}')" class="px-4 py-3 bg-white border border-slate-200 text-slate-400 hover:text-red-500 rounded-xl font-bold transition-all"><i class="ph ph-x"></i></button></div></div>`;
         }
 
-        // ... Existing Helpers (Distance, Toast etc) remain similar ...
+        // ... Existing Helpers ...
         function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return 999; const R = 6371; const dLat = (lat2-lat1)*(Math.PI/180); const dLon = (lon2-lon1)*(Math.PI/180); const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2); return parseFloat((R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)))).toFixed(1)); }
         function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
         function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const dis = !cb.checked; document.getElementById(`qty-${id}`).disabled = dis; document.getElementById(`type-${id}`).disabled = dis; }
@@ -315,6 +342,12 @@
             showToast('Εστάλη!', 'success'); fetchRequests(); if(reqData) notifyUser(reqData.user_id, document.getElementById('prof-name').value);
         }
         function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); fetchRequests(); } }).subscribe(); }
+        
+        function showImageModal(src) { 
+            document.getElementById('image-modal-src').src = src; 
+            document.getElementById('image-modal').classList.remove('hidden'); 
+            document.getElementById('image-modal').classList.add('flex'); 
+        }
     </script>
 </body>
 </html>
