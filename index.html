@@ -69,7 +69,18 @@
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Ονοματεπωνυμο <span class="text-red-500">*</span></label><input id="full-name" type="text" placeholder="π.χ. Μαρία Παπαδοπούλου" oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required></div>
                         <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Κινητο <span class="text-red-500">*</span></label><div class="relative"><input id="phone" type="tel" placeholder="69... ή +30..." oninput="validatePhoneUI(this)" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required><div id="phone-status" class="absolute right-3 top-3 text-lg hidden"></div></div></div>
                     </div>
-                    <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Περιοχη <span class="text-red-500">*</span></label><div class="relative"><input id="city" type="text" placeholder="Περιοχή..." oninput="saveUserData()" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 pr-32 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required><div id="city-suggestions" role="listbox"></div><button type="button" onclick="getLocation()" class="absolute right-2 top-2 bottom-2 px-3 bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-lg text-[10px] font-bold hover:bg-teal-200 transition-colors flex items-center gap-1 shadow-sm active:scale-95"><i class="ph ph-navigation-arrow text-sm"></i> <span data-lang-key="near_me">Κοντά μου</span></button></div></div>
+                    
+                    <div class="space-y-1 relative">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Τοποθεσια (GPS) <span class="text-red-500">*</span></label>
+                        <div class="flex gap-2">
+                            <input id="city" type="text" placeholder="Πατήστε Εντοπισμός..." readonly class="w-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 cursor-not-allowed rounded-xl px-4 py-3 text-sm font-medium border-2 border-transparent focus:border-red-300 transition-colors" required onclick="getLocation()">
+                            <button type="button" onclick="getLocation()" class="bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-xl px-4 font-bold flex items-center gap-2 hover:bg-teal-200 transition-colors whitespace-nowrap active:scale-95 shadow-sm">
+                                <i class="ph ph-navigation-arrow text-lg"></i> <span data-lang-key="near_me">Εντοπισμός</span>
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-400 ml-1 mt-1">Η αναζήτηση γίνεται σε ακτίνα 20χλμ από το στίγμα σας.</p>
+                    </div>
+
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
@@ -270,7 +281,6 @@
             try { await fetch('https://onesignal.com/api/v1/notifications', options); } catch (err) { console.error(err); }
         }
 
-        const citiesData = ["Αθήνα", "Θεσσαλονίκη", "Πάτρα", "Ηράκλειο", "Λάρισα", "Βόλος", "Ιωάννινα", "Τρίκαλα", "Χαλκίδα", "Σέρρες", "Αλεξανδρούπολη", "Ξάνθη", "Κατερίνη", "Καλαμάτα", "Καβάλα", "Χανιά", "Λαμία", "Κομοτηνή", "Ρόδος", "Αγρίνιο"];
         const medicinesData = ["Depon", "Panadol", "Algofren", "Mesulid", "Voltaren", "Augmentin", "Ponstan", "Amoxil", "Klaricid", "Imodium", "Buscopan", "Aerolin", "Flixotide", "Zirtek", "Xozal", "Neurobion"];
         
         const translations = { el: { search_tab: "Αναζήτηση", how_tab: "Πώς λειτουργεί", name: "Όνομα", phone: "Τηλέφωνο", area: "Περιοχή", near_me: "Κοντά μου", notes: "Σημειώσεις", accept_text: "Δέχομαι να μου προτείνουν", accept_link: "γενόσημο", terms_agree: "Αποδέχομαι τους", terms_link: "Όρους Χρήσης", gdpr_link: "GDPR", send: "Αποστολή", subtitle: "Βρες το φάρμακό σου άμεσα & τοπικά." }, en: { search_tab: "Search", how_tab: "How it works", name: "Name", phone: "Phone", area: "City / Area", near_me: "Near Me", notes: "Notes", accept_text: "I accept suggestions for", accept_link: "generics", terms_agree: "I accept the", terms_link: "Terms", gdpr_link: "GDPR", send: "Send Request", subtitle: "Find your medicine instantly & locally." } };
@@ -295,7 +305,6 @@
 
         window.onload = async function() {
             createEmojis();
-            setupAutocomplete('city', 'city-suggestions', citiesData);
             setupAutocomplete('medicine', 'drug-suggestions', medicinesData);
             loadUserData();
             window.db = window.supabase.createClient(SB_URL, SB_KEY);
@@ -374,12 +383,20 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             if(!currentUser) return showToast("Παρακαλώ περιμένετε...", "error");
+            
             const phoneVal = document.getElementById('phone').value;
             if(!/^(\+|00)?\d{10,15}$/.test(phoneVal)) { 
                 document.getElementById('phone').focus(); 
                 return showToast("Το κινητό δεν είναι έγκυρο (10-15 ψηφία)", "error"); 
             }
+
+            // CHECK LOCATION
+            if(!userLocation.lat || !userLocation.lon) {
+                return showToast("Παρακαλώ πατήστε 'Εντοπισμός' για την τοποθεσία.", "error");
+            }
+
             if(requestItems.length === 0) { if(document.getElementById('medicine').value.trim()) addItemToList(); else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error"); }
+            
             const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; btn.disabled = true;
             
             const formData = { user_id: currentUser.id, customer_name: document.getElementById('full-name').value, phone: phoneVal, location: document.getElementById('city').value, items: requestItems, medicine_name: requestItems.map(i => `${i.name}`).join(', '), quantity: requestItems.length, notes: document.getElementById('notes').value, status: 'pending', lat: userLocation.lat, lon: userLocation.lon, accepts_generic: document.getElementById('accept-generic').checked };
@@ -532,10 +549,13 @@
                         .then(r => r.json()).then(d => {
                             let loc = d.address.city || d.address.town || d.address.village || "Τοποθεσία OK";
                             document.getElementById('city').value = loc; saveUserData(); showToast("Βρέθηκε: " + loc, "success");
-                        }).finally(() => { btn.innerHTML = originalText; });
+                            btn.innerHTML = '<i class="ph ph-check"></i> Εντοπισμός';
+                        }).finally(() => { 
+                            if(btn.innerHTML.includes('spinner')) btn.innerHTML = originalText; 
+                        });
                 },
                 () => { showToast("Δεν βρέθηκε τοποθεσία.", "error"); btn.innerHTML = originalText; },
-                { enableHighAccuracy: true, timeout: 3000 }
+                { enableHighAccuracy: true, timeout: 5000 }
             );
         }
         
