@@ -26,7 +26,6 @@
     <style>
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; } 
         body { overscroll-behavior-y: none; display: flex; flex-direction: column; min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
-        /* FIX: Χρήση % αντί για vw για αποφυγή προβλημάτων σε κινητά */
         .emoji-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); } html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         .emoji { position: absolute; bottom: -100px; font-size: 2rem; opacity: 0.4; animation: floatUp 15s linear infinite; z-index: -1; left: 0; will-change: transform; } 
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; } }
@@ -66,7 +65,8 @@
 
         <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist">
             <button onclick="switchTab('search')" id="btn-search" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5" data-lang-key="search_tab">Αναζήτηση</button>
-            <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Πώς λειτουργεί</button>
+            <button onclick="switchTab('history')" id="btn-history" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all">Ιστορικό</button>
+            <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Οδηγίες</button>
         </div>
 
         <div id="tab-search" class="tab-content active" role="tabpanel">
@@ -127,6 +127,15 @@
                     </div>
                     <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-lg font-bold py-4 rounded-2xl shadow-lg shadow-teal-500/30 transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-teal-200"><i class="ph ph-paper-plane-right text-xl"></i> <span data-lang-key="send">Αποστολή</span></button>
                 </form>
+            </div>
+        </div>
+
+        <div id="tab-history" class="tab-content" role="tabpanel">
+            <div class="glass-card rounded-3xl p-6 min-h-[50vh]">
+                <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2"><i class="ph ph-clock-counter-clockwise"></i> Ιστορικό</h3>
+                <div id="user-history-list" class="space-y-4">
+                    <p class="text-center text-slate-400 mt-10">Φορτώνει...</p>
+                </div>
             </div>
         </div>
 
@@ -556,7 +565,77 @@
         
         function toggleScanner() { const c = document.getElementById('scanner-container'); if(!c.classList.contains('hidden')) { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(() => { c.classList.add('hidden'); html5QrcodeScanner.clear(); }); return; } c.classList.remove('hidden'); setTimeout(() => { html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (t) => { html5QrcodeScanner.stop().then(() => c.classList.add('hidden')); document.getElementById('medicine').value = t; showToast("Barcode Scanned!", 'success'); }, (e) => {}); }, 100); }
         function startVoiceInput() { if (!SpeechRecognition) return showToast("Δεν υποστηρίζεται.", 'error'); const recognition = new SpeechRecognition(); recognition.lang = currentLang === 'el' ? 'el-GR' : 'en-US'; recognition.onstart = () => showToast("Μιλήστε τώρα...", 'info'); recognition.onresult = (e) => { document.getElementById('medicine').value = e.results[0][0].transcript; showToast("Είπατε: " + e.results[0][0].transcript, 'success'); }; recognition.start(); }
-        function switchTab(id) { document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-' + id).classList.add('active'); if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); }
+        
+        // --- UPDATED SWITCHTAB: LOADS HISTORY ---
+        function switchTab(id) { 
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); 
+            document.getElementById('tab-' + id).classList.add('active'); 
+            
+            // Adjust active state for bottom bar buttons if needed, or top tabs
+            // In this specific design, we have top tabs. Let's make sure they highlight.
+            ['search', 'history', 'how'].forEach(t => {
+                const btn = document.getElementById('btn-' + t);
+                if(t === id) {
+                    btn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                    btn.classList.remove('text-slate-500', 'hover:bg-white/50');
+                } else {
+                    btn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                    btn.classList.add('text-slate-500', 'hover:bg-white/50');
+                }
+            });
+
+            if(id === 'history') {
+                fetchUserHistory();
+            }
+            if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); 
+        }
+
+        // --- NEW FUNCTION: FETCH USER HISTORY ---
+        async function fetchUserHistory() {
+            const list = document.getElementById('user-history-list');
+            if(!currentUser) {
+                list.innerHTML = '<p class="text-center text-slate-500">Παρακαλώ συνδεθείτε για να δείτε το ιστορικό.</p>';
+                return;
+            }
+            
+            list.innerHTML = '<div class="flex justify-center p-4"><i class="ph ph-spinner animate-spin text-2xl text-primary"></i></div>';
+
+            const { data, error } = await window.db.from('requests')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if(error || !data || data.length === 0) {
+                list.innerHTML = '<p class="text-center text-slate-400 py-10">Δεν βρέθηκαν παλαιότερα αιτήματα.</p>';
+                return;
+            }
+
+            list.innerHTML = data.map(req => {
+                let statusBadge = '';
+                if(req.status === 'pending') statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Εκκρεμεί</span>';
+                else if(req.status === 'reserved') statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε</span>';
+                else if(req.status === 'rejected') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Ακυρώθηκε</span>';
+
+                const dateStr = new Date(req.created_at).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+                return `
+                <div class="bg-white dark:bg-slate-700 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-xs text-slate-400">${dateStr}</span>
+                            <h4 class="font-bold text-slate-800 dark:text-white text-sm">${req.medicine_name}</h4>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <span class="text-xs text-slate-500 dark:text-slate-400">${req.location}</span>
+                        ${req.status === 'reserved' ? `<span class="font-mono text-sm font-bold text-primary bg-teal-50 px-2 rounded">Code: ${req.id.substring(0,6)}</span>` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
         function closeModal(t){document.getElementById(`modal-${t}`).classList.remove('active');}
         function createEmojis() { const c = document.getElementById('emoji-container'); const em = ['💊','🩺','🏥','🩹','🧪','🧬','🧴']; for(let i=0; i<15; i++){ const e = document.createElement('div'); e.innerText = em[Math.floor(Math.random() * em.length)]; e.classList.add('emoji'); e.style.left = Math.random() * 100 + '%'; e.style.animationDuration = (12 + Math.random() * 20) + 's'; e.style.animationDelay = (Math.random() * 10) + 's'; c.appendChild(e); } }
