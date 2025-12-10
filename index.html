@@ -66,7 +66,7 @@
         <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist">
             <button onclick="switchTab('search')" id="btn-search" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5" data-lang-key="search_tab">Αναζήτηση</button>
             <button onclick="switchTab('history')" id="btn-history" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all">Ιστορικό</button>
-            <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Οδηγίες</button>
+            <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-lang-key="how_tab">Πώς λειτουργεί</button>
         </div>
 
         <div id="tab-search" class="tab-content active" role="tabpanel">
@@ -416,7 +416,6 @@
             
             const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; btn.disabled = true;
             
-            // UPDATE: Include updated_at on creation (optional, but good practice)
             const formData = { 
                 user_id: currentUser.id, 
                 customer_name: document.getElementById('full-name').value, 
@@ -510,7 +509,6 @@
             openModal('safety');
         }
 
-        // --- UPDATED CONFIRM BOOKING: SENDS TIMESTAMP ---
         async function confirmBooking() {
             if(!currentRequestId || !pendingPharmacyId) return; closeModal('safety'); clearInterval(responsePoller);
             
@@ -571,8 +569,6 @@
             document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); 
             document.getElementById('tab-' + id).classList.add('active'); 
             
-            // Adjust active state for bottom bar buttons if needed, or top tabs
-            // In this specific design, we have top tabs. Let's make sure they highlight.
             ['search', 'history', 'how'].forEach(t => {
                 const btn = document.getElementById('btn-' + t);
                 if(t === id) {
@@ -590,7 +586,7 @@
             if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); 
         }
 
-        // --- NEW FUNCTION: FETCH USER HISTORY ---
+        // --- NEW FUNCTION: FETCH USER HISTORY & CANCEL BUTTON ---
         async function fetchUserHistory() {
             const list = document.getElementById('user-history-list');
             if(!currentUser) {
@@ -612,9 +608,15 @@
 
             list.innerHTML = data.map(req => {
                 let statusBadge = '';
-                if(req.status === 'pending') statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Εκκρεμεί</span>';
+                let actionButton = '';
+
+                if(req.status === 'pending') {
+                    statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Εκκρεμεί</span>';
+                    // Cancel button for pending requests
+                    actionButton = `<button onclick="cancelUserRequest('${req.id}')" class="mt-3 w-full bg-red-50 text-red-500 border border-red-100 font-bold py-2 rounded-lg text-xs hover:bg-red-100 transition-colors">Ακύρωση Αιτήματος</button>`;
+                }
                 else if(req.status === 'reserved') statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε</span>';
-                else if(req.status === 'rejected') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Ακυρώθηκε</span>';
+                else if(req.status === 'rejected' || req.status === 'canceled') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Ακυρώθηκε</span>';
 
                 const dateStr = new Date(req.created_at).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
@@ -628,12 +630,26 @@
                         ${statusBadge}
                     </div>
                     <div class="flex justify-between items-end mt-2">
-                        <span class="text-xs text-slate-500 dark:text-slate-400">${req.location}</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px]">${req.location}</span>
                         ${req.status === 'reserved' ? `<span class="font-mono text-sm font-bold text-primary bg-teal-50 px-2 rounded">Code: ${req.id.substring(0,6)}</span>` : ''}
                     </div>
+                    ${actionButton}
                 </div>
                 `;
             }).join('');
+        }
+
+        // --- CANCEL REQUEST FUNCTION ---
+        async function cancelUserRequest(id) {
+            if(!confirm("Είστε σίγουροι ότι θέλετε να ακυρώσετε το αίτημα;")) return;
+            
+            const { error } = await window.db.from('requests').update({ status: 'canceled' }).eq('id', id);
+            
+            if(error) showToast("Σφάλμα: " + error.message, 'error');
+            else {
+                showToast("Το αίτημα ακυρώθηκε.", 'success');
+                fetchUserHistory(); // Refresh the list
+            }
         }
 
         function openModal(t){document.getElementById(`modal-${t}`).classList.add('active');}
@@ -645,7 +661,7 @@
         function loadUserData() { const d = JSON.parse(localStorage.getItem('mr_user') || '{}'); if(d.n) document.getElementById('full-name').value = d.n; if(d.p) document.getElementById('phone').value = d.p; if(d.c) document.getElementById('city').value = d.c; }
         function resetApp() { window.location.reload(); }
         function showToast(m, t='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); el.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-slate-800'} animate-toast`; el.innerText = m; c.appendChild(el); setTimeout(()=>el.remove(), 3000); }
-        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`http://maps.google.com/maps?q=${userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`http://maps.google.com/maps?q=${document.getElementById('city').value}`, '_blank'); } }
+        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`https://www.google.com/maps/dir/?api=1&destination=${userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`https://www.google.com/maps/search/?api=1&query=${document.getElementById('city').value}`, '_blank'); } }
         
         function getLocation() {
             if(!navigator.geolocation) return showToast("GPS not supported.", "error");
