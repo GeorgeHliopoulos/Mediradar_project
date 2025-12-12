@@ -399,22 +399,32 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            if(!currentUser) return showToast("Παρακαλώ περιμένετε...", "error");
+            
+            // 1. Έλεγχος Τοποθεσίας (Πιο έντονος)
+            if(!userLocation.lat || !userLocation.lon) {
+                const cityInput = document.getElementById('city');
+                cityInput.classList.add('ring-4', 'ring-red-500', 'bg-red-50'); // Κόκκινο πλαίσιο
+                setTimeout(() => cityInput.classList.remove('ring-4', 'ring-red-500', 'bg-red-50'), 3000);
+                return showToast("⚠️ ΠΡΟΣΟΧΗ: Πατήστε 'Εντοπισμός' για να βρούμε το στίγμα σας!", "error");
+            }
+
+            if(!currentUser) return showToast("Παρακαλώ περιμένετε τη σύνδεση...", "error");
             
             const phoneVal = document.getElementById('phone').value;
             if(!/^(\+|00)?\d{10,15}$/.test(phoneVal)) { 
                 document.getElementById('phone').focus(); 
-                return showToast("Το κινητό δεν είναι έγκυρο (10-15 ψηφία)", "error"); 
+                return showToast("Το κινητό δεν είναι έγκυρο.", "error"); 
             }
 
-            // CHECK LOCATION
-            if(!userLocation.lat || !userLocation.lon) {
-                return showToast("Παρακαλώ πατήστε 'Εντοπισμός' για την τοποθεσία.", "error");
+            if(requestItems.length === 0) { 
+                if(document.getElementById('medicine').value.trim()) addItemToList(); 
+                else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error"); 
             }
-
-            if(requestItems.length === 0) { if(document.getElementById('medicine').value.trim()) addItemToList(); else return showToast("Προσθέστε τουλάχιστον ένα φάρμακο!", "error"); }
             
-            const btn = e.target.querySelector('button[type="submit"]'); const oldText = btn.innerHTML; btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; btn.disabled = true;
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Αποστολή...'; 
+            btn.disabled = true;
             
             const formData = { 
                 user_id: currentUser.id, 
@@ -431,18 +441,32 @@
                 accepts_generic: document.getElementById('accept-generic').checked 
             };
             
-            const { data, error } = await window.db.from('requests').insert([formData]).select().single();
-            if(error) { showToast("Σφάλμα: " + error.message, "error"); btn.innerHTML = oldText; btn.disabled = false; } 
-            else {
-                currentRequestId = data.id; saveUserData(); confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0d9488', '#38bdf8'] }); switchTab('results');
+            // Χρήση try/catch για να πιάσουμε ΚΑΘΕ πιθανό λάθος
+            try {
+                const { data, error } = await window.db.from('requests').insert([formData]).select().single();
                 
-                notifyPharmacists(document.getElementById('full-name').value);
+                if(error) throw error;
+
+                // Επιτυχία
+                currentRequestId = data.id; 
+                saveUserData(); 
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0d9488', '#38bdf8'] }); 
+                switchTab('results');
+                
+                // Οι ειδοποιήσεις φεύγουν ασύγχρονα (δεν μπλοκάρουν τη ροή αν αποτύχουν)
+                notifyPharmacists(formData.customer_name).catch(err => console.warn("Notification error:", err));
 
                 let i = 0; const texts = ["Ειδοποιούμε τα φαρμακεία...", "Έλεγχος αποθέματος...", "Αναζήτηση σε εξέλιξη..."];
                 intervalId = setInterval(() => { i = (i + 1) % texts.length; document.getElementById('loading-text').innerText = texts[i]; }, 2500);
                 
-                // NEW: Subscribe to realtime changes instead of polling
+                // Subscribe στα αποτελέσματα
                 subscribeToResponses(data.id);
+
+            } catch (err) {
+                console.error("Critical Error:", err);
+                showToast("Σφάλμα: " + (err.message || "Κάτι πήγε στραβά"), "error");
+                btn.innerHTML = oldText; 
+                btn.disabled = false;
             }
         }
 
@@ -592,7 +616,7 @@
             if(id !== 'results') document.getElementById('pickup-view').classList.add('hidden'); 
         }
 
-        // --- NEW FUNCTION: FETCH USER HISTORY & RE-ORDER BUTTON ---
+        // --- NEW FUNCTION: FETCH USER HISTORY & CANCEL BUTTON ---
         async function fetchUserHistory() {
             const list = document.getElementById('user-history-list');
             if(!currentUser) {
@@ -614,15 +638,17 @@
 
             list.innerHTML = data.map(req => {
                 let statusBadge = '';
-                if(req.status === 'pending') statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Εκκρεμεί</span>';
+                let actionButton = '';
+
+                if(req.status === 'pending') {
+                    statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Εκκρεμεί</span>';
+                    // Cancel button for pending requests
+                    actionButton = `<button onclick="cancelUserRequest('${req.id}')" class="mt-3 w-full bg-red-50 text-red-500 border border-red-100 font-bold py-2 rounded-lg text-xs hover:bg-red-100 transition-colors">Ακύρωση Αιτήματος</button>`;
+                }
                 else if(req.status === 'reserved') statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε</span>';
-                else if(req.status === 'rejected') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Ακυρώθηκε</span>';
+                else if(req.status === 'rejected' || req.status === 'canceled') statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Ακυρώθηκε</span>';
 
                 const dateStr = new Date(req.created_at).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-
-                // Create the RE-ORDER button functionality
-                // We encode the items array to pass it to the function
-                const itemsJson = encodeURIComponent(JSON.stringify(req.items));
 
                 return `
                 <div class="bg-white dark:bg-slate-700 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600">
@@ -637,40 +663,22 @@
                         <span class="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px]">${req.location}</span>
                         ${req.status === 'reserved' ? `<span class="font-mono text-sm font-bold text-primary bg-teal-50 px-2 rounded">Code: ${req.id.substring(0,6)}</span>` : ''}
                     </div>
-                    <button onclick="reorderRequest('${itemsJson}')" class="mt-3 w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-teal-50 text-slate-600 hover:text-teal-700 border border-slate-200 font-bold py-2 rounded-lg text-xs transition-colors">
-                        <i class="ph ph-arrow-counter-clockwise"></i> Παραγγελία Ξανά (Re-order)
-                    </button>
+                    ${actionButton}
                 </div>
                 `;
             }).join('');
         }
 
-        // --- RE-ORDER FUNCTION ---
-        function reorderRequest(itemsEncoded) {
-            try {
-                const items = JSON.parse(decodeURIComponent(itemsEncoded));
-                
-                // Clear current list
-                requestItems = [];
-                
-                // Populate list with old items
-                if(Array.isArray(items)) {
-                    requestItems = items;
-                } else {
-                    // Fallback for old single items
-                    // This handles legacy data if any
-                }
-                
-                updateItemsUI();
-                switchTab('search');
-                showToast("Η φόρμα συμπληρώθηκε από το ιστορικό!", "success");
-                
-                // Optional: Scroll to bottom of form
-                document.getElementById('items-list-display').scrollIntoView({ behavior: 'smooth' });
-                
-            } catch(e) {
-                console.error(e);
-                showToast("Σφάλμα κατά την επαναφορά.", "error");
+        // --- CANCEL REQUEST FUNCTION ---
+        async function cancelUserRequest(id) {
+            if(!confirm("Είστε σίγουροι ότι θέλετε να ακυρώσετε το αίτημα;")) return;
+            
+            const { error } = await window.db.from('requests').update({ status: 'canceled' }).eq('id', id);
+            
+            if(error) showToast("Σφάλμα: " + error.message, 'error');
+            else {
+                showToast("Το αίτημα ακυρώθηκε.", 'success');
+                fetchUserHistory(); // Refresh the list
             }
         }
 
@@ -683,7 +691,7 @@
         function loadUserData() { const d = JSON.parse(localStorage.getItem('mr_user') || '{}'); if(d.n) document.getElementById('full-name').value = d.n; if(d.p) document.getElementById('phone').value = d.p; if(d.c) document.getElementById('city').value = d.c; }
         function resetApp() { window.location.reload(); }
         function showToast(m, t='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); el.className = `p-3 rounded-xl shadow-lg text-white text-sm mb-2 ${t==='success'?'bg-green-500':t==='error'?'bg-red-500':'bg-slate-800'} animate-toast`; el.innerText = m; c.appendChild(el); setTimeout(()=>el.remove(), 3000); }
-        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`http://googleusercontent.com/maps.google.com/5{userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`http://googleusercontent.com/maps.google.com/6{document.getElementById('city').value}`, '_blank'); } }
+        function openGoogleMaps() { if(userLocation.lat && userLocation.lon) { window.open(`http://maps.google.com/maps?q=${userLocation.lat},${userLocation.lon}`, '_blank'); } else { window.open(`http://maps.google.com/maps?q=${document.getElementById('city').value}`, '_blank'); } }
         
         function getLocation() {
             if(!navigator.geolocation) return showToast("GPS not supported.", "error");
