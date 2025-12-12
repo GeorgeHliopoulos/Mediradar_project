@@ -131,7 +131,13 @@
         OneSignalDeferred.push(function(OneSignal) { OneSignal.init({ appId: ONESIGNAL_APP_ID }); OneSignal.User.PushSubscription.optIn(); });
 
         async function notifyUser(userId, pharmacyName) {
-            try { await fetch('https://onesignal.com/api/v1/notifications', { method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/json', Authorization: 'Basic ' + ONESIGNAL_API_KEY }, body: JSON.stringify({ app_id: ONESIGNAL_APP_ID, include_external_user_ids: [userId], contents: { en: "Pharmacy responded!", el: `Το ${pharmacyName} απάντησε!` }, headings: { en: "MediRadar", el: "Βρέθηκαν τα φάρμακα!" }, url: "https://mediradar.netlify.app/" }) }); } catch (err) { console.error(err); }
+            try { await fetch('https://onesignal.com/api/v1/notifications', { method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/json', Authorization: 'Basic ' + ONESIGNAL_API_KEY }, body: JSON.stringify({ app_id: ONESIGNAL_APP_ID, include_external_user_ids: [userId], contents: { en: "Pharmacy responded!", el: `Το ${pharmacyName} απάντησε!` }, headings: { en: "MediRadar", el: "Βρέθηκαν τα φάρμακα!" }, url: "https://mediradar.netlify.app/", priority: 10, channel_for_external_user_ids: "push" }) }); } catch (err) { console.error(err); }
+        }
+
+        // --- NEW: Audio Unlock Button ---
+        function enableAudio() { 
+            const a = new Audio('https://cdn.freesound.org/previews/536/536108_10463375-lq.mp3');
+            a.volume = 0.1; a.play().then(() => showToast('🔊 Ήχος ενεργός!', 'success')).catch(() => {}); 
         }
 
         function generateTimeOptions() { let opts = '<option value="">--:--</option>'; for(let h=0; h<24; h++) { for(let m=0; m<60; m+=30) { const time = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; opts += `<option value="${time}">${time}</option>`; } } return opts; }
@@ -190,7 +196,7 @@
         async function handleGoogleLogin() { const redirectUrl = window.location.origin + '/pharmacy.html'; const { error } = await window.db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } }); if (error) showToast(error.message, 'error'); }
         
         async function handleLoginSuccess(pharmData) { 
-            document.getElementById('auth-section').innerHTML = `<button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
+            document.getElementById('auth-section').innerHTML = `<button onclick="enableAudio()" class="text-xl p-2 mr-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors" title="Ενεργοποίηση Ήχου">🔊</button><button onclick="window.db.auth.signOut().then(()=>location.reload())" class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-500 hover:text-white transition-colors">Έξοδος</button>`; 
             document.getElementById('main-app').classList.remove('hidden');
             const data = pharmData;
             if(data.name && data.name !== 'Νέο Φαρμακείο') document.getElementById('prof-name').value = data.name;
@@ -270,6 +276,7 @@
         async function fetchRequests() {
             if(!currentUser) return;
             const container = document.getElementById('requests-container');
+            const historyContainer = document.getElementById('history-container');
             
             const isOpen = document.getElementById('status-toggle').checked;
             if (!isOpen) {
@@ -279,24 +286,37 @@
 
             const { data, error } = await window.db.from('requests').select('*').order('created_at', { ascending: false });
             if(error) return;
-            const { data: myResponses } = await window.db.from('responses').select('request_id').eq('pharmacist_id', currentUser.id);
-            const responseSet = new Set(myResponses.map(r => r.request_id));
+            const { data: myResponses } = await window.db.from('responses').select('request_id, found_items, message').eq('pharmacist_id', currentUser.id);
+            const responseMap = new Map(); myResponses.forEach(r => responseMap.set(r.request_id, r));
 
-            container.innerHTML = ''; let pendingCount = 0;
+            container.innerHTML = ''; historyContainer.innerHTML = ''; let pendingCount = 0;
+            
             data.forEach(req => {
                 if (req.lat && req.lon && myLat && myLon) { if (getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon) > MAX_RADIUS_KM) return; }
-                if (req.status === 'pending' && !responseSet.has(req.id)) { container.innerHTML += createPendingCard(req); pendingCount++; }
+
+                const hasResponded = responseMap.has(req.id);
+                // HISTORY LOGIC: IF I am the winner OR I have responded OR I rejected it
+                const isMyHistory = (req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) || 
+                                    (req.status === 'completed' && req.winner_pharmacy_id === currentUser.id) ||
+                                    hasResponded || 
+                                    req.status === 'rejected';
+
+                if (req.status === 'pending' && !hasResponded) { 
+                    container.innerHTML += createPendingCard(req); 
+                    pendingCount++; 
+                } else if (isMyHistory) { 
+                    historyContainer.innerHTML += createHistoryCard(req, responseMap.get(req.id)); 
+                    if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) startCountdown(req.id, req.updated_at);
+                }
             });
             const badge = document.getElementById('badge-count'); if(pendingCount > 0) { badge.innerText = pendingCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
         }
 
-        // --- UPDATED CARD CREATION: BARCODE UI & IMAGE MODAL ---
         function createPendingCard(req) {
             const dist = (myLat && req.lat) ? getDistanceFromLatLonInKm(myLat, myLon, req.lat, req.lon) + ' χλμ' : '...';
             let items = Array.isArray(req.items) ? req.items : [{name: req.medicine_name, quantity: req.quantity}];
             
             const itemList = items.map((item, idx) => {
-                // Check if name is purely numeric (Barcode)
                 const isBarcode = /^\d+$/.test(item.name);
                 const displayName = isBarcode 
                     ? `<div class="flex items-center gap-1 font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 text-sm border border-slate-300 w-fit"><i class="ph ph-barcode text-lg"></i> <span class="tracking-widest font-bold">${item.name}</span></div>` 
@@ -324,30 +344,86 @@
                 </div>`;
             }).join('');
 
-            return `<div id="card-${req.id}" class="glass-panel p-6 rounded-3xl shadow-sm border-l-4 border-secondary animate-fadeIn bg-white mb-4"><div class="flex justify-between items-start mb-4"><div class="flex gap-2"><div class="bg-slate-100 p-2 rounded-full"><i class="ph ph-user text-slate-600"></i></div><div><h3 class="font-bold text-sm text-slate-800">${req.customer_name}</h3><span class="text-xs text-slate-500 font-medium">${new Date(req.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div></div><span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold border border-teal-100 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist}</span></div>${req.notes ? `<div class="bg-yellow-50 border border-yellow-100 p-3 rounded-xl mb-3 text-xs text-slate-700 italic flex gap-2"><i class="ph ph-chat-text text-yellow-500 text-lg"></i><span>"${req.notes}"</span></div>` : ''}<div class="mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">${itemList}</div><div class="flex gap-2"><button onclick="sendDetailedResponse('${req.id}')" class="flex-1 bg-secondary hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right"></i> Απάντηση</button><button onclick="dismissRequest('${req.id}')" class="px-4 py-3 bg-white border border-slate-200 text-slate-400 hover:text-red-500 rounded-xl font-bold transition-all"><i class="ph ph-x"></i></button></div></div>`;
+            return `<div id="card-${req.id}" class="glass-panel p-6 rounded-3xl shadow-sm border-l-4 border-secondary animate-fadeIn bg-white mb-4"><div class="flex justify-between items-start mb-4"><div class="flex gap-2"><div class="bg-slate-100 p-2 rounded-full"><i class="ph ph-user text-slate-600"></i></div><div><h3 class="font-bold text-sm text-slate-800">${req.customer_name}</h3><span class="text-xs text-slate-500 font-medium">${new Date(req.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div></div><span class="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold border border-teal-100 flex items-center gap-1"><i class="ph ph-map-pin"></i> ${dist}</span></div>${req.notes ? `<div class="bg-yellow-50 border border-yellow-100 p-3 rounded-xl mb-3 text-xs text-slate-700 italic flex gap-2"><i class="ph ph-chat-text text-yellow-500 text-lg"></i><span>"${req.notes}"</span></div>` : ''}<div class="mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">${itemList}</div><div class="flex gap-2"><button onclick="sendDetailedResponse('${req.id}')" class="flex-1 bg-secondary hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"><i class="ph ph-paper-plane-right"></i> Απάντηση</button><button onclick="dismissRequest('${req.id}')" class="px-4 py-3 bg-white border border-slate-200 text-slate-400 hover:text-red-500 rounded-xl font-bold transition-all"><i class="ph ph-eye-slash"></i></button></div></div>`;
         }
 
-        // ... Existing Helpers ...
-        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return 999; const R = 6371; const dLat = (lat2-lat1)*(Math.PI/180); const dLon = (lon2-lon1)*(Math.PI/180); const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2); return parseFloat((R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)))).toFixed(1)); }
-        function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
-        function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const dis = !cb.checked; document.getElementById(`qty-${id}`).disabled = dis; document.getElementById(`type-${id}`).disabled = dis; }
-        async function dismissRequest(id) { document.getElementById(`card-${id}`).remove(); await window.db.from('requests').update({ status: 'rejected' }).eq('id', id); }
+        function createHistoryCard(req, myResp) {
+            let statusBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Απαντήθηκε</span>';
+            let extraInfo = '';
+            let timerHtml = '';
+            let completeBtn = '';
+
+            if(req.status === 'reserved' && req.winner_pharmacy_id === currentUser.id) {
+                statusBadge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Κρατήθηκε!</span>';
+                extraInfo = `<div class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-center"><span class="text-[10px] uppercase font-bold text-green-800">Κωδικος Επαληθευσης</span><div class="text-xl font-mono font-bold text-green-700 tracking-widest">${req.id.substring(0, 6)}</div></div>`;
+                timerHtml = `<div class="text-xs font-mono font-bold text-red-500 bg-red-50 px-2 py-1 rounded mt-1 text-center border border-red-100">Λήγει σε: <span id="timer-${req.id}">...</span></div>`;
+                // --- NEW COMPLETE BUTTON ---
+                completeBtn = `<button onclick="completeRequest('${req.id}')" class="w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition-all active:scale-95"><i class="ph ph-check"></i> Παραδόθηκε (Ολοκλήρωση)</button>`;
+            } 
+            else if (req.status === 'completed' && req.winner_pharmacy_id === currentUser.id) {
+                statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Ολοκληρώθηκε</span>';
+                extraInfo = `<div class="text-[10px] text-emerald-600 mt-1 flex items-center gap-1"><i class="ph ph-check-circle-fill"></i> Η παραγγελία παραδόθηκε επιτυχώς.</div>`;
+            }
+            else if (req.status === 'rejected') { statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Απορρίφθηκε</span>'; }
+
+            let sentItemsHtml = '';
+            if(myResp && myResp.found_items) {
+                const items = typeof myResp.found_items === 'string' ? JSON.parse(decodeURIComponent(myResp.found_items)) : myResp.found_items;
+                sentItemsHtml = items.map(i => `<span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-600 border border-slate-200">${i.name} (x${i.quantity}) <b>${i.responseType === 'generic' ? 'Γεν' : 'Πρωτ'}</b></span>`).join(' ');
+            }
+
+            return `<div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all"><div class="flex justify-between items-start mb-2"><span class="font-bold text-sm text-slate-800">${req.customer_name}</span>${statusBadge}</div><div class="flex flex-wrap gap-1 mb-2">${sentItemsHtml}</div><div class="text-[10px] text-slate-400 flex justify-between items-center"><span>${new Date(req.created_at).toLocaleString()}</span></div>${timerHtml}${extraInfo}${completeBtn}</div>`;
+        }
+
+        // --- NEW: COMPLETE REQUEST ---
+        async function completeRequest(id) {
+            if(!confirm("Επιβεβαίωση παράδοσης;")) return;
+            const { error } = await window.db.from('requests').update({ status: 'completed' }).eq('id', id);
+            if(error) showToast("Error: " + error.message, 'error'); else { showToast("Η παραγγελία ολοκληρώθηκε!", 'success'); fetchRequests(); }
+        }
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) { if(!lat1 || !lat2) return 999; const R = 6371; const dLat = deg2rad(lat2 - lat1); const dLon = deg2rad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return parseFloat((R * c).toFixed(1)); }
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
+        function toggleItemInputs(id) { const cb = document.getElementById(`check-${id}`); const qty = document.getElementById(`qty-${id}`); const type = document.getElementById(`type-${id}`); if(!cb.checked) { qty.disabled = true; type.disabled = true; qty.classList.add('opacity-50'); type.classList.add('opacity-50'); } else { qty.disabled = false; type.disabled = false; qty.classList.remove('opacity-50'); type.classList.remove('opacity-50'); } }
+        
         async function sendDetailedResponse(reqId) { 
             const container = document.getElementById(`card-${reqId}`); const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
-            if(checkboxes.length === 0) return showToast('Επιλέξτε είδος', 'error');
-            const foundItems = Array.from(checkboxes).map(cb => { const idx = cb.id.split('-').pop(); return { name: cb.value, quantity: document.getElementById(`qty-${reqId}-${idx}`).value, responseType: document.getElementById(`type-${reqId}-${idx}`).value }; });
-            let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.trim(); } catch(e) {}
-            const { data: reqData } = await window.db.from('requests').select('user_id').eq('id', reqId).single();
-            await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: `Βρέθηκαν ${foundItems.length} είδη`, price: 0, distance: distStr, found_items: foundItems, response_type: 'mixed' });
-            showToast('Εστάλη!', 'success'); fetchRequests(); if(reqData) notifyUser(reqData.user_id, document.getElementById('prof-name').value);
+            if(checkboxes.length === 0) return showToast('Επιλέξτε τουλάχιστον ένα είδος!', 'error'); 
+            const foundItems = Array.from(checkboxes).map(cb => { const idxStr = cb.id.split('-').pop(); return { name: cb.value, quantity: parseInt(document.getElementById(`qty-${reqId}-${idxStr}`).value), responseType: document.getElementById(`type-${reqId}-${idxStr}`).value }; }); 
+            const message = `Βρέθηκαν ${foundItems.length} είδη.`; 
+            let distStr = '0.0'; try { distStr = container.querySelector('.ph-map-pin').parentNode.innerText.replace(' χλμ', '').trim(); } catch(e) {} 
+            const { data: requestData } = await window.db.from('requests').select('user_id').eq('id', reqId).single();
+            const { error } = await window.db.from('responses').insert({ request_id: reqId, pharmacist_id: currentUser.id, message: message, price: 0.00, distance: distStr, found_items: foundItems, response_type: 'mixed' }); 
+            if (!error) { showToast('Η απάντηση εστάλη!', 'success'); fetchRequests(); if(requestData) notifyUser(requestData.user_id, document.getElementById('prof-name').value); } else { showToast('Σφάλμα: ' + error.message, 'error'); } 
         }
-        function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); fetchRequests(); } }).subscribe(); }
-        
-        function showImageModal(src) { 
-            document.getElementById('image-modal-src').src = src; 
-            document.getElementById('image-modal').classList.remove('hidden'); 
-            document.getElementById('image-modal').classList.add('flex'); 
+
+        // --- UPDATED DISMISS: LOCAL HIDE ONLY ---
+        async function dismissRequest(id) { 
+            document.getElementById(`card-${id}`).remove(); 
+            showToast("Η κάρτα αποκρύφθηκε προσωρινά.", 'info');
         }
+
+        function startCountdown(reqId, startTimeStr) { 
+            if(!startTimeStr) return; 
+            if(timers[reqId]) clearInterval(timers[reqId]); 
+            const safeStartTime = new Date(startTimeStr).getTime(); 
+            const duration = 60 * 60 * 1000; 
+            const endTime = safeStartTime + duration; 
+            function update() { 
+                const distance = endTime - new Date().getTime(); 
+                const el = document.getElementById(`timer-${reqId}`); 
+                if (!el) { clearInterval(timers[reqId]); return; } 
+                if (distance < 0) { clearInterval(timers[reqId]); el.innerHTML = "ΕΛΗΞΕ"; el.classList.add('text-slate-500'); el.parentElement.classList.add('bg-slate-100', 'border-slate-200'); el.parentElement.classList.remove('bg-red-50', 'border-red-100', 'text-red-500'); return; } 
+                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); 
+                const s = Math.floor((distance % (1000 * 60)) / 1000); 
+                el.innerHTML = `${m}:${s < 10 ? '0' : ''}${s}`; 
+            } 
+            update(); 
+            timers[reqId] = setInterval(update, 1000); 
+        }
+        function showToast(msg, type='info') { const c = document.getElementById('toast-container'); const el = document.createElement('div'); const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800'); el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold`; el.innerHTML = msg; c.appendChild(el); setTimeout(() => el.remove(), 3000); }
+        function subscribeToEverything() { window.db.channel('pharmacy-global').on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => { if(payload.eventType === 'INSERT') { showToast('🔔 Νέο αίτημα!', 'info'); try { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{}); } catch(e){} fetchRequests(); } if(payload.eventType === 'UPDATE' && payload.new.status === 'reserved' && payload.new.winner_pharmacy_id === currentUser.id) { showToast('✅ Κράτηση!', 'success'); fetchRequests(); } }).subscribe(); }
+        function showImageModal(src) { document.getElementById('image-modal-src').src = src; document.getElementById('image-modal').classList.remove('hidden'); document.getElementById('image-modal').classList.add('flex'); }
     </script>
 </body>
 </html>
