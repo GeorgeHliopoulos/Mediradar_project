@@ -10,6 +10,11 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <script>
+        const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
+        const db = supabase.createClient(SB_URL, SB_KEY);
+        window.db = db;
+
         tailwind.config = { 
             darkMode: 'class', 
             theme: { 
@@ -23,111 +28,129 @@
     <style>
         body { background-color: #f1f5f9; }
         .glass-panel { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.75rem; color: #94a3b8; font-weight: 500; transition: all 0.2s; }
-        .sidebar-link:hover, .sidebar-link.active { background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .table-th { padding: 1rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-        .table-td { padding: 1rem; font-size: 0.875rem; color: #334155; border-bottom: 1px solid #f1f5f9; }
-        .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
-        .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .sidebar-link:hover { background-color: #f8fafc; color: #0f172a; }
+        .sidebar-link.active { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
     </style>
 </head>
-<body class="text-slate-800 h-screen overflow-hidden flex">
+<body class="flex h-screen overflow-hidden text-slate-800">
 
-    <aside id="sidebar" class="w-64 bg-slate-900 text-white flex-col hidden md:flex h-full shadow-2xl z-20">
-        <div class="p-6 flex items-center gap-3 border-b border-slate-800">
-            <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg"><i class="ph ph-shield-check text-2xl"></i></div>
-            <div><h1 class="font-bold text-lg">MediRadar</h1><p class="text-xs text-slate-400">Admin Console</p></div>
+    <div id="login-screen" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="ph-fill ph-shield-check text-3xl text-primary"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Admin Login</h1>
+            <p class="text-sm text-slate-500 mb-6">Ασφαλής Περιοχή Διαχείρισης</p>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="email" id="admin-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-lg border border-slate-300 focus:border-primary focus:outline-none" required>
+                <input type="password" id="admin-pass" placeholder="Password" class="w-full p-3 rounded-lg border border-slate-300 focus:border-primary focus:outline-none" required>
+                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">Είσοδος</button>
+            </form>
         </div>
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-link active w-full"><i class="ph ph-squares-four text-xl"></i> Dashboard</button>
-            <button onclick="switchView('pharmacies')" id="nav-pharmacies" class="sidebar-link w-full"><i class="ph ph-storefront text-xl"></i> Φαρμακεία</button>
-            <button onclick="switchView('requests')" id="nav-requests" class="sidebar-link w-full"><i class="ph ph-list-dashes text-xl"></i> Αιτήματα</button>
+    </div>
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 hidden" id="sidebar">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">M</div>
+            <span class="font-bold text-lg text-slate-800">MediRadar Admin</span>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-link active">
+                <i class="ph ph-squares-four text-xl"></i> Dashboard
+            </div>
+            <div onclick="switchView('pharmacies')" id="nav-pharmacies" class="sidebar-link">
+                <i class="ph ph-storefront text-xl"></i> Φαρμακεία
+                <span id="badge-pharmacies" class="ml-auto bg-slate-100 text-slate-600 text-xs py-0.5 px-2 rounded-full hidden">0</span>
+            </div>
+            <div onclick="switchView('requests')" id="nav-requests" class="sidebar-link">
+                <i class="ph ph-list-magnifying-glass text-xl"></i> Αιτήματα
+            </div>
         </nav>
-        <div class="p-4 border-t border-slate-800">
-            <button onclick="handleLogout()" class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors w-full p-2"><i class="ph ph-sign-out text-xl"></i> Έξοδος</button>
+
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="handleLogout()" class="sidebar-link w-full text-red-500 hover:bg-red-50 hover:text-red-600">
+                <i class="ph ph-sign-out text-xl"></i> Αποσύνδεση
+            </button>
         </div>
     </aside>
 
-    <div id="mobile-header" class="md:hidden fixed top-0 w-full bg-slate-900 text-white p-4 z-20 flex justify-between items-center shadow-md hidden">
-        <span class="font-bold">MediRadar Admin</span>
-        <button onclick="handleLogout()" class="text-sm bg-slate-800 px-3 py-1 rounded">Exit</button>
-    </div>
-
-    <main class="flex-1 h-full overflow-y-auto relative pt-16 md:pt-0">
-        
-        <div id="admin-login" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4 hidden">
-            <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border-4 border-indigo-500/20">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6"><i class="ph ph-lock-key text-3xl"></i></div>
-                <h2 class="text-2xl font-bold mb-2 text-slate-800">Admin Access</h2>
-                <p id="login-msg" class="text-sm text-slate-500 mb-6">Αυστηρά για διαχειριστές.</p>
-                
-                <form id="admin-form" class="space-y-4">
-                    <input type="email" id="a-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500" required>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-500/30">Αποστολή Magic Link</button>
-                </form>
+    <main class="flex-1 bg-slate-50 overflow-auto relative hidden" id="main-content">
+        <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+            <h2 id="page-title" class="text-2xl font-bold text-slate-800">Overview</h2>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-slate-500">Admin User</span>
+                <div class="w-8 h-8 rounded-full bg-slate-200"></div>
             </div>
-        </div>
+        </header>
 
-        <div id="content-area" class="p-8 hidden">
+        <div class="p-8 max-w-7xl mx-auto space-y-8">
             
-            <div id="view-dashboard" class="space-y-8 animate-fadeIn">
-                <h2 class="text-2xl font-bold text-slate-800">Επισκόπηση</h2>
-                
+            <div id="view-dashboard" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-indigo-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Συνολικα Αιτηματα</p><h3 id="stat-requests" class="text-4xl font-bold mt-2 text-slate-800">-</h3></div>
-                            <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600"><i class="ph ph-article text-2xl"></i></div>
+                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium uppercase">Active Requests</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1" id="stat-req-active">-</h3>
                         </div>
+                        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><i class="ph-fill ph-pulse text-2xl"></i></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-teal-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Ενεργα Φαρμακεια</p><h3 id="stat-pharmacies" class="text-4xl font-bold mt-2 text-slate-800">-</h3></div>
-                            <div class="bg-teal-50 p-3 rounded-xl text-teal-600"><i class="ph ph-storefront text-2xl"></i></div>
+                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium uppercase">Pending Pharmacies</p>
+                            <h3 class="text-3xl font-bold text-orange-600 mt-1" id="stat-phar-pending">-</h3>
                         </div>
+                        <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><i class="ph-fill ph-storefront text-2xl"></i></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-orange-500">
-                        <div class="flex justify-between items-start">
-                            <div><p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Εκκρεμεις Εγκρισεις</p><h3 id="stat-pending" class="text-4xl font-bold mt-2 text-slate-800">-</h3></div>
-                            <div class="bg-orange-50 p-3 rounded-xl text-orange-600"><i class="ph ph-warning-circle text-2xl"></i></div>
+                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium uppercase">Total Completed</p>
+                            <h3 class="text-3xl font-bold text-green-600 mt-1" id="stat-completed">-</h3>
                         </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel rounded-2xl overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 flex justify-between items-center"><h3 class="font-bold text-lg">Πρόσφατη Δραστηριότητα</h3></div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead><tr><th class="table-th">Ωρα</th><th class="table-th">Ενεργεια</th><th class="table-th">Status</th></tr></thead>
-                            <tbody id="recent-activity-table"></tbody>
-                        </table>
+                        <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-600"><i class="ph-fill ph-check-circle text-2xl"></i></div>
                     </div>
                 </div>
             </div>
 
-            <div id="view-pharmacies" class="space-y-6 hidden animate-fadeIn">
+            <div id="view-pharmacies" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-slate-800">Διαχείριση Φαρμακείων</h2>
-                    <div class="relative"><i class="ph ph-magnifying-glass absolute left-3 top-3 text-slate-400"></i><input type="text" id="search-pharmacy" oninput="filterPharmacies()" placeholder="Αναζήτηση..." class="pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 w-64"></div>
+                    <input type="text" placeholder="Search pharmacy..." class="p-2 border rounded-lg w-64" id="search-pharmacy" onkeyup="filterPharmacies()">
                 </div>
-                <div class="glass-panel rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left">
-                        <thead><tr><th class="table-th">Λογοτυπο</th><th class="table-th">Ονομα / Επωνυμια</th><th class="table-th">Τηλεφωνο</th><th class="table-th">Περιοχη</th><th class="table-th">Status</th><th class="table-th text-right">Ενεργειες</th></tr></thead>
-                        <tbody id="pharmacies-table"></tbody>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+                            <tr>
+                                <th class="p-4">Name</th>
+                                <th class="p-4">Phone</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-pharmacies" class="divide-y divide-slate-100">
+                            </tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="view-requests" class="space-y-6 hidden animate-fadeIn">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-slate-800">Ιστορικό Αιτημάτων</h2>
-                    <div class="relative"><i class="ph ph-magnifying-glass absolute left-3 top-3 text-slate-400"></i><input type="text" id="search-request" oninput="filterRequests()" placeholder="Αναζήτηση πελάτη..." class="pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 w-64"></div>
+            <div id="view-requests" class="hidden space-y-6">
+                 <div class="flex justify-between items-center">
+                    <input type="text" placeholder="Search requests..." class="p-2 border rounded-lg w-64" id="search-request" onkeyup="filterRequests()">
                 </div>
-                <div class="glass-panel rounded-2xl overflow-hidden shadow-sm">
-                    <table class="w-full text-left">
-                        <thead><tr><th class="table-th">Ημ/νια</th><th class="table-th">Πελατης</th><th class="table-th">Φαρμακα</th><th class="table-th">Περιοχη</th><th class="table-th">Status</th><th class="table-th text-right">Ενεργειες</th></tr></thead>
-                        <tbody id="requests-table"></tbody>
+                <div class="glass-panel rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+                            <tr>
+                                <th class="p-4">Time</th>
+                                <th class="p-4">Medicine</th>
+                                <th class="p-4">Customer</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Winner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-requests" class="divide-y divide-slate-100">
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -135,267 +158,150 @@
         </div>
     </main>
 
-    <div id="modal-edit-pharmacy" class="modal-backdrop">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">Επεξεργασία Φαρμακείου</h3>
-            <form onsubmit="updatePharmacy(event)" class="space-y-3">
-                <input type="hidden" id="edit-ph-id">
-                <div><label class="text-xs font-bold text-slate-500">Όνομα</label><input id="edit-ph-name" type="text" class="w-full p-2 border rounded-lg"></div>
-                <div><label class="text-xs font-bold text-slate-500">Τηλέφωνο</label><input id="edit-ph-phone" type="text" class="w-full p-2 border rounded-lg"></div>
-                <div><label class="text-xs font-bold text-slate-500">Διεύθυνση</label><input id="edit-ph-address" type="text" class="w-full p-2 border rounded-lg"></div>
-                <div class="flex items-center gap-2 mt-2">
-                    <input type="checkbox" id="edit-ph-approved" class="w-5 h-5 text-indigo-600 rounded">
-                    <label for="edit-ph-approved" class="text-sm font-bold">Εγκεκριμένο (Approved)</label>
-                </div>
-                <div class="flex justify-end gap-2 mt-4">
-                    <button type="button" onclick="closeModal('edit-pharmacy')" class="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg">Ακύρωση</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Αποθήκευση</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-view-request" class="modal-backdrop">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
-            <button onclick="closeModal('view-request')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="ph ph-x text-xl"></i></button>
-            <h3 class="text-xl font-bold mb-1">Λεπτομέρειες Αιτήματος</h3>
-            <p id="view-req-id" class="text-xs font-mono text-slate-400 mb-4"></p>
-            
-            <div class="bg-slate-50 p-4 rounded-xl mb-4 space-y-2">
-                <div class="flex justify-between"><span class="text-sm text-slate-500">Πελάτης:</span> <span id="view-req-name" class="font-bold"></span></div>
-                <div class="flex justify-between"><span class="text-sm text-slate-500">Τηλέφωνο:</span> <span id="view-req-phone" class="font-bold font-mono"></span></div>
-                <div class="flex justify-between"><span class="text-sm text-slate-500">Σημειώσεις:</span> <span id="view-req-notes" class="italic"></span></div>
-            </div>
-
-            <h4 class="text-sm font-bold uppercase text-slate-500 mb-2">Λιστα Φαρμακων</h4>
-            <div id="view-req-items" class="space-y-2 max-h-60 overflow-y-auto mb-4"></div>
-            
-            <button onclick="deleteRequest(document.getElementById('view-req-id').innerText)" class="w-full border border-red-200 text-red-500 py-2 rounded-lg hover:bg-red-50 font-bold">Διαγραφή Αιτήματος</button>
-        </div>
-    </div>
-
     <script>
-        const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-
+        // --- DATA STATE ---
         let allPharmacies = [];
         let allRequests = [];
 
-        window.onload = async function() {
-            window.db = window.supabase.createClient(SB_URL, SB_KEY);
-
-            // 1. ΕΛΕΓΧΟΣ ΓΙΑ ΕΠΙΣΤΡΟΦΗ ΑΠΟ MAGIC LINK
-            // Αν το URL έχει access_token, σημαίνει ότι ο χρήστης μόλις πάτησε το Link από το email
-            const isMagicLinkReturn = window.location.hash && window.location.hash.includes('access_token');
-
-            if (isMagicLinkReturn) {
-                // Δείξε μήνυμα φόρτωσης και κρύψε τη φόρμα
-                document.getElementById('admin-login').classList.remove('hidden');
-                document.getElementById('admin-form').classList.add('hidden');
-                document.getElementById('login-msg').innerText = "Γίνεται ασφαλής σύνδεση...";
-                // Άσε το Supabase να κάνει τη δουλειά στο onAuthStateChange
-            } else {
-                // Αν δεν είναι magic link, έλεγξε αν υπάρχει ήδη session
-                const { data: { session } } = await window.db.auth.getSession();
-                if (!session) {
-                    document.getElementById('admin-login').classList.remove('hidden');
-                }
-            }
-
-            // 2. LISTEN FOR AUTH CHANGES (Η ΚΑΡΔΙΑ ΤΗΣ ΛΥΣΗΣ)
-            window.db.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    if (session && !session.user.is_anonymous) {
-                        // Καθαρισμός URL για να μην μείνει το token (και προκαλεί otp_expired στο refresh)
-                        if (window.location.hash) {
-                            window.history.replaceState(null, null, window.location.pathname);
-                        }
-                        initDashboard(session.user);
-                    }
-                } else if (event === 'SIGNED_OUT') {
-                    document.getElementById('admin-login').classList.remove('hidden');
-                    document.getElementById('admin-form').classList.remove('hidden');
-                    document.getElementById('content-area').classList.add('hidden');
-                    document.querySelector('aside').classList.add('hidden');
-                    document.getElementById('mobile-header').classList.add('hidden');
-                }
-            });
-        };
-
-        // LOGIN HANDLER
-        document.getElementById('admin-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('a-email').value;
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = "Αποστολή..."; btn.disabled = true;
-
-            const { error } = await window.db.auth.signInWithOtp({ 
-                email: email,
-                options: { emailRedirectTo: window.location.href }
-            }); 
-            
-            if (error) alert(error.message); 
-            else alert("Ελέγξτε το email σας! Θα σας συνδέσει αυτόματα.");
-            
-            btn.innerText = originalText; btn.disabled = false;
+        // --- INIT ---
+        window.addEventListener('load', async () => {
+             const { data: { session } } = await window.db.auth.getSession();
+             if(session) {
+                 unlockAdmin();
+             }
         });
 
-        function initDashboard(user) {
-            document.getElementById('admin-login').classList.add('hidden');
-            document.getElementById('content-area').classList.remove('hidden');
-            document.querySelector('aside').classList.remove('hidden'); 
-            document.getElementById('mobile-header').classList.remove('hidden');
+        // --- AUTH ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-pass').value;
+
+            const { data, error } = await window.db.auth.signInWithPassword({
+                email: email,
+                password: pass
+            });
+
+            if (error) {
+                alert('Login Failed: ' + error.message);
+            } else {
+                unlockAdmin();
+            }
+        }
+
+        function unlockAdmin() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('sidebar').classList.add('flex');
+            document.getElementById('main-content').classList.remove('hidden');
             loadData();
-            // Auto refresh every 30s
-            setInterval(loadData, 30000);
         }
 
+        async function handleLogout() {
+            await window.db.auth.signOut();
+            window.location.reload();
+        }
+
+        // --- DATA LOADING ---
         async function loadData() {
-            // 1. Fetch Pharmacies
-            const { data: pharms } = await window.db.from('pharmacies').select('*').order('created_at', { ascending: false });
-            allPharmacies = pharms || [];
+            fetchPharmacies();
+            fetchRequests();
             
-            // 2. Fetch Requests
-            const { data: reqs } = await window.db.from('requests').select('*').order('created_at', { ascending: false });
-            allRequests = reqs || [];
+            // Realtime
+            window.db.channel('admin-chan')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'pharmacies' }, fetchPharmacies)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, fetchRequests)
+            .subscribe();
+        }
 
-            // 3. Update Stats
-            document.getElementById('stat-requests').innerText = allRequests.length;
-            document.getElementById('stat-pharmacies').innerText = allPharmacies.filter(p => p.approved).length;
-            document.getElementById('stat-pending').innerText = allPharmacies.filter(p => !p.approved).length;
-
-            // 4. Render Tables
+        async function fetchPharmacies() {
+            const { data } = await window.db.from('pharmacies').select('*').order('created_at', {ascending: false});
+            allPharmacies = data || [];
             renderPharmaciesTable(allPharmacies);
+            updateStats();
+        }
+
+        async function fetchRequests() {
+            const { data } = await window.db.from('requests').select('*').order('created_at', {ascending: false}).limit(50);
+            allRequests = data || [];
             renderRequestsTable(allRequests);
-            renderRecentActivity(allRequests);
+            updateStats();
         }
 
-        // --- RENDER FUNCTIONS ---
-        function renderPharmaciesTable(data) {
-            const tbody = document.getElementById('pharmacies-table');
-            tbody.innerHTML = data.map(p => `
-                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
-                    <td class="table-td"><img src="${p.image_url || 'https://ui-avatars.com/api/?name=' + p.name}" class="w-10 h-10 rounded-lg object-cover bg-slate-200"></td>
-                    <td class="table-td font-bold">${p.name || 'Ανώνυμο'}</td>
-                    <td class="table-td font-mono text-xs">${p.phone || '-'}</td>
-                    <td class="table-td text-xs">${p.address || '-'}</td>
-                    <td class="table-td">
-                        ${p.approved 
-                            ? '<span class="px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-bold">Approved</span>' 
-                            : '<span class="px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs font-bold animate-pulse">Pending</span>'}
+        // --- RENDERERS ---
+        function renderPharmaciesTable(list) {
+            const tbody = document.getElementById('table-pharmacies');
+            tbody.innerHTML = list.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 font-medium text-slate-900">${p.name || 'No Name'}</td>
+                    <td class="p-4">${p.phone || '-'}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${statusColor(p.status)}">${p.status}</span></td>
+                    <td class="p-4 text-right">
+                        ${p.status === 'pending' ? 
+                        `<button onclick="approvePharmacy('${p.id}')" class="text-green-600 hover:bg-green-50 px-3 py-1 rounded border border-green-200 text-xs font-bold">Approve</button>` 
+                        : '<span class="text-slate-400 text-xs">No Action</span>'}
                     </td>
-                    <td class="table-td text-right">
-                        <button onclick="openEditPharmacy('${p.id}')" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded transition mr-1" title="Επεξεργασία"><i class="ph ph-pencil-simple"></i></button>
-                        <button onclick="deletePharmacy('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition" title="Διαγραφή"><i class="ph ph-trash"></i></button>
-                    </td>
+                </tr>
+            `).join('');
+            
+            // Badge Update
+            const pendingCount = list.filter(p => p.status === 'pending').length;
+            const badge = document.getElementById('badge-pharmacies');
+            if(pendingCount > 0) {
+                badge.innerText = pendingCount;
+                badge.classList.remove('hidden');
+                badge.classList.add('bg-orange-100', 'text-orange-700');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderRequestsTable(list) {
+            const tbody = document.getElementById('table-requests');
+            tbody.innerHTML = list.map(r => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-4 text-xs">${new Date(r.created_at).toLocaleString()}</td>
+                    <td class="p-4 font-medium text-slate-900">${r.medicine_name}</td>
+                    <td class="p-4">${r.customer_phone || '-'}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${reqStatusColor(r.status)}">${r.status}</span></td>
+                    <td class="p-4 text-xs">${r.winner_pharmacy || '-'}</td>
                 </tr>
             `).join('');
         }
 
-        function renderRequestsTable(data) {
-            const tbody = document.getElementById('requests-table');
-            tbody.innerHTML = data.map(r => `
-                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
-                    <td class="table-td text-xs text-slate-500">${new Date(r.created_at).toLocaleDateString()} ${new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
-                    <td class="table-td font-bold">${r.customer_name}</td>
-                    <td class="table-td text-xs truncate max-w-[150px]">${r.medicine_name}</td>
-                    <td class="table-td text-xs">${r.location}</td>
-                    <td class="table-td">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${r.status==='reserved'?'bg-green-100 text-green-800':r.status==='pending'?'bg-yellow-100 text-yellow-800':'bg-slate-100 text-slate-500'}">${r.status}</span>
-                    </td>
-                    <td class="table-td text-right">
-                        <button onclick="openViewRequest('${r.id}')" class="text-teal-600 hover:bg-teal-50 p-2 rounded transition mr-1" title="Λεπτομέρειες"><i class="ph ph-eye"></i></button>
-                        <button onclick="deleteRequest('${r.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition" title="Διαγραφή"><i class="ph ph-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderRecentActivity(data) {
-            const tbody = document.getElementById('recent-activity-table');
-            tbody.innerHTML = data.slice(0, 5).map(r => `
-                <tr>
-                    <td class="p-3 text-xs text-slate-500">${new Date(r.created_at).toLocaleTimeString()}</td>
-                    <td class="p-3 text-sm">Νέο αίτημα από <b>${r.customer_name}</b></td>
-                    <td class="p-3"><span class="w-2 h-2 rounded-full ${r.status==='pending'?'bg-yellow-500':'bg-green-500'} inline-block"></span></td>
-                </tr>
-            `).join('');
+        function updateStats() {
+            document.getElementById('stat-phar-pending').innerText = allPharmacies.filter(p => p.status === 'pending').length;
+            document.getElementById('stat-req-active').innerText = allRequests.filter(r => r.status === 'pending').length;
+            document.getElementById('stat-completed').innerText = allRequests.filter(r => r.status === 'reserved').length;
         }
 
         // --- ACTIONS ---
-        async function deletePharmacy(id) {
-            if(!confirm("ΠΡΟΣΟΧΗ: Θα διαγραφεί οριστικά το φαρμακείο και τα δεδομένα του. Συνέχεια;")) return;
-            const { error } = await window.db.from('pharmacies').delete().eq('id', id);
-            if(error) alert("Error: " + error.message); else loadData();
+        async function approvePharmacy(id) {
+            if(!confirm('Approve this pharmacy?')) return;
+            await window.db.from('pharmacies').update({ status: 'approved' }).eq('id', id);
         }
 
-        async function deleteRequest(id) {
-            if(!confirm("Διαγραφή αιτήματος;")) return;
-            const { error } = await window.db.from('requests').delete().eq('id', id);
-            if(error) alert("Error: " + error.message); else { closeModal('view-request'); loadData(); }
+        // --- UTILS ---
+        function statusColor(s) {
+            if(s === 'approved') return 'bg-green-100 text-green-700';
+            if(s === 'pending') return 'bg-orange-100 text-orange-700';
+            return 'bg-slate-100 text-slate-600';
+        }
+        function reqStatusColor(s) {
+            if(s === 'reserved') return 'bg-green-100 text-green-700';
+            if(s === 'pending') return 'bg-blue-100 text-blue-700';
+            if(s === 'cancelled') return 'bg-red-100 text-red-700';
+            return 'bg-slate-100 text-slate-600';
         }
 
-        // --- MODAL HANDLERS ---
-        function openEditPharmacy(id) {
-            const p = allPharmacies.find(x => x.id === id);
-            if(!p) return;
-            document.getElementById('edit-ph-id').value = p.id;
-            document.getElementById('edit-ph-name').value = p.name || '';
-            document.getElementById('edit-ph-phone').value = p.phone || '';
-            document.getElementById('edit-ph-address').value = p.address || '';
-            document.getElementById('edit-ph-approved').checked = p.approved;
-            document.getElementById('modal-edit-pharmacy').classList.add('active');
-        }
-
-        async function updatePharmacy(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-ph-id').value;
-            const updates = {
-                name: document.getElementById('edit-ph-name').value,
-                phone: document.getElementById('edit-ph-phone').value,
-                address: document.getElementById('edit-ph-address').value,
-                approved: document.getElementById('edit-ph-approved').checked
-            };
-            const { error } = await window.db.from('pharmacies').update(updates).eq('id', id);
-            if(error) alert("Error: " + error.message);
-            else { closeModal('edit-pharmacy'); loadData(); }
-        }
-
-        function openViewRequest(id) {
-            const r = allRequests.find(x => x.id === id);
-            if(!r) return;
-            document.getElementById('view-req-id').innerText = r.id;
-            document.getElementById('view-req-name').innerText = r.customer_name;
-            document.getElementById('view-req-phone').innerText = r.phone;
-            document.getElementById('view-req-notes').innerText = r.notes || '-';
-            
-            const items = Array.isArray(r.items) ? r.items : [];
-            const itemsHtml = items.map(i => `
-                <div class="flex items-center gap-3 bg-white border p-2 rounded-lg">
-                    ${i.image ? `<img src="${i.image}" class="w-10 h-10 rounded object-cover cursor-pointer" onclick="window.open('${i.image}')">` : '<div class="w-10 h-10 bg-slate-100 rounded flex items-center justify-center">💊</div>'}
-                    <div>
-                        <div class="font-bold text-sm">${i.name}</div>
-                        <div class="text-xs text-slate-500">Ποσότητα: ${i.quantity} | Τύπος: ${i.type || '-'}</div>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('view-req-items').innerHTML = itemsHtml || '<p class="text-sm text-slate-400">Δεν υπάρχουν δεδομένα ειδών.</p>';
-            
-            document.getElementById('modal-view-request').classList.add('active');
-        }
-
-        function closeModal(id) { document.getElementById('modal-'+id).classList.remove('active'); }
-
-        // --- UI UTILS ---
         function switchView(viewName) {
             ['dashboard', 'pharmacies', 'requests'].forEach(v => {
                 document.getElementById('view-'+v).classList.add('hidden');
                 document.getElementById('nav-'+v).classList.remove('active');
-                document.getElementById('nav-'+v).classList.remove('bg-indigo-600', 'text-white', 'shadow-md'); 
             });
             document.getElementById('view-'+viewName).classList.remove('hidden');
             document.getElementById('nav-'+viewName).classList.add('active');
+            document.getElementById('page-title').innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1);
         }
 
         function filterPharmacies() {
@@ -406,11 +312,9 @@
 
         function filterRequests() {
             const term = document.getElementById('search-request').value.toLowerCase();
-            const filtered = allRequests.filter(r => (r.customer_name||'').toLowerCase().includes(term) || (r.medicine_name||'').toLowerCase().includes(term));
+            const filtered = allRequests.filter(r => (r.customer_phone||'').includes(term) || (r.medicine_name||'').toLowerCase().includes(term));
             renderRequestsTable(filtered);
         }
-
-        async function handleLogout() { await window.db.auth.signOut(); window.location.reload(); }
     </script>
 </body>
 </html>
