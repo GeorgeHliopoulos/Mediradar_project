@@ -11,9 +11,12 @@
     <link rel="icon" type="image/png" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
+    <!-- Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Libraries -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -27,13 +30,13 @@
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; } 
         body { overscroll-behavior-y: none; display: flex; flex-direction: column; min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
         
-        /* Fixed Emoji Background */
+        /* Floating Emojis Background */
         .emoji-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; pointer-events: none; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); } 
         html.dark .emoji-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
         
         .emoji { position: absolute; bottom: -120px; font-size: 2rem; opacity: 0; animation: floatUp linear infinite; z-index: -1; left: 0; will-change: transform, opacity; } 
         
-        /* Corrected Keyframes - Now they become visible! */
+        /* Animation: Fade In -> Float Up -> Fade Out */
         @keyframes floatUp { 
             0% { transform: translateY(0) rotate(0deg); opacity: 0; } 
             10% { opacity: 0.6; } 
@@ -41,14 +44,18 @@
             100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } 
         }
         
-        /* Keyframes for Modals */
+        /* Modal Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; } html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
-        .tab-content { display: none; animation: fadeIn 0.3s ease-out; } .tab-content.active { display: block; }
+        /* Glassmorphism */
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); position: relative; z-index: 10; transition: all 0.3s ease; } 
+        html.dark .glass-card { background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3); }
         
-        /* Modal Styles */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-out; } 
+        .tab-content.active { display: block; }
+        
+        /* Modal Structure */
         .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 1rem; } 
         .modal-backdrop.active { display: flex; animation: fadeIn 0.2s ease-out; }
         .modal-content { width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95); opacity: 0; position: relative; z-index: 10000; max-height: 85vh; overflow-y: auto; background: white; } 
@@ -62,14 +69,14 @@
 </head>
 <body class="text-slate-800 dark:text-slate-100 antialiased relative">
 
-    <!-- BACKGROUND -->
+    <!-- BACKGROUND ANIMATION -->
     <div id="emoji-container" class="emoji-bg" aria-hidden="true"></div>
 
-    <!-- NAVIGATION -->
+    <!-- NAVIGATION BAR -->
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative pt-safe">
         <div class="flex gap-2">
-            <!-- PRO BUTTON (Restored) -->
-            <button onclick="window.location.href='pharmacy.html'" class="bg-indigo-600/90 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all flex items-center gap-1 active:scale-95 border border-indigo-400/30">
+            <!-- PRO PORTAL BUTTON -->
+            <button onclick="openModal('pro')" class="bg-indigo-600/90 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all flex items-center gap-1 active:scale-95 border border-indigo-400/30">
                 <i class="ph-bold ph-briefcase"></i> Pro Portal
             </button>
         </div>
@@ -77,38 +84,41 @@
         <div class="flex gap-2">
             <button onclick="toggleLang()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95"><span id="lang-flag">🇬🇷</span></button>
             <button onclick="toggleTheme()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm transition-transform border border-white/50 hover:scale-110 active:scale-95"><i id="theme-icon" class="ph ph-moon-stars"></i></button>
-            <!-- User Login -->
-            <button onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 w-10 h-10 rounded-full text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center justify-center active:scale-95">
+            <button id="btn-user-icon" onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 w-10 h-10 rounded-full text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center justify-center active:scale-95">
                 <i class="ph-fill ph-user text-lg"></i>
             </button>
         </div>
     </nav>
 
-    <!-- MAIN APP CONTENT -->
+    <!-- MAIN APP CONTAINER -->
     <main id="main-content" class="w-full max-w-lg mx-auto p-4 flex-grow z-10 relative flex flex-col">
+        
+        <!-- HEADER -->
         <header class="text-center mb-6">
             <div class="inline-flex items-center justify-center bg-white/70 dark:bg-slate-700/70 p-4 rounded-2xl mb-3 shadow-sm backdrop-blur-sm border border-white/50"><i class="ph ph-magnifying-glass text-4xl text-primary"></i></div>
             <h1 class="text-3xl font-bold text-primary bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-cyan-500 drop-shadow-sm">MediRadar</h1>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Βρες το φάρμακό σου άμεσα & τοπικά.</p>
         </header>
 
-        <!-- TABS -->
+        <!-- TAB NAVIGATION -->
         <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist">
             <button onclick="switchTab('search')" id="btn-search" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5">Αναζήτηση</button>
             <button onclick="switchTab('history')" id="btn-history" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all">Ιστορικό</button>
             <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all">Πώς λειτουργεί</button>
         </div>
 
-        <!-- SEARCH TAB -->
+        <!-- SEARCH TAB (MAIN FORM) -->
         <div id="tab-search" class="tab-content active" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 relative overflow-visible">
                 <form id="request-form" class="space-y-6" onsubmit="return false;">
                     
+                    <!-- Customer Details -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Ονοματεπωνυμο <span class="text-red-500">*</span></label><input id="full-name" type="text" maxlength="50" placeholder="π.χ. Μαρία Π." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required></div>
                         <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Κινητο <span class="text-red-500">*</span></label><input id="phone" type="tel" placeholder="69..." oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required></div>
                     </div>
                     
+                    <!-- Location -->
                     <div class="space-y-1 relative">
                         <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Τοποθεσια (GPS) <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
@@ -121,6 +131,7 @@
 
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
+                    <!-- Medicine List -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary text-lg"></i> Λιστα Φαρμακων <span class="text-red-500">*</span></label>
@@ -145,8 +156,9 @@
                         </div>
                     </div>
 
-                    <!-- CHECKBOXES -->
+                    <!-- Options -->
                     <div class="space-y-3">
+                        <!-- Generic -->
                         <div class="bg-blue-50 dark:bg-slate-800/50 p-3 rounded-xl border border-blue-100 dark:border-slate-700">
                             <div class="flex items-start gap-3">
                                 <div class="relative flex items-center h-5 mt-0.5">
@@ -161,10 +173,11 @@
                                 </div>
                             </div>
                             <div id="info-generic" class="info-box mt-2 text-xs text-blue-800 bg-blue-100 p-2 rounded-lg leading-relaxed">
-                                <strong>Τι είναι το γενόσημο;</strong> Είναι φάρμακο που περιέχει την ίδια δραστική ουσία και έχει την ίδια θεραπευτική δράση και ασφάλεια με το πρωτότυπο φάρμακο.
+                                <strong>Τι είναι το γενόσημο;</strong> Είναι φάρμακο που περιέχει την ίδια δραστική ουσία, έχει την ίδια ασφάλεια και αποτελεσματικότητα με το πρωτότυπο.
                             </div>
                         </div>
 
+                        <!-- GDPR -->
                         <div class="flex items-center gap-3 px-1">
                             <input id="accept-terms" type="checkbox" required class="w-5 h-5 rounded text-primary focus:ring-primary border-slate-300">
                             <div class="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center flex-wrap">
@@ -181,27 +194,29 @@
             </div>
         </div>
 
+        <!-- HISTORY TAB -->
         <div id="tab-history" class="tab-content" role="tabpanel">
              <div class="glass-card rounded-3xl p-6 text-center text-slate-500">
                  <p>Το ιστορικό είναι άδειο.</p>
              </div>
         </div>
 
+        <!-- HOW TAB -->
         <div id="tab-how" class="tab-content" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 space-y-4">
                 <h3 class="font-bold text-lg text-primary">Πώς λειτουργεί;</h3>
                 <div class="space-y-3">
                     <div class="flex items-start gap-3">
                         <div class="bg-teal-100 dark:bg-teal-900 w-8 h-8 rounded-full flex items-center justify-center text-teal-700 dark:text-teal-300 font-bold">1</div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Συμπληρώστε τη φόρμα με τα φάρμακα που χρειάζεστε ή ανεβάστε φωτογραφία της συνταγής.</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Συμπληρώστε τη φόρμα ή ανεβάστε φωτογραφία.</p>
                     </div>
                     <div class="flex items-start gap-3">
                         <div class="bg-teal-100 dark:bg-teal-900 w-8 h-8 rounded-full flex items-center justify-center text-teal-700 dark:text-teal-300 font-bold">2</div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Η εφαρμογή ειδοποιεί αυτόματα όλα τα συνεργαζόμενα φαρμακεία σε ακτίνα 5χλμ.</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Η εφαρμογή ειδοποιεί τα κοντινά φαρμακεία.</p>
                     </div>
                     <div class="flex items-start gap-3">
                         <div class="bg-teal-100 dark:bg-teal-900 w-8 h-8 rounded-full flex items-center justify-center text-teal-700 dark:text-teal-300 font-bold">3</div>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Το πρώτο φαρμακείο που θα αποδεχτεί το αίτημα, δεσμεύει το φάρμακο για 15 λεπτά. Θα λάβετε χάρτη και οδηγίες.</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 flex-1">Το πρώτο που θα αποδεχτεί, δεσμεύει το φάρμακο για εσάς.</p>
                     </div>
                 </div>
                 
@@ -209,17 +224,17 @@
                     <h4 class="font-bold text-sm mb-2 text-slate-700 dark:text-slate-200">Συχνές Ερωτήσεις (FAQ)</h4>
                     <details class="group">
                         <summary class="text-xs font-medium cursor-pointer py-2 hover:text-primary flex justify-between items-center">Είναι δωρεάν; <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i></summary>
-                        <p class="text-xs text-slate-500 pb-2 pl-2">Ναι, η χρήση είναι εντελώς δωρεάν για τους ασθενείς.</p>
+                        <p class="text-xs text-slate-500 pb-2 pl-2">Ναι, εντελώς δωρεάν για τους ασθενείς.</p>
                     </details>
                     <details class="group">
                         <summary class="text-xs font-medium cursor-pointer py-2 hover:text-primary flex justify-between items-center">Πόσο διαρκεί η αναζήτηση; <i class="ph-bold ph-caret-down group-open:rotate-180 transition-transform"></i></summary>
-                        <p class="text-xs text-slate-500 pb-2 pl-2">Συνήθως λαμβάνετε απάντηση εντός 1-2 λεπτών.</p>
+                        <p class="text-xs text-slate-500 pb-2 pl-2">Συνήθως 1-2 λεπτά.</p>
                     </details>
                 </div>
             </div>
         </div>
 
-        <!-- FOOTER (New) -->
+        <!-- FOOTER -->
         <footer class="mt-8 pb-4 text-center">
             <div class="flex justify-center gap-6 mb-4 text-slate-400">
                 <a href="#" class="hover:text-primary hover:scale-110 transition-transform"><i class="ph-fill ph-facebook-logo text-2xl"></i></a>
@@ -293,12 +308,101 @@
         </div>
     </div>
     
-    <!-- USER MODAL (Placeholder) -->
+    <!-- PRO LOGIN MODAL (PRODUCTION READY) -->
+    <div id="modal-pro" class="modal-backdrop">
+        <div class="modal-content text-center relative">
+            <div class="absolute top-4 right-4">
+                 <button onclick="closeModal('pro')" class="text-slate-400 hover:text-slate-600"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600">
+                <i class="ph-fill ph-storefront text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Πύλη Φαρμακείου</h3>
+            <p class="text-slate-500 text-sm mb-6">Συνδεθείτε για να διαχειριστείτε αιτήματα.</p>
+            
+            <div class="space-y-3">
+                 <!-- Google Login -->
+                 <button onclick="handleGoogleLoginPro()" class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
+                    Σύνδεση με Google
+                </button>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs">ή με Email</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <!-- Magic Link Form -->
+                <form onsubmit="handleEmailLoginPro(event)" class="space-y-3">
+                    <input type="email" id="pro-email" placeholder="pharmacy@example.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                    <button type="submit" id="btn-pro-email" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
+                        <span>Αποστολή Magic Link</span>
+                        <i class="ph-bold ph-paper-plane-right"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                 <p class="text-xs text-slate-400">Είστε διαχειριστής;</p>
+                 <button onclick="window.location.href='admin.html'" class="text-indigo-600 text-xs font-bold mt-1 hover:underline">Είσοδος στο Admin Portal</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- USER LOGIN MODAL (NEW & FUNCTIONAL) -->
     <div id="modal-user" class="modal-backdrop">
-        <div class="modal-content text-center">
-             <h3 class="text-xl font-bold mb-4 dark:text-white">Είσοδος Χρήστη</h3>
-             <p class="mb-4 text-slate-500">Λειτουργία υπό κατασκευή.</p>
-             <button onclick="closeModal('user')" class="bg-slate-100 px-4 py-2 rounded-lg">Κλείσιμο</button>
+        <div class="modal-content text-center relative">
+            <div class="absolute top-4 right-4">
+                 <button onclick="closeModal('user')" class="text-slate-400 hover:text-slate-600"><i class="ph-bold ph-x text-xl"></i></button>
+            </div>
+            <div class="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-teal-600">
+                <i class="ph-fill ph-user-circle text-4xl"></i>
+            </div>
+            
+            <div id="user-login-view">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Είσοδος Χρήστη</h3>
+                <p class="text-slate-500 text-sm mb-6">Αποθηκεύστε το ιστορικό σας και συνδεθείτε εύκολα.</p>
+                
+                <div class="space-y-3">
+                     <!-- Google Login -->
+                     <button onclick="handleGoogleLoginUser()" class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
+                        Σύνδεση με Google
+                    </button>
+                    
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-400 text-xs">ή με Email</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
+    
+                    <!-- Magic Link Form -->
+                    <form onsubmit="handleEmailLoginUser(event)" class="space-y-3">
+                        <input type="email" id="user-email" placeholder="your@email.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none" required>
+                        <button type="submit" id="btn-user-email" class="w-full bg-teal-600 text-white font-bold py-3 rounded-xl hover:bg-teal-700 transition-all flex items-center justify-center gap-2">
+                            <span>Αποστολή Magic Link</span>
+                            <i class="ph-bold ph-paper-plane-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Logged In View (Hidden by default) -->
+            <div id="user-profile-view" class="hidden">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Το Προφίλ μου</h3>
+                <p id="user-email-display" class="text-slate-500 text-sm mb-6 font-mono bg-slate-100 p-2 rounded-lg inline-block">...</p>
+                
+                <div class="space-y-3">
+                    <button onclick="switchTab('history'); closeModal('user')" class="w-full bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-clock-counter-clockwise"></i> Ιστορικό Αιτημάτων
+                    </button>
+                    <button onclick="handleUserLogout()" class="w-full bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-sign-out"></i> Αποσύνδεση
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -330,22 +434,20 @@
         window.onload = function() {
             renderFloatingEmojis();
             restoreActiveSession();
+            checkUserAuth(); // Check if user is logged in
         };
 
         // --- UI FUNCTIONS ---
         function renderFloatingEmojis() {
             const container = document.getElementById('emoji-container');
-            // Expanded emoji list
             const emojis = ['💊', '🩺', '🏥', '🩹', '🩸', '🧬', '🚑', '🧪', '🔬',  '👨‍⚕️', '👩‍⚕️', '🦷'];
             for(let i=0; i<20; i++) {
                 const el = document.createElement('div');
                 el.classList.add('emoji');
                 el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
                 el.style.left = Math.random() * 100 + '%';
-                // Varied animation duration for natural feel
                 el.style.animationDuration = (12 + Math.random() * 20) + 's';
                 el.style.animationDelay = (Math.random() * 5) + 's';
-                // Random size variation
                 el.style.fontSize = (1.5 + Math.random()) + 'rem';
                 container.appendChild(el);
             }
@@ -561,6 +663,93 @@
         
         function startConfetti() {
              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+
+        // --- AUTH FUNCTIONS (Pro / Pharmacy) ---
+        async function handleGoogleLoginPro() {
+            const redirectUrl = window.location.origin + '/pharmacy.html';
+            const { error } = await window.db.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: redirectUrl }
+            });
+            if (error) showToast(error.message, 'error');
+        }
+
+        async function handleEmailLoginPro(e) {
+            e.preventDefault();
+            const email = document.getElementById('pro-email').value;
+            const btn = document.getElementById('btn-pro-email');
+            
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+            btn.disabled = true;
+
+            const redirectUrl = window.location.origin + '/pharmacy.html';
+
+            const { error } = await window.db.auth.signInWithOtp({
+                email: email,
+                options: { emailRedirectTo: redirectUrl }
+            });
+
+            if (error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
+                btn.disabled = false;
+            } else {
+                showToast('Στάλθηκε! Ελέγξτε το email σας.', 'success');
+                btn.innerHTML = '<i class="ph-bold ph-check"></i> Εστάλη';
+                setTimeout(() => closeModal('pro'), 3000);
+            }
+        }
+
+        // --- AUTH FUNCTIONS (User / Patient) ---
+        async function checkUserAuth() {
+            const { data: { user } } = await window.db.auth.getUser();
+            if (user) {
+                document.getElementById('user-login-view').classList.add('hidden');
+                document.getElementById('user-profile-view').classList.remove('hidden');
+                document.getElementById('user-email-display').innerText = user.email;
+                // Highlight the user icon to show logged in state
+                const userBtn = document.getElementById('btn-user-icon');
+                userBtn.classList.remove('bg-white/90', 'dark:bg-slate-800/90', 'text-primary');
+                userBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+            }
+        }
+
+        async function handleGoogleLoginUser() {
+            const { error } = await window.db.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.href } // Stay on current page
+            });
+            if (error) showToast(error.message, 'error');
+        }
+
+        async function handleEmailLoginUser(e) {
+            e.preventDefault();
+            const email = document.getElementById('user-email').value;
+            const btn = document.getElementById('btn-user-email');
+            
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+            btn.disabled = true;
+
+            const { error } = await window.db.auth.signInWithOtp({
+                email: email,
+                options: { emailRedirectTo: window.location.href }
+            });
+
+            if (error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
+                btn.disabled = false;
+            } else {
+                showToast('Στάλθηκε! Ελέγξτε το email σας.', 'success');
+                btn.innerHTML = '<i class="ph-bold ph-check"></i> Εστάλη';
+                // Don't close immediately so they see the success
+            }
+        }
+
+        async function handleUserLogout() {
+            await window.db.auth.signOut();
+            window.location.reload();
         }
     </script>
 </body>
