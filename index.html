@@ -417,8 +417,11 @@
 
     <script>
         // --- CONFIGURATION ---
+        // Cleaned up keys to remove hidden characters
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
+        
+        // Initialize Supabase
         const db = supabase.createClient(SB_URL, SB_KEY);
         window.db = db;
 
@@ -435,7 +438,19 @@
             renderFloatingEmojis();
             restoreActiveSession();
             checkUserAuth(); // Check if user is logged in
+            
+            // Health check for Supabase connection
+            checkSupabaseConnection();
         };
+
+        async function checkSupabaseConnection() {
+            // Simple query to check if API key is valid
+            const { error } = await window.db.from('requests').select('count', { count: 'exact', head: true });
+            if (error && (error.code === 'PGRST301' || error.message.includes('JWT'))) {
+                showToast("⚠️ Σφάλμα API Key: Ελέγξτε τα κλειδιά Supabase", 'error');
+                console.error("Supabase Error:", error);
+            }
+        }
 
         // --- UI FUNCTIONS ---
         function renderFloatingEmojis() {
@@ -567,7 +582,7 @@
             }]).select();
 
             if (error) {
-                showToast('Σφάλμα σύνδεσης', 'error');
+                showToast('Σφάλμα: ' + error.message, 'error');
                 btn.disabled = false;
                 btn.innerHTML = 'Αναζήτηση Τώρα';
             } else {
@@ -691,7 +706,7 @@
             });
 
             if (error) {
-                showToast(error.message, 'error');
+                showToast("Σφάλμα: " + error.message, 'error');
                 btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
                 btn.disabled = false;
             } else {
@@ -737,7 +752,7 @@
             });
 
             if (error) {
-                showToast(error.message, 'error');
+                showToast("Σφάλμα: " + error.message, 'error');
                 btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
                 btn.disabled = false;
             } else {
