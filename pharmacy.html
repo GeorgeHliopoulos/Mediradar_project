@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     
     <script>
         // --- ΕΝΗΜΕΡΩΜΕΝΑ ΚΛΕΙΔΙΑ SUPABASE ---
@@ -32,14 +31,11 @@
 
     <style>
         body { background-color: #f1f5f9; }
-        .glass-panel { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         .req-card { transition: all 0.2s; border-left: 4px solid transparent; }
         .req-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .req-card.new { border-left-color: #3b82f6; background-color: #eff6ff; }
         .btn-accept { background: #3b82f6; color: white; transition: 0.2s; }
         .btn-accept:hover { background: #2563eb; }
-        
-        /* Loading overlay */
         #global-loader { position: fixed; inset: 0; background: white; z-index: 100; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -59,10 +55,10 @@
                 <p class="text-slate-500 text-sm">Πλατφόρμα Φαρμακοποιών</p>
             </div>
 
-            <form onsubmit="handleProLoginFromUserApp(event)" class="space-y-4">
+            <form onsubmit="handleProLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Email Φαρμακείου</label>
-                    <input type="email" id="pro-email" class="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-colors" placeholder="pharmacy@example.com" required>
+                    <input type="email" id="pro-email" class="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none" placeholder="pharmacy@example.com" required>
                 </div>
                 <button type="submit" id="btn-login" class="w-full bg-slate-900 text-white p-3 rounded-xl font-semibold hover:bg-slate-800 transition-colors">
                     Αποστολή Magic Link
@@ -79,13 +75,12 @@
     </section>
 
     <section id="pending-section" class="min-h-screen flex flex-col items-center justify-center p-4 hidden">
-        <i class="ph-duotone ph-hourglass-high text-6xl text-orange-500 mb-4"></i>
+        <i class="ph-duotone ph-hourglass-high text-6xl text-orange-500 mb-4 animate-pulse"></i>
         <h1 class="text-2xl font-bold text-slate-900">Αναμονή Έγκρισης</h1>
         <p class="text-slate-600 max-w-md text-center mt-2">
-            Ο λογαριασμός σας έχει δημιουργηθεί και εξετάζεται από την ομάδα διαχείρισης. 
-            Θα λάβετε ειδοποίηση μόλις ενεργοποιηθεί.
+            Ο λογαριασμός σας δημιουργήθηκε επιτυχώς! <br>Περιμένετε την έγκριση από τη διαχείριση για να μπείτε στο ραντάρ.
         </p>
-        <button onclick="logout()" class="mt-8 text-sm text-slate-500 hover:text-red-500 underline">Αποσύνδεση</button>
+        <button onclick="logout()" class="mt-8 text-sm text-slate-500 hover:text-red-500 underline font-bold">Αποσύνδεση</button>
     </section>
 
     <section id="dashboard-section" class="min-h-screen flex flex-col hidden">
@@ -101,14 +96,10 @@
             </div>
             <div class="flex items-center gap-4">
                 <button id="btn-sound" onclick="enableSound()" class="hidden bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 animate-pulse">
-                    <i class="ph-fill ph-speaker-high"></i> Ενεργοποίηση Ήχου
+                    <i class="ph-fill ph-speaker-high"></i> Ήχος
                 </button>
-
                 <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-                    <span class="relative flex h-2.5 w-2.5">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                    </span>
+                    <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>
                     <span class="text-xs font-semibold text-slate-600">Online</span>
                 </div>
                 <button onclick="logout()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors">
@@ -118,122 +109,119 @@
         </nav>
 
         <main class="flex-1 p-6 max-w-5xl mx-auto w-full">
-            <div id="requests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-full text-center py-20 text-slate-400">
-                    <i class="ph ph-coffee text-4xl mb-4 inline-block opacity-50"></i>
-                    <p>Αναμονή για νέα αιτήματα στην περιοχή σας...</p>
-                </div>
-            </div>
+            <div id="requests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </main>
     </section>
-
-    <div id="image-modal" class="fixed inset-0 z-[60] bg-black/90 hidden items-center justify-center p-4 cursor-pointer" onclick="this.classList.add('hidden')">
-        <img id="image-modal-src" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl">
-    </div>
 
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
-        // --- GLOBAL STATE ---
         let currentPharmacyId = null;
         let audioContextAllowed = false;
 
-        // --- INIT ---
-        window.addEventListener('load', async () => {
-            // Check Session on Load
-            const { data: { session } } = await window.db.auth.getSession();
-            
-            if (session) {
-                currentPharmacyId = session.user.id;
-                await checkApprovalStatus();
-            } else {
+        // Ο Αλεξίσφαιρος Auth Listener
+        window.addEventListener('load', () => {
+            // Αν το Supabase κολλήσει, κρύψε το loader σε 3 δεύτερα ούτως ή άλλως
+            const safetyTimer = setTimeout(() => {
+                document.getElementById('global-loader').classList.add('hidden');
                 showAuth();
-            }
-            
-            document.getElementById('global-loader').classList.add('hidden');
+            }, 3000);
+
+            window.db.auth.onAuthStateChange(async (event, session) => {
+                if (session) {
+                    clearTimeout(safetyTimer); // Βρήκαμε session, ακυρώνουμε το safety timer
+                    currentPharmacyId = session.user.id;
+                    await checkApprovalStatus(session.user.email);
+                } else {
+                    document.getElementById('global-loader').classList.add('hidden');
+                    showAuth();
+                }
+            });
         });
 
-        // --- AUTH LOGIC ---
+        // Έλεγχος & Αυτόματη Εγγραφή
+        async function checkApprovalStatus(email) {
+            try {
+                // Ψάχνουμε το φαρμακείο στη βάση
+                const { data: pharmacy, error } = await window.db
+                    .from('pharmacies')
+                    .select('*')
+                    .eq('id', currentPharmacyId)
+                    .single();
+
+                if (error || !pharmacy) {
+                    // ΔΕΝ ΥΠΑΡΧΕΙ! Το γράφουμε στη βάση αυτόματα
+                    console.log("Δημιουργία νέου λογαριασμού φαρμακείου...");
+                    await window.db.from('pharmacies').insert([{
+                        id: currentPharmacyId,
+                        name: 'Φαρμακείο (' + email + ')',
+                        status: 'pending'
+                    }]);
+                    showPending();
+                } else if (pharmacy.status === 'approved') {
+                    showDashboard(pharmacy);
+                } else {
+                    showPending();
+                }
+            } catch (err) {
+                console.error("Σφάλμα:", err);
+                showAuth();
+            } finally {
+                document.getElementById('global-loader').classList.add('hidden');
+            }
+        }
+
+        // --- Εναλλαγές Οθονών ---
         function showAuth() {
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('dashboard-section').classList.add('hidden');
             document.getElementById('pending-section').classList.add('hidden');
         }
 
-        async function checkApprovalStatus() {
-            // Fetch pharmacy details
-            const { data: pharmacy, error } = await window.db
-                .from('pharmacies')
-                .select('*')
-                .eq('id', currentPharmacyId)
-                .single();
-
-            if (error || !pharmacy) {
-                // First time login or data missing -> Maybe redirect to a setup profile page?
-                // For now, assume if logged in but no record, create one or show pending
-                console.log("Pharmacy profile not found. Creating default...");
-                // Note: You should have a logic to create profile. Assuming it exists for now.
-                showAuth(); 
-                return;
-            }
-
-            if (pharmacy.status === 'approved') {
-                // Access Granted
-                document.getElementById('pharmacy-name-display').innerText = pharmacy.name;
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('pending-section').classList.add('hidden');
-                document.getElementById('dashboard-section').classList.remove('hidden');
-                
-                // Show Sound Button
-                document.getElementById('btn-sound').classList.remove('hidden');
-
-                // Start Logic
-                fetchRequests();
-                subscribeToEverything();
-            } else {
-                // Pending Access
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('dashboard-section').classList.add('hidden');
-                document.getElementById('pending-section').classList.remove('hidden');
-            }
+        function showPending() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('pending-section').classList.remove('hidden');
         }
 
-        async function handleProLoginFromUserApp(e) {
-            e.preventDefault();
-            const email = document.getElementById('pro-email').value;
-            const btn = document.getElementById('btn-login');
-            const oldText = btn.innerHTML;
+        function showDashboard(pharmacy) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('pending-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('pharmacy-name-display').innerText = pharmacy.name;
+            document.getElementById('btn-sound').classList.remove('hidden');
             
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+            fetchRequests();
+            subscribeToEverything();
+        }
 
-            // Redirect back to pharmacy.html, not index
-            const redirectUrl = window.location.origin + '/pharmacy.html';
+        // --- Logins & Logouts ---
+        async function handleProLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+            btn.disabled = true;
 
             const { error } = await window.db.auth.signInWithOtp({
-                email: email,
-                options: {
-                    emailRedirectTo: redirectUrl
-                }
+                email: document.getElementById('pro-email').value,
+                options: { emailRedirectTo: window.location.origin + '/pharmacy.html' }
             });
 
             if (error) {
                 showToast("Σφάλμα: " + error.message, 'error');
-                btn.innerHTML = oldText;
+                btn.innerHTML = 'Αποστολή Magic Link';
                 btn.disabled = false;
             } else {
-                showToast("✅ Link εστάλη! Ελέγξτε το email σας.", 'success');
-                btn.innerHTML = '<i class="ph ph-check"></i> Εστάλη!';
+                showToast("✅ Ελέγξτε το email σας!", 'success');
+                btn.innerHTML = '<i class="ph ph-check"></i> Εστάλη';
             }
         }
 
         async function handleGoogleLoginPro() {
-            const redirectUrl = window.location.origin + '/pharmacy.html';
-            const { error } = await window.db.auth.signInWithOAuth({
+            await window.db.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: redirectUrl }
+                options: { redirectTo: window.location.origin + '/pharmacy.html' }
             });
-            if (error) showToast(error.message, 'error');
         }
 
         async function logout() {
@@ -241,145 +229,77 @@
             window.location.reload();
         }
 
-        // --- DASHBOARD LOGIC ---
-
-        function enableSound() {
-            // User interaction to unlock audio
-            const audio = new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3');
-            audio.play().then(() => {
-                audioContextAllowed = true;
-                document.getElementById('btn-sound').classList.add('hidden');
-                showToast("🔊 Ήχος ενεργοποιήθηκε!", "success");
-            }).catch(e => console.error(e));
-        }
-
-        function playNotificationSound() {
-            if (audioContextAllowed) {
-                new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(e=>{});
-            }
-        }
-
+        // --- Λογική Dashboard & Realtime ---
         async function fetchRequests() {
-            // Only fetch pending requests
-            const { data: requests, error } = await window.db
+            const { data: requests } = await window.db
                 .from('requests')
                 .select('*')
                 .eq('status', 'pending')
                 .order('created_at', { ascending: false });
-
             if (requests) renderRequests(requests);
         }
 
         function renderRequests(requests) {
             const container = document.getElementById('requests-grid');
-            
             if (requests.length === 0) {
-                container.innerHTML = `
-                <div class="col-span-full text-center py-20 text-slate-400">
-                    <i class="ph ph-coffee text-4xl mb-4 inline-block opacity-50"></i>
-                    <p>Δεν υπάρχουν εκκρεμή αιτήματα.</p>
-                </div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400"><i class="ph ph-coffee text-4xl mb-4 opacity-50"></i><p>Αναμονή για νέα αιτήματα...</p></div>`;
                 return;
             }
-
             container.innerHTML = requests.map(req => `
                 <div class="req-card bg-white p-5 rounded-xl shadow-sm border border-slate-100 new flex flex-col justify-between h-full">
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Νεο Αιτημα</span>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded uppercase">Νεο Αιτημα</span>
                             <span class="text-xs text-slate-400">${new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
-                        
-                        <h3 class="text-lg font-bold text-slate-900 mb-1">${req.medicine_name || 'Φωτογραφία Συνταγής'}</h3>
-                        
-                        ${req.image_url ? 
-                            `<div onclick="showImageModal('${req.image_url}')" class="cursor-pointer mb-3 relative group">
-                                <img src="${req.image_url}" class="w-full h-32 object-cover rounded-lg border border-slate-200">
-                                <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center rounded-lg text-white">
-                                    <i class="ph-bold ph-magnifying-glass-plus text-2xl"></i>
-                                </div>
-                             </div>` 
-                        : ''}
-                        
-                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                            <i class="ph-fill ph-map-pin text-slate-400"></i>
-                            <span>Απόσταση: <span class="font-semibold text-slate-700">~1.2km</span></span>
-                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">${req.medicine_name || 'Φωτογραφία'}</h3>
                     </div>
-
-                    <button onclick="acceptRequest('${req.id}')" class="btn-accept w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
-                        <i class="ph-bold ph-check"></i>
-                        Έχω το φάρμακο
+                    <button onclick="acceptRequest('${req.id}')" class="btn-accept w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">
+                        <i class="ph-bold ph-check"></i> Έχω το φάρμακο
                     </button>
                 </div>
             `).join('');
         }
 
         async function acceptRequest(reqId) {
-            if (!confirm('Είστε σίγουροι ότι έχετε το φάρμακο και μπορείτε να το δεσμεύσετε για 15 λεπτά;')) return;
-
-            // Get Pharmacy Details (Address/Phone) to send to customer
             const { data: pharmacy } = await window.db.from('pharmacies').select('*').eq('id', currentPharmacyId).single();
-
-            // Atomic Update
-            const { data, error } = await window.db
-                .from('requests')
-                .update({ 
-                    status: 'reserved',
-                    winner_pharmacy: pharmacy.name,
-                    pharmacy_id: currentPharmacyId,
-                    pharmacy_address: pharmacy.address,
-                    pharmacy_phone: pharmacy.phone,
-                    pharmacy_lat: pharmacy.lat,
-                    pharmacy_lng: pharmacy.lng,
-                    updated_at: new Date()
-                })
-                .eq('id', reqId)
-                .select();
+            const { error } = await window.db.from('requests').update({ 
+                status: 'reserved', winner_pharmacy: pharmacy.name, pharmacy_phone: pharmacy.phone || '-', updated_at: new Date()
+            }).eq('id', reqId);
 
             if (error) {
-                showToast('Κάποιος άλλος πρόλαβε το αίτημα.', 'error');
-                fetchRequests();
+                showToast('Άλλος πρόλαβε το αίτημα!', 'error');
             } else {
-                showToast('🎉 Το αίτημα ανατέθηκε σε εσάς!', 'success');
-                fetchRequests();
-                // Optional: Show "Won" tab
+                showToast('🎉 Δεσμεύτηκε επιτυχώς!', 'success');
             }
+            fetchRequests();
         }
 
         function subscribeToEverything() {
             window.db.channel('pharmacy-global')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                    if (payload.eventType === 'INSERT') {
-                        showToast('🔔 Νέο αίτημα!', 'info');
-                        playNotificationSound();
-                        fetchRequests();
+                    fetchRequests();
+                    if (payload.eventType === 'INSERT' && audioContextAllowed) {
+                        new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(()=>{});
                     }
-                    if (payload.eventType === 'UPDATE') {
-                        // Refresh list to remove taken requests
-                        fetchRequests();
-                    }
-                })
-                .subscribe();
+                }).subscribe();
         }
 
-        // --- UTILS ---
-        function showImageModal(src) { 
-            document.getElementById('image-modal-src').src = src; 
-            document.getElementById('image-modal').classList.remove('hidden'); 
-            document.getElementById('image-modal').classList.add('flex');
+        function enableSound() {
+            new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().then(() => {
+                audioContextAllowed = true;
+                document.getElementById('btn-sound').classList.add('hidden');
+            }).catch(e=>{});
         }
 
         function showToast(msg, type='info') {
             const c = document.getElementById('toast-container');
             const el = document.createElement('div');
-            const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800');
-            el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 animate-bounce-in`;
+            el.className = `text-white px-4 py-3 rounded-xl shadow-lg text-sm font-bold flex gap-2 ${type==='error'?'bg-red-500':'bg-green-500'}`;
             el.innerHTML = msg;
             c.appendChild(el);
             setTimeout(() => el.remove(), 3000);
         }
-
     </script>
 </body>
 </html>
