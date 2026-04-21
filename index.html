@@ -11,12 +11,10 @@
     <link rel="icon" type="image/png" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    <!-- Fonts & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- Libraries -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -69,20 +67,16 @@
 </head>
 <body class="text-slate-800 dark:text-slate-100 antialiased relative">
 
-    <!-- BACKGROUND ANIMATION -->
     <div id="emoji-container" class="emoji-bg" aria-hidden="true"></div>
 
-    <!-- NAVIGATION BAR -->
     <nav class="w-full max-w-lg mx-auto p-4 flex justify-between items-center z-20 relative pt-safe">
         <div class="flex gap-2">
-            <!-- PRO PORTAL BUTTON -->
             <button onclick="openModal('pro')" class="bg-indigo-600/90 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 hover:shadow-lg transition-all flex items-center gap-1 active:scale-95 border border-indigo-400/30">
                 <i class="ph-bold ph-briefcase"></i> <span data-i18n="pro_portal">Pro Portal</span>
             </button>
         </div>
         
         <div class="flex gap-2">
-            <!-- LANGUAGE TOGGLE -->
             <button onclick="toggleLang()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm hover:scale-110 transition-transform border border-white/50 active:scale-95"><span id="lang-flag">🇬🇷</span></button>
             <button onclick="toggleTheme()" class="bg-white/60 dark:bg-slate-700/60 w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-sm transition-transform border border-white/50 hover:scale-110 active:scale-95"><i id="theme-icon" class="ph ph-moon-stars"></i></button>
             <button id="btn-user-icon" onclick="openModal('user')" class="bg-white/90 dark:bg-slate-800/90 w-10 h-10 rounded-full text-primary border border-primary/20 shadow-sm hover:shadow-md transition-all flex items-center justify-center active:scale-95">
@@ -91,35 +85,29 @@
         </div>
     </nav>
 
-    <!-- MAIN APP CONTAINER -->
     <main id="main-content" class="w-full max-w-lg mx-auto p-4 flex-grow z-10 relative flex flex-col">
         
-        <!-- HEADER -->
         <header class="text-center mb-6">
             <div class="inline-flex items-center justify-center bg-white/70 dark:bg-slate-700/70 p-4 rounded-2xl mb-3 shadow-sm backdrop-blur-sm border border-white/50"><i class="ph ph-magnifying-glass text-4xl text-primary"></i></div>
             <h1 class="text-3xl font-bold text-primary bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-cyan-500 drop-shadow-sm">MediRadar</h1>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium" data-i18n="tagline">Βρες το φάρμακό σου άμεσα & τοπικά.</p>
         </header>
 
-        <!-- TAB NAVIGATION -->
         <div class="flex p-1.5 bg-slate-200/80 dark:bg-slate-800/80 rounded-2xl mb-6 glass-card" role="tablist">
             <button onclick="switchTab('search')" id="btn-search" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-primary dark:text-teal-300 ring-1 ring-black/5" data-i18n="tab_search">Αναζήτηση</button>
             <button onclick="switchTab('history')" id="btn-history" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-i18n="tab_history">Ιστορικό</button>
             <button onclick="switchTab('how')" id="btn-how" role="tab" class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all" data-i18n="tab_how">Πώς λειτουργεί</button>
         </div>
 
-        <!-- SEARCH TAB (MAIN FORM) -->
         <div id="tab-search" class="tab-content active" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 relative overflow-visible">
                 <form id="request-form" class="space-y-6" onsubmit="return false;">
                     
-                    <!-- Customer Details -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1" data-i18n="label_name">ΟΝΟΜΑΤΕΠΩΝΥΜΟ <span class="text-red-500">*</span></label><input id="full-name" type="text" maxlength="50" placeholder="π.χ. Μαρία Π." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required></div>
                         <div class="space-y-1 relative"><label class="text-[10px] font-bold text-slate-500 uppercase ml-1" data-i18n="label_phone">ΚΙΝΗΤΟ <span class="text-red-500">*</span></label><input id="phone" type="tel" placeholder="69..." oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="10" class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-bold tracking-wider" required></div>
                     </div>
                     
-                    <!-- Location -->
                     <div class="space-y-1 relative">
                         <label class="text-[10px] font-bold text-slate-500 uppercase ml-1" data-i18n="label_location">ΤΟΠΟΘΕΣΙΑ (GPS) <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
@@ -132,7 +120,6 @@
 
                     <div class="border-t-2 border-dashed border-slate-200 dark:border-slate-700 my-2"></div>
                     
-                    <!-- Medicine List -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 space-y-4">
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-2"><i class="ph ph-list-plus text-primary text-lg"></i> <span data-i18n="label_list">ΛΙΣΤΑ ΦΑΡΜΑΚΩΝ</span> <span class="text-red-500">*</span></label>
@@ -157,9 +144,7 @@
                         </div>
                     </div>
 
-                    <!-- Options -->
                     <div class="space-y-3">
-                        <!-- Generic -->
                         <div class="bg-blue-50 dark:bg-slate-800/50 p-3 rounded-xl border border-blue-100 dark:border-slate-700">
                             <div class="flex items-start gap-3">
                                 <div class="relative flex items-center h-5 mt-0.5">
@@ -178,7 +163,6 @@
                             </div>
                         </div>
 
-                        <!-- GDPR -->
                         <div class="flex items-center gap-3 px-1">
                             <input id="accept-terms" type="checkbox" required class="w-5 h-5 rounded text-primary focus:ring-primary border-slate-300">
                             <div class="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center flex-wrap">
@@ -195,14 +179,12 @@
             </div>
         </div>
 
-        <!-- HISTORY TAB -->
         <div id="tab-history" class="tab-content" role="tabpanel">
              <div class="glass-card rounded-3xl p-6 text-center text-slate-500">
                  <p data-i18n="history_empty">Το ιστορικό είναι άδειο.</p>
              </div>
         </div>
 
-        <!-- HOW TAB -->
         <div id="tab-how" class="tab-content" role="tabpanel">
             <div class="glass-card rounded-3xl p-6 space-y-4">
                 <h3 class="font-bold text-lg text-primary" data-i18n="how_title">Πώς λειτουργεί;</h3>
@@ -235,7 +217,6 @@
             </div>
         </div>
 
-        <!-- FOOTER -->
         <footer class="mt-8 pb-4 text-center">
             <div class="flex justify-center gap-6 mb-4 text-slate-400">
                 <a href="#" class="hover:text-primary hover:scale-110 transition-transform"><i class="ph-fill ph-facebook-logo text-2xl"></i></a>
@@ -250,12 +231,11 @@
                 <span>•</span>
                 <button onclick="switchTab('how')" class="hover:text-primary hover:underline" data-i18n="link_help">Βοήθεια</button>
             </div>
-            <p class="text-[10px] text-slate-400">&copy; 2024 MediRadar App. All rights reserved.</p>
+            <p class="text-[10px] text-slate-400">© 2024 MediRadar App. All rights reserved.</p>
         </footer>
 
     </main>
 
-    <!-- SUCCESS MODAL -->
     <div id="modal-success" class="modal-backdrop">
         <div class="modal-content text-center relative overflow-hidden">
             <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 animate-bounce">
@@ -278,7 +258,6 @@
         </div>
     </div>
 
-    <!-- LOADING MODAL -->
     <div id="modal-loading" class="modal-backdrop">
         <div class="modal-content text-center">
             <div class="relative w-20 h-20 mx-auto mb-6">
@@ -292,7 +271,6 @@
         </div>
     </div>
     
-    <!-- TERMS MODAL -->
     <div id="modal-terms" class="modal-backdrop">
         <div class="modal-content text-left">
             <div class="flex justify-between items-center mb-4">
@@ -309,7 +287,6 @@
         </div>
     </div>
     
-    <!-- PRO LOGIN MODAL (PRODUCTION READY) -->
     <div id="modal-pro" class="modal-backdrop">
         <div class="modal-content text-center relative">
             <div class="absolute top-4 right-4">
@@ -322,7 +299,6 @@
             <p class="text-slate-500 text-sm mb-6" data-i18n="pro_desc">Συνδεθείτε για να διαχειριστείτε αιτήματα.</p>
             
             <div class="space-y-3">
-                 <!-- Google Login -->
                  <button onclick="handleGoogleLoginPro()" class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
                     <span data-i18n="btn_google_login">Σύνδεση με Google</span>
@@ -334,7 +310,6 @@
                     <div class="flex-grow border-t border-slate-200"></div>
                 </div>
 
-                <!-- Magic Link Form -->
                 <form onsubmit="handleEmailLoginPro(event)" class="space-y-3">
                     <input type="email" id="pro-email" placeholder="pharmacy@example.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none" required>
                     <button type="submit" id="btn-pro-email" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2">
@@ -351,7 +326,6 @@
         </div>
     </div>
     
-    <!-- USER LOGIN MODAL (NEW & FUNCTIONAL) -->
     <div id="modal-user" class="modal-backdrop">
         <div class="modal-content text-center relative">
             <div class="absolute top-4 right-4">
@@ -366,7 +340,6 @@
                 <p class="text-slate-500 text-sm mb-6" data-i18n="user_login_desc">Αποθηκεύστε το ιστορικό σας και συνδεθείτε εύκολα.</p>
                 
                 <div class="space-y-3">
-                     <!-- Google Login -->
                      <button onclick="handleGoogleLoginUser()" class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all">
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
                         <span data-i18n="btn_google_login">Σύνδεση με Google</span>
@@ -378,7 +351,6 @@
                         <div class="flex-grow border-t border-slate-200"></div>
                     </div>
     
-                    <!-- Magic Link Form -->
                     <form onsubmit="handleEmailLoginUser(event)" class="space-y-3">
                         <input type="email" id="user-email" placeholder="your@email.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none" required>
                         <button type="submit" id="btn-user-email" class="w-full bg-teal-600 text-white font-bold py-3 rounded-xl hover:bg-teal-700 transition-all flex items-center justify-center gap-2">
@@ -389,7 +361,6 @@
                 </div>
             </div>
 
-            <!-- Logged In View (Hidden by default) -->
             <div id="user-profile-view" class="hidden">
                 <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2" data-i18n="user_profile_title">Το Προφίλ μου</h3>
                 <p id="user-email-display" class="text-slate-500 text-sm mb-6 font-mono bg-slate-100 p-2 rounded-lg inline-block">...</p>
@@ -407,21 +378,19 @@
         </div>
     </div>
 
-    <!-- QR SCANNER OVERLAY -->
     <div id="scanner-overlay" class="fixed inset-0 z-[60] bg-black hidden">
         <div id="reader" class="w-full h-full"></div>
         <button onclick="toggleScanner()" class="absolute top-5 right-5 bg-white/20 text-white p-3 rounded-full backdrop-blur-md z-[70]"><i class="ph ph-x text-xl"></i></button>
     </div>
 
-    <!-- TOAST CONTAINER -->
     <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 w-full max-w-xs px-4"></div>
 
     <script>
         // --- CONFIGURATION ---
-        // Κλειδί Supabase (καθαρισμένο από κενά)
+        // Κλειδί Supabase (ενημερωμένο με τα νέα στοιχεία)
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co"; 
-        const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
-        const SB_KEY = RAW_KEY.trim(); // .trim() αφαιρεί τυχόν κενά
+        const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
+        const SB_KEY = RAW_KEY.trim(); 
 
         // Initialize Supabase
         const db = supabase.createClient(SB_URL, SB_KEY);
