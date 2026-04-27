@@ -259,15 +259,16 @@
     </div>
 
     <div id="modal-loading" class="modal-backdrop">
-        <div class="modal-content text-center">
-            <div class="relative w-20 h-20 mx-auto mb-6">
-                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
-                <i class="ph-fill ph-radar absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-primary animate-pulse"></i>
+        <div class="modal-content text-center relative overflow-hidden min-h-[300px] flex flex-col items-center justify-center" style="padding: 0;">
+            <canvas id="swirlCanvas" class="absolute inset-0 w-full h-full z-0"></canvas>
+            
+            <div class="relative z-10 flex flex-col items-center justify-center p-6 w-full h-full bg-white/30 dark:bg-slate-900/30 backdrop-blur-[1px]">
+                <div class="bg-white/80 dark:bg-slate-800/80 px-6 py-4 rounded-3xl shadow-sm border border-white/50 dark:border-slate-600/50 mt-4 mb-6">
+                    <h3 class="text-xl font-bold text-teal-600 dark:text-teal-400 mb-1" data-i18n="loading_title">Αναζήτηση...</h3>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm font-medium" data-i18n="loading_desc">Ειδοποιούμε τα φαρμακεία στη γειτονιά σας.</p>
+                </div>
+                <button onclick="cancelRequest()" class="mt-auto text-red-500 font-bold text-sm bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/50 px-6 py-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors shadow-sm" data-i18n="btn_cancel">Ακύρωση</button>
             </div>
-            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2" data-i18n="loading_title">Αναζήτηση...</h3>
-            <p class="text-slate-500 text-sm mb-6" data-i18n="loading_desc">Ειδοποιούμε τα φαρμακεία στη γειτονιά σας.</p>
-            <button onclick="cancelRequest()" class="text-red-500 font-bold text-sm border border-red-200 px-6 py-2 rounded-full hover:bg-red-50" data-i18n="btn_cancel">Ακύρωση</button>
         </div>
     </div>
     
@@ -387,7 +388,6 @@
 
     <script>
         // --- CONFIGURATION ---
-        // ΕΔΩ ΗΤΑΝ ΤΟ ΛΑΘΟΣ - ΜΠΗΚΕ ΤΟ ΣΩΣΤΟ ΚΛΕΙΔΙ
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co"; 
         const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
         const SB_KEY = RAW_KEY.trim(); 
@@ -595,8 +595,73 @@
             }
         }
 
-        function openModal(id) { document.getElementById('modal-'+id).classList.add('active'); }
-        function closeModal(id) { document.getElementById('modal-'+id).classList.remove('active'); }
+        // --- ΕΔΩ ΜΠΗΚΑΝ ΟΙ ΝΕΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ΓΙΑ ΤΟ ANIMATION ---
+        function openModal(id) { 
+            document.getElementById('modal-'+id).classList.add('active'); 
+            if(id === 'loading') startSwirlAnimation();
+        }
+        
+        function closeModal(id) { 
+            document.getElementById('modal-'+id).classList.remove('active'); 
+            if(id === 'loading') stopSwirlAnimation();
+        }
+
+        let swirlAnimationId;
+        function startSwirlAnimation() {
+            const canvas = document.getElementById('swirlCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // Μικρή καθυστέρηση για να προλάβει το CSS να δώσει διαστάσεις
+            setTimeout(() => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width * window.devicePixelRatio;
+                canvas.height = rect.height * window.devicePixelRatio;
+                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                
+                const particles = [];
+                const medicines = ['💊', '🩺', '🧪', '🩹', '⚕️'];
+                for(let i = 0; i < 15; i++) {
+                    particles.push({
+                        angle: Math.random() * Math.PI * 2,
+                        radius: 50 + Math.random() * 70,
+                        speed: 0.002 + Math.random() * 0.006,
+                        emoji: medicines[Math.floor(Math.random() * medicines.length)],
+                        offsetY: (Math.random() - 0.5) * 60,
+                        size: 16 + Math.random() * 10
+                    });
+                }
+
+                function animate() {
+                    // Διαβάζει αν ο χρήστης έχει Dark Mode για να βάλει το σωστό χρώμα "ουράς"
+                    const isDark = document.documentElement.classList.contains('dark');
+                    ctx.fillStyle = isDark ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.3)';
+                    ctx.fillRect(0, 0, rect.width, rect.height);
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    particles.forEach(p => {
+                        p.angle += p.speed;
+                        const x = centerX + Math.cos(p.angle) * p.radius;
+                        const y = centerY + Math.sin(p.angle) * (p.radius * 0.6) + p.offsetY; 
+                        
+                        ctx.font = `${p.size}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(p.emoji, x, y);
+                    });
+                    swirlAnimationId = requestAnimationFrame(animate);
+                }
+                if(swirlAnimationId) cancelAnimationFrame(swirlAnimationId);
+                animate();
+            }, 50);
+        }
+
+        function stopSwirlAnimation() {
+            if(swirlAnimationId) cancelAnimationFrame(swirlAnimationId);
+        }
+        
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
         
         function toggleInfo(id) {
