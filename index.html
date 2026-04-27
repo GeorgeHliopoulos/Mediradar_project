@@ -109,11 +109,11 @@
                     </div>
                     
                     <div class="space-y-1 relative">
-                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1" data-i18n="label_location">ΤΟΠΟΘΕΣΙΑ (GPS) <span class="text-red-500">*</span></label>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-1" data-i18n="label_location">ΤΟΠΟΘΕΣΙΑ (GPS Η ΔΙΕΥΘΥΝΣΗ) <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
-                            <input id="city" type="text" placeholder="Πατήστε Εντοπισμός..." readonly class="w-full bg-slate-200 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 cursor-not-allowed rounded-xl px-4 py-3 text-sm font-medium border-2 border-transparent focus:border-red-300 transition-colors" required onclick="getLocation()">
+                            <input id="city" type="text" placeholder="Γράψτε περιοχή..." class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white font-medium" required oninput="resetCoords()">
                             <button type="button" onclick="getLocation()" id="btn-location" class="bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-700 rounded-xl px-4 font-bold flex items-center gap-2 hover:bg-teal-200 transition-colors whitespace-nowrap active:scale-95 shadow-sm">
-                                <i class="ph ph-navigation-arrow text-lg"></i> <span data-i18n="btn_locate">Εντοπισμός</span>
+                                <i class="ph ph-navigation-arrow text-lg"></i> <span data-i18n="btn_locate">GPS</span>
                             </button>
                         </div>
                     </div>
@@ -416,8 +416,8 @@
                 tab_how: "Πώς λειτουργεί",
                 label_name: "ΟΝΟΜΑΤΕΠΩΝΥΜΟ",
                 label_phone: "ΚΙΝΗΤΟ",
-                label_location: "ΤΟΠΟΘΕΣΙΑ (GPS)",
-                btn_locate: "Εντοπισμός",
+                label_location: "ΤΟΠΟΘΕΣΙΑ (GPS Η ΔΙΕΥΘΥΝΣΗ)",
+                btn_locate: "GPS",
                 label_list: "ΛΙΣΤΑ ΦΑΡΜΑΚΩΝ",
                 label_item_name: "ΟΝΟΜΑΣΙΑ ΕΙΔΟΥΣ",
                 btn_add_list: "Προσθήκη στη Λίστα",
@@ -472,8 +472,8 @@
                 tab_how: "How it works",
                 label_name: "FULL NAME",
                 label_phone: "MOBILE PHONE",
-                label_location: "LOCATION (GPS)",
-                btn_locate: "Locate Me",
+                label_location: "LOCATION (GPS OR ADDRESS)",
+                btn_locate: "GPS",
                 label_list: "MEDICINE LIST",
                 label_item_name: "MEDICINE NAME",
                 btn_add_list: "Add to List",
@@ -573,11 +573,11 @@
             });
             if(currentLang === 'en') {
                 document.getElementById('full-name').placeholder = "e.g. Maria P.";
-                document.getElementById('city').placeholder = "Press Locate...";
+                document.getElementById('city').placeholder = "Type area...";
                 document.getElementById('medicine').placeholder = "e.g. Aspirin";
             } else {
                 document.getElementById('full-name').placeholder = "π.χ. Μαρία Π.";
-                document.getElementById('city').placeholder = "Πατήστε Εντοπισμός...";
+                document.getElementById('city').placeholder = "Γράψτε περιοχή...";
                 document.getElementById('medicine').placeholder = "π.χ. Depon";
             }
         }
@@ -653,10 +653,11 @@
         }
 
         function addItemToList() {
-            const name = document.getElementById('medicine').value;
+            const medicineInput = document.getElementById('medicine');
+            const name = medicineInput.value.trim();
             if(!name) return showToast(currentLang === 'el' ? 'Γράψτε ένα φάρμακο' : 'Type a medicine name', 'error');
             itemsList.push({ name: name, qty: 1 });
-            document.getElementById('medicine').value = '';
+            medicineInput.value = '';
             renderList();
         }
 
@@ -679,6 +680,12 @@
             }
         }
 
+        function resetCoords() {
+            // Όταν ο χρήστης γράφει τοποθεσία χειροκίνητα, μηδενίζουμε τις συντεταγμένες
+            currentLat = null;
+            currentLng = null;
+        }
+
         function getLocation() {
             const btn = document.getElementById('btn-location');
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
@@ -687,11 +694,11 @@
                 currentLat = pos.coords.latitude;
                 currentLng = pos.coords.longitude;
                 document.getElementById('city').value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
-                btn.innerHTML = `<i class="ph-fill ph-check"></i> ${currentLang==='el'?'Εντοπίστηκε':'Located'}`;
+                btn.innerHTML = `<i class="ph-fill ph-check"></i> GPS`;
                 btn.classList.add('bg-green-100', 'text-green-800');
             }, () => {
-                btn.innerHTML = currentLang==='el'?'Προσπάθεια ξανά':'Try again';
-                showToast(currentLang==='el'?'Δεν βρέθηκε τοποθεσία':'Location not found', 'error');
+                btn.innerHTML = 'GPS';
+                showToast(currentLang==='el'?'Δεν βρέθηκε τοποθεσία. Παρακαλώ γράψτε την χειροκίνητα.':'Location not found. Please type it.', 'error');
             }, {enableHighAccuracy:true});
         }
 
@@ -714,15 +721,47 @@
             const phone = document.getElementById('phone').value;
             const acceptTerms = document.getElementById('accept-terms').checked;
             const acceptGeneric = document.getElementById('accept-generic').checked;
+            const cityValue = document.getElementById('city').value.trim();
 
             if (!acceptTerms) return showToast(currentLang==='el'?'Πρέπει να αποδεχτείτε τους Όρους Χρήσης.':'You must accept Terms of Use.', 'error');
-            if (itemsList.length === 0 && !selectedFile) return showToast(currentLang==='el'?'Προσθέστε φάρμακο ή φωτογραφία!':'Add medicine or photo!', 'error');
-            if (!currentLat) return showToast(currentLang==='el'?'Πατήστε "Εντοπισμός" για την τοποθεσία.':'Press "Locate Me" for location.', 'error');
             if (phone.length < 10) return showToast(currentLang==='el'?'Ελέγξτε το κινητό τηλέφωνο.':'Check mobile phone number.', 'error');
+            
+            // Auto-add αν ξέχασε να πατήσει το κουμπάκι
+            const medicineInputText = document.getElementById('medicine').value.trim();
+            if (medicineInputText !== '') {
+                itemsList.push({ name: medicineInputText, qty: 1 });
+                document.getElementById('medicine').value = '';
+                renderList();
+            }
+
+            if (itemsList.length === 0 && !selectedFile) return showToast(currentLang==='el'?'Προσθέστε φάρμακο ή φωτογραφία!':'Add medicine or photo!', 'error');
+            
+            // Έλεγχος αν έβαλε περιοχή (είτε GPS είτε κείμενο)
+            if (!currentLat && !cityValue) return showToast(currentLang==='el'?'Γράψτε περιοχή ή πατήστε GPS.':'Enter location or press GPS.', 'error');
 
             const btn = document.getElementById('btn-submit');
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> ...';
             btn.disabled = true;
+
+            // Αν δεν έχουμε GPS αλλά έγραψε κείμενο, ψάχνουμε συντεταγμένες μέσω OpenStreetMap
+            if (!currentLat && cityValue) {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityValue + ', Ελλάδα')}`);
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        currentLat = parseFloat(data[0].lat);
+                        currentLng = parseFloat(data[0].lon);
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = currentLang==='el'?'Αναζήτηση Τώρα':'Search Now';
+                        return showToast(currentLang==='el'?'Η περιοχή δεν βρέθηκε. Δοκιμάστε άλλη.':'Location not found. Try another.', 'error');
+                    }
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.innerHTML = currentLang==='el'?'Αναζήτηση Τώρα':'Search Now';
+                    return showToast(currentLang==='el'?'Σφάλμα εύρεσης τοποθεσίας.':'Geocoding error.', 'error');
+                }
+            }
 
             let imageUrl = null;
             if (selectedFile) {
