@@ -3,321 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediRadar Admin Pro</title>
+    <title>MediRadar Admin - Διαχείριση</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <script>
-        // --- ΕΝΗΜΕΡΩΜΕΝΑ ΚΛΕΙΔΙΑ SUPABASE ---
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-        const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
-        const SB_KEY = RAW_KEY.trim();
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
+        window.db = supabase.createClient(SB_URL, SB_KEY);
 
-        const db = supabase.createClient(SB_URL, SB_KEY);
-        window.db = db;
-
-        tailwind.config = { 
-            darkMode: 'class', 
-            theme: { 
-                extend: { 
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }, 
-                    colors: { admin: '#1e293b', primary: '#4f46e5' } 
-                } 
-            } 
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
         }
     </script>
-    <style>
-        body { background-color: #f1f5f9; }
-        .glass-panel { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; color: #64748b; font-weight: 500; transition: all 0.2s; cursor: pointer; }
-        .sidebar-link:hover { background-color: #f8fafc; color: #0f172a; }
-        .sidebar-link.active { background-color: #4f46e5; color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
-    </style>
 </head>
-<body class="flex h-screen overflow-hidden text-slate-800">
+<body class="bg-slate-50 text-slate-800">
 
-    <div id="login-screen" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
-            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="ph-fill ph-shield-check text-3xl text-primary"></i>
-            </div>
-            <h1 class="text-2xl font-bold text-slate-900 mb-2">Admin Login</h1>
-            <p class="text-sm text-slate-500 mb-6">Ασφαλής Περιοχή Διαχείρισης</p>
-            
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <input type="email" id="admin-email" placeholder="admin@mediradar.gr" class="w-full p-3 rounded-lg border border-slate-300 focus:border-primary focus:outline-none" required>
-                <input type="password" id="admin-pass" placeholder="Password" class="w-full p-3 rounded-lg border border-slate-300 focus:border-primary focus:outline-none" required>
-                <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition">Είσοδος</button>
-            </form>
-        </div>
-    </div>
-
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-10 hidden" id="sidebar">
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">M</div>
-            <span class="font-bold text-lg text-slate-800">MediRadar Admin</span>
-        </div>
-        
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-            <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-link active">
-                <i class="ph ph-squares-four text-xl"></i> Dashboard
-            </div>
-            <div onclick="switchView('pharmacies')" id="nav-pharmacies" class="sidebar-link">
-                <i class="ph ph-storefront text-xl"></i> Φαρμακεία
-                <span id="badge-pharmacies" class="ml-auto bg-slate-100 text-slate-600 text-xs py-0.5 px-2 rounded-full hidden">0</span>
-            </div>
-            <div onclick="switchView('requests')" id="nav-requests" class="sidebar-link">
-                <i class="ph ph-list-magnifying-glass text-xl"></i> Αιτήματα
+    <div class="min-h-screen flex flex-col">
+        <nav class="bg-slate-900 text-white p-6 shadow-xl">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="ph-fill ph-shield-check text-3xl text-blue-400"></i>
+                    <div>
+                        <h1 class="text-xl font-bold leading-none">MediRadar Admin</h1>
+                        <p class="text-slate-400 text-xs mt-1">Σύστημα Ελέγχου Δικτύου</p>
+                    </div>
+                </div>
+                <div id="stats" class="hidden md:flex gap-6 text-sm">
+                    <div class="border-l border-slate-700 pl-6"><span class="block text-slate-500">Live Αιτήματα</span> <span id="stat-req" class="font-bold">-</span></div>
+                    <div class="border-l border-slate-700 pl-6"><span class="block text-slate-500">Εκκρεμή Φαρμακεία</span> <span id="stat-pharm" class="font-bold">-</span></div>
+                </div>
             </div>
         </nav>
 
-        <div class="p-4 border-t border-slate-100">
-            <button onclick="handleLogout()" class="sidebar-link w-full text-red-500 hover:bg-red-50 hover:text-red-600">
-                <i class="ph ph-sign-out text-xl"></i> Αποσύνδεση
-            </button>
-        </div>
-    </aside>
-
-    <main class="flex-1 bg-slate-50 overflow-auto relative hidden" id="main-content">
-        <header class="bg-white border-b border-slate-200 p-6 flex justify-between items-center sticky top-0 z-20 shadow-sm">
-            <h2 id="page-title" class="text-2xl font-bold text-slate-800">Overview</h2>
-            <div class="flex items-center gap-4">
-                <span class="text-sm text-slate-500">Admin User</span>
-                <div class="w-8 h-8 rounded-full bg-slate-200"></div>
-            </div>
-        </header>
-
-        <div class="p-8 max-w-7xl mx-auto space-y-8">
+        <main class="max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div id="view-dashboard" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-sm font-medium uppercase">Active Requests</p>
-                            <h3 class="text-3xl font-bold text-slate-900 mt-1" id="stat-req-active">-</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><i class="ph-fill ph-pulse text-2xl"></i></div>
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-storefront"></i> Εγκρίσεις Φαρμακείων
+                </h2>
+                <div id="pharm-list" class="space-y-3">
                     </div>
-                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-sm font-medium uppercase">Pending Pharmacies</p>
-                            <h3 class="text-3xl font-bold text-orange-600 mt-1" id="stat-phar-pending">-</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><i class="ph-fill ph-storefront text-2xl"></i></div>
-                    </div>
-                    <div class="glass-panel p-6 rounded-xl flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 text-sm font-medium uppercase">Total Completed</p>
-                            <h3 class="text-3xl font-bold text-green-600 mt-1" id="stat-completed">-</h3>
-                        </div>
-                        <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-600"><i class="ph-fill ph-check-circle text-2xl"></i></div>
-                    </div>
-                </div>
             </div>
 
-            <div id="view-pharmacies" class="hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <input type="text" placeholder="Search pharmacy..." class="p-2 border rounded-lg w-64" id="search-pharmacy" onkeyup="filterPharmacies()">
-                </div>
-                <div class="glass-panel rounded-xl overflow-hidden">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+            <div class="lg:col-span-2 space-y-4">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="ph ph-list-bullets"></i> Ιστορικό & Live Αιτήματα
+                </h2>
+                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-100">
                             <tr>
-                                <th class="p-4">Name</th>
-                                <th class="p-4">Phone</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4 text-right">Actions</th>
+                                <th class="p-4 text-xs font-bold text-slate-500">ΦΑΡΜΑΚΟ</th>
+                                <th class="p-4 text-xs font-bold text-slate-500">ΠΕΛΑΤΗΣ</th>
+                                <th class="p-4 text-xs font-bold text-slate-500">STATUS</th>
+                                <th class="p-4 text-xs font-bold text-slate-500">ΦΑΡΜΑΚΕΙΟ</th>
                             </tr>
                         </thead>
-                        <tbody id="table-pharmacies" class="divide-y divide-slate-100">
+                        <tbody id="req-table-body" class="divide-y divide-slate-50">
                             </tbody>
                     </table>
                 </div>
             </div>
 
-            <div id="view-requests" class="hidden space-y-6">
-                 <div class="flex justify-between items-center">
-                    <input type="text" placeholder="Search requests..." class="p-2 border rounded-lg w-64" id="search-request" onkeyup="filterRequests()">
-                </div>
-                <div class="glass-panel rounded-xl overflow-hidden">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
-                            <tr>
-                                <th class="p-4">Time</th>
-                                <th class="p-4">Medicine</th>
-                                <th class="p-4">Customer</th>
-                                <th class="p-4">Status</th>
-                                <th class="p-4">Winner</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-requests" class="divide-y divide-slate-100">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script>
-        // --- DATA STATE ---
-        let allPharmacies = [];
-        let allRequests = [];
-
-        // --- INIT ---
-        window.addEventListener('load', async () => {
-             const { data: { session } } = await window.db.auth.getSession();
-             if(session) {
-                 unlockAdmin();
-             }
-        });
-
-        // --- AUTH ---
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('admin-email').value;
-            const pass = document.getElementById('admin-pass').value;
-
-            const { data, error } = await window.db.auth.signInWithPassword({
-                email: email,
-                password: pass
-            });
-
-            if (error) {
-                alert('Login Failed: ' + error.message);
+        async function refreshData() {
+            // 1. Fetch Pending Pharmacies
+            const { data: pharms } = await window.db.from('pharmacies').select('*').eq('status', 'pending');
+            const pList = document.getElementById('pharm-list');
+            document.getElementById('stat-pharm').innerText = pharms ? pharms.length : 0;
+            
+            if (!pharms || pharms.length === 0) {
+                pList.innerHTML = `<div class="bg-white p-6 rounded-2xl border text-center text-slate-400 text-sm">Όλα εγκεκριμένα!</div>`;
             } else {
-                unlockAdmin();
+                pList.innerHTML = pharms.map(p => `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                        <div class="overflow-hidden">
+                            <p class="font-bold text-slate-900 truncate">${p.name}</p>
+                            <p class="text-xs text-slate-400 truncate">${p.id}</p>
+                        </div>
+                        <button onclick="approvePharm('${p.id}')" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100">APPROVE</button>
+                    </div>
+                `).join('');
+            }
+
+            // 2. Fetch All Requests
+            const { data: reqs } = await window.db.from('requests').select('*').order('created_at', { ascending: false }).limit(20);
+            const rTable = document.getElementById('req-table-body');
+            document.getElementById('stat-req').innerText = reqs ? reqs.filter(r => r.status === 'pending').length : 0;
+
+            if (!reqs || reqs.length === 0) {
+                rTable.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400">Δεν υπάρχουν αιτήματα στη βάση.</td></tr>`;
+            } else {
+                rTable.innerHTML = reqs.map(r => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-4"><span class="font-bold text-slate-900">${r.medicine_name}</span></td>
+                        <td class="p-4 text-sm text-slate-500">${r.customer_name || '-'}</td>
+                        <td class="p-4">
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-full uppercase ${r.status === 'pending' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}">
+                                ${r.status}
+                            </span>
+                        </td>
+                        <td class="p-4 text-sm font-medium text-blue-600">${r.winner_pharmacy || '-'}</td>
+                    </tr>
+                `).join('');
             }
         }
 
-        function unlockAdmin() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('sidebar').classList.add('flex');
-            document.getElementById('main-content').classList.remove('hidden');
-            loadData();
+        async function approvePharm(id) {
+            const { error } = await window.db.from('pharmacies').update({ status: 'approved' }).eq('id', id);
+            if (error) alert(error.message);
+            else refreshData();
         }
 
-        async function handleLogout() {
-            await window.db.auth.signOut();
-            window.location.reload();
-        }
-
-        // --- DATA LOADING ---
-        async function loadData() {
-            fetchPharmacies();
-            fetchRequests();
-            
-            // Realtime
-            window.db.channel('admin-chan')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'pharmacies' }, fetchPharmacies)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, fetchRequests)
-            .subscribe();
-        }
-
-        async function fetchPharmacies() {
-            const { data } = await window.db.from('pharmacies').select('*').order('created_at', {ascending: false});
-            allPharmacies = data || [];
-            renderPharmaciesTable(allPharmacies);
-            updateStats();
-        }
-
-        async function fetchRequests() {
-            const { data } = await window.db.from('requests').select('*').order('created_at', {ascending: false}).limit(50);
-            allRequests = data || [];
-            renderRequestsTable(allRequests);
-            updateStats();
-        }
-
-        // --- RENDERERS ---
-        function renderPharmaciesTable(list) {
-            const tbody = document.getElementById('table-pharmacies');
-            tbody.innerHTML = list.map(p => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-4 font-medium text-slate-900">${p.name || 'No Name'}</td>
-                    <td class="p-4">${p.phone || '-'}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${statusColor(p.status)}">${p.status}</span></td>
-                    <td class="p-4 text-right">
-                        ${p.status === 'pending' ? 
-                        `<button onclick="approvePharmacy('${p.id}')" class="text-green-600 hover:bg-green-50 px-3 py-1 rounded border border-green-200 text-xs font-bold">Approve</button>` 
-                        : '<span class="text-slate-400 text-xs">No Action</span>'}
-                    </td>
-                </tr>
-            `).join('');
-            
-            // Badge Update
-            const pendingCount = list.filter(p => p.status === 'pending').length;
-            const badge = document.getElementById('badge-pharmacies');
-            if(pendingCount > 0) {
-                badge.innerText = pendingCount;
-                badge.classList.remove('hidden');
-                badge.classList.add('bg-orange-100', 'text-orange-700');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function renderRequestsTable(list) {
-            const tbody = document.getElementById('table-requests');
-            tbody.innerHTML = list.map(r => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-4 text-xs">${new Date(r.created_at).toLocaleString()}</td>
-                    <td class="p-4 font-medium text-slate-900">${r.medicine_name}</td>
-                    <td class="p-4">${r.customer_phone || '-'}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${reqStatusColor(r.status)}">${r.status}</span></td>
-                    <td class="p-4 text-xs">${r.winner_pharmacy || '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        function updateStats() {
-            document.getElementById('stat-phar-pending').innerText = allPharmacies.filter(p => p.status === 'pending').length;
-            document.getElementById('stat-req-active').innerText = allRequests.filter(r => r.status === 'pending').length;
-            document.getElementById('stat-completed').innerText = allRequests.filter(r => r.status === 'reserved').length;
-        }
-
-        // --- ACTIONS ---
-        async function approvePharmacy(id) {
-            if(!confirm('Approve this pharmacy?')) return;
-            await window.db.from('pharmacies').update({ status: 'approved' }).eq('id', id);
-        }
-
-        // --- UTILS ---
-        function statusColor(s) {
-            if(s === 'approved') return 'bg-green-100 text-green-700';
-            if(s === 'pending') return 'bg-orange-100 text-orange-700';
-            return 'bg-slate-100 text-slate-600';
-        }
-        function reqStatusColor(s) {
-            if(s === 'reserved') return 'bg-green-100 text-green-700';
-            if(s === 'pending') return 'bg-blue-100 text-blue-700';
-            if(s === 'cancelled') return 'bg-red-100 text-red-700';
-            return 'bg-slate-100 text-slate-600';
-        }
-
-        function switchView(viewName) {
-            ['dashboard', 'pharmacies', 'requests'].forEach(v => {
-                document.getElementById('view-'+v).classList.add('hidden');
-                document.getElementById('nav-'+v).classList.remove('active');
-            });
-            document.getElementById('view-'+viewName).classList.remove('hidden');
-            document.getElementById('nav-'+viewName).classList.add('active');
-            document.getElementById('page-title').innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1);
-        }
-
-        function filterPharmacies() {
-            const term = document.getElementById('search-pharmacy').value.toLowerCase();
-            const filtered = allPharmacies.filter(p => (p.name||'').toLowerCase().includes(term) || (p.phone||'').includes(term));
-            renderPharmaciesTable(filtered);
-        }
-
-        function filterRequests() {
-            const term = document.getElementById('search-request').value.toLowerCase();
-            const filtered = allRequests.filter(r => (r.customer_phone||'').includes(term) || (r.medicine_name||'').toLowerCase().includes(term));
-            renderRequestsTable(filtered);
-        }
+        // INIT & REALTIME
+        window.onload = refreshData;
+        window.db.channel('admin-channel').on('postgres_changes', {event:'*', schema:'public'}, refreshData).subscribe();
     </script>
 </body>
 </html>
