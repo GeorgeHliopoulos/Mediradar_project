@@ -389,7 +389,7 @@
     <script>
         // --- CONFIGURATION ---
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co"; 
-        const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
+        const RAW_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
         const SB_KEY = RAW_KEY.trim(); 
 
         // Initialize Supabase
@@ -524,17 +524,13 @@
 
         window.onload = function() {
             renderFloatingEmojis();
-            // Try to restore session, but be graceful about it
             try { restoreActiveSession(); } catch(e) { console.log('Session restore info:', e); }
             checkUserAuth(); 
-            
-            // Clean localStorage if it contains bad data
             if(localStorage.getItem('active_request_id') === 'undefined') {
                 localStorage.removeItem('active_request_id');
             }
         };
 
-        // --- UI FUNCTIONS ---
         function renderFloatingEmojis() {
             const container = document.getElementById('emoji-container');
             const emojis = ['💊', '🩺', '🏥', '🩹', '🩸', '🧬', '🚑', '🧪', '🔬',  '👨‍⚕️', '👩‍⚕️', '🦷'];
@@ -555,7 +551,6 @@
             document.getElementById('tab-'+tab).classList.add('active');
         }
         
-        // --- LANGUAGE TOGGLE (IMPLEMENTED) ---
         function toggleLang() {
             const flag = document.getElementById('lang-flag');
             if (currentLang === 'el') {
@@ -573,17 +568,9 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (t[key]) {
-                    // Check if it's an input with placeholder or innerHTML
-                    if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
-                       // Note: Placeholders would need separate data attributes or logic, 
-                       // for simplicity we are swapping innerHTML/text mostly.
-                    } else {
-                       el.innerHTML = t[key];
-                    }
+                    el.innerHTML = t[key];
                 }
             });
-            
-            // Specific placeholder updates manually for inputs
             if(currentLang === 'en') {
                 document.getElementById('full-name').placeholder = "e.g. Maria P.";
                 document.getElementById('city').placeholder = "Press Locate...";
@@ -595,12 +582,11 @@
             }
         }
 
-        // --- ΕΔΩ ΜΠΗΚΑΝ ΟΙ ΝΕΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ΓΙΑ ΤΟ ANIMATION ---
+        // --- ANIMATION CONTROLS ---
         function openModal(id) { 
             document.getElementById('modal-'+id).classList.add('active'); 
             if(id === 'loading') startSwirlAnimation();
         }
-        
         function closeModal(id) { 
             document.getElementById('modal-'+id).classList.remove('active'); 
             if(id === 'loading') stopSwirlAnimation();
@@ -612,7 +598,6 @@
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            // Μικρή καθυστέρηση για να προλάβει το CSS να δώσει διαστάσεις
             setTimeout(() => {
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width * window.devicePixelRatio;
@@ -633,7 +618,6 @@
                 }
 
                 function animate() {
-                    // Διαβάζει αν ο χρήστης έχει Dark Mode για να βάλει το σωστό χρώμα "ουράς"
                     const isDark = document.documentElement.classList.contains('dark');
                     ctx.fillStyle = isDark ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.3)';
                     ctx.fillRect(0, 0, rect.width, rect.height);
@@ -663,14 +647,9 @@
         }
         
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-        
         function toggleInfo(id) {
             const el = document.getElementById('info-'+id);
-            if(el.classList.contains('active')) {
-                el.classList.remove('active');
-            } else {
-                el.classList.add('active');
-            }
+            el.classList.toggle('active');
         }
 
         function addItemToList() {
@@ -730,7 +709,6 @@
             }
         }
 
-        // --- CORE LOGIC ---
         async function submitRequest() {
             const name = document.getElementById('full-name').value;
             const phone = document.getElementById('phone').value;
@@ -868,7 +846,7 @@
              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
         }
 
-        // --- AUTH FUNCTIONS (Pro / Pharmacy) ---
+        // --- AUTH LOGIC ---
         async function handleGoogleLoginPro() {
             const redirectUrl = window.location.origin + '/pharmacy.html';
             const { error } = await window.db.auth.signInWithOAuth({
@@ -882,17 +860,13 @@
             e.preventDefault();
             const email = document.getElementById('pro-email').value;
             const btn = document.getElementById('btn-pro-email');
-            
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> ...';
             btn.disabled = true;
-
             const redirectUrl = window.location.origin + '/pharmacy.html';
-
             const { error } = await window.db.auth.signInWithOtp({
                 email: email,
                 options: { emailRedirectTo: redirectUrl }
             });
-
             if (error) {
                 showToast("Error: " + error.message, 'error');
                 btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
@@ -904,14 +878,12 @@
             }
         }
 
-        // --- AUTH FUNCTIONS (User / Patient) ---
         async function checkUserAuth() {
             const { data: { user } } = await window.db.auth.getUser();
             if (user) {
                 document.getElementById('user-login-view').classList.add('hidden');
                 document.getElementById('user-profile-view').classList.remove('hidden');
                 document.getElementById('user-email-display').innerText = user.email;
-                // Highlight the user icon to show logged in state
                 const userBtn = document.getElementById('btn-user-icon');
                 userBtn.classList.remove('bg-white/90', 'dark:bg-slate-800/90', 'text-primary');
                 userBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
@@ -921,7 +893,7 @@
         async function handleGoogleLoginUser() {
             const { error } = await window.db.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.href } // Stay on current page
+                options: { redirectTo: window.location.href }
             });
             if (error) showToast(error.message, 'error');
         }
@@ -930,15 +902,12 @@
             e.preventDefault();
             const email = document.getElementById('user-email').value;
             const btn = document.getElementById('btn-user-email');
-            
             btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> ...';
             btn.disabled = true;
-
             const { error } = await window.db.auth.signInWithOtp({
                 email: email,
                 options: { emailRedirectTo: window.location.href }
             });
-
             if (error) {
                 showToast("Error: " + error.message, 'error');
                 btn.innerHTML = '<span>Αποστολή Magic Link</span> <i class="ph-bold ph-paper-plane-right"></i>';
@@ -946,7 +915,6 @@
             } else {
                 showToast('Link sent! Check your email.', 'success');
                 btn.innerHTML = '<i class="ph-bold ph-check"></i> Sent';
-                // Don't close immediately so they see the success
             }
         }
 
