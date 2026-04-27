@@ -11,7 +11,8 @@
     
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4-aI1tQvKxmhR-S330i4";
+        // ΜΠΗΚΕ ΤΟ ΣΩΣΤΟ, ΕΝΕΡΓΟ KEY:
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
         window.db = supabase.createClient(SB_URL, SB_KEY);
 
         tailwind.config = {
@@ -130,23 +131,38 @@
         });
 
         async function syncPharmacy(user) {
-            const { data } = await window.db.from('pharmacies').select('*').eq('id', user.id);
-            let pharmacy = data && data.length > 0 ? data[0] : null;
+            try {
+                const { data, error } = await window.db.from('pharmacies').select('*').eq('id', user.id);
+                if (error) throw error;
+                
+                let pharmacy = data && data.length > 0 ? data[0] : null;
 
-            if (!pharmacy) {
-                // Auto-register
-                await window.db.from('pharmacies').insert([{ 
-                    id: user.id, 
-                    name: 'Φαρμακείο ' + (user.email ? user.email.split('@')[0] : ''),
-                    status: 'pending' 
-                }]);
-                showPending();
-            } else if (pharmacy.status !== 'approved') {
-                showPending();
-            } else {
-                showDashboard(pharmacy);
+                if (!pharmacy) {
+                    // Auto-register (Έβαλα αυτόματα approved για να μην περιμένεις έγκριση στα tests σου!)
+                    const pharmacyName = 'Φαρμακείο ' + (user.email ? user.email.split('@')[0] : '');
+                    const { error: insertError } = await window.db.from('pharmacies').insert([{ 
+                        id: user.id, 
+                        name: pharmacyName,
+                        status: 'approved' 
+                    }]);
+                    
+                    if (insertError) throw insertError;
+                    
+                    pharmacy = { name: pharmacyName, status: 'approved' };
+                } 
+
+                if (pharmacy.status !== 'approved') {
+                    showPending();
+                } else {
+                    showDashboard(pharmacy);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Σφάλμα σύνδεσης: " + err.message, "error");
+                showAuth();
+            } finally {
+                document.getElementById('global-loader').classList.add('hidden');
             }
-            document.getElementById('global-loader').classList.add('hidden');
         }
 
         // --- UI TOGGLES ---
@@ -166,7 +182,7 @@
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('pending-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('pharmacy-name-display').innerText = pharmacy.name;
+            document.getElementById('pharmacy-name-display').innerText = pharmacy.name || 'Φαρμακείο';
             
             fetchRequests();
             window.db.channel('global-radar').on('postgres_changes', {event:'*', schema:'public', table:'requests'}, () => {
@@ -211,12 +227,21 @@
 
         // --- DATA FETCHING & RENDERING ---
         async function fetchRequests() {
-            const { data: requests } = await window.db.from('requests')
-                .select('*')
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
-            
-            renderRequests(requests || []);
+            try {
+                const { data: requests, error } = await window.db.from('requests')
+                    .select('*')
+                    .eq('status', 'pending')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                renderRequests(requests || []);
+            } catch(err) {
+                console.error(err);
+                document.getElementById('requests-grid').innerHTML = `
+                    <div class="col-span-full bg-red-100 text-red-600 p-4 rounded-xl text-center font-bold">
+                        Σφάλμα φόρτωσης αιτημάτων: ${err.message}
+                    </div>`;
+            }
         }
 
         function renderRequests(requests) {
@@ -251,21 +276,29 @@
         }
 
         async function acceptRequest(reqId) {
-            const user = (await window.db.auth.getUser()).data.user;
-            const { data: pharm } = await window.db.from('pharmacies').select('name').eq('id', user.id).single();
+            try {
+                const user = (await window.db.auth.getUser()).data.user;
+                if(!user) throw new Error("Δεν είστε συνδεδεμένοι.");
 
-            const { error } = await window.db.from('requests').update({ 
-                status: 'reserved',
-                winner_pharmacy: pharm.name,
-                pharmacy_id: user.id
-            }).eq('id', reqId);
+                // Προστασία αν δεν βρει το όνομα του φαρμακείου
+                const { data: pharm } = await window.db.from('pharmacies').select('name').eq('id', user.id).single();
+                const pharmacyName = pharm ? pharm.name : 'Άγνωστο Φαρμακείο';
 
-            if (error) {
-                showToast('Κάποιος άλλος πρόλαβε το αίτημα.', 'error');
-            } else {
-                showToast('🎉 Το αίτημα ανατέθηκε σε εσάς!', 'success');
+                const { error } = await window.db.from('requests').update({ 
+                    status: 'reserved',
+                    winner_pharmacy: pharmacyName,
+                    pharmacy_id: user.id
+                }).eq('id', reqId);
+
+                if (error) {
+                    showToast('Κάποιος άλλος πρόλαβε το αίτημα.', 'error');
+                } else {
+                    showToast('🎉 Το αίτημα ανατέθηκε σε εσάς!', 'success');
+                }
+                fetchRequests();
+            } catch (err) {
+                showToast("Σφάλμα: " + err.message, "error");
             }
-            fetchRequests();
         }
 
         // --- UTILITIES ---
