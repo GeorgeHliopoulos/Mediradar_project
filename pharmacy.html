@@ -118,16 +118,59 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
-        // --- AUTH & ROUTING ---
-        window.addEventListener('load', () => {
-            window.db.auth.onAuthStateChange(async (event, session) => {
+        // --- AUTH & ROUTING (PRODUCTION READY) ---
+        window.addEventListener('load', async () => {
+            const hash = window.location.hash;
+            
+            // 1. Προστασία από ληγμένα links (Magic Link Expired)
+            if (hash.includes('error=access_denied') || hash.includes('error_code=otp_expired')) {
+                document.getElementById('global-loader').classList.add('hidden');
+                showAuth();
+                showToast("Το link έληξε. Παρακαλώ ζητήστε νέο.", "error");
+                // Καθαρίζουμε το URL για να μην ξαναβγάλει το error στο επόμενο refresh
+                window.history.replaceState(null, null, window.location.pathname);
+                return;
+            }
+
+            // 2. Failsafe Timer: Αν κολλήσει, κλείνει το spinner σε 4 δευτερόλεπτα
+            const emergencyTimer = setTimeout(() => {
+                const loader = document.getElementById('global-loader');
+                if(!loader.classList.contains('hidden')) {
+                    loader.classList.add('hidden');
+                    showAuth();
+                    showToast("Καθυστέρηση δικτύου. Ξαναδοκιμάστε.", "error");
+                }
+            }, 4000);
+
+            try {
+                // 3. Κανονικός έλεγχος Session
+                const { data: { session }, error } = await window.db.auth.getSession();
+                clearTimeout(emergencyTimer); // Ακύρωση του failsafe γιατί απάντησε σωστά
+                if (error) throw error;
+
                 if (session) {
                     await syncPharmacy(session.user);
                 } else {
                     document.getElementById('global-loader').classList.add('hidden');
                     showAuth();
                 }
-            });
+
+                // 4. Listener για μελλοντικές συνδέσεις
+                window.db.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'SIGNED_IN' && session) {
+                        document.getElementById('global-loader').classList.remove('hidden');
+                        await syncPharmacy(session.user);
+                    } else if (event === 'SIGNED_OUT') {
+                        document.getElementById('global-loader').classList.add('hidden');
+                        showAuth();
+                    }
+                });
+            } catch (err) {
+                clearTimeout(emergencyTimer);
+                document.getElementById('global-loader').classList.add('hidden');
+                showAuth();
+                showToast("Σφάλμα συστήματος: " + err.message, "error");
+            }
         });
 
         async function syncPharmacy(user) {
@@ -138,7 +181,7 @@
                 let pharmacy = data && data.length > 0 ? data[0] : null;
 
                 if (!pharmacy) {
-                    // Auto-register (Έβαλα αυτόματα approved για να μην περιμένεις έγκριση στα tests σου!)
+                    // Auto-register σε κατάσταση 'approved' για να μην κολλάει στο pending
                     const pharmacyName = 'Φαρμακείο ' + (user.email ? user.email.split('@')[0] : '');
                     const { error: insertError } = await window.db.from('pharmacies').insert([{ 
                         id: user.id, 
@@ -147,7 +190,6 @@
                     }]);
                     
                     if (insertError) throw insertError;
-                    
                     pharmacy = { name: pharmacyName, status: 'approved' };
                 } 
 
@@ -158,7 +200,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                showToast("Σφάλμα σύνδεσης: " + err.message, "error");
+                showToast("Σφάλμα ανάκτησης φαρμακείου", "error");
                 showAuth();
             } finally {
                 document.getElementById('global-loader').classList.add('hidden');
@@ -185,6 +227,9 @@
             document.getElementById('pharmacy-name-display').innerText = pharmacy.name || 'Φαρμακείο';
             
             fetchRequests();
+            
+            // Βεβαιωνόμαστε ότι κλείνουμε παλιά κανάλια πριν ανοίξουμε νέο
+            window.db.removeChannel(window.db.channel('global-radar'));
             window.db.channel('global-radar').on('postgres_changes', {event:'*', schema:'public', table:'requests'}, () => {
                 fetchRequests();
                 playDing();
@@ -209,7 +254,12 @@
                 btn.disabled = false;
             } else {
                 showToast("Ελέγξτε το email σας!", 'success');
-                btn.innerHTML = '<i class="ph ph-check"></i> Εστάλη';
+                btn.innerHTML = '<i class="ph-bold ph-check"></i> Εστάλη';
+                // Reset button after 5 seconds
+                setTimeout(() => {
+                    btn.innerHTML = 'Αποστολή Magic Link';
+                    btn.disabled = false;
+                }, 5000);
             }
         }
 
@@ -310,10 +360,10 @@
             const c = document.getElementById('toast-container');
             const el = document.createElement('div');
             const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800');
-            el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 animate-bounce-in`;
+            el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 transition-all duration-300 transform scale-100`;
             el.innerHTML = msg;
             c.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
+            setTimeout(() => el.remove(), 3500);
         }
     </script>
 </body>
