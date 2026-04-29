@@ -1,48 +1,37 @@
 <!DOCTYPE html>
-<html lang="el" class="light">
+<html lang="el">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediRadar Pro - Portal Φαρμακείου</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <script>
         const SB_URL = "https://qzerrisyowkfkmcyxmav.supabase.co";
-        // ΜΠΗΚΕ ΤΟ ΣΩΣΤΟ, ΕΝΕΡΓΟ KEY:
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6ZXJyaXN5b3drZmttY3l4bWF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTcxODQsImV4cCI6MjA3NTU5MzE4NH0.alkvHkOQPBTwY3daUcKAEsf4nt0kizuU3rYI2c2InPk";
+        // Έβαλα το νέο Publishable Key που φαίνεται στο screenshot σου!
+        const SB_KEY = "sb_publishable_ltaNA7nnVozoSC0cZIjg";
         window.db = supabase.createClient(SB_URL, SB_KEY);
-
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { pro: '#0f172a', accent: '#3b82f6' }
-                }
-            }
-        }
     </script>
 
     <style>
-        body { background-color: #f1f5f9; }
-        .glass-panel { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
         .req-card { transition: all 0.2s; border-left: 4px solid transparent; }
         .req-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .req-card.new { border-left-color: #3b82f6; background-color: #eff6ff; }
         .btn-accept { background: #3b82f6; color: white; transition: 0.2s; }
         .btn-accept:hover { background: #2563eb; }
-        
-        /* Loading overlay */
-        #global-loader { position: fixed; inset: 0; background: white; z-index: 100; display: flex; justify-content: center; align-items: center; }
+        /* Νέο Overlay που επιβεβαιώνει ότι τρέχεις τον νέο κώδικα */
+        #global-loader { position: fixed; inset: 0; background: white; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
 <body class="text-slate-800">
 
     <div id="global-loader">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p class="text-slate-500 font-bold">Φόρτωση Πύλης (NEW VERSION)...</p>
     </div>
 
     <section id="auth-section" class="min-h-screen flex items-center justify-center p-4 hidden">
@@ -55,33 +44,32 @@
                 <p class="text-slate-500 text-sm">Πλατφόρμα Φαρμακοποιών</p>
             </div>
 
-            <form onsubmit="handleProLogin(event)" class="space-y-4">
+            <form id="email-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Email Φαρμακείου</label>
                     <input type="email" id="pro-email" class="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none transition-colors" placeholder="pharmacy@example.com" required>
                 </div>
-                <button type="submit" id="btn-login" class="w-full bg-slate-900 text-white p-3 rounded-xl font-semibold hover:bg-slate-800 transition-colors">
-                    Αποστολή Magic Link
+                <button type="submit" id="btn-send-otp" class="w-full bg-slate-900 text-white p-3 rounded-xl font-semibold hover:bg-slate-800 transition-colors">
+                    Λήψη Κωδικού Εισόδου
                 </button>
             </form>
 
-            <div class="mt-6 pt-6 border-t border-slate-100">
-                 <button onclick="handleGoogleLogin()" class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 p-3 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
-                    Σύνδεση με Google
+            <form id="otp-form" class="space-y-4 hidden">
+                <div class="bg-green-50 text-green-700 p-3 rounded-xl text-sm font-medium text-center mb-4">
+                    Ο 6-ψήφιος κωδικός στάλθηκε στο email σας!
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1 text-center">Εισάγετε τον Κωδικό</label>
+                    <input type="text" id="pro-otp" maxlength="6" class="w-full p-4 rounded-xl border border-slate-200 focus:border-blue-500 focus:outline-none text-center text-3xl tracking-[0.5em] font-bold" placeholder="------" required autocomplete="one-time-code">
+                </div>
+                <button type="submit" id="btn-verify-otp" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30">
+                    Επαλήθευση & Είσοδος
                 </button>
-            </div>
+                <button type="button" id="btn-reset" class="w-full text-center text-sm text-slate-500 mt-4 hover:underline">
+                    Αλλαγή Email
+                </button>
+            </form>
         </div>
-    </section>
-
-    <section id="pending-section" class="min-h-screen flex flex-col items-center justify-center p-4 hidden">
-        <i class="ph-duotone ph-hourglass-high text-6xl text-orange-500 mb-4 animate-pulse"></i>
-        <h1 class="text-2xl font-bold text-slate-900">Αναμονή Έγκρισης</h1>
-        <p class="text-slate-600 max-w-md text-center mt-2">
-            Ο λογαριασμός σας έχει δημιουργηθεί και εξετάζεται από την ομάδα διαχείρισης. 
-            Θα έχετε πρόσβαση μόλις ενεργοποιηθεί.
-        </p>
-        <button onclick="logout()" class="mt-8 text-sm text-slate-500 hover:text-red-500 underline font-bold">Αποσύνδεση</button>
     </section>
 
     <section id="dashboard-section" class="min-h-screen flex flex-col hidden">
@@ -95,179 +83,115 @@
                     <p id="pharmacy-name-display" class="text-xs text-slate-500 font-medium">Φαρμακείο ...</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-                    <span class="relative flex h-2.5 w-2.5">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                    </span>
-                    <span class="text-xs font-semibold text-slate-600">Online</span>
-                </div>
-                <button onclick="logout()" class="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors">
-                    <i class="ph ph-sign-out text-xl"></i>
-                </button>
-            </div>
+            <button id="btn-logout" class="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors"><i class="ph ph-sign-out text-xl"></i></button>
         </nav>
-
         <main class="flex-1 p-6 max-w-5xl mx-auto w-full">
-            <div id="requests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
+            <div id="requests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </main>
     </section>
 
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
     <script>
-        // --- AUTH & ROUTING (PRODUCTION READY) ---
-        window.addEventListener('load', async () => {
-            const hash = window.location.hash;
-            
-            // 1. Προστασία από ληγμένα links (Magic Link Expired)
-            if (hash.includes('error=access_denied') || hash.includes('error_code=otp_expired')) {
-                document.getElementById('global-loader').classList.add('hidden');
-                showAuth();
-                showToast("Το link έληξε. Παρακαλώ ζητήστε νέο.", "error");
-                // Καθαρίζουμε το URL για να μην ξαναβγάλει το error στο επόμενο refresh
-                window.history.replaceState(null, null, window.location.pathname);
-                return;
-            }
-
-            // 2. Failsafe Timer: Αν κολλήσει, κλείνει το spinner σε 4 δευτερόλεπτα
-            const emergencyTimer = setTimeout(() => {
-                const loader = document.getElementById('global-loader');
-                if(!loader.classList.contains('hidden')) {
-                    loader.classList.add('hidden');
-                    showAuth();
-                    showToast("Καθυστέρηση δικτύου. Ξαναδοκιμάστε.", "error");
-                }
-            }, 4000);
-
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 3. Κανονικός έλεγχος Session
                 const { data: { session }, error } = await window.db.auth.getSession();
-                clearTimeout(emergencyTimer); // Ακύρωση του failsafe γιατί απάντησε σωστά
-                if (error) throw error;
-
                 if (session) {
                     await syncPharmacy(session.user);
                 } else {
                     document.getElementById('global-loader').classList.add('hidden');
-                    showAuth();
+                    document.getElementById('auth-section').classList.remove('hidden');
                 }
-
-                // 4. Listener για μελλοντικές συνδέσεις
-                window.db.auth.onAuthStateChange(async (event, session) => {
-                    if (event === 'SIGNED_IN' && session) {
-                        document.getElementById('global-loader').classList.remove('hidden');
-                        await syncPharmacy(session.user);
-                    } else if (event === 'SIGNED_OUT') {
-                        document.getElementById('global-loader').classList.add('hidden');
-                        showAuth();
-                    }
-                });
             } catch (err) {
-                clearTimeout(emergencyTimer);
                 document.getElementById('global-loader').classList.add('hidden');
-                showAuth();
-                showToast("Σφάλμα συστήματος: " + err.message, "error");
+                document.getElementById('auth-section').classList.remove('hidden');
+                showToast("Σφάλμα σύνδεσης: " + err.message, "error");
             }
+
+            document.getElementById('email-form').addEventListener('submit', handleSendOTP);
+            document.getElementById('otp-form').addEventListener('submit', handleVerifyOTP);
+            document.getElementById('btn-reset').addEventListener('click', resetToEmail);
+            document.getElementById('btn-logout').addEventListener('click', logout);
         });
+
+        async function handleSendOTP(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-send-otp');
+            const email = document.getElementById('pro-email').value;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
+            btn.disabled = true;
+
+            const { error } = await window.db.auth.signInWithOtp({ email: email });
+
+            if (error) {
+                showToast(error.message, 'error');
+                btn.innerHTML = 'Λήψη Κωδικού Εισόδου';
+                btn.disabled = false;
+            } else {
+                document.getElementById('email-form').classList.add('hidden');
+                document.getElementById('otp-form').classList.remove('hidden');
+            }
+        }
+
+        async function handleVerifyOTP(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-verify-otp');
+            const email = document.getElementById('pro-email').value;
+            const otp = document.getElementById('pro-otp').value;
+            
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Επαλήθευση...';
+            btn.disabled = true;
+
+            // FIX: Τύπος email για να δέχεται το 6-ψήφιο
+            const { data: { session }, error } = await window.db.auth.verifyOtp({
+                email: email,
+                token: otp,
+                type: 'email' 
+            });
+
+            if (error) {
+                showToast("Λάθος κωδικός ή έληξε: " + error.message, 'error');
+                btn.innerHTML = 'Επαλήθευση & Είσοδος';
+                btn.disabled = false;
+            } else {
+                document.getElementById('global-loader').classList.remove('hidden');
+                document.getElementById('auth-section').classList.add('hidden');
+                await syncPharmacy(session.user);
+            }
+        }
+
+        function resetToEmail() {
+            document.getElementById('otp-form').classList.add('hidden');
+            document.getElementById('email-form').classList.remove('hidden');
+            document.getElementById('btn-send-otp').innerHTML = 'Λήψη Κωδικού Εισόδου';
+            document.getElementById('btn-send-otp').disabled = false;
+        }
 
         async function syncPharmacy(user) {
             try {
                 const { data, error } = await window.db.from('pharmacies').select('*').eq('id', user.id);
-                if (error) throw error;
-                
                 let pharmacy = data && data.length > 0 ? data[0] : null;
 
                 if (!pharmacy) {
-                    // Auto-register σε κατάσταση 'approved' για να μην κολλάει στο pending
                     const pharmacyName = 'Φαρμακείο ' + (user.email ? user.email.split('@')[0] : '');
-                    const { error: insertError } = await window.db.from('pharmacies').insert([{ 
-                        id: user.id, 
-                        name: pharmacyName,
-                        status: 'approved' 
-                    }]);
-                    
-                    if (insertError) throw insertError;
+                    await window.db.from('pharmacies').insert([{ id: user.id, name: pharmacyName, status: 'approved' }]);
                     pharmacy = { name: pharmacyName, status: 'approved' };
                 } 
 
-                if (pharmacy.status !== 'approved') {
-                    showPending();
-                } else {
-                    showDashboard(pharmacy);
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Σφάλμα ανάκτησης φαρμακείου", "error");
-                showAuth();
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('pharmacy-name-display').innerText = pharmacy.name || 'Φαρμακείο';
+                
+                fetchRequests();
+                window.db.channel('global-radar').on('postgres_changes', {event:'*', schema:'public', table:'requests'}, () => {
+                    fetchRequests();
+                    playDing();
+                }).subscribe();
+            } catch(e) {
+                showToast("Σφάλμα προφίλ: " + e.message, "error");
             } finally {
                 document.getElementById('global-loader').classList.add('hidden');
             }
-        }
-
-        // --- UI TOGGLES ---
-        function showAuth() {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('pending-section').classList.add('hidden');
-        }
-
-        function showPending() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('pending-section').classList.remove('hidden');
-        }
-
-        function showDashboard(pharmacy) {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('pending-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            document.getElementById('pharmacy-name-display').innerText = pharmacy.name || 'Φαρμακείο';
-            
-            fetchRequests();
-            
-            // Βεβαιωνόμαστε ότι κλείνουμε παλιά κανάλια πριν ανοίξουμε νέο
-            window.db.removeChannel(window.db.channel('global-radar'));
-            window.db.channel('global-radar').on('postgres_changes', {event:'*', schema:'public', table:'requests'}, () => {
-                fetchRequests();
-                playDing();
-            }).subscribe();
-        }
-
-        // --- LOGIN ACTIONS ---
-        async function handleProLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btn-login');
-            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Αποστολή...';
-            btn.disabled = true;
-
-            const { error } = await window.db.auth.signInWithOtp({
-                email: document.getElementById('pro-email').value,
-                options: { emailRedirectTo: window.location.origin + window.location.pathname }
-            });
-
-            if (error) {
-                showToast(error.message, 'error');
-                btn.innerHTML = 'Αποστολή Magic Link';
-                btn.disabled = false;
-            } else {
-                showToast("Ελέγξτε το email σας!", 'success');
-                btn.innerHTML = '<i class="ph-bold ph-check"></i> Εστάλη';
-                // Reset button after 5 seconds
-                setTimeout(() => {
-                    btn.innerHTML = 'Αποστολή Magic Link';
-                    btn.disabled = false;
-                }, 5000);
-            }
-        }
-
-        async function handleGoogleLogin() {
-            await window.db.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.origin + window.location.pathname }
-            });
         }
 
         async function logout() {
@@ -275,33 +199,15 @@
             window.location.reload();
         }
 
-        // --- DATA FETCHING & RENDERING ---
         async function fetchRequests() {
-            try {
-                const { data: requests, error } = await window.db.from('requests')
-                    .select('*')
-                    .eq('status', 'pending')
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                renderRequests(requests || []);
-            } catch(err) {
-                console.error(err);
-                document.getElementById('requests-grid').innerHTML = `
-                    <div class="col-span-full bg-red-100 text-red-600 p-4 rounded-xl text-center font-bold">
-                        Σφάλμα φόρτωσης αιτημάτων: ${err.message}
-                    </div>`;
-            }
+            const { data: requests, error } = await window.db.from('requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            if (!error) renderRequests(requests || []);
         }
 
         function renderRequests(requests) {
             const container = document.getElementById('requests-grid');
             if (requests.length === 0) {
-                container.innerHTML = `
-                <div class="col-span-full text-center py-20 text-slate-400">
-                    <i class="ph ph-coffee text-4xl mb-4 inline-block opacity-50"></i>
-                    <p>Αναμονή για νέα αιτήματα στην περιοχή σας...</p>
-                </div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-slate-400"><i class="ph ph-coffee text-4xl mb-4 inline-block opacity-50"></i><p>Αναμονή για νέα αιτήματα στην περιοχή σας...</p></div>`;
                 return;
             }
 
@@ -310,13 +216,10 @@
                     <div>
                         <div class="flex justify-between items-start mb-3">
                             <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Νεο Αιτημα</span>
-                            <span class="text-xs text-slate-400"><i class="ph ph-clock"></i> ${new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span class="text-xs text-slate-400">${new Date(req.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 mb-1">${req.medicine_name || 'Φάρμακο'}</h3>
-                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                            <i class="ph-fill ph-user text-slate-400"></i>
-                            <span>Πελάτης: <span class="font-semibold text-slate-700">${req.customer_name || 'Ανώνυμος'}</span></span>
-                        </div>
+                        <p class="text-sm text-slate-500 mb-4">Πελάτης: <strong>${req.customer_name || 'Ανώνυμος'}</strong></p>
                     </div>
                     <button onclick="acceptRequest('${req.id}')" class="btn-accept w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
                         <i class="ph-bold ph-check"></i> Έχω το φάρμακο
@@ -326,44 +229,28 @@
         }
 
         async function acceptRequest(reqId) {
-            try {
-                const user = (await window.db.auth.getUser()).data.user;
-                if(!user) throw new Error("Δεν είστε συνδεδεμένοι.");
+            const user = (await window.db.auth.getUser()).data.user;
+            const { data: pharm } = await window.db.from('pharmacies').select('name').eq('id', user.id).single();
+            
+            const { error } = await window.db.from('requests').update({ 
+                status: 'reserved', winner_pharmacy: pharm.name, pharmacy_id: user.id
+            }).eq('id', reqId);
 
-                // Προστασία αν δεν βρει το όνομα του φαρμακείου
-                const { data: pharm } = await window.db.from('pharmacies').select('name').eq('id', user.id).single();
-                const pharmacyName = pharm ? pharm.name : 'Άγνωστο Φαρμακείο';
-
-                const { error } = await window.db.from('requests').update({ 
-                    status: 'reserved',
-                    winner_pharmacy: pharmacyName,
-                    pharmacy_id: user.id
-                }).eq('id', reqId);
-
-                if (error) {
-                    showToast('Κάποιος άλλος πρόλαβε το αίτημα.', 'error');
-                } else {
-                    showToast('🎉 Το αίτημα ανατέθηκε σε εσάς!', 'success');
-                }
-                fetchRequests();
-            } catch (err) {
-                showToast("Σφάλμα: " + err.message, "error");
-            }
+            if (error) showToast('Κάποιος άλλος πρόλαβε το αίτημα.', 'error');
+            else showToast('🎉 Το αίτημα ανατέθηκε σε εσάς!', 'success');
+            fetchRequests();
         }
 
-        // --- UTILITIES ---
-        function playDing() {
-            new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(()=>{});
-        }
+        function playDing() { new Audio('https://cdn.freesound.org/previews/201/201159_866625-lq.mp3').play().catch(()=>{}); }
 
         function showToast(msg, type='info') {
             const c = document.getElementById('toast-container');
             const el = document.createElement('div');
-            const bg = type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-slate-800');
-            el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 transition-all duration-300 transform scale-100`;
+            const bg = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            el.className = `toast ${bg} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2`;
             el.innerHTML = msg;
             c.appendChild(el);
-            setTimeout(() => el.remove(), 3500);
+            setTimeout(() => el.remove(), 4000);
         }
     </script>
 </body>
